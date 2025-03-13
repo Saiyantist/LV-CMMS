@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -14,6 +15,32 @@ Route::get('/', function () {
     ]);
 });
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+// // For testing purposes
+Route::get('/', function () {
+    return Inertia::render('Home', ['name' => 'Algen']);
+});
+
+Route::get('/about', function () {
+    return Inertia::render('About', ['name' => 'jojo']);
+});
+
+Route::get('/login', function () {
+    return Inertia::render('Login');
+});
+
+Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+// Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+// Route::get('/reset-password/{token}', [PasswordResetLinkController::class, 'show'])->name('password.reset');
+// Route::post('/reset-password', [PasswordResetLinkController::class, 'update'])->name('password.update');
+
+
+
+
+
+// Don't tounch this
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

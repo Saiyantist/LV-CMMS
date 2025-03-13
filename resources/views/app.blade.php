@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome - LV CMMS</title>
+    @viteReactRefresh
+    @vite('resources/js/app.jsx')
+    <script src="{{ asset('js/ziggy.js') }}"></script>
+
+    @inertiaHead
 </head>
 <body>
-
-    <!-- <div>
-        @include('navbar')
-    </div> -->
-
-    <div>
-        @include('landingpage')
-    </div>
-    
+    @inertia
 </body>
 </html>
