@@ -20,7 +20,7 @@ Route::get('/', function () {
 
 // // For testing purposes
 Route::get('/', function () {
-    return Inertia::render('Home', ['name' => 'Algen']);
+    return Inertia::render('Home');
 });
 
 Route::get('/about', function () {
@@ -37,10 +37,12 @@ Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->
 // Route::post('/reset-password', [PasswordResetLinkController::class, 'update'])->name('password.update');
 
 
+Route::get('/hero', function () {
+    return Inertia::render('Hero', ['name' => 'John']);
+});
 
 
-
-// Don't tounch this
+// Don't touch these routes
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

@@ -1,12 +1,9 @@
-import NavBar from "../Components/NavBar";
+// resources/js/Pages/Hero.jsx
+import React from "react";
 
-export default function About({ name }) {
+const Hero = ({ name }) => {
   return (
-    <div>
-      <NavBar /> {/* Include the NavBar component here */}
-      <h1 className="title">About {name}</h1> 
-
-      <div
+    <div
       className="hero min-h-screen"
       style={{
         backgroundImage:
@@ -26,7 +23,7 @@ export default function About({ name }) {
         </div>
       </div>
     </div>
-    
-    </div>
   );
-}
+};
+
+export default Hero;
