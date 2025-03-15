@@ -1,35 +1,36 @@
-import Checkbox from '@/Components/Checkbox';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
+import { FormEventHandler } from 'react';
 
-export default function Login({ status, canResetPassword }) {
+export default function ResetPassword({
+    token,
+    email,
+}: {
+    token: string;
+    email: string;
+}) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
+        token: token,
+        email: email,
         password: '',
-        remember: false,
+        password_confirmation: '',
     });
 
-    const submit = (e) => {
+    const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route('login'), {
-            onFinish: () => reset('password'),
+        post(route('password.store'), {
+            onFinish: () => reset('password', 'password_confirmation'),
         });
     };
 
     return (
         <GuestLayout>
-            <Head title="Log in" />
-
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+            <Head title="Reset Password" />
 
             <form onSubmit={submit}>
                 <div>
@@ -42,7 +43,6 @@ export default function Login({ status, canResetPassword }) {
                         value={data.email}
                         className="mt-1 block w-full"
                         autoComplete="username"
-                        isFocused={true}
                         onChange={(e) => setData('email', e.target.value)}
                     />
 
@@ -58,40 +58,41 @@ export default function Login({ status, canResetPassword }) {
                         name="password"
                         value={data.password}
                         className="mt-1 block w-full"
-                        autoComplete="current-password"
+                        autoComplete="new-password"
+                        isFocused={true}
                         onChange={(e) => setData('password', e.target.value)}
                     />
 
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="mt-4 block">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) =>
-                                setData('remember', e.target.checked)
-                            }
-                        />
-                        <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                            Remember me
-                        </span>
-                    </label>
+                <div className="mt-4">
+                    <InputLabel
+                        htmlFor="password_confirmation"
+                        value="Confirm Password"
+                    />
+
+                    <TextInput
+                        type="password"
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        value={data.password_confirmation}
+                        className="mt-1 block w-full"
+                        autoComplete="new-password"
+                        onChange={(e) =>
+                            setData('password_confirmation', e.target.value)
+                        }
+                    />
+
+                    <InputError
+                        message={errors.password_confirmation}
+                        className="mt-2"
+                    />
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
-
                     <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
+                        Reset Password
                     </PrimaryButton>
                 </div>
             </form>
