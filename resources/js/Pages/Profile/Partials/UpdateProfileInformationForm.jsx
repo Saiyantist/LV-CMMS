@@ -4,16 +4,11 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
 
 export default function UpdateProfileInformation({
     mustVerifyEmail,
     status,
     className = '',
-}: {
-    mustVerifyEmail: boolean;
-    status?: string;
-    className?: string;
 }) {
     const user = usePage().props.auth.user;
 
@@ -24,7 +19,7 @@ export default function UpdateProfileInformation({
             email: user.email,
         });
 
-        const submit: FormEventHandler = (e) => {
+    const submit = (e) => {
         e.preventDefault();
 
         patch(route('profile.update'));

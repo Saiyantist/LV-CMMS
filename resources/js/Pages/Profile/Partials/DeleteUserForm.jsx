@@ -5,12 +5,11 @@ import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
 import TextInput from '@/Components/TextInput';
 import { useForm } from '@inertiajs/react';
-import { FormEventHandler, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
-export default function DeleteUserForm({ className = ''
-}: { className?: string; }) {
+export default function DeleteUserForm({ className = '' }) {
     const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
-    const passwordInput = useRef<HTMLInputElement>(null);
+    const passwordInput = useRef();
 
     const {
         data,
@@ -28,13 +27,13 @@ export default function DeleteUserForm({ className = ''
         setConfirmingUserDeletion(true);
     };
 
-    const deleteUser: FormEventHandler = (e) => {
+    const deleteUser = (e) => {
         e.preventDefault();
 
         destroy(route('profile.destroy'), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
-            onError: () => passwordInput.current?.focus(),
+            onError: () => passwordInput.current.focus(),
             onFinish: () => reset(),
         });
     };

@@ -1,10 +1,4 @@
-import { HTMLAttributes } from 'react';
-
-export default function InputError({
-    message,
-    className = '',
-    ...props
-}: HTMLAttributes<HTMLParagraphElement> & { message?: string }) {
+export default function InputError({ message, className = '', ...props }) {
     return message ? (
         <p
             {...props}
