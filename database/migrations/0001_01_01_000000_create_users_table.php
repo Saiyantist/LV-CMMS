@@ -20,6 +20,15 @@ return new class extends Migration
             $table->string('contact_number');
             $table->string('email')->unique();
             $table->string('password');
+            
+            /**
+             * This will affect the user, mutate the necessary changes in
+             * controller, model, migration, seeder/factory
+             * and in the register page.
+             */
+            $table->enum('staff_type', ['teaching', 'non-teaching'])->nullable(); 
+
+            $table->foreignId('department_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

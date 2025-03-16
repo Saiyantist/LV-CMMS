@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Psy\CodeCleaner\FunctionReturnInWriteContextPass;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -27,6 +29,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'contact_number',
         'email',
         'password',
+        'staff_type',
+        'department_id',
     ];
 
     /**
@@ -43,6 +47,27 @@ class User extends Authenticatable implements MustVerifyEmail
     public function assignedWorkOrders(): HasMany
     {
         return $this->hasMany(WorkOrder::class, 'assigned_to');
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+        /**
+     * Check if the user is a teaching staff.
+     */
+    public function isTeachingStaff(): bool
+    {
+        return $this->staff_type === 'teaching';
+    }
+
+    /**
+     * Check if the user is a non-teaching staff.
+     */
+    public function isNonTeachingStaff(): bool
+    {
+        return $this->staff_type === 'non_teaching';
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Department;
 use App\Models\User;
 use App\Models\WorkOrder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -15,6 +16,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(DepartmentSeeder::class);
+
         User::factory(10)->create();
 
         User::create([
@@ -23,6 +26,8 @@ class DatabaseSeeder extends Seeder
             'contact_number' => '09205979015',
             'email' => 'jshallador19@gmail.com',
             'password' => Hash::make('password'),
+            'staff_type' => 'non-teaching',
+            'department_id' => Department::inRandomOrder()->first()?->id,
         ]);
 
         User::create([
@@ -31,6 +36,8 @@ class DatabaseSeeder extends Seeder
             'contact_number' => '09471847021',
             'email' => 'angelo.delossantos000@gmail.com',
             'password' => Hash::make('password'),
+            'staff_type' => 'non-teaching',
+            'department_id' => Department::inRandomOrder()->first()?->id,
         ]);
 
         // WorkOrder::factory(20)->create();
