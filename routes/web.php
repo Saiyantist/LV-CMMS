@@ -21,7 +21,7 @@ Route::get('/awaiting-approval', function () {
         return redirect()->route('dashboard');
     }
     return Inertia::render('AwaitingApproval');
-})->middleware('auth');
+})->middleware('auth', 'verified');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [ 'auth' => [ 'user' => Auth::user()->load('roles')]]);

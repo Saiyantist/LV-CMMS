@@ -151,6 +151,7 @@ export default function Register({ departments }: RegisterProps) {
                         value={data.contact_number}
                         className="mt-1 block w-full"
                         placeholder="9XXXXXXXXX"
+                        maxLength={10}
                         onChange={(e) => setData("contact_number", e.target.value)}
                         required
                     />
