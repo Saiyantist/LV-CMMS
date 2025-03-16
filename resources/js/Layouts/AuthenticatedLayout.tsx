@@ -30,12 +30,14 @@ export default function AuthenticatedLayout({ header, children }: PropsWithChild
                                 >
                                     Dashboard
                                 </NavLink>
+                            {user.roles.some((role) => role.name === 'super_admin') && (
                                 <NavLink
                                     href={route('admin.manage-roles')}
                                     active={route().current('admin.manage-roles')}
                                 >
                                     User Management
                                 </NavLink>
+                            )}
                             </div>
                         </div>
 
