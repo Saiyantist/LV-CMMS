@@ -4,14 +4,17 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Psy\CodeCleaner\FunctionReturnInWriteContextPass;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +27,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'birth_date',
         'gender',
         'contact_number',
+        'staff_type',
+        'department_id',
         'email',
         'password',
     ];
@@ -42,6 +47,27 @@ class User extends Authenticatable implements MustVerifyEmail
     public function assignedWorkOrders(): HasMany
     {
         return $this->hasMany(WorkOrder::class, 'assigned_to');
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+        /**
+     * Check if the user is a teaching staff.
+     */
+    public function isTeachingStaff(): bool
+    {
+        return $this->staff_type === 'teaching';
+    }
+
+    /**
+     * Check if the user is a non-teaching staff.
+     */
+    public function isNonTeachingStaff(): bool
+    {
+        return $this->staff_type === 'non_teaching';
     }
 
     /**

@@ -2,9 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Nette\Utils\Random;
+use Spatie\Permission\Models\Role;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -23,15 +26,18 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $firstName = fake()->firstName();
         return [
-            'first_name' => fake()->firstName(),
+            'first_name' => $firstName,
             'last_name' => fake()->lastName(),
             'birth_date' => fake()->date('Y-m-d','-21 years'),
             'gender' => fake()->randomElement(['male', 'female', 'rather not say']),
             'contact_number' => '09' . fake()->randomNumber(9, true),
-            'email' => fake()->unique()->safeEmail(),
+            'email' => Str::lower($firstName) . '@laverdad.edu.ph',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'staff_type' => fake()->randomElement(['teaching', 'non-teaching']),
+            'department_id' => Department::inRandomOrder()->first()?->id,
             // 'remember_token' => Str::random(10),
         ];
     }
@@ -44,5 +50,17 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function ($user) {
+            $safeRoles = Role::all()->count() - 1; // 'super_admin' is the last record in the roles table, so I excluded it.
+            $role = Role::find(rand(1, $safeRoles));
+
+            if ($role) {
+                $user->assignRole($role->name);
+            }
+        });
     }
 }

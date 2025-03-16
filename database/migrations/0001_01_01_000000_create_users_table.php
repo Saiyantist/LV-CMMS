@@ -18,6 +18,15 @@ return new class extends Migration
             $table->date('birth_date');
             $table->enum('gender', ['male', 'female', 'rather not say']);
             $table->string('contact_number');
+            
+            /**
+             * This will affect the user, mutate the necessary changes in
+             * controller, model, migration, seeder/factory
+             * and in the register page.
+             */
+            $table->enum('staff_type', ['teaching', 'non-teaching'])->nullable(); 
+
+            $table->foreignId('department_id')->nullable()->constrained()->onDelete('set null');
             $table->string('email')->unique();
             $table->string('password');
             $table->timestamp('email_verified_at')->nullable();
