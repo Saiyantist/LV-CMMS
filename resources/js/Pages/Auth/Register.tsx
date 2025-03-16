@@ -16,13 +16,25 @@ function maxDate(){
 
     return {maxDateString, minDateString};
 }
-export default function Register() {
+
+interface Department {
+    id: number;
+    name: string;
+}
+
+interface RegisterProps {
+    departments: Department[];
+}
+
+export default function Register({ departments }: RegisterProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         first_name: '',
         last_name: '',
         birth_date: '',
         gender: '',
         contact_number: '',
+        staff_type: '',
+        department_id: '',
         email: '',
         password: '',
         password_confirmation: '',
@@ -143,6 +155,52 @@ export default function Register() {
                         required
                     />
                     <InputError message={errors.contact_number} className="mt-2" />
+                </div>
+
+                {/* Staff type and Department */}
+                <div className='flex justify-stretch mt-4'>
+
+                    {/* Staff type */}
+                    <div className="w-full mr-2">
+                        <InputLabel htmlFor="staff_type" value="Type of Staff" />
+
+                        <select
+                            id="staff_type"
+                            name="staff_type"
+                            value={data.staff_type}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                            onChange={(e) => setData("staff_type", e.target.value)}
+                            required
+                        >
+                            <option value="">Select Type</option>
+                            <option value="teaching">Teaching</option>
+                            <option value="non-teaching">Non-teaching</option>
+                        </select>
+
+                        <InputError message={errors.staff_type} className="mt-2" />
+                    </div>
+
+                    {/* Department */}
+                    <div className='w-full ml-2'>
+                        <InputLabel htmlFor="department" value="Department" />
+
+                        <select
+                            id="department_id"
+                            name="department_id"
+                            value={data.department_id}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                            onChange={(e) => setData("department_id", e.target.value)}
+                            required
+                        >
+                            <option value="">Select Department</option>
+                            {departments.map(dept => (
+                                <option key={dept.id} value={dept.id}>{dept.name}</option>
+                            ))}
+                        </select>
+
+                        <InputError message={errors.department_id} className="mt-2" />
+                    </div>
+
                 </div>
 
                 {/* Email */}
