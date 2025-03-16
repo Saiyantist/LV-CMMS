@@ -16,11 +16,18 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/awaiting-approval', function () {
+    if (Auth::user()->roles->isnotempty()){
+        return redirect()->route('dashboard');
+    }
+    return Inertia::render('AwaitingApproval');
+})->middleware('auth');
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [ 'auth' => [ 'user' => Auth::user()->load('roles')]]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'hasRole'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -29,7 +36,7 @@ Route::middleware('auth')->group(function () {
 /**
  * User Role Management - our Role-based Access Control (RBAC)
  */
-Route::middleware(['auth', 'role:super_admin'])->group(function () {
+Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::get('/admin/manage-roles', [UserRoleController::class, 'index'])->name('admin.manage-roles');
     Route::patch('/admin/manage-roles/{user}/role', [UserRoleController::class, 'updateRole'])->name('admin.update.role');
     Route::delete('/admin/manage-roles/{user}/role', [UserRoleController::class, 'removeRole'])->name('admin.remove.role');

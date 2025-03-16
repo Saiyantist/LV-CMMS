@@ -6,6 +6,8 @@ export default function Welcome({
     laravelVersion,
     phpVersion,
 }: PageProps<{ laravelVersion: string; phpVersion: string }>) {
+    const userHasRoles = auth?.user?.roles?.length > 0;
+
     const handleImageError = () => {
         document
             .getElementById('screenshot-container')
@@ -48,7 +50,7 @@ export default function Welcome({
                                         href={route('dashboard')}
                                         className="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
                                     >
-                                        Dashboard
+                                        {userHasRoles ? ('Dashboard') : ('Awaiting Approval')}
                                     </Link>
                                 ) : (
                                     <>
