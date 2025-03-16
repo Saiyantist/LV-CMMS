@@ -17,29 +17,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(DepartmentSeeder::class);
-
-        User::factory(10)->create();
-
-        User::create([
-            'first_name' => 'Joshua', 'last_name' => 'Allador',
-            'birth_date' => '1999-01-01', 'gender' => 'male',
-            'contact_number' => '09205979015',
-            'email' => 'jshallador19@gmail.com',
-            'password' => Hash::make('password'),
-            'staff_type' => 'non-teaching',
-            'department_id' => Department::inRandomOrder()->first()?->id,
-        ]);
-
-        User::create([
-            'first_name' => 'Angelo', 'last_name' => 'Delos Santos',
-            'birth_date' => '1999-01-01', 'gender' => 'male',
-            'contact_number' => '09471847021',
-            'email' => 'angelo.delossantos000@gmail.com',
-            'password' => Hash::make('password'),
-            'staff_type' => 'non-teaching',
-            'department_id' => Department::inRandomOrder()->first()?->id,
-        ]);
-
+        $this->call(RolePermissionSeeder::class);
+        $this->call(UserSeeder::class);
+        User::factory(30)->create();
         // WorkOrder::factory(20)->create();
 
         // User::factory()->create([
