@@ -25,7 +25,9 @@
         "vite": "^6.0.11"
     },
     "dependencies": {
+        "@heroicons/react": "^2.2.0",
         "react-router-dom": "^7.3.0",
-        "shadcn": "^2.4.0-canary.14"
+        "shadcn": "^2.4.0-canary.14",
+        "tw-elements": "^2.0.0"
     }
 }

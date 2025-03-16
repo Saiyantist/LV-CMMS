@@ -18,6 +18,7 @@ Route::get('/', function () {
 //     return Inertia::render('Home');  // This will automatically look for resources/js/Pages/Home.tsx
 // });
 
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
