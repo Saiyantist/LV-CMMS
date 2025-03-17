@@ -7,6 +7,13 @@ import GuestLayout from "@/Layouts/GuestLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { FormEventHandler } from "react";
 
+interface LoginFormData {
+    email: string;
+    password: string;
+    remember: boolean;
+    [key: string]: string | boolean | File | null;
+}
+
 export default function Login({
     status,
     canResetPassword,
@@ -14,11 +21,12 @@ export default function Login({
     status?: string;
     canResetPassword: boolean;
 }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: "",
-        password: "",
-        remember: false as boolean,
-    });
+    const { data, setData, post, processing, errors, reset } =
+        useForm<LoginFormData>({
+            email: "",
+            password: "",
+            remember: false,
+        });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -49,7 +57,7 @@ export default function Login({
                         value={data.email}
                         className="mt-1 block w-full"
                         autoComplete="username"
-                        isFocused={true}
+                        isFocused
                         onChange={(e) => setData("email", e.target.value)}
                     />
 
@@ -87,7 +95,7 @@ export default function Login({
                     </label>
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
+                <div className="mt-4 flex items-center justify-between w-full">
                     {canResetPassword && (
                         <Link
                             href={route("password.request")}
@@ -100,6 +108,18 @@ export default function Login({
                     <PrimaryButton className="ms-4" disabled={processing}>
                         Log in
                     </PrimaryButton>
+                </div>
+
+                <div className="mt-4 text-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Don't have an account yet?{" "}
+                    </span>
+                    <Link
+                        href="/register"
+                        className="text-indigo-600 underline hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200"
+                    >
+                        Sign up now.
+                    </Link>
                 </div>
             </form>
         </GuestLayout>

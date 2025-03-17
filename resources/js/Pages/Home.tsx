@@ -2,6 +2,7 @@ import React from "react";
 import Hero from "@/Layouts/Hero"; // Hero Layout
 import About from "./About";
 import Features from "./Features";
+import Footer from "./Footer";
 
 const Home = () => {
     return (
@@ -13,6 +14,9 @@ const Home = () => {
             </div>
             <div>
                 <Features />
+            </div>
+            <div>
+                <Footer />
             </div>
         </div>
     );
