@@ -2,6 +2,8 @@ export interface User {
     id: number;
     first_name: string;
     last_name: string;
+    birth_date: string;
+    contact_number: string;
     email: string;
     email_verified_at?: string;
     roles: Role[];
