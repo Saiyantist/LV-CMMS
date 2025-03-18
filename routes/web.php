@@ -27,6 +27,10 @@ Route::get('/submitrequest', function () {
     return Inertia::render('SubmitRequest');
 })->middleware(['auth', 'verified'])->name('submitrequest');
 
+Route::get('/requestdetails', function () {
+    return Inertia::render('RequestDetails');
+})->middleware(['auth', 'verified'])->name('requestdetails');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -1,150 +1,98 @@
-import React from "react";
-import { Head } from "@inertiajs/react";
+import React, { useState, useMemo } from "react";
+import { Head, useForm } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
+import SubmitRequestLayout from "@/Layouts/SubmitRequestLayout";
 
 const SubmitRequest: React.FC = () => {
+    // ✅ Form State using Inertia's useForm
+    const { data, setData, post, reset } = useForm({
+        date: "",
+        requestedBy: "",
+        workOrderType: "maintenance",
+        location: "",
+        description: "",
+        photos: [] as File[],
+    });
+
+    // ✅ Loading and Error States
+    const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+    // ✅ File Previews - Memoized for Performance
+    const filePreviews = useMemo(
+        () =>
+            data.photos.map((file) => ({
+                url: URL.createObjectURL(file),
+                name: file.name,
+            })),
+        [data.photos]
+    );
+
+    // ✅ Basic Form Validation
+    const validateForm = () => {
+        const newErrors: { [key: string]: string } = {};
+        if (!data.date) newErrors.date = "This field is required.";
+        if (!data.requestedBy.trim())
+            newErrors.requestedBy = "This field is required.";
+        if (!data.location.trim()) newErrors.location = "This field is required.";
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    // ✅ Handle Submit Action
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+
+        setIsLoading(true);
+        // 🚨 No backend configured yet, so we'll simulate a successful response
+        setTimeout(() => {
+            alert("Request submitted successfully!");
+            reset(); // Reset form
+            setIsLoading(false);
+        }, 1000);
+    };
+
+    // ✅ Handle File Change with Validation
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+            const maxSize = 2 * 1024 * 1024; // 2MB
+
+            const filteredFiles = Array.from(e.target.files).filter(
+                (file) =>
+                    allowedTypes.includes(file.type) && file.size <= maxSize
+            );
+
+            if (filteredFiles.length !== e.target.files.length) {
+                alert(
+                    "Some files were rejected. Only JPEG/PNG and size below 2MB are allowed."
+                );
+            }
+
+            setData("photos", filteredFiles);
+        }
+    };
+
+    // ✅ Handle Cancel Action
+    const handleCancel = () => {
+        reset(); // Clear the form
+        setErrors({}); // Reset errors
+    };
+
     return (
         <Authenticated>
             <Head title="Submit Request" />
-
-            <div className="flex h-screen">
-                {/* Submit Request Form */}
-                <div className="flex-1 p-8">
-                    <section className="text-gray-600 body-font relative">
-                        <div className="container px-5 py-24 mx-auto">
-                            <div className="flex flex-col text-center w-full mb-12">
-                                <h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">
-                                    Work Order Request Form
-                                </h1>
-                            </div>
-                            <div className="lg:w-1/2 md:w-2/3 mx-auto">
-                                <div className="flex flex-wrap -m-2">
-                                    <div className="p-2 w-1/2">
-                                        <div className="relative">
-                                            <label
-                                                htmlFor="name"
-                                                className="leading-7 text-sm text-gray-600"
-                                            >
-                                                Date
-                                            </label>
-                                            <input
-                                                type="date"
-                                                id="name"
-                                                name="name"
-                                                className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="p-2 w-1/2">
-                                        <div className="relative">
-                                            <label
-                                                htmlFor="email"
-                                                className="leading-7 text-sm text-gray-600"
-                                            >
-                                                Requested by
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="email"
-                                                name="email"
-                                                className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="p-2 w-1/2">
-                                        <div className="relative">
-                                            <label
-                                                htmlFor="workOrderType"
-                                                className="leading-7 text-sm text-gray-600"
-                                            >
-                                                Work Order Type
-                                            </label>
-                                            <select
-                                                id="workOrderType"
-                                                name="workOrderType"
-                                                className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                                            >
-                                                <option value="maintenance">
-                                                    Maintenance
-                                                </option>
-                                                <option value="repair">
-                                                    Repair
-                                                </option>
-                                                <option value="installation">
-                                                    Installation
-                                                </option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-2 w-1/2">
-                                        <div className="relative">
-                                            <label
-                                                htmlFor="location"
-                                                className="leading-7 text-sm text-gray-600"
-                                            >
-                                                Location
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="location"
-                                                name="location"
-                                                className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="p-2 w-full">
-                                        <div className="relative">
-                                            <label
-                                                htmlFor="message"
-                                                className="leading-7 text-sm text-gray-600"
-                                            >
-                                                Description
-                                            </label>
-                                            <textarea
-                                                id="message"
-                                                name="message"
-                                                className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"
-                                            ></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-2 w-full">
-                                        <div className="relative">
-                                            <label
-                                                htmlFor="photos"
-                                                className="leading-7 text-sm text-gray-600"
-                                            >
-                                                Upload Photos
-                                            </label>
-                                            <input
-                                                type="file"
-                                                id="photos"
-                                                name="photos"
-                                                multiple
-                                                accept="image/*"
-                                                className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="p-2 w-full flex justify-end">
-                                        <button className="text-white bg-red-500 border-0 py-2 px-8 focus :outline-none hover:bg-indigo-600 rounded text-lg">
-                                            Cancel
-                                        </button>
-
-                                        <button className="text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">
-                                            Submit
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            </div>
+            <SubmitRequestLayout
+                data={data}
+                errors={errors}
+                isLoading={isLoading}
+                filePreviews={filePreviews}
+                handleSubmit={handleSubmit}
+                handleCancel={handleCancel}
+                handleFileChange={handleFileChange}
+                setData={setData}
+            />
         </Authenticated>
     );
 };
