@@ -30,32 +30,21 @@ const Footer = () => {
                     </p>
                     <div className="flex">
                         <p className="mr-1 text-gray-800">Phone:</p>
-                        <a
-                            href="tel:850-123-5021"
-                            className="transition-colors duration-300 text-deep-purple-accent-400 hover:text-deep-purple-800"
-                        >
+                        <p className="transition-colors duration-300 text-deep-purple-accent-400 hover:text-deep-purple-800">
                             09** *** ****
-                        </a>
+                        </p>
                     </div>
                     <div className="flex">
                         <p className="mr-1 text-gray-800">Email:</p>
-                        <a
-                            href="mailto:info@lorem.mail"
-                            className="transition-colors duration-300 text-deep-purple-accent-400 hover:text-deep-purple-800"
-                        >
+                        <p className="transition-colors duration-300 text-deep-purple-accent-400 hover:text-deep-purple-800">
                             lvccapalit@gmail.com
-                        </a>
+                        </p>
                     </div>
                     <div className="flex">
                         <p className="mr-1 text-gray-800">Address:</p>
-                        <a
-                            href="https://www.google.com/maps"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="transition-colors duration-300 text-deep-purple-accent-400 hover:text-deep-purple-800"
-                        >
+                        <p className="transition-colors duration-300 text-deep-purple-accent-400 hover:text-deep-purple-800">
                             MacArthur Highway, <br /> Sampaloc Apalit, Pampanga.
-                        </a>
+                        </p>
                     </div>
                 </div>
                 <div>

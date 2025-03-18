@@ -13,7 +13,7 @@ export default function Hero() {
             <div className="absolute inset-0 bg-black bg-opacity-70"></div>
 
             {/* Navbar */}
-            <header className="fixed top-0 left-0 w-full py-4 z-10">
+            <header className="fixed top-0 left-0 w-full py-4 z-10 bg-white">
                 <div className="px-4 mx-auto max-w-7xl flex items-center justify-between">
                     {/* Logo */}
                     <div className="flex items-center space-x-2">
@@ -22,7 +22,7 @@ export default function Hero() {
                             src="/images/lvlogo.jpg"
                             alt="La Verdad Christian College Logo"
                         />
-                        <span className="text-lg font-semibold text-white">
+                        <span className="text-lg font-semibold text-black">
                             La Verdad Christian College
                         </span>
                     </div>
@@ -31,19 +31,19 @@ export default function Hero() {
                     <nav className="hidden lg:flex items-center space-x-10">
                         <Link
                             href="/"
-                            className="text-sm sm:text-base text-white transition-all duration-200 hover:text-opacity-80 hover:underline"
+                            className="text-sm sm:text-base text-black transition-all duration-200 hover:text-opacity-80 hover:underline"
                         >
                             Home
                         </Link>
                         <Link
                             href="#about"
-                            className="text-sm sm:text-base text-white transition-all duration-200 hover:text-opacity-80 hover:underline"
+                            className="text-sm sm:text-base text-black transition-all duration-200 hover:text-opacity-80 hover:underline"
                         >
                             About
                         </Link>
                         <Link
                             href="#features"
-                            className="text-sm sm:text-base text-white transition-all duration-200 hover:text-opacity-80 hover:underline"
+                            className="text-sm sm:text-base text-black transition-all duration-200 hover:text-opacity-80 hover:underline"
                         >
                             Features
                         </Link>
@@ -60,7 +60,7 @@ export default function Hero() {
                     {/* Mobile Menu Button */}
                     <button
                         onClick={() => setMenuOpen(!menuOpen)}
-                        className="lg:hidden p-2 text-white transition-all duration-200 rounded-md focus:bg-gray-100 hover:bg-gray-100"
+                        className="lg:hidden p-2 text-black transition-all duration-200 rounded-md focus:bg-gray-100 hover:bg-gray-100"
                     >
                         {menuOpen ? (
                             <svg
