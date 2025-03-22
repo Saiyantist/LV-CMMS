@@ -6,16 +6,13 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-function maxDate(){
-    // Calculate the maximum date (18 years ago from today)
+const getDateLimits = () => {
     const today = new Date();
-    const minDate = new Date(today.getFullYear() - 70, today.getMonth(), today.getDate()) // Optional: Limit to 70 years old max
-    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-    const maxDateString = maxDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-    const minDateString = minDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+    const minDate = new Date(today.getFullYear() - 70, today.getMonth(), today.getDate()).toISOString().split("T")[0]; // 70 years ago
+    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split("T")[0]; // 18 years ago
 
-    return {maxDateString, minDateString};
-}
+    return { minDate, maxDate };
+};
 
 interface Department {
     id: number;
@@ -48,7 +45,7 @@ export default function Register({ departments }: RegisterProps) {
         });
     };
 
-    const { minDateString, maxDateString } = maxDate();
+    const { minDate, maxDate } = getDateLimits();
 
     return (
         <GuestLayout>
@@ -111,8 +108,8 @@ export default function Register({ departments }: RegisterProps) {
                             value={data.birth_date}
                             className="mt-1 block w-full"
                             autoComplete="bday"
-                            min={minDateString} // 70 years olds
-                            max={maxDateString} // 18 years olds
+                            min={minDate} // 70 years olds
+                            max={maxDate} // 18 years olds
                             onChange={(e) => setData("birth_date", e.target.value)}
                             required
                         />

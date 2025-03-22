@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
     {
         User::create([
             'first_name' => 'Joshua', 'last_name' => 'Allador',
-            'birth_date' => Crypt::encryptString('1999-01-01'), 'gender' => 'male',
+            'birth_date' => '1999-01-01', 'gender' => 'male',
             'contact_number' => '09205979015',
             'email' => 'joshua@laverdad.edu.ph',
             'email_verified_at' => now(),
@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
 
         User::create([
             'first_name' => 'Angelo', 'last_name' => 'Delos Santos',
-            'birth_date' => Crypt::encryptString('1999-01-01'), 'gender' => 'male',
+            'birth_date' => '1999-01-01', 'gender' => 'male',
             'contact_number' => '09471847021',
             'email' => 'angelo@laverdad.edu.ph',
             'email_verified_at' => now(),
@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
         // Mr. Eric
         User::create([
             'first_name' => 'Eric', 'last_name' => 'Bolaño',
-            'birth_date' => Crypt::encryptString('1999-01-01'), 'gender' => 'male',
+            'birth_date' => '1999-01-01', 'gender' => 'male',
             'contact_number' => '09123456789',
             'email' => 'eric@laverdad.edu.ph',
             'password' => Hash::make('password'),
@@ -52,7 +52,7 @@ class UserSeeder extends Seeder
         // Ms. Edyssa
         User::create([
             'first_name' => 'Edyssa', 'last_name' => 'Belandres',
-            'birth_date' => Crypt::encryptString('1999-01-01'), 'gender' => 'female',
+            'birth_date' => '1999-01-01', 'gender' => 'female',
             'contact_number' => '09234567890',
             'email' => 'edyssa@laverdad.edu.ph',
             'password' => Hash::make('password'),
