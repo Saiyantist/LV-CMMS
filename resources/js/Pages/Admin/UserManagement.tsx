@@ -49,6 +49,8 @@ export default function ManageRoles({ users, roles, auth }: UserRoleProps) {
             <tr className="bg-gray-200 dark:bg-gray-800">
               <th className="border p-2 dark:border-gray-700 dark:text-gray-300">Id</th>
               <th className="border p-2 dark:border-gray-700 dark:text-gray-300">Name</th>
+              <th className="border p-2 dark:border-gray-700 dark:text-gray-300">Birthday</th>
+              <th className="border p-2 dark:border-gray-700 dark:text-gray-300">Contact Number</th>
               <th className="border p-2 dark:border-gray-700 dark:text-gray-300">Email</th>
               <th className="border p-2 dark:border-gray-700 dark:text-gray-300">Current Role</th>
               <th className="border p-2 dark:border-gray-700 dark:text-gray-300">Assign New Role</th>
@@ -60,6 +62,8 @@ export default function ManageRoles({ users, roles, auth }: UserRoleProps) {
               <tr key={user.id} className="border dark:border-gray-700 text-center">
                 <td className="p-2">{user.id}</td>
                 <td className="p-2">{user.first_name} {user.last_name}</td>
+                <td className="p-2">{user.birth_date}</td>
+                <td className="p-2">{user.contact_number}</td>
                 <td className="p-2">{user.email}</td>
                 <td className="p-2">{user.roles.map((r) => r.name).join(', ')}</td>
                 <td className="p-2">

@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 use Psy\CodeCleaner\FunctionReturnInWriteContextPass;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -33,6 +36,29 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
     ];
 
+    /**
+     * Encrypts and decrypts the contact number.
+     *
+     */
+    protected function contactNumber(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value && Str::startsWith($value, 'eyJpdiI6') ? Crypt::decryptString($value) : $value,
+            set: fn ($value) => $value ? Crypt::encryptString($value) : null,
+        );
+    }
+
+    /**
+     * Encrypts and decrypts the birth date.
+     *
+     */
+    protected function birthDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value && Str::startsWith($value, 'eyJpdiI6') ? Crypt::decryptString($value) : $value,
+            set: fn ($value) => $value ? Crypt::encryptString($value) : null
+        );
+    }
     /**
      * Work orders requested by this user.
      */
