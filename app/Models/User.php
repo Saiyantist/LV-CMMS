@@ -43,7 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function contactNumber(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value && Str::startsWith($value, 'eyJpdiI6') ? Crypt::decryptString($value) : $value,
+            get: fn ($value) => $value && Str::startsWith($value, 'eyJpdiI6') ? ltrim(Crypt::decryptString($value), '0') : ltrim($value, '0'),
             set: fn ($value) => $value ? Crypt::encryptString($value) : null,
         );
     }

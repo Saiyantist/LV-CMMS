@@ -7,6 +7,11 @@ export interface User {
     email: string;
     email_verified_at?: string;
     roles: Role[];
+    contact_number?: string;
+    birth_date?: string;
+    gender?: string;
+    staff_type?: string;
+    department_id?: number;
 }
 
 export interface Role {
