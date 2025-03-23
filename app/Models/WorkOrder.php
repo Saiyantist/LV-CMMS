@@ -12,25 +12,44 @@ class WorkOrder extends Model
 
     protected $fillable = [
         'report_description',
-        'location',
+        'location_id',
         'status',
         'work_order_type',
+        'label',
         'priority',
-        'date_requested',
-        'date_completed',
+        'requested_at',
+        'completed_at',
         'remarks',
-        'is_scheduled',
-        'scheduled_maintenance_id',
-        'scheduled_maintenance_date_scheduled',
+        'asset_id',
         'requested_by',
         'assigned_to',
     ];
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function asset()
+    {
+        return $this->belongsTo(Asset::class);
+    }
+
+    public function scheduledMaintenance()
+    {
+        return $this->hasOne(ScheduledMaintenance::class);
+    }
+
+    public function images()
+    {
+        return $this->morphMany(Image::class, 'imageable');
+    }
 
     public function requestedBy()
     {
         return $this->belongsTo(User::class, 'requested_by');
     }
-
+    
     public function assignedTo()
     {
         return $this->belongsTo(User::class, 'assigned_to');
