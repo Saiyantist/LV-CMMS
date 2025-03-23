@@ -18,9 +18,10 @@ return new class extends Migration
             $table->date('date_acquired');
             $table->enum('status', ['functional', 'non-functional']);
             $table->foreignId('location_id')->nullable()->constrained()->nullOnDelete();
-            $table->integer('preventive_maintenance_interval')->nullable(); // Refine this, interval unit (day/week/month) and interval value (number) 
+            $table->integer('preventive_maintenance_interval_value')->nullable();
+            $table->enum('preventive_maintenance_interval_unit', ['day', 'week', 'month', 'year'])->nullable();
             $table->date('last_maintained_at')->nullable();
-            $table->string('qr_code')->unique(); // How to implement qr functionality in the system?
+            $table->string('qr_code')->unique()->nullable();
             $table->timestamps();
         });
     }

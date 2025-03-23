@@ -14,33 +14,6 @@ return new class extends Migration
         // Initial setup of table pa lang.
 
         Schema::create('work_orders', function (Blueprint $table) {
-            // $location =  [
-            //     'DSR 201', 'DSR 215',
-            //     'DSR 301', 'DSR 315',
-            //     'EFS 201', 'EFS 213',
-            //     'EFS 301', 'EFS 315',
-            //     'EFS 401', 'EFS 410',
-            //     'IC Laboratory',
-            //     'Clinic',
-            //     'Stockroom',
-            //     'Computer Laboratory A', 'Computer Laboratory B',
-            //     'Dean\'s Office',
-            //     'College Faculty',
-            //     'Finance Office',
-            //     'TLE Room',
-            //     'Physics',
-            //     'Data Privacy Office',
-            //     'Registrar Office',
-            //     'MIS  Office',
-            //     'PSAS Office',
-            //     'ITSS Office',
-            //     'College Library',
-            //     'Basic Education Library',
-            //     'Auditorium', 'Auditorium Lobby',
-            // ];
-            // $table->enum('location', $location);
-
-
             $table->id();
             $table->string('report_description');
             $table->foreignId('location_id')->nullable()->constrained()->nullOnDelete();
