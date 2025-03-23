@@ -63,7 +63,7 @@ export default function ManageRoles({ users, roles, auth }: UserRoleProps) {
                 <td className="p-2">{user.id}</td>
                 <td className="p-2">{user.first_name} {user.last_name}</td>
                 <td className="p-2">{user.birth_date}</td>
-                <td className="p-2">{user.contact_number}</td>
+                <td className="p-2">+63 {user.contact_number}</td>
                 <td className="p-2">{user.email}</td>
                 <td className="p-2">{user.roles.map((r) => r.name).join(', ')}</td>
                 <td className="p-2">
