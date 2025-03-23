@@ -37,7 +37,7 @@ class WorkOrder extends Model
 
     public function scheduledMaintenance()
     {
-        return $this->hasOne(ScheduledMaintenance::class);
+        return $this->hasOne(ScheduledMaintenance::class, 'work_order_id');
     }
 
     public function images()

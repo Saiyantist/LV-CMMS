@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('location_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('status', ['Pending', 'Assigned', 'Ongoing', 'Overdue', 'Completed', 'Cancelled'])->default('Pending');
             $table->enum('work_order_type', ['Work Order', 'Preventive Maintenance', 'Compliance'])->default('Work Order');
-            $table->enum('label', ['Electrical', 'Plumbing', 'Painting', 'Carpentry', '', 'No Label'])->default('No Label'); /** If  work_order_typpe is "Work Order", must have label, otherwise, "No Label" */
+            $table->enum('label', ['Electrical', 'Plumbing', 'Painting', 'Carpentry', 'No Label'])->default('No Label'); /** If  work_order_typpe is "Work Order", must have label, otherwise, "No Label" */
             $table->enum('priority', ['Low', 'Medium', 'High', 'Critical'])->nullable(); /** This can be improved by automation, kkeywords: AI, Analysis, Rule Setting (pre-defined words) */
             $table->date('requested_at');
             $table->date('completed_at')->nullable();
