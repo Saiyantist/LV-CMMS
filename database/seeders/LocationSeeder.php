@@ -45,6 +45,7 @@ class LocationSeeder extends Seeder
             'ITSS Office',
             'College Library',
             'Basic Education Library',
+            'Communications Office',
             'Chess Room',
             'TLE Room',
             'Auditorium', 'Auditorium Lobby',

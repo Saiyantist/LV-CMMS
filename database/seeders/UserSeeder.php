@@ -36,7 +36,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'staff_type' => 'non-teaching',
             'department_id' => 1,
-        ])->assignRole('super_admin');
+            ])->assignRole('super_admin');
 
         // Mr. Eric
         User::create([
@@ -44,6 +44,7 @@ class UserSeeder extends Seeder
             'birth_date' => '1999-01-01', 'gender' => 'male',
             'contact_number' => '09123456789',
             'email' => 'eric@laverdad.edu.ph',
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'staff_type' => 'non-teaching',
             'department_id' => 2,
@@ -55,9 +56,10 @@ class UserSeeder extends Seeder
             'birth_date' => '1999-01-01', 'gender' => 'female',
             'contact_number' => '09234567890',
             'email' => 'edyssa@laverdad.edu.ph',
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'staff_type' => 'non-teaching',
             'department_id' => 3,
-            ])->assignRole('communications_officer');
+        ])->assignRole('communications_officer');
     }
 }

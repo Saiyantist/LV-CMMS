@@ -44,7 +44,7 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::delete('/admin/manage-roles/{user}/role', [UserRoleController::class, 'removeRole'])->name('admin.remove.role');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'restrict_external'])->group(function () {
     Route::resource('work-orders', WorkOrderController::class);
 });
 

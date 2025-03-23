@@ -22,11 +22,25 @@ class StoreWorkOrderRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $user = auth()->user();
+
+        $rules = [
             'report_description' => 'required|string|max:1000',
             'location_id' => 'required|exists:locations,id',
             'images' => 'nullable|array', // Accept multiple images
             'images.*' => 'image|mimes:jpg,jpeg,png|max:1024', // Validate each image
         ];
+
+        if ($user->hasPermissionTo('manage work orders')) {
+            $rules = array_merge($rules, [
+                'status' => ['required', Rule::in(['Pending', 'Assigned', 'Ongoing', 'Overdue', 'Completed', 'Cancelled'])],
+                'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
+                'label' => ['required', Rule::in(['Electrical', 'Plumbing', 'Painting', 'Carpentry', 'No Label'])],
+                'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // AI-generated in the future
+                'remarks' => 'nullable|string|max:1000',
+            ]);
+        }
+
+        return $rules;
     }
 }

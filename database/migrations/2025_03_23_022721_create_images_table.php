@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('path');
             $table->morphs('imageable'); // Supports multiple models like Users & Work Orders
-            $table->string('caption');
+            $table->string('caption')->nullable();
             $table->timestamps();
         });
     }
