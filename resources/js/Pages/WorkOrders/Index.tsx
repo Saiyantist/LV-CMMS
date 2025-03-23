@@ -24,6 +24,7 @@ export default function WorkOrders({ workOrders }: PageProps<{ workOrders: WorkO
                     <th className="border px-4 py-2">Status</th>
                     <th className="border px-4 py-2">Priority</th>
                     <th className="border px-4 py-2">Requested At</th>
+                    <th className="border px-4 py-2">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -35,6 +36,11 @@ export default function WorkOrders({ workOrders }: PageProps<{ workOrders: WorkO
                     <td className="border px-4 py-2">{workOrder.status}</td>
                     <td className="border px-4 py-2">{workOrder.priority}</td>
                     <td className="border px-4 py-2">{new Date(workOrder.requested_at).toLocaleDateString()}</td>
+                    <td className="border px-4 py-2">
+                        <Link href={`/work-orders/${workOrder.id}/edit`} className="text-blue-600 hover:text-blue-800">
+                            Edit
+                        </Link>
+                    </td>
                     </tr>
                 ))}
                 </tbody>
