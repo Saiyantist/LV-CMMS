@@ -32,7 +32,9 @@ const RequestDetails: React.FC = () => {
                                         <th className="p-3">Location</th>
                                         <th className="p-3">Description</th>
                                         <th className="p-3">Date Requested</th>
-                                        <th className="p-3 text-center">Status</th>
+                                        <th className="p-3 text-center">
+                                            Status
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -40,33 +42,9 @@ const RequestDetails: React.FC = () => {
                                         {
                                             name: "Joshua Allador",
                                             workordertype: "Maintenance",
-                                            location: "14 Jan 2022",
-                                            description: "01 Feb 2022",
-                                            daterequested: "$15,792",
-                                            status: "Pending",
-                                        },
-                                        {
-                                            name: "Joshua Allador",
-                                            workordertype: "Repair & Maintenance",
-                                            location: "14 Jan 2022",
-                                            description: "01 Feb 2022",
-                                            daterequested: "$275",
-                                            status: "Pending",
-                                        },
-                                        {
-                                            name: "Joshua Allador",
-                                            workordertype: "Repair",
-                                            location: "14 Jan 2022",
-                                            description: "01 Feb 2022",
-                                            daterequested: "$8,950,500",
-                                            status: "Pending",
-                                        },
-                                        {
-                                            name: "Joshua Allador",
-                                            workordertype: "Installation",
-                                            location: "14 Jan 2022",
-                                            description: "01 Feb 2022",
-                                            daterequested: "$98,218",
+                                            location: "EFS 404",
+                                            description: "Aircon Malfunction",
+                                            daterequested: "March 24, 2025",
                                             status: "Pending",
                                         },
                                     ].map((invoice, index) => (
@@ -74,15 +52,26 @@ const RequestDetails: React.FC = () => {
                                             key={index}
                                             className="border-b border-opacity-20 dark:border-gray-300 dark:bg-gray-50"
                                         >
-                                            <td className="p-3">{invoice.name}</td>
-                                            <td className="p-3">{invoice.workordertype}</td>
-                                            <td className="p-3">{invoice.location}</td>
-                                            <td className="p-3">{invoice.description}</td>
-                                            <td className="p-3">{invoice.daterequested}</td>
+                                            <td className="p-3">
+                                                {invoice.name}
+                                            </td>
+                                            <td className="p-3">
+                                                {invoice.workordertype}
+                                            </td>
+                                            <td className="p-3">
+                                                {invoice.location}
+                                            </td>
+                                            <td className="p-3">
+                                                {invoice.description}
+                                            </td>
+                                            <td className="p-3">
+                                                {invoice.daterequested}
+                                            </td>
                                             <td className="p-3 text-center">
                                                 <span
                                                     className={`px-3 py-1 font-semibold rounded-md ${
-                                                        invoice.status === "Pending"
+                                                        invoice.status ===
+                                                        "Pending"
                                                             ? "dark:bg-violet-600 dark:text-gray-50"
                                                             : "dark:bg-green-600 dark:text-gray-50"
                                                     }`}
