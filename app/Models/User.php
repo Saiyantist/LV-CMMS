@@ -26,7 +26,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'contact_number',
         'email',
         'password',
+        'staff_type',
+        'department_id',
     ];
+    
 
     /**
      * Work orders requested by this user.

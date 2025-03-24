@@ -21,6 +21,21 @@ class ProfileController extends Controller
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+
+            // Pass full user information to the profile edit page
+            'user' => $request->user()->only([
+                'id',
+                'first_name',
+                'last_name',
+                'contact',
+                'number',
+                'birthday',
+                'gender',
+                'staff_type',
+                'department',
+                'role',
+                'profile_photo_url',
+            ]),
         ]);
     }
 
@@ -37,7 +52,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit');
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
