@@ -8,16 +8,15 @@ import UserProfileCard from "@/Components/UserProfileCard";
 import UserDetailsCard from "@/Components/UsersDetailsCard";
 import { useState } from "react";
 
-export default function Edit({
-    mustVerifyEmail,
-    status,
-}: PageProps<{ mustVerifyEmail: boolean; status?: string }>) {
+export default function Edit({ mustVerifyEmail, status, departments
+
+}: PageProps<{ mustVerifyEmail: boolean; status?: string; departments?: { id: number; name: string }[]}>) {
     // ✅ Get the user from usePage()
     const user = usePage<PageProps>().props.auth.user;
 
     // ✅ State to toggle between view and edit modes
     const [isEditing, setIsEditing] = useState(false);
-
+    
     return (
         <AuthenticatedLayout>
             <Head title="Profile" />
@@ -63,6 +62,15 @@ export default function Edit({
                                 />
                             </div>
 
+                            <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
+                                <UpdateProfileInformationForm
+                                    mustVerifyEmail={mustVerifyEmail}
+                                    status={status}
+                                    className="max-w-xl"
+                                    departments={departments}
+                                />
+                            </div>
+                        
                             {/* Update Password */}
                             <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
                                 <UpdatePasswordForm className="max-auto" />

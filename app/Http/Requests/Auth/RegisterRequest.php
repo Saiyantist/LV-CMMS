@@ -1,13 +1,21 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 
-class ProfileUpdateRequest extends FormRequest
+class RegisterRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -16,7 +24,6 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'name' => ['required', 'string', 'max:255'],
             'first_name' => 'required|string|max:20',
             'last_name' => 'required|string|max:40',
             'birth_date' => 'required|date|max:255',
@@ -24,14 +31,24 @@ class ProfileUpdateRequest extends FormRequest
             'contact_number' => 'required|integer|digits:10',
             'staff_type' => ['required', 'in:teaching,non-teaching'],
             'department_id' => ['required', 'exists:departments,id'],
+            // 'email' => 'required|string|lowercase|email|regex:/^[a-zA-Z0-9._%+-]+@laverdad\.edu\.ph$/i|max:255|unique:'.User::class,
             'email' => [
                 'required',
                 'string',
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                'unique:users,email',
+                'regex:/^[a-zA-Z0-9._%+-]+@laverdad\.edu\.ph$/i',
             ],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()], // Ctrl + Click on the 'Rules\Password' to customize the default rules 
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'email.regex' => 'The provided email address is not a valid La Verdad email address.',
         ];
     }
 }

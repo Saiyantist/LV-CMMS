@@ -6,23 +6,32 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-function maxDate(){
-    // Calculate the maximum date (18 years ago from today)
+const getDateLimits = () => {
     const today = new Date();
-    const minDate = new Date(today.getFullYear() - 70, today.getMonth(), today.getDate()) // Optional: Limit to 70 years old max
-    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-    const maxDateString = maxDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-    const minDateString = minDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+    const minDate = new Date(today.getFullYear() - 70, today.getMonth(), today.getDate()).toISOString().split("T")[0]; // 70 years ago
+    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split("T")[0]; // 18 years ago
 
-    return {maxDateString, minDateString};
+    return { minDate, maxDate };
+};
+
+interface Department {
+    id: number;
+    name: string;
 }
-export default function Register() {
+
+interface RegisterProps {
+    departments: Department[];
+}
+
+export default function Register({ departments }: RegisterProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         first_name: '',
         last_name: '',
         birth_date: '',
         gender: '',
         contact_number: '',
+        staff_type: '',
+        department_id: '',
         email: '',
         password: '',
         password_confirmation: '',
@@ -36,7 +45,7 @@ export default function Register() {
         });
     };
 
-    const { minDateString, maxDateString } = maxDate();
+    const { minDate, maxDate } = getDateLimits();
 
     return (
         <GuestLayout>
@@ -99,8 +108,8 @@ export default function Register() {
                             value={data.birth_date}
                             className="mt-1 block w-full"
                             autoComplete="bday"
-                            min={minDateString} // 70 years olds
-                            max={maxDateString} // 18 years olds
+                            min={minDate} // 70 years olds
+                            max={maxDate} // 18 years olds
                             onChange={(e) => setData("birth_date", e.target.value)}
                             required
                         />
@@ -139,10 +148,57 @@ export default function Register() {
                         value={data.contact_number}
                         className="mt-1 block w-full"
                         placeholder="9XXXXXXXXX"
+                        maxLength={10}
                         onChange={(e) => setData("contact_number", e.target.value)}
                         required
                     />
                     <InputError message={errors.contact_number} className="mt-2" />
+                </div>
+
+                {/* Staff type and Department */}
+                <div className='flex justify-stretch mt-4'>
+
+                    {/* Staff type */}
+                    <div className="w-full mr-2">
+                        <InputLabel htmlFor="staff_type" value="Type of Staff" />
+
+                        <select
+                            id="staff_type"
+                            name="staff_type"
+                            value={data.staff_type}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                            onChange={(e) => setData("staff_type", e.target.value)}
+                            required
+                        >
+                            <option value="">Select Type</option>
+                            <option value="teaching">Teaching</option>
+                            <option value="non-teaching">Non-teaching</option>
+                        </select>
+
+                        <InputError message={errors.staff_type} className="mt-2" />
+                    </div>
+
+                    {/* Department */}
+                    <div className='w-full ml-2'>
+                        <InputLabel htmlFor="department" value="Department" />
+
+                        <select
+                            id="department_id"
+                            name="department_id"
+                            value={data.department_id}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                            onChange={(e) => setData("department_id", e.target.value)}
+                            required
+                        >
+                            <option value="">Select Department</option>
+                            {departments.map(dept => (
+                                <option key={dept.id} value={dept.id}>{dept.name}</option>
+                            ))}
+                        </select>
+
+                        <InputError message={errors.department_id} className="mt-2" />
+                    </div>
+
                 </div>
 
                 {/* Email */}
