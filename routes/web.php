@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
@@ -27,6 +27,17 @@ Route::get('/awaiting-approval', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [ 'auth' => [ 'user' => Auth::user()->load('roles')]]);
 })->middleware(['auth', 'verified', 'hasRole'])->name('dashboard');
+
+// Gelo:
+// Not good implementation
+// For Work Order, I created a work order grouped routes
+Route::get('/submitrequest', function () {
+    return Inertia::render('SubmitRequest');
+})->middleware(['auth', 'verified'])->name('submitrequest');
+
+Route::get('/requestdetails', function () {
+    return Inertia::render('RequestDetails');
+})->middleware(['auth', 'verified'])->name('requestdetails');
 
 Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

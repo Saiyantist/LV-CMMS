@@ -6,6 +6,8 @@ export interface User {
     contact_number: string;
     email: string;
     email_verified_at?: string;
+    profile_photo_url?: string; // Optional for profile photo
+    [key: string]: any; // To allow dynamic properties if needed
     roles: Role[];
     contact_number?: string;
     birth_date?: string;
