@@ -3,22 +3,20 @@ import Hero from "@/Layouts/Hero"; // Hero Layout
 import About from "./About";
 import Features from "./Features";
 import Footer from "./Footer";
+import { Head } from "@inertiajs/react";
 
 const Home = () => {
     return (
+        <>
+        <Head title="Welcome"/>
         <div className="scroll-smooth">
-            <Hero /> {/* This is your existing home page hero section */}
-            {/* Add an ID to the About section */}
-            <div id="about">
-                <About />
-            </div>
-            <div>
-                <Features />
-            </div>
-            <div>
-                <Footer />
-            </div>
+            <Hero />
+            {/* This is your existing home page hero section */}
+            <About />
+            <Features />
+            <Footer />
         </div>
+        </>
     );
 };
 

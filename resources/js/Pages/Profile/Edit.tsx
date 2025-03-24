@@ -12,7 +12,7 @@ export default function Edit({ mustVerifyEmail, status, departments
 
 }: PageProps<{ mustVerifyEmail: boolean; status?: string; departments?: { id: number; name: string }[]}>) {
     // ✅ Get the user from usePage()
-    const user = usePage<PageProps>().props.auth.user;
+    const user = usePage().props.auth.user;
 
     // ✅ State to toggle between view and edit modes
     const [isEditing, setIsEditing] = useState(false);
@@ -54,14 +54,6 @@ export default function Edit({ mustVerifyEmail, status, departments
                         // Show Edit Forms when editing
                         <>
                             {/* Update Profile Info */}
-                            <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-white">
-                                <UpdateProfileInformationForm
-                                    mustVerifyEmail={mustVerifyEmail}
-                                    status={status}
-                                    className="max-auto"
-                                />
-                            </div>
-
                             <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
                                 <UpdateProfileInformationForm
                                     mustVerifyEmail={mustVerifyEmail}

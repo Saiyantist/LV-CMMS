@@ -16,6 +16,9 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                lvblue: 'oklch(0.588 0.158 241.966)', //EXAMPLE ONLY
+            },
         },
     },
 

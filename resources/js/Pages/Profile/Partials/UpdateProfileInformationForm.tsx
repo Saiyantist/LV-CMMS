@@ -1,10 +1,10 @@
-import InputError from "@/Components/InputError";
-import InputLabel from "@/Components/InputLabel";
-import PrimaryButton from "@/Components/PrimaryButton";
-import TextInput from "@/Components/TextInput";
-import { Transition } from "@headlessui/react";
-import { Link, useForm, usePage } from "@inertiajs/react";
-import { FormEventHandler } from "react";
+import InputError from '@/Components/InputError';
+import InputLabel from '@/Components/InputLabel';
+import PrimaryButton from '@/Components/PrimaryButton';
+import TextInput from '@/Components/TextInput';
+import { Transition } from '@headlessui/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
+import { FormEventHandler } from 'react';
 
 const getDateLimits = () => {
     const today = new Date();
@@ -35,28 +35,30 @@ export default function UpdateProfileInformation({
             contact_number: user.contact_number || '',
             birth_date: user.birth_date || '',
             gender: user.gender || '',
-            staff_type: user.st
-          aff_type || '',
+            staff_type: user.staff_type || '',
             department_id: user.department_id || '', // Fetch department ID
             email: user.email,
         });
 
-    const submit: FormEventHandler = (e) => {
+        const submit: FormEventHandler = (e) => {
         e.preventDefault();
-      
+
         patch(route('profile.update'), {
             preserveScroll: true
-        });
+        });  
     };
+
+
+    console.log('department_id', user.department_id)
 
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900 dark:text-black">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                     Profile Information
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-600 dark:text-black">
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Update your account's profile information and email address.
                 </p>
             </header>
@@ -71,7 +73,7 @@ export default function UpdateProfileInformation({
                         id="first_name"
                         className="mt-1 block w-full"
                         value={data.first_name}
-                        onChange={(e) => setData("first_name", e.target.value)}
+                        onChange={(e) => setData('first_name', e.target.value)}
                         required
                         isFocused
                         autoComplete="first_name"
@@ -88,7 +90,7 @@ export default function UpdateProfileInformation({
                         id="last_name"
                         className="mt-1 block w-full"
                         value={data.last_name}
-                        onChange={(e) => setData("last_name", e.target.value)}
+                        onChange={(e) => setData('last_name', e.target.value)}
                         required
                         isFocused
                         autoComplete="last_name"
@@ -193,7 +195,7 @@ export default function UpdateProfileInformation({
                         type="email"
                         className="mt-1 block w-full !text-gray-500"
                         value={data.email}
-                        onChange={(e) => setData("email", e.target.value)}
+                        onChange={(e) => setData('email', e.target.value)}
                         required
                         autoComplete="username"
                     />
@@ -205,9 +207,8 @@ export default function UpdateProfileInformation({
                     <div>
                         <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
                             Your email address is unverified.
-                            <Link
-                                preserveScroll
-                                href={route("verification.send")}
+                            <Link preserveScroll
+                                href={route('verification.send')}
                                 method="post"
                                 as="button"
                                 className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
@@ -216,7 +217,7 @@ export default function UpdateProfileInformation({
                             </Link>
                         </p>
 
-                        {status === "verification-link-sent" && (
+                        {status === 'verification-link-sent' && (
                             <div className="mt-2 text-sm font-medium text-green-600 dark:text-green-400">
                                 A new verification link has been sent to your
                                 email address.

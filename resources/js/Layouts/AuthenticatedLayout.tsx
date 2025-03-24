@@ -1,8 +1,8 @@
 import Sidebar from "@/Components/SideBar";
 import Dropdown from "@/Components/Dropdown";
-// import ResponsiveNavLink from "@/Components/ResponsiveNavLink";
 import { PropsWithChildren, ReactNode, useState } from "react";
 import { usePage } from "@inertiajs/react";
+import NavLink from "@/Components/NavLink";
 
 export default function AuthenticatedLayout({
     header,
@@ -22,7 +22,7 @@ export default function AuthenticatedLayout({
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="flex h-16 justify-between">
                             <div className="flex">
-                                {/* Add any other nav items if needed */
+                                {/* Add any other nav items if needed */}
                               <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink
                                     href={route('dashboard')}
