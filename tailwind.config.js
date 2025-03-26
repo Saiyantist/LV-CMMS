@@ -21,7 +21,7 @@ export default {
                 ]
     		},
     		colors: {
-    			lvblue: 'oklch(0.588 0.158 241.966)',
+				bluetext: "oklch(0.554 0.046 257.417)",
     			background: 'hsl(var(--background))',
     			foreground: 'hsl(var(--foreground))',
     			card: {
@@ -33,11 +33,13 @@ export default {
     				foreground: 'hsl(var(--popover-foreground))'
     			},
     			primary: {
-    				DEFAULT: 'hsl(var(--primary))',
+    				// DEFAULT: 'hsl(var(--primary))',
+    				DEFAULT: '#1f3463',
     				foreground: 'hsl(var(--primary-foreground))'
     			},
     			secondary: {
-    				DEFAULT: 'hsl(var(--secondary))',
+    				// DEFAULT: 'hsl(var(--secondary))',
+    				DEFAULT: '#05549c',
     				foreground: 'hsl(var(--secondary-foreground))'
     			},
     			muted: {

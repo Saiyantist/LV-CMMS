@@ -31,19 +31,19 @@ export default function Hero() {
                     <nav className="hidden lg:flex items-center space-x-10">
                         <Link
                             href="/"
-                            className="text-sm sm:text-base text-black transition-all duration-200 hover:text-opacity-80 hover:underline"
+                            className="text-sm sm:text-base text-slate-500 transition-all duration-200 hover:text-opacity-80 hover:underline"
                         >
                             Home
                         </Link>
                         <Link
                             href="#about"
-                            className="text-sm sm:text-base text-black transition-all duration-200 hover:text-opacity-80 hover:underline"
+                            className="text-sm sm:text-base text-slate-500 transition-all duration-200 hover:text-opacity-80 hover:underline"
                         >
                             About
                         </Link>
                         <Link
                             href="#features"
-                            className="text-sm sm:text-base text-black transition-all duration-200 hover:text-opacity-80 hover:underline"
+                            className="text-sm sm:text-base text-slate-500 transition-all duration-200 hover:text-opacity-80 hover:underline"
                         >
                             Features
                         </Link>
@@ -52,7 +52,7 @@ export default function Hero() {
                     {/* Desktop Login Button */}
                     <Link
                         href="/login"
-                        className="hidden lg:inline-flex px-5 py-2.5 text-base transition-all duration-200 hover:bg-yellow-300 hover:text-black focus:text-black focus:bg-yellow-300 font-semibold text-white bg-black rounded-full"
+                        className="hidden lg:inline-flex px-5 py-2.5 text-base transition-all duration-200 hover:bg-yellow-300 hover:text-black focus:text-black focus:bg-yellow-300 font-semibold text-white bg-secondary rounded-full"
                     >
                         Login
                     </Link>
