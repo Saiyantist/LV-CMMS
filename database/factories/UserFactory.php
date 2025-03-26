@@ -31,9 +31,9 @@ class UserFactory extends Factory
         return [
             'first_name' => $firstName,
             'last_name' => fake()->lastName(),
-            'birth_date' => Crypt::encryptString(fake()->date('Y-m-d','-21 years')),
+            'birth_date' => fake()->date('Y-m-d','-21 years'),
             'gender' => fake()->randomElement(['male', 'female', 'rather not say']),
-            'contact_number' => Crypt::encryptString('09' . fake()->randomNumber(9, true)),
+            'contact_number' => '09' . fake()->randomNumber(9, true),
             'email' => Str::lower($firstName) . '@laverdad.edu.ph',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),

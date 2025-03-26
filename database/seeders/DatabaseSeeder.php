@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Department;
+use App\Models\Location;
 use App\Models\User;
 use App\Models\WorkOrder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -19,12 +20,10 @@ class DatabaseSeeder extends Seeder
         $this->call(DepartmentSeeder::class);
         $this->call(RolePermissionSeeder::class);
         $this->call(UserSeeder::class);
+        $this->call(LocationSeeder::class);
+        $this->call(AssetSeeder::class);
         User::factory(30)->create();
-        // WorkOrder::factory(20)->create();
-
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        
+        WorkOrder::factory(50)->create();
     }
 }

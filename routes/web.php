@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WorkOrderController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +53,10 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::get('/admin/manage-roles', [UserRoleController::class, 'index'])->name('admin.manage-roles');
     Route::patch('/admin/manage-roles/{user}/role', [UserRoleController::class, 'updateRole'])->name('admin.update.role');
     Route::delete('/admin/manage-roles/{user}/role', [UserRoleController::class, 'removeRole'])->name('admin.remove.role');
+});
+
+Route::middleware(['auth', 'restrict_external'])->group(function () {
+    Route::resource('work-orders', WorkOrderController::class);
 });
 
 require __DIR__.'/auth.php';
