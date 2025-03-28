@@ -1,8 +1,13 @@
 import React from "react";
 
-const About = () => {
+// Define a functional component with proper TypeScript typing
+const About: React.FC = () => {
     return (
-        <div className="sm:flex items-center max-w-screen-xl mx-auto py-10 px-5">
+        <section
+            id="about"
+            className="sm:flex items-center max-w-screen-xl mx-auto py-10 px-5"
+        >
+            {/* Left Section with Image */}
             <div className="sm:w-1/2 p-10 flex justify-center">
                 <div className="image object-center text-center w-full max-w-3xl">
                     <img
@@ -13,29 +18,27 @@ const About = () => {
                 </div>
             </div>
 
+            {/* Right Section with Text */}
             <div className="sm:w-1/2 p-5">
                 <div className="text">
-                    <span className="text-gray-500 border-b-2 border-indigo-600 uppercase">
-                        About us
-                    </span>
-                    <h2 className="my-4 font-bold text-3xl sm:text-4xl">
-                        About{" "}
-                        <span className="text-indigo-600">
-                            CMMS with Facility Scheduling
-                        </span>
+                    <h2 className="my-4 font-bold text-3xl sm:text-4xl text-bluetitle">
+                        About Us
                     </h2>
-                    <p className="text-gray-700">
-                        Computer Maintenance Management System with Facility
+
+                    {/* Description Text */}
+                    <p className="text-bluetext">
+                        The Computer Maintenance Management System with Facility
                         Scheduling is designed to streamline the management of
                         computer resources, maintenance tasks, and facility
                         bookings. We aim to provide an efficient and organized
-                        platform that helps ensure assets are well-maintained and
+                        platform that ensures assets are well-maintained and
                         that facility usage is properly scheduled, supporting a
-                        smooth and productive environment for everyone on campus.
+                        smooth and productive environment for everyone on
+                        campus.
                     </p>
                 </div>
             </div>
-        </div>
+        </section>
     );
 };
 

@@ -21,7 +21,11 @@ export default {
                 ]
     		},
     		colors: {
-				bluetext: "oklch(0.554 0.046 257.417)",
+				bluetitle: "#486284",
+				bluetext: "#8CA2C0",
+				bluebutton: "#05549C",
+				secondarybg: '#05549C', //This is the color of footer
+				sidebarbg: '#1F3463',
     			background: 'hsl(var(--background))',
     			foreground: 'hsl(var(--foreground))',
     			card: {
