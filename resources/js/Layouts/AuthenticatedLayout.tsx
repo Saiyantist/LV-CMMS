@@ -1,68 +1,34 @@
 import Sidebar from "@/Components/SideBar";
-import Dropdown from "@/Components/Dropdown";
-import { PropsWithChildren, ReactNode, useState } from "react";
-import { usePage } from "@inertiajs/react";
 import NavLink from "@/Components/NavLink";
+import { PropsWithChildren, ReactNode } from "react";
+import { usePage } from "@inertiajs/react";
 
 export default function AuthenticatedLayout({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
     const user = usePage().props.auth.user;
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
 
     return (
         <div className="min-h-screen bg-gray-100 flex">
-            {/* Sidebar here */}
-            <Sidebar />
+            {/* Pass user to Sidebar */}
+            <Sidebar user={user} />
 
             <div className="flex-1 flex flex-col">
                 <nav className="border-b border-gray-100 bg-white">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="flex h-16 justify-between">
-                            <div className="flex">
-                                {/* Add any other nav items if needed */}
-                              <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <div className="flex h-16 justify-between items-center">
+                            <div></div>{" "}
+                            {/* Empty space to push profile button to the right */}
+                            <div className="sm:ms-6 sm:flex sm:items-center">
                                 <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
+                                    href={route("profile.edit")}
+                                    className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none border border-gray-300 shadow-sm"
+                                    active={route().current("profile.edit")}
                                 >
-                                    Dashboard
+                                    <i className="bx bx-user-circle text-lg mr-2" />
+                                    {user.first_name} {user.last_name}
                                 </NavLink>
-                              {user.roles.some((role) => role.name === 'super_admin') && (
-                                <NavLink
-                                    href={route('admin.manage-roles')}
-                                    active={route().current('admin.manage-roles')}
-                                >
-                                    User Management
-                                </NavLink>
-                              )}
-                              </div>
-                            </div>
-
-                            <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {user.first_name} {user.last_name}
-                                            </button>
-                                        </span>
-                                    </Dropdown.Trigger>
-
-                                    <Dropdown.Content>
-                                        <Dropdown.Link href={route("profile.edit")}>
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link href={route("logout")} method="post" as="button">
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
                             </div>
                         </div>
                     </div>
