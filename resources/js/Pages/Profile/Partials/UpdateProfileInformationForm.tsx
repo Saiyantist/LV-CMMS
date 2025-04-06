@@ -45,7 +45,7 @@ export default function UpdateProfileInformation({
 
         patch(route('profile.update'), {
             preserveScroll: true
-        });
+        });  
     };
 
     return (

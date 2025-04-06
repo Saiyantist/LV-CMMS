@@ -2,13 +2,14 @@
 
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WorkOrderController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
+    
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
@@ -28,6 +29,17 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [ 'auth' => [ 'user' => Auth::user()->load('roles')]]);
 })->middleware(['auth', 'verified', 'hasRole'])->name('dashboard');
 
+// Gelo:
+// Not good implementation
+// For Work Order, I created a work order grouped routes
+Route::get('/submitrequest', function () {
+    return Inertia::render('SubmitRequest');
+})->middleware(['auth', 'verified', 'hasRole'])->name('submitrequest');
+
+Route::get('/requestdetails', function () {
+    return Inertia::render('RequestDetails');
+})->middleware(['auth', 'verified', 'hasRole'])->name('requestdetails');
+
 Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -41,6 +53,10 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::get('/admin/manage-roles', [UserRoleController::class, 'index'])->name('admin.manage-roles');
     Route::patch('/admin/manage-roles/{user}/role', [UserRoleController::class, 'updateRole'])->name('admin.update.role');
     Route::delete('/admin/manage-roles/{user}/role', [UserRoleController::class, 'removeRole'])->name('admin.remove.role');
+});
+
+Route::middleware(['auth', 'restrict_external'])->group(function () {
+    Route::resource('work-orders', WorkOrderController::class);
 });
 
 require __DIR__.'/auth.php';

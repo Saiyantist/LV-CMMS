@@ -34,7 +34,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'department_id',
         'email',
         'password',
+        'staff_type',
+        'department_id',
     ];
+    
 
     /**
      * Encrypts and decrypts the contact number.

@@ -2,13 +2,13 @@ export interface User {
     id: number;
     first_name: string;
     last_name: string;
-    birth_date: string;
-    contact_number: string;
+    birth_date?: string;
+    contact_number?: string;
     email: string;
     email_verified_at?: string;
+    profile_photo_url?: string; // Optional for profile photo
+    [key: string]: any; // To allow dynamic properties if needed
     roles: Role[];
-    contact_number?: string;
-    birth_date?: string;
     gender?: string;
     staff_type?: string;
     department_id?: number;
