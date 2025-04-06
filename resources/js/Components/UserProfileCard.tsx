@@ -17,7 +17,7 @@ export default function UserProfileCard({
 }) {
     return (
         <div
-            className={`bg-white p-6 rounded-lg shadow-lg flex items-center justify-between w-full ${className}`}
+            className={`bg-white p-6 rounded-lg shadow flex items-center justify-between w-full ${className}`}
         >
             {/* Profile Section */}
             <div className="flex items-center gap-4">

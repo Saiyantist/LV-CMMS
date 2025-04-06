@@ -68,10 +68,9 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     ];
 
     return (
-        <div className="min-h-screen flex flex-row bg-gray-100">
+        <div className="fixed min-h-screen max-h-screen flex bg-primary">
             <div
                 className="flex flex-col w-56 overflow-hidden"
-                style={{ backgroundColor: "#1F3463" }}
             >
                 {/* Logo */}
                 <div className="flex items-center justify-center h-24">
