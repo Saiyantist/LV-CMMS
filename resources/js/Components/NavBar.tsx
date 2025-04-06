@@ -15,37 +15,40 @@ export default function NavBar() {
                         src="/images/lvlogo.jpg"
                         alt="La Verdad Christian College Logo"
                     />
-                    <span className="text-lg font-semibold text-black">
-                        La Verdad Christian College
-                    </span>
+                    <Link
+                        href="/"
+                        className="text-lg font-light text-bluetitle"
+                    >
+                    La Verdad Christian College
+                    </Link>
                 </div>
 
                 {/* Desktop Navigation */}
                 <nav className="hidden lg:flex items-center space-x-10 scroll-smooth">
-                    <a
+                    <Link
                         href="/"
-                        className="text-sm sm:text-base text-bluetext transition-all duration-200 hover:text-opacity-80 hover:underline"
+                        className="text-sm sm:text-base text-black font-semibold transition-all duration-200 hover:text-opacity-80 hover:underline"
                     >
                         Home
-                    </a>
-                    <a
-                        href="#about"
-                        className="text-sm sm:text-base text-bluetext transition-all duration-200 hover:text-opacity-80 hover:underline"
+                    </Link>
+                    <Link
+                        href="/#about"
+                        className="text-sm sm:text-base text-bluetitle transition-all duration-200 hover:text-opacity-80 hover:underline"
                     >
                         About
-                    </a>
-                    <a
-                        href="#features"
-                        className="text-sm sm:text-base text-bluetext transition-all duration-200 hover:text-opacity-80 hover:underline"
+                    </Link>
+                    <Link
+                        href="/#features"
+                        className="text-sm sm:text-base text-bluetitle transition-all duration-200 hover:text-opacity-80 hover:underline"
                     >
                         Features
-                    </a>
+                    </Link>
                 </nav>
 
                 {/* Desktop Login Button */}
                 <Link
                     href="/login"
-                    className="hidden lg:inline-flex px-5 py-2.5 text-base font-semibold text-white transition-all duration-300 bg-bluebutton rounded-lg hover:bg-opacity-90 hover:scale-105 focus:bg-opacity-90"
+                    className="hidden lg:inline-flex px-5 py-2.5 text-base font-semibold text-white transition-all duration-300 bg-secondary rounded-lg hover:bg-opacity-90 hover:scale-105"
                 >
                     Login
                 </Link>
@@ -92,27 +95,27 @@ export default function NavBar() {
             {/* Mobile Navigation Menu */}
             {menuOpen && (
                 <div className="lg:hidden bg-white shadow-md py-4 px-6 absolute top-full left-0 w-full flex flex-col items-center space-y-4">
-                    <a
+                    <Link
                         href="/"
-                        className="text-black text-lg hover:text-opacity-80"
+                        className="text-black font-semibold text-lg hover:text-opacity-80"
                     >
                         Home
-                    </a>
-                    <a
-                        href="#about"
-                        className="text-black text-lg hover:text-opacity-80"
+                    </Link>
+                    <Link
+                        href="/#about"
+                        className="text-bluetitle text-lg hover:text-opacity-80"
                     >
                         About
-                    </a>
-                    <a
-                        href="#features"
-                        className="text-black text-lg hover:text-opacity-80"
+                    </Link>
+                    <Link
+                        href="/#features"
+                        className="text-bluetitle text-lg hover:text-opacity-80"
                     >
                         Features
-                    </a>
+                    </Link>
                     <Link
                         href="/login"
-                        className="px-5 py-2.5 text-base transition-all duration-200 hover:bg-yellow-300 hover:text-black focus:text-black focus:bg-yellow-300 font-semibold text-white bg-black rounded-full"
+                        className="px-5 py-2.5 text-base transition-all duration-200 font-semibold text-white bg-secondary rounded-full hover:bg-opacity-90 hover:scale-105 focus:bg-opacity-90 focus:scale-105"
                     >
                         Login
                     </Link>

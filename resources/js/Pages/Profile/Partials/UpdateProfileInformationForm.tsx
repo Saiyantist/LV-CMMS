@@ -48,9 +48,6 @@ export default function UpdateProfileInformation({
         });  
     };
 
-
-    console.log('department_id', user.department_id)
-
     return (
         <section className={className}>
             <header>

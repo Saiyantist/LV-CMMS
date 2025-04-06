@@ -10,40 +10,36 @@ export default function AuthenticatedLayout({
     const user = usePage().props.auth.user;
 
     return (
-        <div className="min-h-screen bg-gray-100 flex">
-            {/* Pass user to Sidebar */}
+        <div className="min-h-screen max-w-auto bg-gray-100">
             <Sidebar user={user} />
 
-            <div className="flex-1 flex flex-col">
-                <nav className="border-b border-gray-100 bg-white">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="flex h-16 justify-between items-center">
-                            <div></div>{" "}
-                            {/* Empty space to push profile button to the right */}
-                            <div className="sm:ms-6 sm:flex sm:items-center">
-                                <NavLink
-                                    href={route("profile.edit")}
-                                    className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none border border-gray-300 shadow-sm"
-                                    active={route().current("profile.edit")}
-                                >
-                                    <i className="bx bx-user-circle text-lg mr-2" />
-                                    {user.first_name} {user.last_name}
-                                </NavLink>
-                            </div>
-                        </div>
-                    </div>
+            <div className="flex flex-col ml-56">
+
+                {/* Top Nav bar for Authenticated */}
+                <nav className="border-b border-gray-100 self-end h-16 px-4">
+                { /* This can be turned into a component, kung makita mo ito josh, do this. if u ignore it'll refelct on u. */}
+                    <NavLink
+                        href={route("profile.edit")}
+                        className="flex flex-col rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none border border-gray-300 shadow-sm"
+                        active={route().current("profile.edit")}
+                        >
+                        <i className="bx bx-user-circle text-lg mr-2" />
+                        {user.first_name} {user.last_name}
+                    </NavLink>
+
+                {/* Gelo: your implementation was not the best way and a bad practicce, merong self-end sa tw. */}
+
                 </nav>
 
                 {header && (
-                    <header className="bg-white shadow">
-                        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                    <header className="mt-2 max-w-7xl min-w-screen sm:px-6 lg:px-8">
+                        <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg p-6">
                             {header}
                         </div>
                     </header>
                 )}
 
-                {/* Main Content */}
-                <main className="flex-1 py-12 px-6">{children}</main>
+                <main className="flex-1 mt-2 px-6">{children}</main>
             </div>
         </div>
     );

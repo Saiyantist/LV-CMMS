@@ -36,7 +36,7 @@ export default function ManageRoles({ users, roles, auth }: UserRoleProps) {
   return (
     <AuthenticatedLayout
       header={
-        <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+        <h2 className="text-xl leading-tight text-gray-800 dark:text-gray-200">
             User Management
         </h2>
       }
@@ -44,7 +44,7 @@ export default function ManageRoles({ users, roles, auth }: UserRoleProps) {
       <Head title="User Management" />
 
       <div className="p-6">
-        <table className="w-full border-collapse border border-gray-300 dark:border-gray-700">
+        <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 text-xs">
           <thead>
             <tr className="bg-gray-200 dark:bg-gray-800">
               <th className="border p-2 dark:border-gray-700 dark:text-gray-300">Id</th>
@@ -70,7 +70,7 @@ export default function ManageRoles({ users, roles, auth }: UserRoleProps) {
                   <select
                     value={selectedRole[user.id] || ''}
                     onChange={(e) => setSelectedRole({ ...selectedRole, [user.id]: e.target.value })}
-                    className="border p-1 rounded text-black dark:text-white dark:bg-gray-700 dark:border-gray-600"
+                    className="border p-1 rounded text-black text-xs dark:text-white dark:bg-gray-700 dark:border-gray-600"
                     disabled={auth.user.id === user.id && user.roles.some((r) => r.name === 'super_admin')}
                   >
                     <option value="" disabled>Select role</option>
