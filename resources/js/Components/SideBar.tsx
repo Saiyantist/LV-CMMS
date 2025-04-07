@@ -29,23 +29,27 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     const menuItems = [
         {
             href: route("dashboard"),
-            icon: "bx bx-home", // Home Icon
             text: "Dashboard",
         },
         {
             text: "Work Order Request",
-            icon: "bx bx-list-ul", // List Icon
             isDropdown: true,
             children: [
                 {
                     href: "/submitrequest",
                     text: "Submit Request",
-                    icon: "bx bx-send", // Send Icon
+                },
+                {
+                    href: "/workorderlist",
+                    text: "Work Order List",
                 },
                 {
                     href: "/requestdetails",
                     text: "Request Details",
-                    icon: "bx bx-detail", // Details Icon
+                },
+                {
+                    href: "/workorderrequests",
+                    text: "Work Order Requests",
                 },
             ],
         },
@@ -56,16 +60,13 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         ? [
               {
                   href: route("admin.manage-roles"),
-                  icon: "bx bx-user", // User Icon
                   text: "User Management",
               },
           ]
         : [];
 
     // Bottom Menu Items
-    const bottomMenuItems = [
-        { href: "#", icon: "bx bx-bell", text: "Settings" },
-    ];
+    const bottomMenuItems = [{ href: "#", text: "Settings" }];
 
     return (
         <div className="min-h-screen flex flex-row bg-gray-100">

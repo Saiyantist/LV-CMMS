@@ -40,6 +40,26 @@ Route::get('/requestdetails', function () {
     return Inertia::render('RequestDetails');
 })->middleware(['auth', 'verified', 'hasRole'])->name('requestdetails');
 
+
+// Work Order List Route (Points to the WorkOrderList.tsx page)
+Route::get('/workorderlist', function () {
+    return Inertia::render('WorkOrderList');  // This directly loads the WorkOrderList.tsx page
+})->middleware(['auth', 'verified', 'hasRole'])->name('workorderlist');
+
+
+// Work Order Requests Route (Points to the WorkOrderRequests.tsx page)
+Route::get('/workorderrequests', function () {
+    return Inertia::render('WorkOrderRequests');
+})->middleware(['auth', 'verified', 'hasRole'])->name('workorderrequests');
+
+
+// Work Order Requests Route (Points to the AccepterWORequests.tsx page)
+// Route::get('/acceptedworequests', function () {
+//     return Inertia::render('AcceptedWORequests');
+// })->middleware(['auth', 'verified', 'hasRole'])->name('acceptedworequests');
+
+
+
 Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -58,5 +78,7 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
 Route::middleware(['auth', 'restrict_external'])->group(function () {
     Route::resource('work-orders', WorkOrderController::class);
 });
+
+
 
 require __DIR__.'/auth.php';

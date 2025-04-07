@@ -158,7 +158,7 @@ class WorkOrderController extends Controller
         }
 
         if ($workOrder-> status !== "Cancelled") {
-            return back()->with('error', 'Only CANCELLED workk orders can be deleted.');
+            return back()->with('error', 'Only CANCELLED work orders can be deleted.');
         }
 
         $workOrder->update(['status' => 'Deleted']);
