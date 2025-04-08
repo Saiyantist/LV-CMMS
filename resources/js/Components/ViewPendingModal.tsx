@@ -180,10 +180,9 @@ const ViewPendingModal: React.FC<ViewPendingModalProps> = ({
                                         className="w-full border p-2 rounded"
                                         size={2}
                                     >
-                                        <option>John Doe</option>
-                                        <option>Jane Smith</option>
-                                        <option>Emily Johnson</option>
-                                        <option>Michael Brown</option>
+                                        <option>Joshua</option>
+                                        <option>Vallecera</option>
+                                        <option>Allador</option>
                                     </select>
                                 </div>
                             </div>

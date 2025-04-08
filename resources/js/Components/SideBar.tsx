@@ -37,7 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             children: [
                 {
                     href: "/submitrequest",
-                    text: "Submit Request",
+                    text: "Submit a Request",
                 },
                 {
                     href: "/workorderlist",
@@ -48,6 +48,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     text: "Request Details",
                 },
                 {
+                    // This should be for CMMS admin
+                    // Might add logic to render this only for admin
                     href: "/workorderrequests",
                     text: "Work Order Requests",
                 },
