@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
     
 Route::get('/', function () {
-        if (Auth::user()->roles->isnotempty()){
+    if (Auth::user() && Auth::user()->roles->isnotempty()){
         return redirect()->route('dashboard');
     }
     return Inertia::render('Home', [
