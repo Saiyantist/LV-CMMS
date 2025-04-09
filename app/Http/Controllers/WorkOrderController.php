@@ -18,14 +18,34 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
-        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo']);
+        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'images']);
 
         if ($user->hasPermissionTo('view own work orders') && !$user->hasPermissionTo('manage work orders')) {
             $workOrders->where('requested_by', $user->id);
         }
+
+        /**
+         * Format work orders to include images
+         */
+        $formattedWorkOrders = $workOrders->get()->map(function ($wo) {
+            return [
+                'id' => $wo->id,
+                'location_id' => $wo->location_id,
+                'report_description' => $wo->report_description,
+                'status' => $wo->status,
+                'work_order_type' => $wo->work_order_type,
+                'label' => $wo->label,
+                'priority' => $wo->priority,
+                'remarks' => $wo->remarks,
+                'requested_at' => $wo->created_at->toDateString(),
+                'location' => $wo->location ? ['name' => $wo->location->name] : null,
+                'images' => $wo->images->pluck('url')->toArray(), // ✅ important part
+            ];
+        });
+
         return Inertia::render('WorkOrders/Index',
         [
-            'workOrders' => $workOrders->get(),
+            'workOrders' => $formattedWorkOrders,
             'locations' => Location::select('id', 'name')->get(),
             'user' => [
                 // ...$user->toArray(), // converts the user model to array including roles. downside is everything is sent to FE.
@@ -105,22 +125,6 @@ class WorkOrderController extends Controller
      */
     public function edit(WorkOrder $workOrder)
     {
-        $user = auth()->user();
-
-        if (!$user->hasPermissionTo('manage work orders') && $workOrder->requested_by != $user->id) {
-            return back()->with('error', 'You are not allowed to edit this work order.');
-        }
-
-        return Inertia::render('WorkOrders/Edit', [
-            'workOrder' => $workOrder,
-            'locations' => Location::select('id', 'name')->get(),
-            'user' => [
-                // ...$user->toArray(), // converts the user model to array including roles. downside is everything is sent to FE.
-                'id' => $user->id,
-                'name' => $user->first_name . ' ' . $user->last_name,
-                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
-            ],
-        ]);
     }
 
     /**
@@ -147,6 +151,36 @@ class WorkOrderController extends Controller
             'priority' => $request->priority,
             'remarks' => $request->remarks,
         ]);
+
+        /**
+         * Handle image uploads (if any)
+         */
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $filename = uniqid('wo_') . '.' . $image->extension(); // prefix to be added to the image name 
+                $path = $image->storeAs('work_orders', $filename, 'public'); // To save under storage/app/public/work_orders folder
+                Image::create([
+                    'imageable_id' => $workOrder->id,
+                    'imageable_type' => WorkOrder::class,
+                    'path' => $path,
+                ]);
+            }
+        }
+
+        /**
+         * Handle image deletions (if any)
+         */
+        if ($request->has('deleted_images')) {
+            foreach ($request->deleted_images as $imagePath) {
+                $removeFromUrl = config('app.url') . 'storage/'; // Remove app URL and 'storage/' prefix
+                $imagePath = str_replace($removeFromUrl, '', $imagePath); 
+                $image = Image::where('path', $imagePath)->where('imageable_id', $workOrder->id)->first();
+                if ($image) {
+                    $image->delete(); // Delete the image record from the database
+                    \Storage::disk('public')->delete($imagePath); // Delete the file from storage
+                }
+            }
+        }
 
         return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
     }

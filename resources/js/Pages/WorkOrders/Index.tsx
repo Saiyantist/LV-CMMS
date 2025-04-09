@@ -4,6 +4,7 @@ import { PageProps } from "@/types";
 import { Head, Link } from "@inertiajs/react";
 import { useState } from "react";
 import CreateWorkOrderModal from "./CreateModal";
+import EditWorkOrderModal from "./EditModal";
 
 interface WorkOrder {
     id: number;
@@ -12,6 +13,11 @@ interface WorkOrder {
     status: string;
     priority: string;
     requested_at: string;
+    location_id: string;
+    work_order_type: string;
+    label: string;
+    remarks: string;
+    images: string[];
 }
 
 export default function WorkOrders({
@@ -46,6 +52,9 @@ export default function WorkOrders({
         }
         return true;
     });
+    const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(
+        null
+    );
 
     return (
         <AuthenticatedLayout>
@@ -54,6 +63,15 @@ export default function WorkOrders({
                     locations={locations}
                     user={user}
                     onClose={() => setIsCreating(false)}
+                />
+            )}
+
+            {editingWorkOrder && (
+                <EditWorkOrderModal
+                    workOrder={editingWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setEditingWorkOrder(null)}
                 />
             )}
             <Head title="Work Orders" />
@@ -147,12 +165,12 @@ export default function WorkOrders({
                                     ).toLocaleDateString()}
                                 </td>
                                 <td className="border px-6 py-4">
-                                    <Link
-                                        href={`/work-orders/${workOrder.id}/edit`}
-                                        className="text-white bg-secondary px-4 py-2 rounded-md hover:bg-secondary/90 transition"
+                                    <PrimaryButton
+                                        onClick={() => setEditingWorkOrder(workOrder)
+                                        }
                                     >
                                         Edit
-                                    </Link>
+                                    </PrimaryButton>
                                 </td>
                             </tr>
                         ))}

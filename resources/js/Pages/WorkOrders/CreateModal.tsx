@@ -80,8 +80,13 @@ export default function CreateWorkOrderModal({
     }, [previewImages]);
 
     return (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full xl:max-w-3xl lg:max-w-2xl max-h-auto">
+        <div
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50"
+            onClick={onClose}
+        >
+            <div className="bg-white rounded-lg shadow-lg w-full xl:max-w-3xl lg:max-w-2xl max-h-auto"
+            onClick={(e) => e.stopPropagation()}
+            >
                 <form
                     onSubmit={submit}
                     className="p-4 bg-white shadow-md rounded-lg"
