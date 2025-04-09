@@ -39,9 +39,22 @@ Route::get('/submitrequest', function () {
     return Inertia::render('SubmitRequest');
 })->middleware(['auth', 'verified', 'hasRole'])->name('submitrequest');
 
+Route::get('/workorderlist', function () {
+    return Inertia::render('WorkOrderList');  // This directly loads the WorkOrderList.tsx page
+})->middleware(['auth', 'verified', 'hasRole'])->name('workorderlist');
+
 Route::get('/requestdetails', function () {
     return Inertia::render('RequestDetails');
 })->middleware(['auth', 'verified', 'hasRole'])->name('requestdetails');
+
+
+Route::get('/workorderrequests', function () {
+    return Inertia::render('WorkOrderRequests');
+})->middleware(['auth', 'verified', 'hasRole'])->name('workorderrequests');
+
+
+
+// ~~separation of concerns~~
 
 Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -29,12 +29,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     const menuItems = [
         {
             href: route("dashboard"),
-            icon: "bx bx-home", // Home Icon
             text: "Dashboard",
         },
         {
-            text: "Work Order Request",
-            icon: "bx bx-list-ul", // List Icon
+            text: "Work Order",
             isDropdown: true,
             children: [
                 {
@@ -45,13 +43,21 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 },
                 {
                     href: "/submitrequest",
-                    text: "Submit Request",
-                    icon: "bx bx-send", // Send Icon
+                    text: "Submit a Request",
+                },
+                {
+                    href: "/workorderlist",
+                    text: "Work Order List",
                 },
                 {
                     href: "/requestdetails",
                     text: "Request Details",
-                    icon: "bx bx-detail", // Details Icon
+                },
+                {
+                    // This should be for CMMS admin
+                    // Might add logic to render this only for admin
+                    href: "/workorderrequests",
+                    text: "Work Order Requests",
                 },
             ],
         },
@@ -75,9 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
     return (
         <div className="fixed min-h-screen max-h-screen flex bg-primary">
-            <div
-                className="flex flex-col w-56 overflow-hidden"
-            >
+            <div className="flex flex-col w-56 overflow-hidden">
                 {/* Logo */}
                 <div className="flex items-center justify-center h-24">
                     <img

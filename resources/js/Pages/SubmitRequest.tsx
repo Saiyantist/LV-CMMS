@@ -2,21 +2,22 @@ import React, { useState, useMemo } from "react";
 import { Head, useForm } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import SubmitRequestLayout from "@/Layouts/SubmitRequestLayout";
+import WOConfirmationModal from "@/Components/WOSubmittedModal";
+import ConfirmModal from "@/Components/ConfirmModal";
 
 const SubmitRequest: React.FC = () => {
     // ✅ Form State using Inertia's useForm
-    const { data, setData, post, reset } = useForm({
-        date: "",
-        requestedBy: "",
-        workOrderType: "maintenance",
+    const { data, setData, reset } = useForm({
         location: "",
         description: "",
         photos: [] as File[],
     });
 
-    // ✅ Loading and Error States
+    // ✅ Loading, Error, and Modal States
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
 
     // ✅ File Previews - Memoized for Performance
     const filePreviews = useMemo(
@@ -31,10 +32,8 @@ const SubmitRequest: React.FC = () => {
     // ✅ Basic Form Validation
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
-        if (!data.date) newErrors.date = "This field is required.";
-        if (!data.requestedBy.trim())
-            newErrors.requestedBy = "This field is required.";
-        if (!data.location.trim()) newErrors.location = "This field is required.";
+        if (!data.location.trim())
+            newErrors.location = "This field is required.";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -44,12 +43,19 @@ const SubmitRequest: React.FC = () => {
         e.preventDefault();
         if (!validateForm()) return;
 
+        // Show confirmation modal before proceeding
+        setShowConfirmModal(true);
+    };
+
+    // ✅ Handle Confirmation Modal Action
+    const handleConfirmSubmit = () => {
+        setShowConfirmModal(false);
         setIsLoading(true);
-        // 🚨 No backend configured yet, so we'll simulate a successful response
+
+        // Simulate successful submission
         setTimeout(() => {
-            alert("Request submitted successfully!");
-            reset(); // Reset form
             setIsLoading(false);
+            setShowDetailsModal(true); // Show details modal after confirmation
         }, 1000);
     };
 
@@ -80,6 +86,12 @@ const SubmitRequest: React.FC = () => {
         setErrors({}); // Reset errors
     };
 
+    // ✅ Handle Modal Close
+    const handleModalClose = () => {
+        setShowDetailsModal(false);
+        reset(); // Clear the form after submission
+    };
+
     return (
         <Authenticated>
             <Head title="Submit Request" />
@@ -93,6 +105,24 @@ const SubmitRequest: React.FC = () => {
                 handleFileChange={handleFileChange}
                 setData={setData}
             />
+
+            {/* ✅ Confirmation Modal */}
+            {showConfirmModal && (
+                <ConfirmModal
+                    message="Are you sure you want to submit this request?"
+                    onConfirm={handleConfirmSubmit}
+                    onCancel={() => setShowConfirmModal(false)}
+                />
+            )}
+
+            {/* ✅ Details Modal After Submission */}
+            {showDetailsModal && (
+                <WOConfirmationModal
+                    data={data}
+                    filePreviews={filePreviews}
+                    onClose={handleModalClose}
+                />
+            )}
         </Authenticated>
     );
 };

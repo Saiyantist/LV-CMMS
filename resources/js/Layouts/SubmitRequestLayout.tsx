@@ -32,7 +32,7 @@ const SubmitRequestLayout: React.FC<SubmitRequestLayoutProps> = ({
         <div className="flex h-screen">
             <div className="flex-1 p-8">
                 <section className="text-gray-600 body-font relative">
-                    <div className="container px-5 py-24 mx-auto">
+                    <div className="container mx-auto">
                         <div className="flex flex-col text-center w-full mb-12">
                             <h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">
                                 Work Order Request Form
@@ -43,94 +43,16 @@ const SubmitRequestLayout: React.FC<SubmitRequestLayoutProps> = ({
                             className="lg:w-1/2 md:w-2/3 mx-auto"
                         >
                             <div className="flex flex-wrap -m-2">
-                                {/* Date Input */}
-                                <div className="p-2 w-1/2">
-                                    <label
-                                        htmlFor="date"
-                                        className="leading-7 text-sm text-gray-600"
-                                    >
-                                        Date <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="date"
-                                        id="date"
-                                        name="date"
-                                        value={data.date}
-                                        onChange={(e) =>
-                                            setData("date", e.target.value)
-                                        }
-                                        className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                                        aria-required="true"
-                                        aria-invalid={errors.date ? "true" : "false"}
-                                    />
-                                    {errors.date && (
-                                        <p className="text-red-500 text-sm">
-                                            {errors.date}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Requested By */}
-                                <div className="p-2 w-1/2">
-                                    <label
-                                        htmlFor="requestedBy"
-                                        className="leading-7 text-sm text-gray-600"
-                                    >
-                                        Requested by{" "}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="requestedBy"
-                                        name="requestedBy"
-                                        value={data.requestedBy}
-                                        onChange={(e) =>
-                                            setData("requestedBy", e.target.value)
-                                        }
-                                        className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                                    />
-                                    {errors.requestedBy && (
-                                        <p className="text-red-500 text-sm">
-                                            {errors.requestedBy}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Work Order Type */}
-                                <div className="p-2 w-1/2">
-                                    <label
-                                        htmlFor="workOrderType"
-                                        className="leading-7 text-sm text-gray-600"
-                                    >
-                                        Work Order Type
-                                    </label>
-                                    <select
-                                        id="workOrderType"
-                                        name="workOrderType"
-                                        value={data.workOrderType}
-                                        onChange={(e) =>
-                                            setData("workOrderType", e.target.value)
-                                        }
-                                        className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                                    >
-                                        <option value="maintenance">Maintenance</option>
-                                        <option value="repair">Repair</option>
-                                        <option value="installation">
-                                            Installation
-                                        </option>
-                                    </select>
-                                </div>
-
-                                {/* Location */}
-                                <div className="p-2 w-1/2">
+                                {/* Location Dropdown */}
+                                <div className="p-2 w-full">
                                     <label
                                         htmlFor="location"
                                         className="leading-7 text-sm text-gray-600"
                                     >
-                                        Location <span className="text-red-500">*</span>
+                                        Location{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
-                                    <input
-                                        type="text"
+                                    <select
                                         id="location"
                                         name="location"
                                         value={data.location}
@@ -138,7 +60,20 @@ const SubmitRequestLayout: React.FC<SubmitRequestLayoutProps> = ({
                                             setData("location", e.target.value)
                                         }
                                         className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                                    />
+                                    >
+                                        <option value="" disabled>
+                                            Select Option
+                                        </option>
+                                        <option value="Auditorium">
+                                            Auditorium
+                                        </option>
+                                        <option value="Audy Lobby">
+                                            Audy Lobby
+                                        </option>
+                                        <option value="LVCC Lobby">
+                                            LVCC Lobby
+                                        </option>
+                                    </select>
                                     {errors.location && (
                                         <p className="text-red-500 text-sm">
                                             {errors.location}
@@ -159,7 +94,10 @@ const SubmitRequestLayout: React.FC<SubmitRequestLayoutProps> = ({
                                         name="description"
                                         value={data.description}
                                         onChange={(e) =>
-                                            setData("description", e.target.value)
+                                            setData(
+                                                "description",
+                                                e.target.value
+                                            )
                                         }
                                         className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"
                                     />
@@ -186,7 +124,7 @@ const SubmitRequestLayout: React.FC<SubmitRequestLayoutProps> = ({
 
                                 {/* Image Previews */}
                                 {filePreviews.length > 0 && (
-                                    <div className="p-2 w-full grid grid-cols-3 gap-2">
+                                    <div className="p-2 w-full grid grid-cols-3 gap-2 overflow-auto max-h-60">
                                         {filePreviews.map((file, index) => (
                                             <img
                                                 key={index}
@@ -198,27 +136,31 @@ const SubmitRequestLayout: React.FC<SubmitRequestLayoutProps> = ({
                                     </div>
                                 )}
 
-                                {/* Submit and Cancel Buttons */}
+                                {/* Submit and Clear Buttons */}
                                 <div className="p-2 w-full flex justify-end space-x-4">
                                     <button
                                         type="button"
-                                        onClick={handleCancel}
-                                        className="text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg"
+                                        onClick={() => {
+                                            setData("location", "");
+                                            setData("description", "");
+                                        }}
+                                        className="text-white bg-destructive border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg"
                                     >
-                                        Cancel
+                                        Clear
                                     </button>
 
                                     <button
                                         type="submit"
-                                        className={`text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none rounded text-lg ${
+                                        className={`text-white bg-secondary border-0 py-2 px-8 focus:outline-none rounded text-lg ${
                                             isLoading
                                                 ? "cursor-not-allowed opacity-50"
-                                                : "hover:bg-indigo-600"
+                                                : "hover:bg-primary"
                                         }`}
                                         disabled={isLoading}
                                     >
                                         {isLoading ? "Submitting..." : "Submit"}
                                     </button>
+                                    
                                 </div>
                             </div>
                         </form>
