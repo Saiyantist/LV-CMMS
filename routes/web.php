@@ -43,6 +43,14 @@ Route::get('/workorderrequests', function () {
     return Inertia::render('WorkOrderRequests');
 })->middleware(['auth', 'verified', 'hasRole'])->name('workorderrequests');
 
+// Route::get('/work-order-list', function () {
+//     return Inertia::render('WorkOrderList');
+// })->middleware(['auth', 'verified', 'hasRole'])->name('work-order-list');
+
+
+
+
+
 
 // ~~separation of concerns~~
 
