@@ -37,22 +37,17 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             children: [
                 {
                     href: route("work-orders.index"),
-                    // href: "/work-orders",
-                    text: "Work Orders",
+                    text: "Work Order List",
                     // icon: "bx bx-send", // Send Icon
                 },
                 {
-                    href: "/submitrequest",
+                    href: route("submitrequest"),
                     text: "Submit a Request",
                 },
-                {
-                    href: "/workorderlist",
-                    text: "Work Order List",
-                },
-                {
-                    href: "/requestdetails",
-                    text: "Request Details",
-                },
+                // {
+                //     href: route("workorderlist"),
+                //     text: "Work Order List",
+                // },
                 {
                     // This should be for CMMS admin
                     // Might add logic to render this only for admin

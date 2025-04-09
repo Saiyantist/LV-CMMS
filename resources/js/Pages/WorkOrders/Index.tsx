@@ -3,7 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { PageProps } from "@/types";
 import { Head, Link } from "@inertiajs/react";
 import { useState } from "react";
-import CreateWorkOrder from "./Create";
+import CreateWorkOrderModal from "./CreateModal";
 
 interface WorkOrder {
     id: number;
@@ -16,13 +16,14 @@ interface WorkOrder {
 
 export default function WorkOrders({
     workOrders, locations, user
-}: PageProps<{ workOrders: WorkOrder[]; locations: { id: number; name: string }[]; user: { id: number; name: string; permissions: string[];} }>) {
+}: PageProps<{ workOrders: WorkOrder[]; locations: { id: number; name: string }[]; user: { id: number; name: string; permissions: string[];}}>) {
     const [isCreating, setIsCreating] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+
     return (
         <AuthenticatedLayout>
             {isCreating && (
-                <CreateWorkOrder
+                <CreateWorkOrderModal
                     locations={locations}
                     user={user}
                     onClose={() => setIsCreating(false)}

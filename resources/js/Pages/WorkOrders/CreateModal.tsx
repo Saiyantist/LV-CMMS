@@ -17,10 +17,10 @@ interface CreateWorkOrderProps {
     onClose: () => void;
 }
 
-export default function CreateWorkOrder({
+export default function CreateWorkOrderModal({
     locations,
     user,
-    onClose,
+    onClose, // for modal, remove all instances if not modal ang paggagamitan along
 }: CreateWorkOrderProps) {
     const [previewImages, setPreviewImages] = useState<string[]>([]);
 

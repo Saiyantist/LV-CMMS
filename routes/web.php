@@ -39,19 +39,9 @@ Route::get('/submitrequest', function () {
     return Inertia::render('SubmitRequest');
 })->middleware(['auth', 'verified', 'hasRole'])->name('submitrequest');
 
-Route::get('/workorderlist', function () {
-    return Inertia::render('WorkOrderList');  // This directly loads the WorkOrderList.tsx page
-})->middleware(['auth', 'verified', 'hasRole'])->name('workorderlist');
-
-Route::get('/requestdetails', function () {
-    return Inertia::render('RequestDetails');
-})->middleware(['auth', 'verified', 'hasRole'])->name('requestdetails');
-
-
 Route::get('/workorderrequests', function () {
     return Inertia::render('WorkOrderRequests');
 })->middleware(['auth', 'verified', 'hasRole'])->name('workorderrequests');
-
 
 
 // ~~separation of concerns~~
@@ -71,7 +61,7 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::delete('/admin/manage-roles/{user}/role', [UserRoleController::class, 'removeRole'])->name('admin.remove.role');
 });
 
-Route::middleware(['auth', 'restrict_external', 'hasRole'])->group(function () {
+Route::middleware(['auth', 'restrict_external', 'hasRole', 'verified'])->group(function () {
     Route::resource('work-orders', WorkOrderController::class);
 });
 
