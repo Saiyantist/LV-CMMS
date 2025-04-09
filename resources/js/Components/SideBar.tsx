@@ -38,6 +38,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             isDropdown: true,
             children: [
                 {
+                    href: route("work-orders.index"),
+                    // href: "/work-orders",
+                    text: "Work Orders",
+                    // icon: "bx bx-send", // Send Icon
+                },
+                {
                     href: "/submitrequest",
                     text: "Submit Request",
                     icon: "bx bx-send", // Send Icon

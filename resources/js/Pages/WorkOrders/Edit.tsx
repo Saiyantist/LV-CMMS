@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Head, router, useForm, usePage } from "@inertiajs/react";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 interface Location {
     id: number;
@@ -19,22 +20,18 @@ interface EditWorkOrderProps {
         images: string[]; // assuming images are returned as URLs
     };
     locations: Location[];
-    auth: {
-        user: {
-            id: number;
-            name: string;
-        };
+    user: {
+        id: number;
+        name: string;
         permissions: string[];
     }
 }
 
-export default function EditWorkOrder({ workOrder, locations, auth }: EditWorkOrderProps) {
+export default function EditWorkOrder({ workOrder, locations, user }: EditWorkOrderProps) {
     const [previewImages, setPreviewImages] = useState<string[]>([]);
     const [deletedImages, setDeletedImages] = useState<string[]>([]); // For handling image deletions
 
-    const isWOManager = auth.permissions.includes("manage work orders");
-
-    console.log(isWOManager);
+    const isWorkOrderManager = user.permissions.includes("manage work orders");
     
     const { data, setData, put, errors, processing } = useForm({
         location_id: workOrder.location_id,
@@ -59,7 +56,7 @@ export default function EditWorkOrder({ workOrder, locations, auth }: EditWorkOr
         data.images.forEach((image) => formData.append("images[]", image));
         deletedImages.forEach((image) => formData.append("deleted_images[]", image)); // send deleted images
 
-        if (isWOManager) {
+        if (isWorkOrderManager) {
             formData.append("status", data.status || "");
             formData.append("work_order_type", data.work_order_type || "");
             formData.append("label", data.label || "");
@@ -95,7 +92,7 @@ export default function EditWorkOrder({ workOrder, locations, auth }: EditWorkOr
     }, [previewImages]);
 
     return (
-        <>
+        <AuthenticatedLayout>
             <Head title="Edit Work Order" />
             <form onSubmit={submit} className="max-w-md mx-auto p-4 bg-white shadow-md rounded-lg">
                 <h2 className="text-xl font-bold mb-4">Edit Work Order</h2>
@@ -165,7 +162,7 @@ export default function EditWorkOrder({ workOrder, locations, auth }: EditWorkOr
                     </div>
                 </div>
 
-                {isWOManager && (
+                {isWorkOrderManager && (
                     <>
                         {/* Status */}
                         <div>
@@ -251,6 +248,6 @@ export default function EditWorkOrder({ workOrder, locations, auth }: EditWorkOr
                     {processing ? "Updating..." : "Update Work Order"}
                 </button>
             </form>
-        </>
+        </AuthenticatedLayout>
     );
 }

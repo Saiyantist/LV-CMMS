@@ -23,7 +23,17 @@ class WorkOrderController extends Controller
         if ($user->hasPermissionTo('view own work orders') && !$user->hasPermissionTo('manage work orders')) {
             $workOrders->where('requested_by', $user->id);
         }
-        return Inertia::render('WorkOrders/Index', ['workOrders' => $workOrders->get()]);
+        return Inertia::render('WorkOrders/Index',
+        [
+            'workOrders' => $workOrders->get(),
+            'locations' => Location::select('id', 'name')->get(),
+            'user' => [
+                // ...$user->toArray(), // converts the user model to array including roles. downside is everything is sent to FE.
+                'id' => $user->id,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+            ],
+        ]);
     }
 
     /**
@@ -33,13 +43,13 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
+
         return Inertia::render('WorkOrders/Create', [
             'locations' => Location::select('id', 'name')->get(),
-            'auth' => [
-                'user' => [
+            'user' => [
+                // ...$user->toArray(), // converts the user model to array including roles. downside is everything is sent to FE.
                 'id' => $user->id,
-                'name' => $user->name,
-                ],
+                'name' => $user->first_name . ' ' . $user->last_name,
                 'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
             ],
         ]);
@@ -52,18 +62,18 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
-        $isWOManager = $user->hasPermissionTo('manage work orders');
+        $isWorkOrderManager = $user->hasPermissionTo('manage work orders');
 
         $workOrder = WorkOrder::create([
             'report_description' => $request->report_description,
             'location_id' => $request->location_id,
             'requested_at' => now(),
             'requested_by' => $user->id,
-            'status' => $isWOManager ? $request->status ?? 'Pending' : 'Pending',
-            'work_order_type' => $isWOManager ? $request->work_order_type ?? 'Work Order' : 'Work Order',
-            'label' => $isWOManager ? $request->label ?? 'No Label' : 'No Label',
-            'priority' => $isWOManager ? $request->priority : null,
-            'remarks' => $isWOManager ? $request->remarks : null,
+            'status' => $isWorkOrderManager ? $request->status ?? 'Pending' : 'Pending',
+            'work_order_type' => $isWorkOrderManager ? $request->work_order_type ?? 'Work Order' : 'Work Order',
+            'label' => $isWorkOrderManager ? $request->label ?? 'No Label' : 'No Label',
+            'priority' => $isWorkOrderManager ? $request->priority : null,
+            'remarks' => $isWorkOrderManager ? $request->remarks : null,
         ]);
 
         // Handle image uploads (if any)
@@ -101,17 +111,13 @@ class WorkOrderController extends Controller
             return back()->with('error', 'You are not allowed to edit this work order.');
         }
 
-        // dd($workOrder, Location::select('id', 'name')->get()); // Debugging output
-        // dd($workOrder);
-
-        return Inertia::render('WorkOrders/EditWorkOrder', [
+        return Inertia::render('WorkOrders/Edit', [
             'workOrder' => $workOrder,
             'locations' => Location::select('id', 'name')->get(),
-            'auth' => [
-                'user' => [
+            'user' => [
+                // ...$user->toArray(), // converts the user model to array including roles. downside is everything is sent to FE.
                 'id' => $user->id,
-                'name' => $user->name,
-                ],
+                'name' => $user->first_name . ' ' . $user->last_name,
                 'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
             ],
         ]);

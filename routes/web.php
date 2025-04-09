@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
     
 Route::get('/', function () {
+        if (Auth::user()->roles->isnotempty()){
+        return redirect()->route('dashboard');
+    }
     return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -55,7 +58,7 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::delete('/admin/manage-roles/{user}/role', [UserRoleController::class, 'removeRole'])->name('admin.remove.role');
 });
 
-Route::middleware(['auth', 'restrict_external'])->group(function () {
+Route::middleware(['auth', 'restrict_external', 'hasRole'])->group(function () {
     Route::resource('work-orders', WorkOrderController::class);
 });
 
