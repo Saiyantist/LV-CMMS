@@ -26,6 +26,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         post(route("logout"));
     };
 
+    const isWorkOrderManager = user.roles.some(
+        (role) => role.name === "WorkOrderManager"
+    );
+
     const menuItems = [
         {
             href: route("dashboard"),
@@ -37,22 +41,13 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             children: [
                 {
                     href: route("work-orders.index"),
-                    text: "Work Order List",
-                    // icon: "bx bx-send", // Send Icon
+                    text: isWorkOrderManager
+                        ? "Work Order Requests"
+                        : "Work Order List",
                 },
                 {
                     href: route("submitrequest"),
                     text: "Submit a Request",
-                },
-                // {
-                //     href: route("workorderlist"),
-                //     text: "Work Order List",
-                // },
-                {
-                    // This should be for CMMS admin
-                    // Might add logic to render this only for admin
-                    href: "/workorderrequests",
-                    text: "Work Order Requests",
                 },
             ],
         },
@@ -186,7 +181,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         </li>
                     ))}
 
-                    {/* Logout Button with Proper Logic */}
+                    {/* Logout Button */}
                     <li>
                         <button
                             onClick={handleLogout}
