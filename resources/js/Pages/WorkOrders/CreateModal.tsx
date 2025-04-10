@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Head, router, useForm } from "@inertiajs/react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
+import { Button } from "@/Components/shadcnui/button";
 // import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 interface Location {
@@ -80,8 +82,13 @@ export default function CreateWorkOrderModal({
     }, [previewImages]);
 
     return (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full xl:max-w-3xl lg:max-w-2xl max-h-auto">
+        <div
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50"
+            onClick={onClose}
+        >
+            <div className="bg-white rounded-lg shadow-lg w-full xl:max-w-3xl lg:max-w-2xl max-h-auto"
+            onClick={(e) => e.stopPropagation()}
+            >
                 <form
                     onSubmit={submit}
                     className="p-4 bg-white shadow-md rounded-lg"
@@ -104,27 +111,59 @@ export default function CreateWorkOrderModal({
 
                     <div className="max-h-[70vh] overflow-y-auto px-6">
                         {/* Location Dropdown */}
+
+                        <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Location
+                                </label>
+                                <select
+                                    value={data.location_id}
+                                    onChange={(e) =>
+                                        setData("location_id", e.target.value)
+                                    }
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">Select a location</option>
+                                    {locations.map((location) => (
+                                        <option
+                                            key={location.id}
+                                            value={location.id}
+                                        >
+                                            {location.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.location_id && (
+                                    <p className="text-red-500 text-sm">
+                                        {errors.location_id}
+                                    </p>
+                                )}
+                            </div>
+
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">
                                 Location
                             </label>
-                            <select
-                                value={data.location_id}
-                                onChange={(e) =>
-                                    setData("location_id", e.target.value)
-                                }
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            >
-                                <option value="">Select a location</option>
-                                {locations.map((location) => (
-                                    <option
-                                        key={location.id}
-                                        value={location.id}
-                                    >
-                                        {location.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <DropdownMenu>
+                                {/* <DropdownMenuLabel>Location</DropdownMenuLabel> */}
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" className="w-full mt-1 justify-start">
+                                        {locations.find((location) => location.id === parseInt(data.location_id))?.name || "Select a location"}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="xl:w-[42rem] lg:[32rem] md:w-[36rem] sm:w-[72rem]">
+                                    <DropdownMenuLabel>Select a location</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    {locations.map((location) => (
+                                        <DropdownMenuItem
+                                            key={location.id}
+                                            onClick={() => setData("location_id", location.id.toString())}
+                                        >
+                                            {location.name}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                             {errors.location_id && (
                                 <p className="text-red-500 text-sm">
                                     {errors.location_id}

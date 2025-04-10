@@ -21,6 +21,9 @@ Route::get('/', function () {
     ]);
 });
 
+/**
+ *  Guest Routes
+ */
 Route::get('/awaiting-approval', function () {
     if (Auth::user()->roles->isnotempty()){
         return redirect()->route('dashboard');
@@ -32,27 +35,9 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [ 'auth' => [ 'user' => Auth::user()->load('roles')]]);
 })->middleware(['auth', 'verified', 'hasRole'])->name('dashboard');
 
-// Gelo:
-// Not good implementation
-// For Work Order, I created a work order grouped routes
-Route::get('/submitrequest', function () {
-    return Inertia::render('SubmitRequest');
-})->middleware(['auth', 'verified', 'hasRole'])->name('submitrequest');
-
-Route::get('/workorderrequests', function () {
-    return Inertia::render('WorkOrderRequests');
-})->middleware(['auth', 'verified', 'hasRole'])->name('workorderrequests');
-
-// Route::get('/work-order-list', function () {
-//     return Inertia::render('WorkOrderList');
-// })->middleware(['auth', 'verified', 'hasRole'])->name('work-order-list');
-
-
-
-
-
-
-// ~~separation of concerns~~
+/**
+ * Authenticated Routes
+ */
 
 Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -61,7 +46,7 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
 });
 
 /**
- * User Role Management - our Role-based Access Control (RBAC)
+ * User Role Management - for Role-based Access Control (RBAC)
  */
 Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::get('/admin/manage-roles', [UserRoleController::class, 'index'])->name('admin.manage-roles');
@@ -70,6 +55,8 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'restrict_external', 'hasRole', 'verified'])->group(function () {
+    Route::get('/work-orders/submit-request', function () {
+        return Inertia::render('WorkOrders/SubmitRequest');})->name('work-orders.submit-request');
     Route::resource('work-orders', WorkOrderController::class);
 });
 

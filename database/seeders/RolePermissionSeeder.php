@@ -72,15 +72,6 @@ class RolePermissionSeeder extends Seeder
             } else {
                 $role->syncPermissions($rolePermissions);
             }
-        }        // Assign Permissions to Roles
-        foreach ($roles as $roleName => $rolePermissions) {
-            $role = Role::firstOrCreate(['name' => $roleName]);
-
-            if ($roleName === 'super_admin') {
-                $role->syncPermissions(Permission::all()); // Give Super Admin all permissions
-            } else {
-                $role->syncPermissions($rolePermissions);
-            }
         }
     }
 }
