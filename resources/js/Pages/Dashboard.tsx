@@ -25,10 +25,9 @@ export default function Dashboard() {
                     <div className="p-6 text-black">
                         You are logged in as {user.roles[0].name}!
                     </div>
-                    <Button>Default ( . Y . )</Button>
                     
-                    <div>
-                        <h1>Dropdown</h1>
+                    <div className="p-6 flex flex-row justify-center items-center gap-4">
+                        <Button>Default Button</Button>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" size="lg">Open Dropdownsky</Button>
@@ -43,7 +42,7 @@ export default function Dashboard() {
                                 <DropdownMenuItem>Collosal</DropdownMenuItem>
                                 <DropdownMenuItem>Carthead</DropdownMenuItem>
                                 <DropdownMenuItem>Warhammer</DropdownMenuItem>
-                                <DropdownMenuItem>Titan's gen?</DropdownMenuItem>
+                                <DropdownMenuItem>Titan's gel?</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
