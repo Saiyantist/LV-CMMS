@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         : "Work Order List",
                 },
                 {
-                    href: route("submitrequest"),
+                    href: route("work-orders.submit-request"),
                     text: "Submit a Request",
                 },
             ],
