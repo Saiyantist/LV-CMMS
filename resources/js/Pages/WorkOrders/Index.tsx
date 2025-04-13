@@ -34,7 +34,9 @@ export default function WorkOrders({
 
     const tabs = ["Pending", "Accepted", "For Budget Request", "Declined"];
 
-    // Filter work orders based on the selected tab
+    /**
+     * Filter work orders based on the selected tab
+     */
     const filteredWorkOrders = workOrders.filter((workOrder) => {
         if (activeTab === "Pending") {
             return workOrder.status === "Pending";
@@ -58,7 +60,7 @@ export default function WorkOrders({
 
     return (
         <AuthenticatedLayout>
-            {isCreating && (
+            {isCreating && ( // Show modal if creating a work order.
                 <CreateWorkOrderModal
                     locations={locations}
                     user={user}
@@ -66,7 +68,7 @@ export default function WorkOrders({
                 />
             )}
 
-            {editingWorkOrder && (
+            {editingWorkOrder && ( // Show modal if editing a work order.
                 <EditWorkOrderModal
                     workOrder={editingWorkOrder}
                     locations={locations}

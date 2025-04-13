@@ -28,7 +28,7 @@ class StoreWorkOrderRequest extends FormRequest
             'report_description' => 'required|string|max:1000',
             'location_id' => 'required|exists:locations,id',
             'images' => 'nullable|array', // Accept multiple images
-            'images.*' => 'image|mimes:jpg,jpeg,png|max:1024', // Validate each image
+            'images.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:1024',
         ];
 
         if ($user->hasPermissionTo('manage work orders')) {
