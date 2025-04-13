@@ -45,13 +45,24 @@ export default function NavBar() {
                     </Link>
                 </nav>
 
-                {/* Desktop Login Button */}
-                <Link
-                    href="/login"
-                    className="hidden lg:inline-flex px-5 py-2.5 text-base font-semibold text-white transition-all duration-300 bg-secondary rounded-lg hover:bg-opacity-90 hover:scale-105"
-                >
-                    Login
-                </Link>
+                {/* Desktop Register and Login Button */}
+                <div className="hidden lg:flex items-center space-x-5">
+                    <span>
+                        |
+                    </span>
+                    <Link
+                        href="/register"
+                        className="text-sm sm:text-base underline text-bluetitle transition-all duration-200 hover:text-opacity-80 hover:underline"
+                        >
+                            Register
+                        </Link>
+                    <Link
+                        href="/login"
+                        className="hidden lg:inline-flex px-8 py-2.5 text-base text-white transition-all duration-300 bg-secondary rounded-md hover:bg-opacity-90 hover:scale-105"
+                    >
+                        Log In
+                    </Link>
+                </div>
 
                 {/* Mobile Menu Button */}
                 <button
@@ -97,21 +108,27 @@ export default function NavBar() {
                 <div className="lg:hidden bg-white shadow-md py-4 px-6 absolute top-full left-0 w-full flex flex-col items-center space-y-4">
                     <Link
                         href="/"
-                        className="text-black font-semibold text-lg hover:text-opacity-80"
+                        className="text-black font-semibold text-md hover:text-opacity-80"
                     >
                         Home
                     </Link>
                     <Link
                         href="/#about"
-                        className="text-bluetitle text-lg hover:text-opacity-80"
+                        className="text-bluetitle text-md hover:text-opacity-80"
                     >
                         About
                     </Link>
                     <Link
                         href="/#features"
-                        className="text-bluetitle text-lg hover:text-opacity-80"
+                        className="text-bluetitle text-md hover:text-opacity-80"
                     >
                         Features
+                    </Link>
+                    <Link
+                        href="/register"
+                        className="text-bluetitle underline text-md hover:text-opacity-80"
+                    >
+                        Register
                     </Link>
                     <Link
                         href="/login"

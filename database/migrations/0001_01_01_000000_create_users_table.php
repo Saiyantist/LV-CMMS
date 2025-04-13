@@ -18,7 +18,8 @@ return new class extends Migration
             $table->text('birth_date');
             $table->enum('gender', ['male', 'female', 'rather not say']);
             $table->text('contact_number');
-            $table->enum('staff_type', ['teaching', 'non-teaching'])->nullable(); 
+            $table->text('job_position')->nullable();
+            $table->enum('staff_type', ['teaching', 'non-teaching', 'maintenance personnel']);
             $table->foreignId('department_id')->nullable()->constrained()->onDelete('set null');
             $table->string('email')->unique();
             $table->string('password');

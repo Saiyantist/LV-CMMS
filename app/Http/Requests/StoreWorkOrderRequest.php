@@ -41,6 +41,9 @@ class StoreWorkOrderRequest extends FormRequest
             ]);
         }
 
+        // if work order type is PMS or Compliance
+        // report description is not required.
+
         return $rules;
     }
 }
