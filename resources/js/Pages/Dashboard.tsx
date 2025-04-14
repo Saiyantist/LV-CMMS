@@ -8,8 +8,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-  } from "@/Components/shadcnui/dropdown-menu"
-  
+} from "@/Components/shadcnui/dropdown-menu";
 
 export default function Dashboard() {
     const user = usePage().props.auth.user;
@@ -22,11 +21,12 @@ export default function Dashboard() {
                     <div className="p-6 text-black">
                         Welcome {user.first_name} {user.last_name}!
                     </div>
-                    <div className="p-6 text-black">
+
+                    {/* <div className="p-6 text-black">
                         You are logged in as {user.roles[0].name}!
-                    </div>
-                    
-                    <div className="p-6 flex flex-row justify-center items-center gap-4">
+                    </div> */}
+
+                    {/* <div className="p-6 flex flex-row justify-center items-center gap-4">
                         <Button>Default Button</Button>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -45,7 +45,7 @@ export default function Dashboard() {
                                 <DropdownMenuItem>Titan's gel?</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </AuthenticatedLayout>

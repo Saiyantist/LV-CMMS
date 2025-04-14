@@ -96,18 +96,16 @@ export default function WorkOrders({
 
             {/* Tabs (UI only) */}
             <div className="mb-6">
-                <div className="inline-flex rounded-md overflow-hidden border border-gray-300">
-                    {tabs.map((tab, index) => (
+                <div className="flex flex-wrap gap-2">
+                    {tabs.map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-2 text-lg font-medium transition-colors duration-200 ${
+                            className={`px-6 py-2 text-lg font-medium transition-colors duration-200 rounded-md border ${
                                 activeTab === tab
-                                    ? "bg-secondary text-white"
-                                    : "bg-white text-black hover:bg-gray-100"
-                            } ${
-                                index !== 0 ? "border-l border-gray-300" : ""
-                            } rounded-tl-md rounded-tr-md`}
+                                    ? "bg-secondary text-white border-secondary"
+                                    : "bg-white text-black border-gray-300 hover:bg-gray-100"
+                            }`}
                         >
                             {tab}
                         </button>
@@ -166,7 +164,8 @@ export default function WorkOrders({
                                 </td>
                                 <td className="border px-6 py-4">
                                     <PrimaryButton
-                                        onClick={() => setEditingWorkOrder(workOrder)
+                                        onClick={() =>
+                                            setEditingWorkOrder(workOrder)
                                         }
                                     >
                                         Edit

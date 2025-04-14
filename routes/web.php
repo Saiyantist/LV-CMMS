@@ -45,6 +45,28 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
+
+
+
+// Try
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/work-orders/asset-management', function () {
+        return Inertia::render('WorkOrders/AssetManagement');
+    })->name('work-orders.assetmanagement');
+});
+
+
+// PMS
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/work-orders/preventive-maintenance', function () {
+        return Inertia::render('WorkOrders/PreventiveMaintenance');
+    })->name('work-orders.preventive-maintenance');
+});
+
+
+
+
 /**
  * User Role Management - for Role-based Access Control (RBAC)
  */
