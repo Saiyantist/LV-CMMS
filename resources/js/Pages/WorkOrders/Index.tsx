@@ -1,10 +1,11 @@
 import PrimaryButton from "@/Components/PrimaryButton";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { PageProps } from "@/types";
-import { Head, Link } from "@inertiajs/react";
-import { useState } from "react";
+import { Head } from "@inertiajs/react";
+import { useState, ReactNode } from "react";
 import CreateWorkOrderModal from "./CreateModal";
 import EditWorkOrderModal from "./EditModal";
+import { Hourglass, ClipboardCheck, FileText, Ban } from "lucide-react";
 
 interface WorkOrder {
     id: number;
@@ -31,10 +32,17 @@ export default function WorkOrders({
 }>) {
     const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState("Pending");
+    const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(null);
 
     const tabs = ["Pending", "Accepted", "For Budget Request", "Declined"];
 
-    // Filter work orders based on the selected tab
+    const tabIcons: Record<string, ReactNode> = {
+        Pending: <Hourglass className="w-5 h-5 sm:hidden" />,
+        Accepted: <ClipboardCheck className="w-5 h-5 sm:hidden" />,
+        "For Budget Request": <FileText className="w-5 h-5 sm:hidden" />,
+        Declined: <Ban className="w-5 h-5 sm:hidden" />,
+    };
+
     const filteredWorkOrders = workOrders.filter((workOrder) => {
         if (activeTab === "Pending") {
             return workOrder.status === "Pending";
@@ -52,12 +60,12 @@ export default function WorkOrders({
         }
         return true;
     });
-    const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(
-        null
-    );
 
     return (
         <AuthenticatedLayout>
+            <Head title="Work Orders" />
+
+            {/* Modals */}
             {isCreating && (
                 <CreateWorkOrderModal
                     locations={locations}
@@ -74,7 +82,6 @@ export default function WorkOrders({
                     onClose={() => setEditingWorkOrder(null)}
                 />
             )}
-            <Head title="Work Orders" />
 
             {/* Header */}
             <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
@@ -85,58 +92,50 @@ export default function WorkOrders({
                         </h1>
                         <PrimaryButton
                             onClick={() => setIsCreating(true)}
-                            className="bg-secondary text-white px-5 py-2 rounded-md hover:bg-primary transition-all duration-300"
+                            className="bg-secondary text-white hover:bg-primary transition-all duration-300 
+                                flex items-center justify-center 
+                                w-10 h-10 rounded-full sm:w-auto sm:h-auto sm:rounded-md 
+                                px-0 sm:px-5 py-0 sm:py-2 gap-0 sm:gap-2"
                         >
-                            <span className="mr-2 text-lg">+</span>
-                            <span>Add Work Order</span>
+                            <span className="text-xl">+</span>
+                            <span className="hidden sm:inline">Add Work Order</span>
                         </PrimaryButton>
                     </div>
                 </div>
             </header>
 
-            {/* Tabs (UI only) */}
-            <div className="mb-6">
-                <div className="flex flex-wrap gap-2">
+            {/* Sticky Tabs */}
+            <div className="sticky top-[64px] z-30 bg-whites pt-4 pb-2 shadow-sm sm:top-[72px]">
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2 px-4">
                     {tabs.map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-2 text-lg font-medium transition-colors duration-200 rounded-md border ${
+                            className={`flex items-center justify-center gap-2 px-3 py-1.5 text-sm sm:text-base font-medium transition-colors duration-200 rounded-md border ${
                                 activeTab === tab
                                     ? "bg-secondary text-white border-secondary"
                                     : "bg-white text-black border-gray-300 hover:bg-gray-100"
                             }`}
                         >
-                            {tab}
+                            <span className="sm:hidden">{tabIcons[tab]}</span>
+                            <span className="hidden sm:inline">{tab}</span>
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Table (filtered based on the active tab) */}
-            <div className="overflow-x-auto bg-white shadow-lg rounded-md">
+            {/* Table View (Desktop) */}
+            <div className="hidden md:block overflow-x-auto bg-white shadow-lg rounded-md mt-4">
                 <table className="w-full table-auto border-collapse text-sm text-gray-700">
                     <thead>
                         <tr className="bg-green-100 text-black">
                             <th className="border px-6 py-3 text-left">ID</th>
-                            <th className="border px-6 py-3 text-left">
-                                Description
-                            </th>
-                            <th className="border px-6 py-3 text-left">
-                                Location
-                            </th>
-                            <th className="border px-6 py-3 text-left">
-                                Status
-                            </th>
-                            <th className="border px-6 py-3 text-left">
-                                Priority
-                            </th>
-                            <th className="border px-6 py-3 text-left">
-                                Requested At
-                            </th>
-                            <th className="border px-6 py-3 text-left">
-                                Actions
-                            </th>
+                            <th className="border px-6 py-3 text-left">Description</th>
+                            <th className="border px-6 py-3 text-left">Location</th>
+                            <th className="border px-6 py-3 text-left">Status</th>
+                            <th className="border px-6 py-3 text-left">Priority</th>
+                            <th className="border px-6 py-3 text-left">Requested At</th>
+                            <th className="border px-6 py-3 text-left">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -158,15 +157,12 @@ export default function WorkOrders({
                                     {workOrder.priority}
                                 </td>
                                 <td className="border px-6 py-4">
-                                    {new Date(
-                                        workOrder.requested_at
-                                    ).toLocaleDateString()}
+                                    {new Date(workOrder.requested_at).toLocaleDateString()}
                                 </td>
                                 <td className="border px-6 py-4">
                                     <PrimaryButton
-                                        onClick={() =>
-                                            setEditingWorkOrder(workOrder)
-                                        }
+                                        className="bg-secondary"
+                                        onClick={() => setEditingWorkOrder(workOrder)}
                                     >
                                         Edit
                                     </PrimaryButton>
@@ -175,6 +171,67 @@ export default function WorkOrders({
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden flex flex-col gap-4 mt-4 px-4">
+                {filteredWorkOrders.map((workOrder) => (
+                    <div
+                        key={workOrder.id}
+                        className="border rounded-lg shadow-md p-4 bg-white flex flex-col gap-4"
+                    >
+                        <div>
+                            <span className="text-sm font-semibold text-gray-500">ID:</span>
+                            <div className="text-base font-medium">{workOrder.id}</div>
+                        </div>
+
+                        <div>
+                            <span className="text-sm font-semibold text-gray-500">
+                                Description:
+                            </span>
+                            <div className="text-base">{workOrder.report_description}</div>
+                        </div>
+
+                        <div>
+                            <span className="text-sm font-semibold text-gray-500">
+                                Location:
+                            </span>
+                            <div className="text-base">
+                                {workOrder.location?.name || "N/A"}
+                            </div>
+                        </div>
+
+                        <div>
+                            <span className="text-sm font-semibold text-gray-500">Status:</span>
+                            <div className="text-base">{workOrder.status}</div>
+                        </div>
+
+                        <div>
+                            <span className="text-sm font-semibold text-gray-500">
+                                Priority:
+                            </span>
+                            <div className="text-base">{workOrder.priority}</div>
+                        </div>
+
+                        <div>
+                            <span className="text-sm font-semibold text-gray-500">
+                                Requested At:
+                            </span>
+                            <div className="text-base">
+                                {new Date(workOrder.requested_at).toLocaleDateString()}
+                            </div>
+                        </div>
+
+                        <div className="mt-4 self-end">
+                            <PrimaryButton
+                                className="bg-secondary px-4 py-1 text-sm"
+                                onClick={() => setEditingWorkOrder(workOrder)}
+                            >
+                                Edit
+                            </PrimaryButton>
+                        </div>
+                    </div>
+                ))}
             </div>
         </AuthenticatedLayout>
     );

@@ -1,6 +1,19 @@
 import React, { useState } from "react";
 import { useForm, Link, usePage } from "@inertiajs/react";
 import NavLink from "@/Components/NavLink";
+import {
+    Home,
+    ClipboardList,
+    Wrench,
+    ShieldCheck,
+    Send,
+    User,
+    Bell,
+    LogOut,
+    MoreVertical,
+    ChevronDown,
+    ChevronUp,
+} from "lucide-react";
 
 interface Role {
     name: string;
@@ -35,30 +48,34 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         {
             href: route("dashboard"),
             text: "Dashboard",
-            icon: "bx bx-home",
+            icon: <Home size={16} className="mr-2" />,
         },
         {
             text: "Work Order",
             isDropdown: true,
-            icon: "bx bx-task",
+            icon: <ClipboardList size={16} className="mr-2" />,
             children: [
                 {
                     href: route("work-orders.index"),
                     text: isWorkOrderManager
                         ? "Work Order Requests"
                         : "Work Order List",
+                    icon: <ClipboardList size={14} className="mr-2" />,
                 },
                 {
                     href: route("work-orders.assetmanagement"),
                     text: "Asset Management",
+                    icon: <Wrench size={14} className="mr-2" />,
                 },
                 {
                     href: route("work-orders.preventive-maintenance"),
                     text: "Preventive Maintenance",
+                    icon: <ShieldCheck size={14} className="mr-2" />,
                 },
                 {
                     href: route("work-orders.submit-request"),
                     text: "Submit a Request",
+                    icon: <Send size={14} className="mr-2" />,
                 },
             ],
         },
@@ -68,21 +85,21 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         ? [
               {
                   href: route("admin.manage-roles"),
-                  icon: "bx bx-user",
+                  icon: <User size={16} className="mr-2" />,
                   text: "User Management",
               },
           ]
         : [];
 
     const bottomMenuItems = [
-        { href: "#", icon: "bx bx-bell", text: "Settings" },
+        { href: "#", icon: <Bell size={16} />, text: "Settings" },
     ];
 
     const isActive = (href: string) => currentRoute === href;
 
     return (
         <>
-            {/* Desktop Sidebar */}
+            {/* --- Desktop Sidebar --- */}
             <div className="hidden md:flex fixed min-h-screen max-h-screen bg-primary w-56 flex-col">
                 <div className="flex items-center justify-center h-24">
                     <img
@@ -100,29 +117,33 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     onClick={() =>
                                         setIsDropdownOpen(!isDropdownOpen)
                                     }
-                                    className="flex items-center w-full h-12 px-4 text-white hover:text-opacity-80 transition-transform"
+                                    className="flex items-center w-full h-12 px-4 text-white hover:text-opacity-80"
                                 >
                                     <span className="text-sm font-medium flex items-center justify-between w-full">
-                                        <i className={`${item.icon} mr-2`}></i>
+                                        {item.icon}
                                         {item.text}
                                         <span className="ml-2">
-                                            {isDropdownOpen ? "˄" : "˅"}
+                                            {isDropdownOpen ? (
+                                                <ChevronUp size={14} />
+                                            ) : (
+                                                <ChevronDown size={14} />
+                                            )}
                                         </span>
                                     </span>
                                 </button>
-
                                 {isDropdownOpen && (
                                     <ul className="ml-4">
                                         {item.children?.map((child) => (
                                             <li key={child.text}>
                                                 <Link
                                                     href={child.href}
-                                                    className={`block h-10 px-4 text-sm hover:text-opacity-80 ${
+                                                    className={`flex items-center h-10 px-4 text-sm hover:text-opacity-80 ${
                                                         isActive(child.href)
                                                             ? "bg-white text-primary rounded"
                                                             : "text-white"
                                                     }`}
                                                 >
+                                                    {child.icon}
                                                     {child.text}
                                                 </Link>
                                             </li>
@@ -140,7 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                             : "text-white"
                                     }`}
                                 >
-                                    <i className={`${item.icon} mr-2`}></i>
+                                    {item.icon}
                                     {item.text}
                                 </Link>
                             </li>
@@ -157,14 +178,14 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                         : "text-white"
                                 }`}
                             >
-                                <i className={item.icon}></i>
-                                <span className="ml-2">{item.text}</span>
+                                {item.icon}
+                                {item.text}
                             </Link>
                         </li>
                     ))}
                 </ul>
 
-                {/* Bottom */}
+                {/* Bottom Items */}
                 <ul className="py-4">
                     {bottomMenuItems.map((item) => (
                         <li key={item.text}>
@@ -172,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 href={item.href}
                                 className="flex items-center h-12 px-4 text-white text-sm hover:text-opacity-80"
                             >
-                                <i className={item.icon}></i>
+                                {item.icon}
                                 <span className="ml-2">{item.text}</span>
                             </Link>
                         </li>
@@ -182,14 +203,14 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             onClick={handleLogout}
                             className="flex items-center w-full h-12 px-4 text-white text-sm hover:text-opacity-80"
                         >
-                            <i className="bx bx-log-out"></i>
-                            <span className="ml-2">Logout</span>
+                            <LogOut size={16} className="mr-2" />
+                            <span>Logout</span>
                         </button>
                     </li>
                 </ul>
             </div>
 
-            {/* Mobile Top Navbar */}
+            {/* --- Mobile Top Navbar --- */}
             <div className="md:hidden fixed top-0 left-0 w-full bg-primary text-white shadow-md z-50">
                 <div className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center space-x-2">
@@ -203,15 +224,15 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="focus:outline-none"
                     >
-                        <i className="bx bx-menu text-2xl" />
+                        <MoreVertical size={20} />
                     </button>
                 </div>
             </div>
 
-            {/* Mobile Full Menu Dropdown */}
+            {/* --- Mobile Dropdown Menu --- */}
             {mobileMenuOpen && (
-                <div className="md:hidden bg-primary text-white px-4 py-3 mt-16 z-40 fixed top-0 left-0 w-full overflow-y-auto h-[calc(100vh-64px)]">
-                    <ul className="space-y-3">
+                <div className="md:hidden bg-primary text-white px-4 py-2 mt-[64px] z-40 fixed top-0 left-0 w-full overflow-y-auto max-h-[calc(100vh-64px)]">
+                    <ul className="space-y-2">
                         {menuItems.map((item) =>
                             item.isDropdown ? (
                                 <li key={item.text}>
@@ -222,25 +243,28 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                         className="w-full text-left py-2 flex justify-between items-center"
                                     >
                                         <span className="flex items-center">
-                                            <i className={`${item.icon} mr-2`} />
+                                            {item.icon}
                                             {item.text}
                                         </span>
-                                        <span>
-                                            {isDropdownOpen ? "˄" : "˅"}
-                                        </span>
+                                        {isDropdownOpen ? (
+                                            <ChevronUp size={14} />
+                                        ) : (
+                                            <ChevronDown size={14} />
+                                        )}
                                     </button>
                                     {isDropdownOpen && (
-                                        <ul className="pl-4 mt-1">
+                                        <ul className="pl-4 mt-1 space-y-1">
                                             {item.children?.map((child) => (
                                                 <li key={child.text}>
                                                     <Link
                                                         href={child.href}
-                                                        className={`block py-1 text-sm ${
+                                                        className={`flex items-center py-1 text-sm ${
                                                             isActive(child.href)
-                                                                ? "bg-white text-primary rounded"
+                                                                ? "bg-white text-primary rounded px-2"
                                                                 : ""
                                                         }`}
                                                     >
+                                                        {child.icon}
                                                         {child.text}
                                                     </Link>
                                                 </li>
@@ -252,13 +276,13 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 <li key={item.text}>
                                     <Link
                                         href={item.href!}
-                                        className={`block py-2 text-sm flex items-center ${
+                                        className={`flex items-center py-2 text-sm ${
                                             isActive(item.href!)
-                                                ? "bg-white text-primary rounded"
+                                                ? "bg-white text-primary rounded px-2"
                                                 : ""
                                         }`}
                                     >
-                                        <i className={`${item.icon} mr-2`} />
+                                        {item.icon}
                                         {item.text}
                                     </Link>
                                 </li>
@@ -269,26 +293,14 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             <li key={item.text}>
                                 <Link
                                     href={item.href}
-                                    className={`block py-2 text-sm flex items-center ${
+                                    className={`flex items-center py-2 text-sm ${
                                         isActive(item.href)
-                                            ? "bg-white text-primary rounded"
+                                            ? "bg-white text-primary rounded px-2"
                                             : ""
                                     }`}
                                 >
-                                    <i className={item.icon}></i>
-                                    <span className="ml-2">{item.text}</span>
-                                </Link>
-                            </li>
-                        ))}
-
-                        {bottomMenuItems.map((item) => (
-                            <li key={item.text}>
-                                <Link
-                                    href={item.href}
-                                    className="block py-2 text-sm"
-                                >
-                                    <i className={item.icon}></i>
-                                    <span className="ml-2">{item.text}</span>
+                                    {item.icon}
+                                    {item.text}
                                 </Link>
                             </li>
                         ))}
@@ -296,9 +308,9 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         <li>
                             <button
                                 onClick={handleLogout}
-                                className="block w-full text-left py-2 text-red-300"
+                                className="flex items-center w-full text-left py-2 text-red-300"
                             >
-                                <i className="bx bx-log-out text-lg mr-2" />
+                                <LogOut size={16} className="mr-2" />
                                 Logout
                             </button>
                         </li>

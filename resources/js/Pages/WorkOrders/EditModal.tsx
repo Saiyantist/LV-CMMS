@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Head, router, useForm, usePage } from "@inertiajs/react";
 
 interface Location {
@@ -34,6 +34,12 @@ export default function EditWorkOrderModal({
     onClose,
 }: EditWorkOrderProps) {
     const [deletedImages, setDeletedImages] = useState<string[]>([]); // For handling image deletions
+    const [selectedLocation, setSelectedLocation] = useState<
+        Location | "Other" | null
+    >(null);
+    const [typedLocation, setTypedLocation] = useState<string>(""); // For the "Other" location input
+    const [filteredLocations, setFilteredLocations] =
+        useState<Location[]>(locations); // For filtering the location list
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
@@ -89,19 +95,37 @@ export default function EditWorkOrderModal({
         setDeletedImages((prev) => [...prev, imageUrl]); // Mark image for deletion
     };
 
+    const handleLocationSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setTypedLocation(value);
+
+        // Filter locations based on the typed input
+        const filtered = locations.filter((location) =>
+            location.name.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredLocations(filtered);
+    };
+
+    useEffect(() => {
+        // Reset location if "Other" is selected, so user can type freely
+        if (selectedLocation === "Other") {
+            setData("location_id", typedLocation); // Keep typed location
+        }
+    }, [typedLocation, selectedLocation, setData]);
+
     return (
         <div
             className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50"
             onClick={onClose}
         >
-            <div className="bg-white rounded-lg shadow-lg w-full xl:max-w-3xl lg:max-w-2xl max-h-auto"
+            <div
+                className="bg-white rounded-lg shadow-lg w-full max-w-3xl sm:max-w-md lg:max-w-2xl p-6 max-h-[90vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
             >
-                <form
-                    onSubmit={submit}
-                    className="p-4 bg-white shadow-md rounded-lg"
-                >
-                    <h2 className="text-xl font-bold mb-4">Edit Work Order</h2>
+                <form onSubmit={submit} className="space-y-6">
+                    <h2 className="text-xl font-bold mb-4 text-center">
+                        Edit Work Order
+                    </h2>
 
                     {/* Location Dropdown */}
                     <div>
@@ -110,17 +134,21 @@ export default function EditWorkOrderModal({
                         </label>
                         <select
                             value={data.location_id}
-                            onChange={(e) =>
-                                setData("location_id", e.target.value)
-                            }
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setData("location_id", value);
+                                setSelectedLocation(
+                                    value === "Other" ? "Other" : null
+                                );
+                            }}
+                            className="border p-2 w-full rounded-md text-sm"
                         >
-                            <option value="">Select a location</option>
                             {locations.map((location) => (
                                 <option key={location.id} value={location.id}>
                                     {location.name}
                                 </option>
                             ))}
+                            <option value="Other">Other</option>
                         </select>
                         {errors.location_id && (
                             <p className="text-red-500 text-sm">
@@ -128,6 +156,54 @@ export default function EditWorkOrderModal({
                             </p>
                         )}
                     </div>
+
+                    {/* Show Text Input for "Other" Location */}
+                    {selectedLocation === "Other" && (
+                        <div className="mt-3">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Enter Custom Location
+                            </label>
+                            <input
+                                type="text"
+                                value={typedLocation}
+                                onChange={handleLocationSearch}
+                                className="border p-2 w-full rounded-md text-sm"
+                                placeholder="Enter a new location"
+                            />
+
+                            {/* Display filtered suggestions */}
+                            {typedLocation && filteredLocations.length > 0 && (
+                                <ul className="mt-2 max-h-40 overflow-y-auto border rounded-md">
+                                    {filteredLocations.map((location) => (
+                                        <li
+                                            key={location.id}
+                                            className="p-2 hover:bg-gray-200 cursor-pointer"
+                                            onClick={() => {
+                                                setTypedLocation(location.name);
+                                                setSelectedLocation(location);
+                                            }}
+                                        >
+                                            {location.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+
+                            {/* Checker if the typed location already exists */}
+                            {typedLocation &&
+                                !filteredLocations.some(
+                                    (loc) =>
+                                        loc.name.toLowerCase() ===
+                                        typedLocation.toLowerCase()
+                                ) && (
+                                    <p className="text-yellow-500 text-sm mt-2">
+                                        Location does not exist. If this is
+                                        correct, proceed with the "Other"
+                                        option.
+                                    </p>
+                                )}
+                        </div>
+                    )}
 
                     {/* Report Description */}
                     <div className="mb-3">
@@ -139,7 +215,7 @@ export default function EditWorkOrderModal({
                             onChange={(e) =>
                                 setData("report_description", e.target.value)
                             }
-                            className="border p-2 w-full rounded"
+                            className="border p-2 w-full rounded-md text-sm"
                             required
                         />
                         {errors.report_description && (
@@ -159,7 +235,7 @@ export default function EditWorkOrderModal({
                             multiple
                             accept="image/*"
                             onChange={handleImageChange}
-                            className="border p-2 w-full rounded"
+                            className="border p-2 w-full rounded-md text-sm"
                         />
                         {errors.images && (
                             <p className="text-red-500">{errors.images}</p>
@@ -167,18 +243,6 @@ export default function EditWorkOrderModal({
 
                         {/* Image Previews */}
                         <div className="flex mt-2 flex-wrap gap-2">
-                            {/* {previewImages.map((src, index) => (
-                            <div key={index} className="relative">
-                                <img src={src} alt="Preview" className="w-20 h-20 object-cover rounded-md" />
-                                <button
-                                    type="button"
-                                    onClick={() => removeImage(src)}
-                                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-                                >
-                                    X
-                                </button>
-                            </div>
-                            ))} */}
                             {workOrder.images?.map((image, index) => (
                                 <div key={index} className="relative">
                                     <img
@@ -210,7 +274,7 @@ export default function EditWorkOrderModal({
                                     onChange={(e) =>
                                         setData("status", e.target.value)
                                     }
-                                    className="border p-2 w-full rounded"
+                                    className="border p-2 w-full rounded-md text-sm"
                                 >
                                     <option value="Pending">Pending</option>
                                     <option value="Assigned">Assigned</option>
@@ -234,7 +298,7 @@ export default function EditWorkOrderModal({
                                             e.target.value
                                         )
                                     }
-                                    className="border p-2 w-full rounded"
+                                    className="border p-2 w-full rounded-md text-sm"
                                 >
                                     <option value="Work Order">
                                         Work Order
@@ -258,15 +322,13 @@ export default function EditWorkOrderModal({
                                     onChange={(e) =>
                                         setData("label", e.target.value)
                                     }
-                                    className="border p-2 w-full rounded"
+                                    className="border p-2 w-full rounded-md text-sm"
                                 >
                                     <option value="Electrical">
                                         Electrical
                                     </option>
                                     <option value="Plumbing">Plumbing</option>
-                                    <option value="Painting">Painting</option>
-                                    <option value="Carpentry">Carpentry</option>
-                                    <option value="No Label">No Label</option>
+                                    <option value="HVAC">HVAC</option>
                                 </select>
                             </div>
 
@@ -280,46 +342,31 @@ export default function EditWorkOrderModal({
                                     onChange={(e) =>
                                         setData("priority", e.target.value)
                                     }
-                                    className="border p-2 w-full rounded"
+                                    className="border p-2 w-full rounded-md text-sm"
                                 >
-                                    <option value="">Select Priority</option>
                                     <option value="Low">Low</option>
                                     <option value="Medium">Medium</option>
                                     <option value="High">High</option>
-                                    <option value="Critical">Critical</option>
                                 </select>
-                            </div>
-
-                            {/* Remarks */}
-                            <div>
-                                <label className="block font-semibold">
-                                    Remarks
-                                </label>
-                                <textarea
-                                    value={data.remarks}
-                                    onChange={(e) =>
-                                        setData("remarks", e.target.value)
-                                    }
-                                    className="border p-2 w-full rounded"
-                                />
                             </div>
                         </>
                     )}
 
                     {/* Buttons */}
-                    <div className="flex justify-end space-x-2">
+                    <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="bg-white text-black px-12 py-2 rounded-3xl border-2 hover:bg-red-400 hover:text-white"
+                            className="bg-gray-300 text-gray-700 py-2 px-4 rounded-md w-full sm:w-auto"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="bg-secondary text-white px-12 py-2 rounded-3xl hover:bg-primary"
+                            className="bg-blue-500 text-white py-2 px-4 rounded-md w-full sm:w-auto"
+                            disabled={processing}
                         >
-                            Update Work Order
+                            {processing ? "Saving..." : "Update"}
                         </button>
                     </div>
                 </form>

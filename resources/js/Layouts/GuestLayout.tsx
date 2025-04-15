@@ -1,4 +1,4 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
+// import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
 import NavBar from '@/Components/NavBar';
@@ -11,11 +11,11 @@ export default function Guest({ children }: PropsWithChildren) {
 
             {/* Left side - Form */}
             <div className="flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-6">
-                <div>
+                {/* <div>
                     <Link href="/">
                         <ApplicationLogo className="h-20 w-20 fill-current text-rose-500" />
                     </Link>
-                </div>
+                </div> */}
 
                 <div className="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-lg sm:rounded-lg dark:bg-gray-800">
                     {children}
