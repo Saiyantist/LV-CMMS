@@ -14,8 +14,7 @@ export default function AuthenticatedLayout({
             <Sidebar user={user} />
 
             {/* Wrapper for main content */}
-            <div className="flex flex-col md:ml-56 pt-16 md:pt-0">
-
+            <div className="flex flex-col md:ml-56 pt-[104px] md:pt-0">
                 {/* Top Navbar (Desktop Only) */}
                 <nav className="hidden md:flex justify-end border-b border-gray-100 h-16 px-4 bg-white shadow-sm">
                     {/* Josh: Make this into a component if you keep seeing it. 👀 */}
@@ -25,7 +24,9 @@ export default function AuthenticatedLayout({
                         active={route().current("profile.edit")}
                     >
                         <i className="bx bx-user-circle text-lg" />
-                        <span>{user.first_name} {user.last_name}</span>
+                        <span>
+                            {user.first_name} {user.last_name}
+                        </span>
                     </NavLink>
                 </nav>
 
