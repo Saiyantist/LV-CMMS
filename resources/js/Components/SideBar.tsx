@@ -194,111 +194,128 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             </div>
 
             {/* --- Mobile Navbar (Unified Layout) --- */}
+            {/* --- Mobile Navbar (Updated Layout) --- */}
             <div className="md:hidden fixed top-0 left-0 w-full bg-primary text-white shadow-md z-50">
-                <div className="flex flex-col">
-                    {/* Top: Logo + Burger */}
-                    <div className="flex items-center justify-between px-4 py-3">
-                        <img
-                            src="/images/Lvlogo.jpg"
-                            alt="Logo"
-                            className="h-10 w-10 rounded-full object-cover"
-                        />
-                        <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="focus:outline-none"
-                        >
-                            <Menu size={24} />
-                        </button>
-                    </div>
-
-                    {/* Nav Icons */}
-                    <div className="flex justify-around px-2 py-2">
-                        <Link
-                            href={route("dashboard")}
-                            className="flex flex-col items-center text-sm hover:text-opacity-80"
-                        >
-                            <Home size={18} />
-                            Dashboard
-                        </Link>
-                        <Link
-                            href={route("profile.edit")}
-                            className="flex flex-col items-center text-sm hover:text-opacity-80"
-                        >
-                            <UserCircle size={18} />
-                            Profile
-                        </Link>
-                        <div className="relative">
-                            <button
-                                onClick={() =>
-                                    setIsDropdownOpen(!isDropdownOpen)
-                                }
-                                className="flex flex-col items-center text-sm hover:text-opacity-80"
-                            >
-                                <ClipboardList size={18} />
-                                Work Order
-                                {isDropdownOpen ? (
-                                    <ChevronUp size={14} />
-                                ) : (
-                                    <ChevronDown size={14} />
-                                )}
-                            </button>
-                            {isDropdownOpen && (
-                                <ul className="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 bg-primary text-white rounded shadow-md z-50 w-56 p-2 space-y-1 border border-white border-opacity-20">
-                                    {menuItems[0].children?.map((child) =>
-                                        renderMenuItem(child)
-                                    )}
-                                </ul>
-                            )}
-                        </div>
-                    </div>
+                <div className="flex items-center justify-between px-4 py-3 h-14">
+                    <Link
+                        href={route("dashboard")}
+                        className="flex flex-col items-center text-sm hover:text-opacity-80"
+                    >
+                        <Home size={20} />
+                        Dashboard
+                    </Link>
+                    <Link
+                        href={route("profile.edit")}
+                        className="flex flex-col items-center text-sm hover:text-opacity-80"
+                    >
+                        <UserCircle size={20} />
+                        Profile
+                    </Link>
+                    <button
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        className="focus:outline-none flex flex-col items-center text-sm"
+                    >
+                        <Menu size={22} />
+                        Menu
+                    </button>
                 </div>
             </div>
 
-            {/* --- Mobile Dropdown (Burger menu) --- */}
+            {/* --- Mobile Burger Full Page Overlay --- */}
             {mobileMenuOpen && (
-                <div className="md:hidden fixed top-[104px] left-2 right-2 z-40 bg-white text-gray-900 rounded-xl shadow-lg p-4 max-h-[calc(100vh-120px)] overflow-y-auto">
-                    <ul className="space-y-3">
-                        {adminItems.length > 0 && (
-                            <>
-                                <li className="text-xs text-gray-500 uppercase tracking-wide px-1">
-                                    Admin
-                                </li>
-                                {adminItems.map((item) => (
-                                    <li key={item.text}>
+                <div className="md:hidden fixed top-0 left-0 w-full h-full bg-primary text-white z-50 p-5 pt-6 overflow-y-auto">
+                    {/* Top Row: Back Button + Centered Logo */}
+                    <div className="relative mb-6">
+                        <button
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="absolute left-0 top-1 text-sm flex items-center text-white hover:text-opacity-80"
+                        >
+                            <ChevronDown size={20} className="mr-1 rotate-90" />
+                            Back
+                        </button>
+                        <div className="flex justify-center">
+                            <img
+                                src="/images/Lvlogo.jpg"
+                                alt="Logo"
+                                className="h-20 w-20 rounded-full object-cover"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Work Order Dropdown */}
+                    <div className="space-y-1 border-t border-white border-opacity-20 pt-4">
+                        <button
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className="w-full text-left flex items-center justify-between px-4 py-3 text-sm font-medium hover:bg-white hover:text-primary rounded-lg transition"
+                        >
+                            <span className="flex items-center">
+                                <ClipboardList size={18} className="mr-2" />
+                                Work Order
+                            </span>
+                            {isDropdownOpen ? (
+                                <ChevronUp size={16} />
+                            ) : (
+                                <ChevronDown size={16} />
+                            )}
+                        </button>
+                        {isDropdownOpen && (
+                            <ul className="space-y-1 mt-1">
+                                {menuItems[0].children?.map((child) => (
+                                    <li key={child.text}>
                                         <Link
-                                            href={item.href}
-                                            className="flex items-center text-sm text-gray-800 hover:text-primary"
+                                            href={child.href}
+                                            className={`flex items-center px-4 py-2 text-sm rounded-lg transition ${
+                                                isActive(child.routeName)
+                                                    ? "bg-white text-primary"
+                                                    : "hover:bg-white hover:text-primary"
+                                            }`}
                                         >
-                                            {item.icon}
-                                            {item.text}
+                                            {child.icon}
+                                            {child.text}
                                         </Link>
                                     </li>
                                 ))}
-                            </>
+                            </ul>
                         )}
-                        <li className="text-xs text-gray-500 uppercase tracking-wide px-1 mt-3">
-                            General
-                        </li>
-                        <li>
-                            <Link
-                                href="#"
-                                className="flex items-center text-sm text-gray-800 hover:text-primary"
-                            >
-                                <Settings size={16} className="mr-2" />
-                                Settings
-                            </Link>
-                        </li>
+                    </div>
 
-                        <li className="border-t border-gray-200 pt-3 mt-3">
-                            <button
-                                onClick={handleLogout}
-                                className="flex items-center text-sm text-red-500 hover:text-red-700 w-full"
-                            >
-                                <LogOut size={16} className="mr-2" />
-                                Logout
-                            </button>
-                        </li>
-                    </ul>
+                    {/* Admin Items (if any) */}
+                    {adminItems.length > 0 && (
+                        <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
+                            {adminItems.map((item) => (
+                                <Link
+                                    key={item.text}
+                                    href={item.href}
+                                    className={`flex items-center px-4 py-3 text-sm rounded-lg transition ${
+                                        isActive(item.routeName)
+                                            ? "bg-white text-primary"
+                                            : "hover:bg-white hover:text-primary"
+                                    }`}
+                                >
+                                    {item.icon}
+                                    {item.text}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Settings and Logout */}
+                    <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
+                        <Link
+                            href="#"
+                            className="flex items-center px-4 py-3 text-sm hover:bg-white hover:text-primary rounded-lg transition"
+                        >
+                            <Settings size={16} className="mr-2" />
+                            Settings
+                        </Link>
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center px-4 py-3 text-sm text-red-300 hover:bg-white hover:text-red-500 rounded-lg w-full transition"
+                        >
+                            <LogOut size={16} className="mr-2" />
+                            Logout
+                        </button>
+                    </div>
                 </div>
             )}
         </>

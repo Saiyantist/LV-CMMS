@@ -2,10 +2,9 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { PageProps } from "@/types";
 import { Head } from "@inertiajs/react";
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useEffect } from "react";
 import CreateWorkOrderModal from "./CreateModal";
 import EditWorkOrderModal from "./EditModal";
-import { Hourglass, ClipboardCheck, FileText, Ban } from "lucide-react";
 
 interface WorkOrder {
     id: number;
@@ -32,16 +31,12 @@ export default function WorkOrders({
 }>) {
     const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState("Pending");
-    const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(null);
+    const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(
+        null
+    );
+    const [showScrollUpButton, setShowScrollUpButton] = useState(false);
 
     const tabs = ["Pending", "Accepted", "For Budget Request", "Declined"];
-
-    const tabIcons: Record<string, ReactNode> = {
-        Pending: <Hourglass className="w-5 h-5 sm:hidden" />,
-        Accepted: <ClipboardCheck className="w-5 h-5 sm:hidden" />,
-        "For Budget Request": <FileText className="w-5 h-5 sm:hidden" />,
-        Declined: <Ban className="w-5 h-5 sm:hidden" />,
-    };
 
     const filteredWorkOrders = workOrders.filter((workOrder) => {
         if (activeTab === "Pending") {
@@ -60,6 +55,23 @@ export default function WorkOrders({
         }
         return true;
     });
+
+    const handleScroll = () => {
+        if (window.scrollY > 300) {
+            setShowScrollUpButton(true);
+        } else {
+            setShowScrollUpButton(false);
+        }
+    };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     return (
         <AuthenticatedLayout>
@@ -86,42 +98,46 @@ export default function WorkOrders({
             {/* Header */}
             <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                 <div className="bg-white shadow-sm sm:rounded-lg">
-                    <div className="p-6 flex items-center text-black">
-                        <h1 className="text-2xl font-semibold mr-6">
+                    <div className="p-6 flex items-center justify-between sm:justify-start text-black">
+                        {/* Title: Left-aligned on larger screens, centered on small screens */}
+                        <h1 className="text-2xl font-semibold mr-6 sm:text-left text-center sm:w-auto w-full">
                             Work Orders
                         </h1>
-                        <PrimaryButton
-                            onClick={() => setIsCreating(true)}
-                            className="bg-secondary text-white hover:bg-primary transition-all duration-300 
-                                flex items-center justify-center 
-                                w-10 h-10 rounded-full sm:w-auto sm:h-auto sm:rounded-md 
-                                px-0 sm:px-5 py-0 sm:py-2 gap-0 sm:gap-2"
-                        >
-                            <span className="text-xl">+</span>
-                            <span className="hidden sm:inline">Add Work Order</span>
-                        </PrimaryButton>
+
+                        {/* Button: Always at the right side, but centered on small screens */}
+                        <div className="w-full sm:w-auto flex justify-center sm:justify-start">
+                            <PrimaryButton
+                                onClick={() => setIsCreating(true)}
+                                className="bg-secondary text-white hover:bg-primary transition-all duration-300 
+                        flex items-center justify-center 
+                        w-10 h-10 rounded-full sm:w-auto sm:h-auto sm:rounded-md 
+                        px-0 sm:px-5 py-0 sm:py-2 gap-0 sm:gap-2"
+                            >
+                                <span className="text-xl">+</span>
+                                <span className="hidden sm:inline">
+                                    Add Work Order
+                                </span>
+                            </PrimaryButton>
+                        </div>
                     </div>
                 </div>
             </header>
 
             {/* Sticky Tabs */}
-            <div className="sticky top-[64px] z-30 bg-whites pt-4 pb-2 shadow-sm sm:top-[72px]">
-                <div className="flex flex-wrap justify-center sm:justify-start gap-2 px-4">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`flex items-center justify-center gap-2 px-3 py-1.5 text-sm sm:text-base font-medium transition-colors duration-200 rounded-md border ${
-                                activeTab === tab
-                                    ? "bg-secondary text-white border-secondary"
-                                    : "bg-white text-black border-gray-300 hover:bg-gray-100"
-                            }`}
-                        >
-                            <span className="sm:hidden">{tabIcons[tab]}</span>
-                            <span className="hidden sm:inline">{tab}</span>
-                        </button>
-                    ))}
-                </div>
+            <div className="flex divide-x divide-gray-300 border border-gray-300 rounded-md overflow-hidden mx-4">
+                {tabs.map((tab) => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`w-full px-3 py-2 text-sm sm:text-base text-center font-medium transition-colors duration-200 ${
+                            activeTab === tab
+                                ? "bg-secondary text-white"
+                                : "bg-white text-black hover:bg-gray-100"
+                        }`}
+                    >
+                        {tab}
+                    </button>
+                ))}
             </div>
 
             {/* Table View (Desktop) */}
@@ -130,12 +146,24 @@ export default function WorkOrders({
                     <thead>
                         <tr className="bg-green-100 text-black">
                             <th className="border px-6 py-3 text-left">ID</th>
-                            <th className="border px-6 py-3 text-left">Description</th>
-                            <th className="border px-6 py-3 text-left">Location</th>
-                            <th className="border px-6 py-3 text-left">Status</th>
-                            <th className="border px-6 py-3 text-left">Priority</th>
-                            <th className="border px-6 py-3 text-left">Requested At</th>
-                            <th className="border px-6 py-3 text-left">Actions</th>
+                            <th className="border px-6 py-3 text-left">
+                                Description
+                            </th>
+                            <th className="border px-6 py-3 text-left">
+                                Location
+                            </th>
+                            <th className="border px-6 py-3 text-left">
+                                Status
+                            </th>
+                            <th className="border px-6 py-3 text-left">
+                                Priority
+                            </th>
+                            <th className="border px-6 py-3 text-left">
+                                Requested At
+                            </th>
+                            <th className="border px-6 py-3 text-left">
+                                Actions
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -157,12 +185,16 @@ export default function WorkOrders({
                                     {workOrder.priority}
                                 </td>
                                 <td className="border px-6 py-4">
-                                    {new Date(workOrder.requested_at).toLocaleDateString()}
+                                    {new Date(
+                                        workOrder.requested_at
+                                    ).toLocaleDateString()}
                                 </td>
                                 <td className="border px-6 py-4">
                                     <PrimaryButton
                                         className="bg-secondary"
-                                        onClick={() => setEditingWorkOrder(workOrder)}
+                                        onClick={() =>
+                                            setEditingWorkOrder(workOrder)
+                                        }
                                     >
                                         Edit
                                     </PrimaryButton>
@@ -181,15 +213,21 @@ export default function WorkOrders({
                         className="border rounded-lg shadow-md p-4 bg-white flex flex-col gap-4"
                     >
                         <div>
-                            <span className="text-sm font-semibold text-gray-500">ID:</span>
-                            <div className="text-base font-medium">{workOrder.id}</div>
+                            <span className="text-sm font-semibold text-gray-500">
+                                ID:
+                            </span>
+                            <div className="text-base font-medium">
+                                {workOrder.id}
+                            </div>
                         </div>
 
                         <div>
                             <span className="text-sm font-semibold text-gray-500">
                                 Description:
                             </span>
-                            <div className="text-base">{workOrder.report_description}</div>
+                            <div className="text-base">
+                                {workOrder.report_description}
+                            </div>
                         </div>
 
                         <div>
@@ -202,7 +240,9 @@ export default function WorkOrders({
                         </div>
 
                         <div>
-                            <span className="text-sm font-semibold text-gray-500">Status:</span>
+                            <span className="text-sm font-semibold text-gray-500">
+                                Status:
+                            </span>
                             <div className="text-base">{workOrder.status}</div>
                         </div>
 
@@ -210,7 +250,9 @@ export default function WorkOrders({
                             <span className="text-sm font-semibold text-gray-500">
                                 Priority:
                             </span>
-                            <div className="text-base">{workOrder.priority}</div>
+                            <div className="text-base">
+                                {workOrder.priority}
+                            </div>
                         </div>
 
                         <div>
@@ -218,7 +260,9 @@ export default function WorkOrders({
                                 Requested At:
                             </span>
                             <div className="text-base">
-                                {new Date(workOrder.requested_at).toLocaleDateString()}
+                                {new Date(
+                                    workOrder.requested_at
+                                ).toLocaleDateString()}
                             </div>
                         </div>
 
@@ -233,6 +277,16 @@ export default function WorkOrders({
                     </div>
                 ))}
             </div>
+
+            {/* Scroll Up Button */}
+            {showScrollUpButton && (
+                <button
+                    onClick={scrollToTop}
+                    className="fixed bottom-4 right-4 bg-primary text-white p-3 rounded-full shadow-lg"
+                >
+                    ↑
+                </button>
+            )}
         </AuthenticatedLayout>
     );
 }

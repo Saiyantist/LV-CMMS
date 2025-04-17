@@ -137,21 +137,21 @@ const SubmitRequestLayout: React.FC<SubmitRequestLayoutProps> = ({
                                 )}
 
                                 {/* Submit and Clear Buttons */}
-                                <div className="p-2 w-full flex justify-end space-x-4">
+                                <div className="p-2 w-full flex flex-wrap justify-center sm:justify-end gap-4">
                                     <button
                                         type="button"
                                         onClick={() => {
                                             setData("location", "");
                                             setData("description", "");
                                         }}
-                                        className="text-white bg-destructive border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg"
+                                        className="bg-white text-black px-12 py-2 rounded-3xl border-2 hover:bg-red-400 hover:text-white transition"
                                     >
                                         Clear
                                     </button>
 
                                     <button
                                         type="submit"
-                                        className={`text-white bg-secondary border-0 py-2 px-8 focus:outline-none rounded text-lg ${
+                                        className={`text-white bg-secondary border-0 py-2 px-6 sm:px-8 rounded-3xl text-base sm:text-lg transition ${
                                             isLoading
                                                 ? "cursor-not-allowed opacity-50"
                                                 : "hover:bg-primary"
@@ -160,7 +160,6 @@ const SubmitRequestLayout: React.FC<SubmitRequestLayoutProps> = ({
                                     >
                                         {isLoading ? "Submitting..." : "Submit"}
                                     </button>
-                                    
                                 </div>
                             </div>
                         </form>
