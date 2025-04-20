@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Head, router, useForm, usePage } from "@inertiajs/react";
 
 interface Location {
@@ -16,7 +16,7 @@ interface EditWorkOrderProps {
         label: string;
         priority: string;
         remarks: string;
-        images: string[]; // assuming images are returned as URLs
+        images: string[];
     };
     locations: Location[];
     user: {
@@ -24,7 +24,7 @@ interface EditWorkOrderProps {
         name: string;
         permissions: string[];
     };
-    onClose: () => void; // Function to close the modal
+    onClose: () => void;
 }
 
 export default function EditWorkOrderModal({
@@ -33,20 +33,29 @@ export default function EditWorkOrderModal({
     user,
     onClose,
 }: EditWorkOrderProps) {
-    const [deletedImages, setDeletedImages] = useState<string[]>([]); // For handling image deletions
-    const [selectedLocation, setSelectedLocation] = useState<
-        Location | "Other" | null
-    >(null);
-    const [typedLocation, setTypedLocation] = useState<string>(""); // For the "Other" location input
-    const [filteredLocations, setFilteredLocations] =
-        useState<Location[]>(locations); // For filtering the location list
+    const [deletedImages, setDeletedImages] = useState<string[]>([]);
+    const [typedLocation, setTypedLocation] = useState<string>("");
+    const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
+    const [showDropdown, setShowDropdown] = useState<boolean>(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
+    // const initialLocation =
+    //     locations.find(
+    //         (loc) => String(loc.id) === String(workOrder.location_id)
+    //     )?.name || workOrder.location_id;
+
+    const initialLocationName =
+        locations.find(
+            (loc) => String(loc.id) === String(workOrder.location_id)
+        )?.name || "";
+
     const { data, setData, put, errors, processing } = useForm({
-        location_id: workOrder.location_id,
+        // location_id: initialLocation,
+        location_id: workOrder.location_id, // <- use raw ID or string here
         report_description: workOrder.report_description,
-        images: [] as File[], // Store images as an array for uploads
+        images: [] as File[],
         status: workOrder.status,
         work_order_type: workOrder.work_order_type,
         label: workOrder.label,
@@ -56,16 +65,15 @@ export default function EditWorkOrderModal({
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-
         const formData = new FormData();
         formData.append("_method", "PUT");
         formData.append("location_id", data.location_id);
         formData.append("report_description", data.report_description);
 
-        data.images.forEach((image) => formData.append("images[]", image)); // Handle image files
+        data.images.forEach((image) => formData.append("images[]", image));
         deletedImages.forEach((image) =>
             formData.append("deleted_images[]", image)
-        ); // Sends deleted images
+        );
 
         if (isWorkOrderManager) {
             formData.append("status", data.status || "");
@@ -80,7 +88,7 @@ export default function EditWorkOrderModal({
             preserveScroll: true,
         });
         setTimeout(() => {
-            onClose(); // Close the modal after submission after realistic delay.
+            onClose();
         }, 600);
     };
 
@@ -92,26 +100,50 @@ export default function EditWorkOrderModal({
     };
 
     const removeImage = (imageUrl: string) => {
-        setDeletedImages((prev) => [...prev, imageUrl]); // Mark image for deletion
+        setDeletedImages((prev) => [...prev, imageUrl]);
     };
 
-    const handleLocationSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLocationInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setTypedLocation(value);
 
-        // Filter locations based on the typed input
-        const filtered = locations.filter((location) =>
-            location.name.toLowerCase().includes(value.toLowerCase())
+        const matchedLocation = locations.find(
+            (loc) => loc.name.toLowerCase() === value.toLowerCase()
+        );
+
+        // ✅ Submit ID if it's a known location, else submit raw string
+        if (matchedLocation) {
+            setData("location_id", String(matchedLocation.id));
+        } else {
+            setData("location_id", value);
+        }
+
+        const filtered = locations.filter((loc) =>
+            loc.name.toLowerCase().includes(value.toLowerCase())
         );
         setFilteredLocations(filtered);
     };
 
+    const handleSelectLocation = (loc: Location) => {
+        setTypedLocation(loc.name);
+        setData("location_id", String(loc.id)); // ✅ backend expects ID
+        setShowDropdown(false);
+    };
+
     useEffect(() => {
-        // Reset location if "Other" is selected, so user can type freely
-        if (selectedLocation === "Other") {
-            setData("location_id", typedLocation); // Keep typed location
-        }
-    }, [typedLocation, selectedLocation, setData]);
+        const handleClickOutside = (e: MouseEvent) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target as Node)
+            ) {
+                setShowDropdown(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     return (
         <div
@@ -127,86 +159,60 @@ export default function EditWorkOrderModal({
                         Edit Work Order
                     </h2>
 
-                    {/* Location Dropdown */}
-                    <div>
+                    {/* Location Search Input */}
+                    <div ref={dropdownRef}>
                         <label className="block text-sm font-medium text-gray-700">
                             Location
                         </label>
-                        <select
-                            value={data.location_id}
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                setData("location_id", value);
-                                setSelectedLocation(
-                                    value === "Other" ? "Other" : null
-                                );
-                            }}
+                        <input
+                            type="text"
                             className="border p-2 w-full rounded-md text-sm"
-                        >
-                            {locations.map((location) => (
-                                <option key={location.id} value={location.id}>
-                                    {location.name}
-                                </option>
-                            ))}
-                            <option value="Other">Other</option>
-                        </select>
+                            value={typedLocation}
+                            onChange={handleLocationInput}
+                            onFocus={() => {
+                                setFilteredLocations(locations);
+                                setShowDropdown(true);
+                            }}
+                            placeholder="Search or type a new location"
+                        />
                         {errors.location_id && (
-                            <p className="text-red-500 text-sm">
+                            <p className="text-red-500 text-sm mt-1">
                                 {errors.location_id}
                             </p>
                         )}
+
+                        {showDropdown && filteredLocations.length > 0 && (
+                            <ul className="mt-2 max-h-40 overflow-y-auto border rounded-md shadow bg-white z-10">
+                                {filteredLocations.map((loc) => (
+                                    <li
+                                        key={loc.id}
+                                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                                        onClick={() =>
+                                            handleSelectLocation(loc)
+                                        }
+                                    >
+                                        {loc.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
 
-                    {/* Show Text Input for "Other" Location */}
-                    {selectedLocation === "Other" && (
-                        <div className="mt-3">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Enter Custom Location
-                            </label>
-                            <input
-                                type="text"
-                                value={typedLocation}
-                                onChange={handleLocationSearch}
-                                className="border p-2 w-full rounded-md text-sm"
-                                placeholder="Enter a new location"
-                            />
+                    {/* Checker if typed location is custom */}
+                    {typedLocation &&
+                        !locations.some(
+                            (loc) =>
+                                loc.name.toLowerCase() ===
+                                typedLocation.toLowerCase()
+                        ) && (
+                            <p className="text-yellow-500 text-sm mt-2">
+                                Location does not exist. If this is correct,
+                                proceed with the custom location.
+                            </p>
+                        )}
 
-                            {/* Display filtered suggestions */}
-                            {typedLocation && filteredLocations.length > 0 && (
-                                <ul className="mt-2 max-h-40 overflow-y-auto border rounded-md">
-                                    {filteredLocations.map((location) => (
-                                        <li
-                                            key={location.id}
-                                            className="p-2 hover:bg-gray-200 cursor-pointer"
-                                            onClick={() => {
-                                                setTypedLocation(location.name);
-                                                setSelectedLocation(location);
-                                            }}
-                                        >
-                                            {location.name}
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-
-                            {/* Checker if the typed location already exists */}
-                            {typedLocation &&
-                                !filteredLocations.some(
-                                    (loc) =>
-                                        loc.name.toLowerCase() ===
-                                        typedLocation.toLowerCase()
-                                ) && (
-                                    <p className="text-yellow-500 text-sm mt-2">
-                                        Location does not exist. If this is
-                                        correct, proceed with the "Other"
-                                        option.
-                                    </p>
-                                )}
-                        </div>
-                    )}
-
-                    {/* Report Description */}
-                    <div className="mb-3">
+                    {/* Description */}
+                    <div>
                         <label className="block font-semibold">
                             Description
                         </label>
@@ -226,7 +232,7 @@ export default function EditWorkOrderModal({
                     </div>
 
                     {/* Image Upload */}
-                    <div className="mb-3">
+                    <div>
                         <label className="block font-semibold">
                             Upload Images
                         </label>
@@ -240,8 +246,6 @@ export default function EditWorkOrderModal({
                         {errors.images && (
                             <p className="text-red-500">{errors.images}</p>
                         )}
-
-                        {/* Image Previews */}
                         <div className="flex mt-2 flex-wrap gap-2">
                             {workOrder.images?.map((image, index) => (
                                 <div key={index} className="relative">
@@ -264,7 +268,6 @@ export default function EditWorkOrderModal({
 
                     {isWorkOrderManager && (
                         <>
-                            {/* Status */}
                             <div>
                                 <label className="block font-semibold">
                                     Status
@@ -285,7 +288,6 @@ export default function EditWorkOrderModal({
                                 </select>
                             </div>
 
-                            {/* Work Order Type */}
                             <div>
                                 <label className="block font-semibold">
                                     Work Order Type
@@ -312,7 +314,6 @@ export default function EditWorkOrderModal({
                                 </select>
                             </div>
 
-                            {/* Label */}
                             <div>
                                 <label className="block font-semibold">
                                     Label
@@ -332,7 +333,6 @@ export default function EditWorkOrderModal({
                                 </select>
                             </div>
 
-                            {/* Priority */}
                             <div>
                                 <label className="block font-semibold">
                                     Priority
@@ -347,12 +347,12 @@ export default function EditWorkOrderModal({
                                     <option value="Low">Low</option>
                                     <option value="Medium">Medium</option>
                                     <option value="High">High</option>
+                                    <option value="Critical"> Critical </option>
                                 </select>
                             </div>
                         </>
                     )}
 
-                    {/* Buttons */}
                     <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
                         <button
                             type="button"

@@ -68,6 +68,38 @@ export default function WorkOrders({
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "Pending":
+                return "bg-yellow-100 text-yellow-800"; // Soft Yellow for Pending
+            case "Assigned":
+                return "bg-blue-200 text-blue-800"; // Light Blue for Assigned
+            case "Ongoing":
+                return "bg-green-200 text-green-800"; // Soft Green for Ongoing
+            case "Overdue":
+                return "bg-red-200 text-red-800"; // Light Red for Overdue (Critical)
+            case "Completed":
+                return "bg-teal-200 text-teal-800"; // Light Teal for Completed
+            case "Cancelled":
+                return "bg-red-300 text-red-900"; // Dark Red for Cancelled (Critical)
+            default:
+                return "bg-gray-200 text-gray-800"; // Default Gray for unknown status
+        }
+    };
+
+    const getPriorityColor = (priority: string) => {
+        switch (priority) {
+            case "Low":
+                return "bg-green-100 text-green-700"; // Light Green for Low
+            case "Medium":
+                return "bg-yellow-100 text-yellow-700"; // Light Yellow for Medium
+            case "High":
+                return "bg-red-100 text-red-700"; // Light Red for High
+            default:
+                return "bg-gray-200 text-gray-700"; // Default Gray for unknown priority
+        }
+    };
+
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
@@ -154,7 +186,7 @@ export default function WorkOrders({
             <div className="hidden md:block overflow-x-auto bg-white shadow-lg rounded-md mt-4">
                 <table className="w-full table-auto border-collapse text-sm text-gray-700">
                     <thead>
-                        <tr className="bg-green-100 text-black">
+                        <tr className="bg-secondary text-white">
                             <th className="border px-6 py-3 text-left">ID</th>
                             <th className="border px-6 py-3 text-left">
                                 Description
@@ -188,10 +220,18 @@ export default function WorkOrders({
                                 <td className="border px-6 py-4">
                                     {workOrder.location?.name || "N/A"}
                                 </td>
-                                <td className="border px-6 py-4">
+                                <td
+                                    className={`border px-6 py-4 ${getStatusColor(
+                                        workOrder.status
+                                    )}`}
+                                >
                                     {workOrder.status}
                                 </td>
-                                <td className="border px-6 py-4">
+                                <td
+                                    className={`border px-6 py-4 ${getPriorityColor(
+                                        workOrder.priority
+                                    )}`}
+                                >
                                     {workOrder.priority}
                                 </td>
                                 <td className="border px-6 py-4">
@@ -253,14 +293,24 @@ export default function WorkOrders({
                             <span className="text-sm font-semibold text-gray-500">
                                 Status:
                             </span>
-                            <div className="text-base">{workOrder.status}</div>
+                            <div
+                                className={`text-base ${getStatusColor(
+                                    workOrder.status
+                                )}`}
+                            >
+                                {workOrder.status}
+                            </div>
                         </div>
 
                         <div>
                             <span className="text-sm font-semibold text-gray-500">
                                 Priority:
                             </span>
-                            <div className="text-base">
+                            <div
+                                className={`text-base ${getPriorityColor(
+                                    workOrder.priority
+                                )}`}
+                            >
                                 {workOrder.priority}
                             </div>
                         </div>
