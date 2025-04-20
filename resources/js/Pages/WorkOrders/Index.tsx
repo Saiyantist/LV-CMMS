@@ -98,33 +98,28 @@ export default function WorkOrders({
             {/* Header */}
             <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                 <div className="bg-white shadow-sm sm:rounded-lg">
-                    <div className="p-6 flex items-center justify-between sm:justify-start text-black">
-                        {/* Title: Left-aligned on larger screens, centered on small screens */}
-                        <h1 className="text-2xl font-semibold mr-6 sm:text-left text-center sm:w-auto w-full">
+                    <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 sm:gap-6 text-black">
+                        {/* Title */}
+                        <h1 className="text-2xl font-semibold text-center sm:text-left">
                             Work Orders
                         </h1>
 
-                        {/* Button: Always at the right side, but centered on small screens */}
+                        {/* Button */}
                         <div className="w-full sm:w-auto flex justify-center sm:justify-start">
                             <PrimaryButton
                                 onClick={() => setIsCreating(true)}
                                 className="bg-secondary text-white hover:bg-primary transition-all duration-300 
-                        flex items-center justify-center 
-                        w-10 h-10 rounded-full sm:w-auto sm:h-auto sm:rounded-md 
-                        px-0 sm:px-5 py-0 sm:py-2 gap-0 sm:gap-2"
+                        text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
                             >
-                                <span className="text-xl">+</span>
-                                <span className="hidden sm:inline">
-                                    Add Work Order
-                                </span>
+                                Add Work Order
                             </PrimaryButton>
                         </div>
                     </div>
                 </div>
             </header>
 
-            {/* Sticky Tabs */}
-            <div className="flex divide-x divide-gray-300 border border-gray-300 rounded-md overflow-hidden mx-4">
+            {/* Tabs - Desktop View */}
+            <div className="hidden md:flex divide-x divide-gray-300 border border-gray-300 rounded-md overflow-hidden mx-4 mt-4">
                 {tabs.map((tab) => (
                     <button
                         key={tab}
@@ -138,6 +133,21 @@ export default function WorkOrders({
                         {tab}
                     </button>
                 ))}
+            </div>
+
+            {/* Tabs - Mobile Dropdown */}
+            <div className="md:hidden flex justify-end px-4 mt-4">
+                <select
+                    value={activeTab}
+                    onChange={(e) => setActiveTab(e.target.value)}
+                    className="border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-secondary focus:border-secondary"
+                >
+                    {tabs.map((tab) => (
+                        <option key={tab} value={tab}>
+                            {tab}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             {/* Table View (Desktop) */}
@@ -282,7 +292,7 @@ export default function WorkOrders({
             {showScrollUpButton && (
                 <button
                     onClick={scrollToTop}
-                    className="fixed bottom-4 right-4 bg-primary text-white p-3 rounded-full shadow-lg"
+                    className="fixed bottom-4 right-4 bg-secondary text-white p-3 rounded-full shadow-lg"
                 >
                     ↑
                 </button>

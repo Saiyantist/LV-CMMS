@@ -193,27 +193,38 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 </ul>
             </div>
 
-            {/* --- Mobile Navbar (Unified Layout) --- */}
-            {/* --- Mobile Navbar (Updated Layout) --- */}
+            {/* --- Mobile Navbar (Updated Layout with Active Tab Styling) --- */}
             <div className="md:hidden fixed top-0 left-0 w-full bg-primary text-white shadow-md z-50">
                 <div className="flex items-center justify-between px-4 py-3 h-14">
                     <Link
                         href={route("dashboard")}
-                        className="flex flex-col items-center text-sm hover:text-opacity-80"
+                        className={`flex flex-col items-center text-sm px-3 py-1 rounded-md transition ${
+                            currentRoute === "dashboard"
+                                ? "bg-white text-primary"
+                                : "text-white hover:text-opacity-80"
+                        }`}
                     >
                         <Home size={20} />
                         Dashboard
                     </Link>
                     <Link
                         href={route("profile.edit")}
-                        className="flex flex-col items-center text-sm hover:text-opacity-80"
+                        className={`flex flex-col items-center text-sm px-3 py-1 rounded-md transition ${
+                            currentRoute === "profile.edit"
+                                ? "bg-white text-primary"
+                                : "text-white hover:text-opacity-80"
+                        }`}
                     >
                         <UserCircle size={20} />
                         Profile
                     </Link>
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="focus:outline-none flex flex-col items-center text-sm"
+                        className={`focus:outline-none flex flex-col items-center text-sm px-3 py-1 rounded-md transition ${
+                            mobileMenuOpen
+                                ? "bg-white text-primary"
+                                : "text-white hover:text-opacity-80"
+                        }`}
                     >
                         <Menu size={22} />
                         Menu
