@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Head } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
-import { Menu } from "@headlessui/react";
 
 const AssetManagement: React.FC = () => {
     const assets = [
@@ -48,53 +47,89 @@ const AssetManagement: React.FC = () => {
             <Head title="Asset Management" />
 
             <div className="p-4">
-                <h1 className="text-2xl font-semibold mb-4">Asset Management</h1>
+                <h1 className="text-2xl font-semibold mb-4">
+                    Asset Management
+                </h1>
 
-                {/* Large screen table */}
+                {/* Desktop Table View */}
                 <div className="hidden sm:block overflow-x-auto">
-                    <table className="min-w-full table-auto border border-gray-200">
-                        <thead className="bg-gray-100 dark:bg-gray-800">
+                    <table className="min-w-full table-auto border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                        <thead className="bg-secondary dark:bg-gray-800 text-white dark:text-white">
                             <tr>
-                                <th className="p-2 text-center">
+                                <th className="p-3 text-center">
                                     <input
                                         type="checkbox"
                                         onChange={handleSelectAll}
-                                        checked={selectedAssets.length === assets.length}
+                                        checked={
+                                            selectedAssets.length ===
+                                            assets.length
+                                        }
+                                        className="accent-primary"
                                     />
                                 </th>
-                                <th className="text-left p-2 text-sm font-semibold">ID</th>
-                                <th className="text-left p-2 text-sm font-semibold">Asset Name</th>
-                                <th className="text-left p-2 text-sm font-semibold">Specification</th>
-                                <th className="text-left p-2 text-sm font-semibold">Location</th>
-                                <th className="text-left p-2 text-sm font-semibold">Condition</th>
-                                <th className="text-right p-2 text-sm font-semibold">Date Acquired</th>
-                                <th className="text-right p-2 text-sm font-semibold">Last Maintenance</th>
-                                <th className="text-center p-2 text-sm font-semibold">Action</th>
+                                <th className="text-auto border p-3 text-sm font-semibold">
+                                    ID
+                                </th>
+                                <th className="text-auto border p-3 text-sm font-semibold">
+                                    Asset Name
+                                </th>
+                                <th className="text-auto border p-3 text-sm font-semibold">
+                                    Specification
+                                </th>
+                                <th className="text-auto border p-3 text-sm font-semibold">
+                                    Location
+                                </th>
+                                <th className="text-auto border p-3 text-sm font-semibold">
+                                    Condition
+                                </th>
+                                <th className="text-auto border p-3 text-sm font-semibold">
+                                    Date Acquired
+                                </th>
+                                <th className="text-auto border border p-3 text-sm font-semibold">
+                                    Last Maintenance
+                                </th>
+                                <th className="text-auto border p-3 text-sm font-semibold">
+                                    Action
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             {assets.map((asset) => (
-                                <tr key={asset.id} className="border-b">
-                                    <td className="p-2 text-center">
+                                <tr
+                                    key={asset.id}
+                                    className="border-b hover:bg-gray-50 transition-colors"
+                                >
+                                    <td className="p-3 text-center">
                                         <input
                                             type="checkbox"
-                                            checked={selectedAssets.includes(asset.id)}
-                                            onChange={() => handleCheckboxChange(asset.id)}
+                                            checked={selectedAssets.includes(
+                                                asset.id
+                                            )}
+                                            onChange={() =>
+                                                handleCheckboxChange(asset.id)
+                                            }
+                                            className="accent-primary"
                                         />
                                     </td>
-                                    <td className="p-2">{asset.id}</td>
-                                    <td className="p-2">{asset.name}</td>
-                                    <td className="p-2">{asset.specification}</td>
-                                    <td className="p-2">{asset.location}</td>
-                                    <td className="p-2">{asset.condition}</td>
-                                    <td className="p-2 text-right">{asset.dateAcquired}</td>
-                                    <td className="p-2 text-right">{asset.lastMaintenance}</td>
-                                    <td className="p-4 text-center">
-                                        <div className="flex justify-center items-center gap-2">
-                                            <button className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
+                                    <td className="p-3">{asset.id}</td>
+                                    <td className="p-3">{asset.name}</td>
+                                    <td className="p-3">
+                                        {asset.specification}
+                                    </td>
+                                    <td className="p-3">{asset.location}</td>
+                                    <td className="p-3">{asset.condition}</td>
+                                    <td className="p-3 text-right">
+                                        {asset.dateAcquired}
+                                    </td>
+                                    <td className="p-3 text-right">
+                                        {asset.lastMaintenance}
+                                    </td>
+                                    <td className="p-3 text-center">
+                                        <div className="flex justify-center gap-2">
+                                            <button className="bg-secondary text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-700 transition">
                                                 View
                                             </button>
-                                            <button className="bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
+                                            <button className="bg-destructive text-white px-3 py-1.5 text-sm rounded-md hover:bg-red-700 transition">
                                                 Delete
                                             </button>
                                         </div>
@@ -105,70 +140,73 @@ const AssetManagement: React.FC = () => {
                     </table>
                 </div>
 
-                {/* Mobile card view */}
-                <div className="sm:hidden flex flex-col gap-4">
+                {/* Mobile Card View */}
+                <div className="sm:hidden flex flex-col gap-4 mt-4">
                     {assets.map((asset) => (
                         <div
                             key={asset.id}
-                            className="bg-white border rounded-xl p-4 shadow-sm relative"
+                            className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
                         >
-                            {/* Checkbox at top-right */}
+                            {/* Top-right Checkbox */}
                             <div className="absolute top-3 right-3">
                                 <input
                                     type="checkbox"
                                     checked={selectedAssets.includes(asset.id)}
-                                    onChange={() => handleCheckboxChange(asset.id)}
+                                    onChange={() =>
+                                        handleCheckboxChange(asset.id)
+                                    }
+                                    className="accent-primary"
                                 />
                             </div>
 
-                            <div className="space-y-1 pr-6">
-                                <p><span className="font-semibold">ID:</span> {asset.id}</p>
-                                <p><span className="font-semibold">Name:</span> {asset.name}</p>
-                                <p><span className="font-semibold">Spec:</span> {asset.specification}</p>
-                                <p><span className="font-semibold">Location:</span> {asset.location}</p>
-                                <p><span className="font-semibold">Condition:</span> {asset.condition}</p>
-                                <p><span className="font-semibold">Acquired:</span> {asset.dateAcquired}</p>
-                                <p><span className="font-semibold">Last Maintenance:</span> {asset.lastMaintenance}</p>
+                            {/* Info Section */}
+                            <div className="space-y-1 pr-8 text-sm text-gray-800">
+                                <p>
+                                    <span className="font-medium">ID:</span>{" "}
+                                    {asset.id}
+                                </p>
+                                <p>
+                                    <span className="font-medium">Name:</span>{" "}
+                                    {asset.name}
+                                </p>
+                                <p>
+                                    <span className="font-medium">Spec:</span>{" "}
+                                    {asset.specification}
+                                </p>
+                                <p>
+                                    <span className="font-medium">
+                                        Location:
+                                    </span>{" "}
+                                    {asset.location}
+                                </p>
+                                <p>
+                                    <span className="font-medium">
+                                        Condition:
+                                    </span>{" "}
+                                    {asset.condition}
+                                </p>
+                                <p>
+                                    <span className="font-medium">
+                                        Acquired:
+                                    </span>{" "}
+                                    {asset.dateAcquired}
+                                </p>
+                                <p>
+                                    <span className="font-medium">
+                                        Last Maintenance:
+                                    </span>{" "}
+                                    {asset.lastMaintenance}
+                                </p>
                             </div>
 
-                            {/* 3-dots dropdown at bottom */}
-                            <div className="mt-4">
-                                <Menu as="div" className="relative inline-block text-left w-full">
-                                    <div>
-                                        <Menu.Button className="w-full justify-center inline-flex items-center px-4 py-2 text-sm font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 rounded-md">
-                                            ⋮
-                                        </Menu.Button>
-                                    </div>
-
-                                    <Menu.Items className="absolute bottom-full right-0 mb-2 w-36 origin-bottom-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                                        <div className="py-1">
-                                            <Menu.Item>
-                                                {({ active }) => (
-                                                    <button
-                                                        onClick={() => console.log("View")}
-                                                        className={`${
-                                                            active ? "bg-gray-100" : ""
-                                                        } block w-full px-4 py-2 text-sm text-left text-black`}
-                                                    >
-                                                        View
-                                                    </button>
-                                                )}
-                                            </Menu.Item>
-                                            <Menu.Item>
-                                                {({ active }) => (
-                                                    <button
-                                                        onClick={() => console.log("Delete")}
-                                                        className={`${
-                                                            active ? "bg-gray-100" : ""
-                                                        } block w-full px-4 py-2 text-sm text-left text-red-600`}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                )}
-                                            </Menu.Item>
-                                        </div>
-                                    </Menu.Items>
-                                </Menu>
+                            {/* Action Buttons */}
+                            <div className="mt-4 flex justify-between gap-2">
+                                <button className="flex-1 bg-secondary text-white px-3 py-2 text-sm rounded-md hover:bg-blue-700 transition">
+                                    View
+                                </button>
+                                <button className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition">
+                                    Delete
+                                </button>
                             </div>
                         </div>
                     ))}

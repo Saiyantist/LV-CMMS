@@ -151,20 +151,25 @@ export default function WorkOrders({
             </header>
 
             {/* Tabs - Desktop View */}
-            <div className="hidden md:flex divide-x divide-gray-300 border border-gray-300 rounded-md overflow-hidden mx-4 mt-4">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`w-full px-3 py-2 text-sm sm:text-base text-center font-medium transition-colors duration-200 ${
-                            activeTab === tab
-                                ? "bg-secondary text-white"
-                                : "bg-white text-black hover:bg-gray-100"
-                        }`}
-                    >
-                        {tab}
-                    </button>
-                ))}
+            <div className="hidden md:flex mt-4 pl-4">
+                <div className="flex divide-x divide-gray-300 border-t border-x border-gray-300 bg-white rounded-t-md overflow-hidden">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-4 py-2 text-sm sm:text-base font-medium transition-colors duration-200 whitespace-nowrap
+                    ${
+                        activeTab === tab
+                            ? "bg-secondary text-white"
+                            : "bg-white text-black hover:bg-gray-100"
+                    }
+                    rounded-t-md
+                `}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Tabs - Mobile Dropdown */}
@@ -187,23 +192,23 @@ export default function WorkOrders({
                 <table className="w-full table-auto border-collapse text-sm text-gray-700">
                     <thead>
                         <tr className="bg-secondary text-white">
-                            <th className="border px-6 py-3 text-left">ID</th>
-                            <th className="border px-6 py-3 text-left">
+                            <th className="border px-6 py-3 text-auto">ID</th>
+                            <th className="border px-6 py-3 text-auto">
                                 Description
                             </th>
-                            <th className="border px-6 py-3 text-left">
+                            <th className="border px-6 py-3 text-auto">
                                 Location
                             </th>
-                            <th className="border px-6 py-3 text-left">
+                            <th className="border px-6 py-3 text-auto">
                                 Status
                             </th>
-                            <th className="border px-6 py-3 text-left">
+                            <th className="border px-6 py-3 text-auto">
                                 Priority
                             </th>
-                            <th className="border px-6 py-3 text-left">
+                            <th className="border px-6 py-3 text-auto">
                                 Requested At
                             </th>
-                            <th className="border px-6 py-3 text-left">
+                            <th className="border px-6 py-3 text-auto">
                                 Actions
                             </th>
                         </tr>
@@ -350,3 +355,4 @@ export default function WorkOrders({
         </AuthenticatedLayout>
     );
 }
+ 
