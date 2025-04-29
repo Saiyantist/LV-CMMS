@@ -146,6 +146,7 @@ export default function WorkOrders({
                                 Add Work Order
                             </PrimaryButton>
                         </div>
+                        
                     </div>
                 </div>
             </header>
@@ -355,4 +356,3 @@ export default function WorkOrders({
         </AuthenticatedLayout>
     );
 }
- 

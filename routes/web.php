@@ -66,6 +66,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
+// For Testing Purposes
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('/work-orders/submit-request-layout', function () {
+//         return Inertia::render('WorkOrders/SubmitRequestLayout');
+//     })->name('work-orders.submit-request-layout');
+// });
+
+
 
 /**
  * User Role Management - for Role-based Access Control (RBAC)

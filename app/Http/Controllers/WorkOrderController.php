@@ -185,6 +185,17 @@ class WorkOrderController extends Controller
         return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
     }
 
+
+//     public function rules(): array
+// {
+//     return [
+//         'report_description' => ['required', 'string', 'max:1000'],
+//         'location_id' => ['required', 'exists:locations,id'],
+//         'images.*' => ['nullable', 'image', 'max:5120'], // optional, individual image validation
+//     ];
+// }
+
+
     /**
      * Remove the specified resource from storage.
      */
