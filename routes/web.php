@@ -7,9 +7,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-    
+use App\Models\Location;
+
 Route::get('/', function () {
-    if (Auth::user() && Auth::user()->roles->isnotempty()){
+    if (Auth::user() && Auth::user()->roles->isnotempty()) {
         return redirect()->route('dashboard');
     }
     return Inertia::render('Home', [
@@ -17,7 +18,7 @@ Route::get('/', function () {
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
-        'auth' => [ 'user' => Auth::check() ? Auth::user()->load('roles') : null]
+        'auth' => ['user' => Auth::check() ? Auth::user()->load('roles') : null]
     ]);
 });
 
@@ -25,14 +26,14 @@ Route::get('/', function () {
  *  Guest Routes
  */
 Route::get('/awaiting-approval', function () {
-    if (Auth::user()->roles->isnotempty()){
+    if (Auth::user()->roles->isnotempty()) {
         return redirect()->route('dashboard');
     }
     return Inertia::render('AwaitingApproval');
 })->middleware('auth', 'verified');
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard', [ 'auth' => [ 'user' => Auth::user()->load('roles')]]);
+    return Inertia::render('Dashboard', ['auth' => ['user' => Auth::user()->load('roles')]]);
 })->middleware(['auth', 'verified', 'hasRole'])->name('dashboard');
 
 /**
@@ -68,10 +69,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // For Testing Purposes
 // Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::get('/work-orders/submit-request-layout', function () {
-//         return Inertia::render('WorkOrders/SubmitRequestLayout');
-//     })->name('work-orders.submit-request-layout');
+//     Route::get('/work-orders/testing', function () {
+//         return Inertia::render('WorkOrders/Testing');
+//     })->name('work-orders.testing');
 // });
+
+
 
 
 
@@ -86,8 +89,9 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'restrict_external', 'hasRole', 'verified'])->group(function () {
     Route::get('/work-orders/submit-request', function () {
-        return Inertia::render('WorkOrders/SubmitRequest');})->name('work-orders.submit-request');
+        return Inertia::render('WorkOrders/SubmitRequest');
+    })->name('work-orders.submit-request');
     Route::resource('work-orders', WorkOrderController::class);
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

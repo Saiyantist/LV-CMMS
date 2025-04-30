@@ -357,13 +357,13 @@ export default function EditWorkOrderModal({
                         <button
                             type="button"
                             onClick={onClose}
-                            className="bg-gray-300 text-gray-700 py-2 px-4 rounded-md w-full sm:w-auto"
+                            className="bg-gray-300 text-black hover:bg-destructive hover:text-white py-2 px-4 rounded-md w-full sm:w-auto"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="bg-blue-500 text-white py-2 px-4 rounded-md w-full sm:w-auto"
+                            className="bg-secondary hover:bg-primary text-white py-2 px-4 rounded-md w-full sm:w-auto"
                             disabled={processing}
                         >
                             {processing ? "Saving..." : "Update"}

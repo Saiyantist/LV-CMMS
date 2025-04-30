@@ -16,7 +16,11 @@ interface AddAssetModalProps {
     }) => void;
 }
 
-const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }) => {
+const AddAssetModal: React.FC<AddAssetModalProps> = ({
+    isOpen,
+    onClose,
+    onSave,
+}) => {
     const [name, setName] = useState("");
     const [specification, setSpecification] = useState("");
     const [location, setLocation] = useState("");
@@ -42,7 +46,7 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }
         try {
             // Trigger success toast first
             toast.success("Asset saved successfully!");
-            
+
             // Simulate saving asset and then close modal after toast
             setTimeout(() => {
                 onSave({
@@ -68,10 +72,14 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-md w-full sm:w-80 md:w-96 max-h-[90vh] overflow-y-auto">
-                <h2 className="text-xl font-semibold mb-4">Add New Asset</h2>
+                <h2 className="text-xl font-semibold mb-4 text-center">
+                    Add New Asset
+                </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Asset Name</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Asset Name
+                        </label>
                         <input
                             type="text"
                             value={name}
@@ -82,7 +90,9 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Specification</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Specification
+                        </label>
                         <select
                             value={specification}
                             onChange={(e) => setSpecification(e.target.value)}
@@ -96,7 +106,9 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Location</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Location
+                        </label>
                         <select
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
@@ -110,7 +122,9 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Condition</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Condition
+                        </label>
                         <select
                             value={condition}
                             onChange={(e) => setCondition(e.target.value)}
@@ -124,7 +138,9 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Date Acquired</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Date Acquired
+                        </label>
                         <input
                             type="date"
                             value={dateAcquired}
@@ -135,7 +151,9 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Last Maintenance</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Last Maintenance
+                        </label>
                         <input
                             type="date"
                             value={lastMaintenance}
@@ -146,7 +164,9 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }
 
                     {/* Image Upload Field */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Asset Image</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Asset Image
+                        </label>
                         <input
                             type="file"
                             accept="image/*"
@@ -159,11 +179,15 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }
                         <button
                             type="button"
                             onClick={onClose}
-                            className="bg-destructive text-white px-4 py-2 rounded-md w-full sm:w-auto"
+                            className="bg-white text-black border border-gray-300 px-4 py-2 rounded-md w-full sm:w-auto hover:bg-destructive hover:text-white"
                         >
                             Cancel
                         </button>
-                        <PrimaryButton type="submit" className="w-full sm:w-auto bg-secondary hover:bg-primary">
+
+                        <PrimaryButton
+                            type="submit"
+                            className="justify-center w-full sm:w-auto bg-secondary hover:bg-primary"
+                        >
                             Save Asset
                         </PrimaryButton>
                     </div>
@@ -173,19 +197,21 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose, onSave }
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h2 className="text-lg font-semibold mb-4">Are you sure you want to save this asset?</h2>
+                        <h2 className="text-lg font-semibold mb-4">
+                            Are you sure you want to save this asset?
+                        </h2>
                         <div className="flex justify-between gap-4">
                             <button
                                 type="button"
                                 onClick={() => setShowConfirmModal(false)}
-                                className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                                className="bg-white text-black border border-gray-500 px-4 py-2 rounded-md hover:bg-destructive hover:text-white"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="button"
                                 onClick={handleConfirmSubmit}
-                                className="bg-green-500 text-white px-4 py-2 rounded-md"
+                                className="bg-secondary hover:bg-primary text-white px-4 py-2 rounded-md"
                             >
                                 Confirm
                             </button>

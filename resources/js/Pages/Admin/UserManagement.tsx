@@ -61,9 +61,11 @@ export default function ManageRoles({ users, roles, auth }: UserRoleProps) {
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl leading-tight text-gray-800 dark:text-gray-200">
-                    User Management!
-                </h2>
+                <div className="overflow-hidden bg-white shadow-sm rounded-lg">
+                    <div className="p-6 text-black text-lg sm:text-xl">
+                        User Management
+                    </div>
+                </div>
             }
         >
             <Head title="User Management" />
