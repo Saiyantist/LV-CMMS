@@ -1,43 +1,25 @@
 import React from "react";
 import { usePage } from "@inertiajs/react"; // To access the current user
 
-interface WOSubmittedModalProps {
+interface ViewAssetModalProps {
     data: {
-        date: string;
-        requestedBy: string;
+        id: number;
+        name: string;
+        specification: string;
         location: string;
-        description: string;
-        photos: File[];
+        condition: string;
+        dateAcquired: string;
+        lastMaintenance: string;
     };
-    filePreviews: { url: string; name: string }[];
     onClose: () => void;
-    onSubmitAnotherRequest: () => void;
-    onViewWorkOrderList: () => void;
 }
 
-const WOSubmittedModal: React.FC<WOSubmittedModalProps> = ({
+const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
     data,
-    filePreviews,
     onClose,
-    onSubmitAnotherRequest,
-    onViewWorkOrderList,
 }) => {
     const user = usePage().props.auth.user;
     const currentDate = new Date().toLocaleDateString();
-
-    const handleViewWorkOrderList = () => {
-        // Store the work order data in sessionStorage temporarily
-        sessionStorage.setItem(
-            "newWorkOrder",
-            JSON.stringify({
-                dateRequested: currentDate,
-                location: data.location,
-                description: data.description,
-                status: "Pending", // Assuming a "Pending" status
-            })
-        );
-        onViewWorkOrderList(); // Trigger the action to view the Work Order List page
-    };
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -80,19 +62,24 @@ const WOSubmittedModal: React.FC<WOSubmittedModalProps> = ({
                 </div>
 
                 <h2 className="text-xl font-semibold mb-4 text-center">
-                    Work Order Submitted Successfully
+                    Asset Details
                 </h2>
 
                 <div className="space-y-4 text-sm text-gray-700">
                     <div className="border p-4 rounded-md">
                         <div className="flex mb-2">
-                            <strong className="w-1/3">Date Requested:</strong>
-                            <span className="ml-2">{currentDate}</span>
+                            <strong className="w-1/3">ID:</strong>
+                            <span className="ml-2">{data.id}</span>
                         </div>
 
                         <div className="flex mb-2">
-                            <strong className="w-1/3">Requested By:</strong>
-                            <span className="ml-2">{`${user.first_name} ${user.last_name}`}</span>
+                            <strong className="w-1/3">Asset Name:</strong>
+                            <span className="ml-2">{data.name}</span>
+                        </div>
+
+                        <div className="flex mb-2">
+                            <strong className="w-1/3">Specification:</strong>
+                            <span className="ml-2">{data.specification}</span>
                         </div>
 
                         <div className="flex mb-2">
@@ -101,43 +88,28 @@ const WOSubmittedModal: React.FC<WOSubmittedModalProps> = ({
                         </div>
 
                         <div className="flex mb-2">
-                            <strong className="w-1/3">Description:</strong>
-                            <span className="ml-2">
-                                {data.description || "N/A"}
-                            </span>
+                            <strong className="w-1/3">Condition:</strong>
+                            <span className="ml-2">{data.condition}</span>
                         </div>
 
                         <div className="flex mb-2">
-                            <strong className="w-1/3">Attachments:</strong>
-                            <div className="ml-2 flex space-x-2">
-                                {filePreviews.length > 0
-                                    ? filePreviews.map((file, index) => (
-                                          <img
-                                              key={index}
-                                              src={file.url}
-                                              alt={file.name}
-                                              className="w-20 h-20 object-cover rounded inline-block"
-                                          />
-                                      ))
-                                    : "N/A"}
-                            </div>
+                            <strong className="w-1/3">Date Acquired:</strong>
+                            <span className="ml-2">{data.dateAcquired}</span>
+                        </div>
+
+                        <div className="flex mb-2">
+                            <strong className="w-1/3">Last Maintenance:</strong>
+                            <span className="ml-2">{data.lastMaintenance}</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex justify-between sm:justify-end space-x-4 mt-6">
-                    {/* <button
-                        onClick={onSubmitAnotherRequest}
-                        className="w-full sm:w-auto text-white bg-bluebutton border-0 py-2 px-4 focus:outline-none hover:bg-blue-600 rounded-full text-sm"
-                    >
-                        Submit Another Request
-                    </button> */}
-
                     <button
-                        onClick={handleViewWorkOrderList} // Use the handler to store data and navigate
+                        onClick={onClose}
                         className="w-full sm:w-auto text-white bg-secondary border-0 py-2 px-4 focus:outline-none hover:bg-primary rounded-full text-sm"
                     >
-                        View Work Order List
+                        Close
                     </button>
                 </div>
             </div>
@@ -145,4 +117,4 @@ const WOSubmittedModal: React.FC<WOSubmittedModalProps> = ({
     );
 };
 
-export default WOSubmittedModal;
+export default ViewAssetModal;

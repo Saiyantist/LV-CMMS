@@ -47,7 +47,27 @@ const PreventiveMaintenance: React.FC = () => {
             <Head title="Preventive Maintenance" />
 
             <div className="p-4">
-                <h1 className="text-2xl font-semibold mb-4">Preventive Maintenance</h1>
+                <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+                    <div className="bg-white shadow-sm sm:rounded-lg">
+                        <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 sm:gap-6 text-black">
+                            {/* Title */}
+                            <h1 className="text-2xl font-semibold text-center sm:text-left">
+                                Preventive Maintenance
+                            </h1>
+
+                            {/* Button */}
+                            {/* <div className="w-full sm:w-auto flex sm:ml-4 justify-center sm:justify-start">
+                                <PrimaryButton
+                                    onClick={() => setIsCreating(true)}
+                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 
+                                            text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
+                                >
+                                    Add an Asset
+                                </PrimaryButton>
+                            </div> */}
+                        </div>
+                    </div>
+                </header>
 
                 {/* Desktop Table */}
                 <div className="hidden sm:block overflow-x-auto">
@@ -58,18 +78,39 @@ const PreventiveMaintenance: React.FC = () => {
                                     <input
                                         type="checkbox"
                                         onChange={handleSelectAll}
-                                        checked={selectedAssets.length === assets.length}
+                                        checked={
+                                            selectedAssets.length ===
+                                            assets.length
+                                        }
                                     />
                                 </th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">ID</th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">Date Submitted</th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">Asset Name</th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">Description</th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">Assign To</th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">Status</th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">Next Schedule</th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">Last Maintenance</th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">Action</th>
+                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
+                                    ID
+                                </th>
+                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
+                                    Date Submitted
+                                </th>
+                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
+                                    Asset Name
+                                </th>
+                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
+                                    Description
+                                </th>
+                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
+                                    Assign To
+                                </th>
+                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
+                                    Status
+                                </th>
+                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
+                                    Next Schedule
+                                </th>
+                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
+                                    Last Maintenance
+                                </th>
+                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
+                                    Action
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -78,18 +119,30 @@ const PreventiveMaintenance: React.FC = () => {
                                     <td className="p-2 text-center">
                                         <input
                                             type="checkbox"
-                                            checked={selectedAssets.includes(asset.id)}
-                                            onChange={() => handleCheckboxChange(asset.id)}
+                                            checked={selectedAssets.includes(
+                                                asset.id
+                                            )}
+                                            onChange={() =>
+                                                handleCheckboxChange(asset.id)
+                                            }
                                         />
                                     </td>
                                     <td className="p-2">{asset.id}</td>
-                                    <td className="p-2">{asset.dateAcquired}</td>
+                                    <td className="p-2">
+                                        {asset.dateAcquired}
+                                    </td>
                                     <td className="p-2">{asset.name}</td>
-                                    <td className="p-2">{asset.specification}</td>
+                                    <td className="p-2">
+                                        {asset.specification}
+                                    </td>
                                     <td className="p-2">{asset.location}</td>
-                                    <td className="p-2 text-right">{asset.condition}</td>
+                                    <td className="p-2 text-right">
+                                        {asset.condition}
+                                    </td>
                                     <td className="p-2 text-right">TBD</td>
-                                    <td className="p-2 text-center">{asset.lastMaintenance}</td>
+                                    <td className="p-2 text-center">
+                                        {asset.lastMaintenance}
+                                    </td>
                                     <td className="p-4 text-center">
                                         <div className="flex justify-center items-center gap-2">
                                             <button className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
@@ -118,21 +171,42 @@ const PreventiveMaintenance: React.FC = () => {
                                 <input
                                     type="checkbox"
                                     checked={selectedAssets.includes(asset.id)}
-                                    onChange={() => handleCheckboxChange(asset.id)}
+                                    onChange={() =>
+                                        handleCheckboxChange(asset.id)
+                                    }
                                     className="accent-primary"
                                 />
                             </div>
 
                             {/* Details */}
                             <div className="text-sm text-gray-800 space-y-1 pr-8">
-                                <p><strong>ID:</strong> {asset.id}</p>
-                                <p><strong>Date Submitted:</strong> {asset.dateAcquired}</p>
-                                <p><strong>Name:</strong> {asset.name}</p>
-                                <p><strong>Description:</strong> {asset.specification}</p>
-                                <p><strong>Assign To:</strong> {asset.location}</p>
-                                <p><strong>Status:</strong> {asset.condition}</p>
-                                <p><strong>Next Schedule:</strong> TBD</p>
-                                <p><strong>Last Maintenance:</strong> {asset.lastMaintenance}</p>
+                                <p>
+                                    <strong>ID:</strong> {asset.id}
+                                </p>
+                                <p>
+                                    <strong>Date Submitted:</strong>{" "}
+                                    {asset.dateAcquired}
+                                </p>
+                                <p>
+                                    <strong>Name:</strong> {asset.name}
+                                </p>
+                                <p>
+                                    <strong>Description:</strong>{" "}
+                                    {asset.specification}
+                                </p>
+                                <p>
+                                    <strong>Assign To:</strong> {asset.location}
+                                </p>
+                                <p>
+                                    <strong>Status:</strong> {asset.condition}
+                                </p>
+                                <p>
+                                    <strong>Next Schedule:</strong> TBD
+                                </p>
+                                <p>
+                                    <strong>Last Maintenance:</strong>{" "}
+                                    {asset.lastMaintenance}
+                                </p>
                             </div>
 
                             {/* Action Buttons */}

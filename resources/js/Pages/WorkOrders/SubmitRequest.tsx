@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from "react";
-import { Head, router, useForm } from "@inertiajs/react";
+import { Head, router, usePage, useForm } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import ConfirmModal from "@/Components/ConfirmModal";
 import { Toaster, toast } from "sonner";
+import WOSubmittedModal from "./WOSubmittedModal";
 
 const SubmitWorkOrder: React.FC = () => {
     const { data, setData, post, reset } = useForm({
@@ -14,6 +15,18 @@ const SubmitWorkOrder: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false); // Add state for success modal
+    const [successData, setSuccessData] = useState<{
+        location: string;
+        description: string;
+        images: { url: string; name: string }[];
+    }>({
+        location: "",
+        description: "",
+        images: [],
+    });
+
+    const user = usePage().props.auth.user;
 
     // Location and Photo States
     const [locations, setLocations] = useState<{ id: number; name: string }[]>(
@@ -74,6 +87,15 @@ const SubmitWorkOrder: React.FC = () => {
         setTimeout(() => {
             setIsLoading(false);
             toast.success("Work order submitted successfully!"); // ✅ Show success toast only after confirmed
+
+            // Prepare success data for the modal
+            setSuccessData({
+                location: data.location_id,
+                description: data.report_description,
+                images: filePreviews,
+            });
+
+            setShowSuccessModal(true); // Show success modal after submission
 
             // Clear form and other states after submission
             reset();
@@ -286,6 +308,20 @@ const SubmitWorkOrder: React.FC = () => {
                     onCancel={() => setShowConfirmModal(false)}
                 />
             )}
+
+            {/* Success Modal */}
+            <WOSubmittedModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                dateRequested={new Date().toLocaleDateString()}
+                user={{
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                }}
+                location={successData.location}
+                description={successData.description}
+                images={successData.images}
+            />
         </Authenticated>
     );
 };

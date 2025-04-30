@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Head } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
+import PrimaryButton from "@/Components/PrimaryButton";
+import CreateAssetModal from "./CreateAssetModal";
 
 const AssetManagement: React.FC = () => {
     const assets = [
@@ -25,6 +27,7 @@ const AssetManagement: React.FC = () => {
     ];
 
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
+    const [isCreating, setIsCreating] = useState(false);
 
     const handleCheckboxChange = (assetId: number) => {
         setSelectedAssets((prev) =>
@@ -46,10 +49,28 @@ const AssetManagement: React.FC = () => {
         <Authenticated>
             <Head title="Asset Management" />
 
-            <div className="p-4">
-                <h1 className="text-2xl font-semibold mb-4">
-                    Asset Management
-                </h1>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+                <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+                    <div className="bg-white shadow-sm sm:rounded-lg">
+                        <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 sm:gap-6 text-black">
+                            {/* Title */}
+                            <h1 className="text-2xl font-semibold text-center sm:text-left">
+                                Asset Management
+                            </h1>
+
+                            {/* Button */}
+                            <div className="w-full sm:w-auto flex sm:ml-4 justify-center sm:justify-start">
+                                <PrimaryButton
+                                    onClick={() => setIsCreating(true)}
+                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 
+                            text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
+                                >
+                                    Add an Asset
+                                </PrimaryButton>
+                            </div>
+                        </div>
+                    </div>
+                </header>
 
                 {/* Desktop Table View */}
                 <div className="hidden sm:block overflow-x-auto">
@@ -212,6 +233,15 @@ const AssetManagement: React.FC = () => {
                     ))}
                 </div>
             </div>
+
+            {/* Add Asset Modal */}
+            {isCreating && (
+                <CreateAssetModal
+                    isOpen={isCreating}
+                    onClose={() => setIsCreating(false)}
+                    onSave={() => setIsCreating(false)} // Here you can handle the logic for saving the asset
+                />
+            )}
         </Authenticated>
     );
 };
