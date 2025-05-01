@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreWorkOrderRequest;
 use App\Models\Image;
 use App\Models\Location;
+use App\Models\User;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -51,6 +52,9 @@ class WorkOrderController extends Controller
                 // ...$user->toArray(), // converts the user model to array including roles. downside is everything is sent to FE.
                 'id' => $user->id,
                 'name' => $user->first_name . ' ' . $user->last_name,
+                'roles' => $user->roles->map(function ($role) {
+                    return ['name' => $role->name];
+                }),
                 'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
             ],
         ]);

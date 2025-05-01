@@ -14,6 +14,7 @@ interface WorkOrder {
     priority: string;
     requested_at: string;
     location_id: string;
+    assigned_to: number;
     work_order_type: string;
     label: string;
     remarks: string;
@@ -27,7 +28,7 @@ export default function WorkOrders({
 }: PageProps<{
     workOrders: WorkOrder[];
     locations: { id: number; name: string }[];
-    user: { id: number; name: string; permissions: string[] };
+    user: { id: number; name: string; permissions: string[], roles: string[] };
 }>) {
     const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState("Pending");
@@ -36,10 +37,9 @@ export default function WorkOrders({
     );
     const [showScrollUpButton, setShowScrollUpButton] = useState(false);
 
-    // Conditionally render tabs for Work Order Manager or Super Admin, hide tabs for Internal Requester
+    // Conditionally render tabs for Work Order Manager, hide tabs for Internal Requester
     const tabs =
-        user.permissions.includes("manage work orders") ||
-        user.permissions.includes("super_admin")
+        user.permissions.includes("manage work orders")
             ? ["Pending", "Accepted", "For Budget Request", "Declined"]
             : []; // No tabs for Internal Requester
 
@@ -47,8 +47,7 @@ export default function WorkOrders({
     const filteredWorkOrders = workOrders.filter((workOrder) => {
         // For Work Order Manager and Super Admin, show all work orders
         if (
-            user.permissions.includes("manage work orders") ||
-            user.permissions.includes("super_admin")
+            user.permissions.includes("manage work orders")
         ) {
             if (activeTab === "Pending") {
                 return workOrder.status === "Pending";
@@ -152,8 +151,8 @@ export default function WorkOrders({
                         </h1>
 
                         {/* Button (Visible for Work Order Manager and Super Admin) */}
-                        {user.permissions.includes("manage work orders") ||
-                        user.permissions.includes("super_admin") ? (
+                        {user.permissions.includes("manage work orders")
+                        ? (
                             <div className="w-full sm:w-auto flex justify-center sm:justify-start">
                                 <PrimaryButton
                                     onClick={() => setIsCreating(true)}

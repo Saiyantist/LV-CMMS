@@ -65,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                   ? "Work Order Requests"
                                   : "Work Order List",
                               icon: (
-                                  <ClipboardList size={14} className="mr-2" />
+                                  <ClipboardList size={16} className="mr-2" />
                               ),
                           },
                           // Hide "Submit a Request" for WorkOrderManager, super_admin, and gasd_coordinator
@@ -86,58 +86,51 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                         ),
                                     },
                                 ]),
-                          // Asset Management and Preventive Maintenance Tabs for WorkOrderManager, SuperAdmin, and GasdCoordinator
-                          ...(isWorkOrderManager ||
-                          isSuperAdmin ||
-                          isGasdCoordinator
-                              ? [
-                                    {
-                                        routeName:
-                                            "work-orders.asset-management",
-                                        href:
-                                            route(
-                                                "work-orders.asset-management"
-                                            ) || "",
-                                        text: "Asset Management",
-                                        icon: (
-                                            <Wrench
-                                                size={14}
-                                                className="mr-2"
-                                            />
-                                        ),
-                                    },
-                                    {
-                                        routeName:
-                                            "work-orders.preventive-maintenance",
-                                        href:
-                                            route(
-                                                "work-orders.preventive-maintenance"
-                                            ) || "",
-                                        text: "Preventive Maintenance",
-                                        icon: (
-                                            <ShieldCheck
-                                                size={14}
-                                                className="mr-2"
-                                            />
-                                        ),
-                                    },
-                                ]
-                              : []),
                       ],
                   },
               ]
             : []),
     ];
 
-    const adminItems = isSuperAdmin
+    const adminItems = isSuperAdmin || isWorkOrderManager
         ? [
-              {
-                  routeName: "admin.manage-roles",
-                  href: route("admin.manage-roles") || "",
-                  icon: <User size={16} className="mr-2" />,
-                  text: "User Management",
-              },
-          ]
+            {
+                routeName:
+                "work-orders.asset-management",
+                href:
+                route(
+                    "work-orders.asset-management"
+                ) || "",
+                text: "Asset Management",
+                icon: (
+                    <Wrench
+                    size={14}
+                    className="mr-2"
+                    />
+                ),
+            },
+            {
+                routeName:
+                "work-orders.preventive-maintenance",
+                href:
+                route(
+                    "work-orders.preventive-maintenance"
+                ) || "",
+                text: "Preventive Maintenance",
+                icon: (
+                    <ShieldCheck
+                    size={14}
+                    className="mr-2"
+                    />
+                ),
+            },
+            isSuperAdmin &&{
+                routeName: "admin.manage-roles",
+                href: route("admin.manage-roles") || "",
+                icon: <User size={16} className="mr-2" />,
+                text: "User Management",
+            },
+        ]
         : [];
 
     // Menu item rendering logic remains the same
@@ -149,7 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 href={item.href}
                 className={`flex items-center h-12 pr-2 text-sm hover:text-opacity-80 ${
                     isActive(item.routeName)
-                        ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-6 mr-1 ml-3 rounded-full"
+                        ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-4 mr-1 ml-3 rounded-full"
                         : "text-white"
                 } ${item.isChild ? "pl-8" : "pl-4"}`}
             >
@@ -200,13 +193,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 </div>
 
                 <ul className="flex flex-col py-4 flex-grow">
-                    <li></li>
                     <li>
                         <Link
                             href={route("dashboard")}
                             className={`flex items-center h-12 pl-4 pr-2 text-sm hover:text-opacity-80 ${
                                 currentRoute === "dashboard"
-                                    ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-6 mr-1 ml-3 rounded-full"
+                                    ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-4 mr-1 ml-3 rounded-full"
                                     : "text-white"
                             }`}
                         >
