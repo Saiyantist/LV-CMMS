@@ -22,10 +22,17 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register', [
+        return Inertia::render('Auth/Register',[
             'departments' => Department::all(),
         ]);
     }
+
+    public function createInternal(): Response
+{
+    return Inertia::render('Auth/InternalRegistration', [
+        'departments' => Department::all(),
+    ]);
+}
 
     /**
      * Handle an incoming registration request.

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkOrderController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +56,24 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
 //     })->name('work-orders.testing');
 // });
 // Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
+
+
+
+// Route::get('/access-registration', function () {
+//     return Inertia::render('Auth/AccessRegistration'); 
+// })->name('access-registration');
+
+
+Route::get('/register/external-user-registration', function () {
+    return Inertia::render('Auth/ExternalRegistration'); 
+})->name('access/registration-external-user-registration');
+
+Route::get('/register/external-user-registration', function () {
+    return Inertia::render('Auth/ExternalRegistration'); 
+})->name('access.registration-external-user-registration');
+
+
+Route::get('/register/internal-user-registration', [RegisteredUserController::class, 'createInternal'])->name('access.registration-internal-user-registration');
 
 
 
