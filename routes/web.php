@@ -67,16 +67,58 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 // For Testing Purposes
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     Route::get('/work-orders/testing', function () {
 //         return Inertia::render('WorkOrders/Testing');
 //     })->name('work-orders.testing');
 // });
-Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
+// Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
 
 
 
+// ROUTING PREVENTION FOR UNAUTHORIZED ACCESS/USERS
+
+// Asset Management and Preventive Maintenance should be restricted to work_order_manager or super_admin
+Route::middleware(['auth', 'verified', 'role:work_order_manager|super_admin'])->group(function () {
+    Route::get('/work-orders/asset-management', function () {
+        return Inertia::render('WorkOrders/AssetManagement');
+    })->name('work-orders.assetmanagement');
+
+    Route::get('/work-orders/preventive-maintenance', function () {
+        return Inertia::render('WorkOrders/PreventiveMaintenance');
+    })->name('work-orders.preventive-maintenance');
+});
+
+// Submit Request should be restricted to non work_order_manager and non super_admin
+Route::middleware(['auth', 'verified', 'role:!work_order_manager|!super_admin'])->group(function () {
+    Route::get('/work-orders/submit-request', function () {
+        return Inertia::render('WorkOrders/SubmitRequest');
+    })->name('work-orders.submit-request');
+});
+
+
+Route::middleware(['auth', 'verified', 'role:work_order_manager|super_admin'])->group(function () {
+    Route::get('/work-orders/asset-management', function () {
+        return Inertia::render('WorkOrders/AssetManagement');
+    })->name('work-orders.assetmanagement');
+
+    Route::get('/work-orders/preventive-maintenance', function () {
+        return Inertia::render('WorkOrders/PreventiveMaintenance');
+    })->name('work-orders.preventive-maintenance');
+});
+
+// Catch unauthorized attempts to access restricted pages
+Route::fallback(function () {
+    return abort(403, 'Unauthorized access');
+});
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 

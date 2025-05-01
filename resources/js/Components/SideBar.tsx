@@ -45,39 +45,81 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     );
 
     const menuItems = [
-        {
-            text: "Work Order",
-            isDropdown: true,
-            icon: <ClipboardList size={16} className="mr-2" />,
-            children: [
-                {
-                    routeName: "work-orders.index",
-                    href: route("work-orders.index") || "",
-                    text: isWorkOrderManager
-                        ? "Work Order Requests"
-                        : "Work Order List",
-                    icon: <ClipboardList size={14} className="mr-2" />,
-                },
-                {
-                    routeName: "work-orders.assetmanagement",
-                    href: route("work-orders.assetmanagement") || "",
-                    text: "Asset Management",
-                    icon: <Wrench size={14} className="mr-2" />,
-                },
-                {
-                    routeName: "work-orders.preventive-maintenance",
-                    href: route("work-orders.preventive-maintenance") || "",
-                    text: "Preventive Maintenance",
-                    icon: <ShieldCheck size={14} className="mr-2" />,
-                },
-                {
-                    routeName: "work-orders.submit-request",
-                    href: route("work-orders.submit-request") || "",
-                    text: "Submit a Request",
-                    icon: <Send size={14} className="mr-2" />,
-                },
-            ],
-        },
+        // Check if the user is not an external_requester before rendering "Work Order"
+        ...(user.roles.some((role) => role.name !== "external_requester")
+            ? [
+                  {
+                      text: "Work Order",
+                      isDropdown: true,
+                      icon: <ClipboardList size={16} className="mr-2" />,
+                      children: [
+                          {
+                              routeName: "work-orders.index",
+                              href: route("work-orders.index") || "",
+                              text: isWorkOrderManager
+                                  ? "Work Order Requests"
+                                  : "Work Order List",
+                              icon: (
+                                  <ClipboardList size={14} className="mr-2" />
+                              ),
+                          },
+                          // Show Asset Management and Preventive Maintenance only for WorkOrderManager or super_admin
+                          ...(isWorkOrderManager ||
+                          user.roles.some((role) => role.name === "super_admin")
+                              ? [
+                                    {
+                                        routeName:
+                                            "work-orders.assetmanagement",
+                                        href:
+                                            route(
+                                                "work-orders.assetmanagement"
+                                            ) || "",
+                                        text: "Asset Management",
+                                        icon: (
+                                            <Wrench
+                                                size={14}
+                                                className="mr-2"
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        routeName:
+                                            "work-orders.preventive-maintenance",
+                                        href:
+                                            route(
+                                                "work-orders.preventive-maintenance"
+                                            ) || "",
+                                        text: "Preventive Maintenance",
+                                        icon: (
+                                            <ShieldCheck
+                                                size={14}
+                                                className="mr-2"
+                                            />
+                                        ),
+                                    },
+                                ]
+                              : []),
+                          // Hide "Submit a Request" for WorkOrderManager and super_admin
+                          ...(isWorkOrderManager ||
+                          user.roles.some((role) => role.name === "super_admin")
+                              ? []
+                              : [
+                                    {
+                                        routeName: "work-orders.submit-request",
+                                        href:
+                                            route(
+                                                "work-orders.submit-request"
+                                            ) || "",
+                                        text: "Submit a Request",
+                                        icon: (
+                                            <Send size={14} className="mr-2" />
+                                        ),
+                                    },
+                                ]),
+                      ],
+                  },
+              ]
+            : []),
     ];
 
     const adminItems = user.roles.some((role) => role.name === "super_admin")
