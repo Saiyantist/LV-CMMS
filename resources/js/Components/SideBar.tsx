@@ -41,8 +41,13 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         post(route("logout"));
     };
 
-    const isWorkOrderManager = user.permissions.some((permission) => permission === "manage work orders");
+    const isWorkOrderManager = user.permissions.some(
+        (permission) => permission === "manage work orders"
+    );
     const isSuperAdmin = user.roles.some((role) => role.name === "super_admin");
+    const isGasdCoordinator = user.roles.some(
+        (role) => role.name === "gasd_coordinator"
+    );
 
     const menuItems = [
         // Check if the user is not an external_requester before rendering "Work Order"
@@ -63,8 +68,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                   <ClipboardList size={14} className="mr-2" />
                               ),
                           },
-                          // Hide "Submit a Request" for WorkOrderManager and super_admin
-                          ...(isWorkOrderManager || isSuperAdmin
+                          // Hide "Submit a Request" for WorkOrderManager, super_admin, and gasd_coordinator
+                          ...(isWorkOrderManager ||
+                          isSuperAdmin ||
+                          isGasdCoordinator
                               ? []
                               : [
                                     {
@@ -79,6 +86,43 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                         ),
                                     },
                                 ]),
+                          // Asset Management and Preventive Maintenance Tabs for WorkOrderManager, SuperAdmin, and GasdCoordinator
+                          ...(isWorkOrderManager ||
+                          isSuperAdmin ||
+                          isGasdCoordinator
+                              ? [
+                                    {
+                                        routeName:
+                                            "work-orders.asset-management",
+                                        href:
+                                            route(
+                                                "work-orders.asset-management"
+                                            ) || "",
+                                        text: "Asset Management",
+                                        icon: (
+                                            <Wrench
+                                                size={14}
+                                                className="mr-2"
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        routeName:
+                                            "work-orders.preventive-maintenance",
+                                        href:
+                                            route(
+                                                "work-orders.preventive-maintenance"
+                                            ) || "",
+                                        text: "Preventive Maintenance",
+                                        icon: (
+                                            <ShieldCheck
+                                                size={14}
+                                                className="mr-2"
+                                            />
+                                        ),
+                                    },
+                                ]
+                              : []),
                       ],
                   },
               ]
@@ -87,45 +131,16 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
     const adminItems = isSuperAdmin
         ? [
-            {
-                routeName: "admin.manage-roles",
-                href: route("admin.manage-roles") || "",
-                icon: <User size={16} className="mr-2" />,
-                text: "User Management",
-            },
-            {
-                routeName:
-                    "work-orders.asset-management",
-                href:
-                    route(
-                        "work-orders.asset-management"
-                    ) || "",
-                text: "Asset Management",
-                icon: (
-                    <Wrench
-                        size={14}
-                        className="mr-2"
-                    />
-                ),
-            },
-            {
-                routeName:
-                    "work-orders.preventive-maintenance",
-                href:
-                    route(
-                        "work-orders.preventive-maintenance"
-                    ) || "",
-                text: "Preventive Maintenance",
-                icon: (
-                    <ShieldCheck
-                        size={14}
-                        className="mr-2"
-                    />
-                ),
-            },
+              {
+                  routeName: "admin.manage-roles",
+                  href: route("admin.manage-roles") || "",
+                  icon: <User size={16} className="mr-2" />,
+                  text: "User Management",
+              },
           ]
         : [];
 
+    // Menu item rendering logic remains the same
     const isActive = (routeName: string) => currentRoute === routeName;
 
     const renderMenuItem = (item: any) => (
@@ -185,9 +200,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 </div>
 
                 <ul className="flex flex-col py-4 flex-grow">
-                    <li>
-                        
-                    </li>
+                    <li></li>
                     <li>
                         <Link
                             href={route("dashboard")}

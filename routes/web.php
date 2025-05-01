@@ -60,8 +60,8 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
 
 // ROUTING PREVENTION FOR UNAUTHORIZED ACCESS/USERS
 
-// Asset Management and Preventive Maintenance should be restricted to work_order_manager or super_admin
-Route::middleware(['auth', 'verified', 'role:work_order_manager|super_admin'])->group(function () {
+// Asset Management and Preventive Maintenance should be restricted to work_order_manager, super_admin, and gasd_coordinator
+Route::middleware(['auth', 'verified', 'role:work_order_manager|super_admin|gasd_coordinator'])->group(function () {
     Route::get('/work-orders/asset-management', function () {
         return Inertia::render('WorkOrders/AssetManagement');
     })->name('work-orders.asset-management');
@@ -78,21 +78,11 @@ Route::middleware(['auth', 'verified', 'role:!work_order_manager|!super_admin'])
     })->name('work-orders.submit-request');
 });
 
-
-Route::middleware(['auth', 'verified', 'role:work_order_manager|super_admin'])->group(function () {
-    Route::get('/work-orders/asset-management', function () {
-        return Inertia::render('WorkOrders/AssetManagement');
-    })->name('work-orders.asset-management');
-
-    Route::get('/work-orders/preventive-maintenance', function () {
-        return Inertia::render('WorkOrders/PreventiveMaintenance');
-    })->name('work-orders.preventive-maintenance');
-});
-
 // Catch unauthorized attempts to access restricted pages
 Route::fallback(function () {
     return abort(403, 'Unauthorized access');
 });
+
 
 
 
