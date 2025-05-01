@@ -120,6 +120,55 @@ class WorkOrderController extends Controller
         //
     }
 
+
+
+    // In WorkOrderController.php
+public function submitWorkOrder(Request $request)
+{
+    // Assuming the front-end sends data similar to `SubmitWorkOrder.tsx`
+    $user = auth()->user();
+    
+    // Validate the request data
+    $validated = $request->validate([
+        'report_description' => 'required|string|max:1000',
+        'location_id' => 'required|exists:locations,id',
+        'images.*' => 'nullable|image|max:5120', // If any images are being uploaded
+    ]);
+
+    // Logic for creating a new WorkOrder
+    $isWorkOrderManager = $user->hasPermissionTo('manage work orders');
+
+    $workOrder = WorkOrder::create([
+        'report_description' => $request->report_description,
+        'location_id' => $request->location_id,
+        'requested_at' => now(),
+        'requested_by' => $user->id,
+        'status' => $isWorkOrderManager ? ($request->status ?? 'Pending') : 'Pending',
+        'work_order_type' => $isWorkOrderManager ? ($request->work_order_type ?? 'Work Order') : 'Work Order',
+        'label' => $isWorkOrderManager ? ($request->label ?? 'No Label') : 'No Label',
+        'priority' => $isWorkOrderManager ? $request->priority : null,
+        'remarks' => $isWorkOrderManager ? $request->remarks : null,
+    ]);
+
+    // Handle image uploads (if any)
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $filename = uniqid('wo_') . '.' . $image->extension();
+            $path = $image->storeAs('work_orders', $filename, 'public');
+            Image::create([
+                'imageable_id' => $workOrder->id,
+                'imageable_type' => WorkOrder::class,
+                'path' => $path,
+            ]);
+        }
+    }
+
+    return redirect()->route('work-orders.index')->with('success', 'Work order created successfully.');
+}
+
+
+
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -184,16 +233,6 @@ class WorkOrderController extends Controller
 
         return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
     }
-
-
-//     public function rules(): array
-// {
-//     return [
-//         'report_description' => ['required', 'string', 'max:1000'],
-//         'location_id' => ['required', 'exists:locations,id'],
-//         'images.*' => ['nullable', 'image', 'max:5120'], // optional, individual image validation
-//     ];
-// }
 
 
     /**

@@ -4,6 +4,7 @@ import Authenticated from "@/Layouts/AuthenticatedLayout";
 import ConfirmModal from "@/Components/ConfirmModal";
 import { Toaster, toast } from "sonner";
 import WOSubmittedModal from "./WOSubmittedModal";
+// import { Inertia } from "@inertiajs/inertia";
 
 const SubmitWorkOrder: React.FC = () => {
     const { data, setData, post, reset } = useForm({
@@ -65,9 +66,23 @@ const SubmitWorkOrder: React.FC = () => {
         return true;
     };
 
+    // const handleSubmit = (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     if (!validateForm()) return;
+    //     setShowConfirmModal(true); // ✅ Only show confirm modal
+    // };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateForm()) return;
+
+        // Prepare success data for the modal
+        setSuccessData({
+            location: data.location_id, // Updated to use location_id
+            description: data.report_description,
+            images: filePreviews, // Uses file previews for images
+        });
+
         setShowConfirmModal(true); // ✅ Only show confirm modal
     };
 
@@ -124,7 +139,8 @@ const SubmitWorkOrder: React.FC = () => {
     };
 
     const handleSelectLocation = (loc: { id: number; name: string }) => {
-        setData("location_id", loc.name);
+        // setData("location_id", loc.name);
+        setData("location_id", loc.id.toString());
         setTypedLocation(loc.name);
         setShowDropdown(false);
     };

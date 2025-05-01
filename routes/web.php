@@ -73,6 +73,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //         return Inertia::render('WorkOrders/Testing');
 //     })->name('work-orders.testing');
 // });
+Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
+
 
 
 

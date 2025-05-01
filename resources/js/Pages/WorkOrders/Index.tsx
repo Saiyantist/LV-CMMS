@@ -36,24 +36,39 @@ export default function WorkOrders({
     );
     const [showScrollUpButton, setShowScrollUpButton] = useState(false);
 
-    const tabs = ["Pending", "Accepted", "For Budget Request", "Declined"];
+    // Conditionally render tabs for Work Order Manager or Super Admin, hide tabs for Internal Requester
+    const tabs =
+        user.permissions.includes("manage work orders") ||
+        user.permissions.includes("super_admin")
+            ? ["Pending", "Accepted", "For Budget Request", "Declined"]
+            : []; // No tabs for Internal Requester
 
+    // Filter work orders based on role
     const filteredWorkOrders = workOrders.filter((workOrder) => {
-        if (activeTab === "Pending") {
-            return workOrder.status === "Pending";
+        // For Work Order Manager and Super Admin, show all work orders
+        if (
+            user.permissions.includes("manage work orders") ||
+            user.permissions.includes("super_admin")
+        ) {
+            if (activeTab === "Pending") {
+                return workOrder.status === "Pending";
+            }
+            if (activeTab === "Accepted") {
+                return ["Assigned", "Ongoing", "Overdue", "Completed"].includes(
+                    workOrder.status
+                );
+            }
+            if (activeTab === "For Budget Request") {
+                return workOrder.status === "For Budget Request";
+            }
+            if (activeTab === "Declined") {
+                return workOrder.status === "Cancelled";
+            }
+            return true;
         }
-        if (activeTab === "Accepted") {
-            return ["Assigned", "Ongoing", "Overdue", "Completed"].includes(
-                workOrder.status
-            );
-        }
-        if (activeTab === "For Budget Request") {
-            return workOrder.status === "For Budget Request";
-        }
-        if (activeTab === "Declined") {
-            return workOrder.status === "Cancelled";
-        }
-        return true;
+
+        // For Internal Requester, only show their own work orders
+        return workOrder.assigned_to === user.id; // Assuming `assigned_to` is the field linking the user to the work order
     });
 
     const handleScroll = () => {
@@ -136,17 +151,19 @@ export default function WorkOrders({
                             Work Orders
                         </h1>
 
-                        {/* Button */}
-                        <div className="w-full sm:w-auto flex justify-center sm:justify-start">
-                            <PrimaryButton
-                                onClick={() => setIsCreating(true)}
-                                className="bg-secondary text-white hover:bg-primary transition-all duration-300 
-                        text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
-                            >
-                                Add Work Order
-                            </PrimaryButton>
-                        </div>
-                        
+                        {/* Button (Visible for Work Order Manager and Super Admin) */}
+                        {user.permissions.includes("manage work orders") ||
+                        user.permissions.includes("super_admin") ? (
+                            <div className="w-full sm:w-auto flex justify-center sm:justify-start">
+                                <PrimaryButton
+                                    onClick={() => setIsCreating(true)}
+                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 
+                text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
+                                >
+                                    Add Work Order
+                                </PrimaryButton>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
             </header>
@@ -245,6 +262,7 @@ export default function WorkOrders({
                                         workOrder.requested_at
                                     ).toLocaleDateString()}
                                 </td>
+
                                 <td className="border px-6 py-4">
                                     <PrimaryButton
                                         className="bg-secondary"
