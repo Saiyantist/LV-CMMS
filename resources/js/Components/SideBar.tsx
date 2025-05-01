@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm, Link, usePage } from "@inertiajs/react";
+import { useForm, Link } from "@inertiajs/react";
 import {
     Home,
     ClipboardList,
@@ -21,6 +21,7 @@ interface Role {
 
 interface User {
     roles: Role[];
+    permissions: Array<string>;
     first_name: string;
     last_name: string;
 }
@@ -40,9 +41,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         post(route("logout"));
     };
 
-    const isWorkOrderManager = user.roles.some(
-        (role) => role.name === "WorkOrderManager"
-    );
+    const isWorkOrderManager = user.permissions.some((permission) => permission === "manage work orders");
+    const isSuperAdmin = user.roles.some((role) => role.name === "super_admin");
 
     const menuItems = [
         // Check if the user is not an external_requester before rendering "Work Order"
@@ -63,45 +63,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                   <ClipboardList size={14} className="mr-2" />
                               ),
                           },
-                          // Show Asset Management and Preventive Maintenance only for WorkOrderManager or super_admin
-                          ...(isWorkOrderManager ||
-                          user.roles.some((role) => role.name === "super_admin")
-                              ? [
-                                    {
-                                        routeName:
-                                            "work-orders.asset-management",
-                                        href:
-                                            route(
-                                                "work-orders.asset-management"
-                                            ) || "",
-                                        text: "Asset Management",
-                                        icon: (
-                                            <Wrench
-                                                size={14}
-                                                className="mr-2"
-                                            />
-                                        ),
-                                    },
-                                    {
-                                        routeName:
-                                            "work-orders.preventive-maintenance",
-                                        href:
-                                            route(
-                                                "work-orders.preventive-maintenance"
-                                            ) || "",
-                                        text: "Preventive Maintenance",
-                                        icon: (
-                                            <ShieldCheck
-                                                size={14}
-                                                className="mr-2"
-                                            />
-                                        ),
-                                    },
-                                ]
-                              : []),
                           // Hide "Submit a Request" for WorkOrderManager and super_admin
-                          ...(isWorkOrderManager ||
-                          user.roles.some((role) => role.name === "super_admin")
+                          ...(isWorkOrderManager || isSuperAdmin
                               ? []
                               : [
                                     {
@@ -122,14 +85,44 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             : []),
     ];
 
-    const adminItems = user.roles.some((role) => role.name === "super_admin")
+    const adminItems = isSuperAdmin
         ? [
-              {
-                  routeName: "admin.manage-roles",
-                  href: route("admin.manage-roles") || "",
-                  icon: <User size={16} className="mr-2" />,
-                  text: "User Management",
-              },
+            {
+                routeName: "admin.manage-roles",
+                href: route("admin.manage-roles") || "",
+                icon: <User size={16} className="mr-2" />,
+                text: "User Management",
+            },
+            {
+                routeName:
+                    "work-orders.asset-management",
+                href:
+                    route(
+                        "work-orders.asset-management"
+                    ) || "",
+                text: "Asset Management",
+                icon: (
+                    <Wrench
+                        size={14}
+                        className="mr-2"
+                    />
+                ),
+            },
+            {
+                routeName:
+                    "work-orders.preventive-maintenance",
+                href:
+                    route(
+                        "work-orders.preventive-maintenance"
+                    ) || "",
+                text: "Preventive Maintenance",
+                icon: (
+                    <ShieldCheck
+                        size={14}
+                        className="mr-2"
+                    />
+                ),
+            },
           ]
         : [];
 
@@ -192,6 +185,9 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 </div>
 
                 <ul className="flex flex-col py-4 flex-grow">
+                    <li>
+                        
+                    </li>
                     <li>
                         <Link
                             href={route("dashboard")}
