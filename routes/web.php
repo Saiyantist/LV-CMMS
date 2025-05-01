@@ -46,28 +46,6 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-
-
-
-// Try
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/work-orders/asset-management', function () {
-        return Inertia::render('WorkOrders/AssetManagement');
-    })->name('work-orders.assetmanagement');
-});
-
-
-// PMS
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/work-orders/preventive-maintenance', function () {
-        return Inertia::render('WorkOrders/PreventiveMaintenance');
-    })->name('work-orders.preventive-maintenance');
-});
-
-
-
-
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // For Testing Purposes
@@ -86,7 +64,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'role:work_order_manager|super_admin'])->group(function () {
     Route::get('/work-orders/asset-management', function () {
         return Inertia::render('WorkOrders/AssetManagement');
-    })->name('work-orders.assetmanagement');
+    })->name('work-orders.asset-management');
 
     Route::get('/work-orders/preventive-maintenance', function () {
         return Inertia::render('WorkOrders/PreventiveMaintenance');
@@ -104,7 +82,7 @@ Route::middleware(['auth', 'verified', 'role:!work_order_manager|!super_admin'])
 Route::middleware(['auth', 'verified', 'role:work_order_manager|super_admin'])->group(function () {
     Route::get('/work-orders/asset-management', function () {
         return Inertia::render('WorkOrders/AssetManagement');
-    })->name('work-orders.assetmanagement');
+    })->name('work-orders.asset-management');
 
     Route::get('/work-orders/preventive-maintenance', function () {
         return Inertia::render('WorkOrders/PreventiveMaintenance');
