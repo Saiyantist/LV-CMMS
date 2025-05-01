@@ -69,10 +69,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                               ? [
                                     {
                                         routeName:
-                                            "work-orders.assetmanagement",
+                                            "work-orders.asset-management",
                                         href:
                                             route(
-                                                "work-orders.assetmanagement"
+                                                "work-orders.asset-management"
                                             ) || "",
                                         text: "Asset Management",
                                         icon: (
