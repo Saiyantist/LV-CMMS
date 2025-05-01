@@ -27,7 +27,7 @@ export default function Edit({ mustVerifyEmail, status, departments
                     user={{
                         name: `${user.first_name} ${user.last_name}`,
                         role: user.role ?? "User",
-                        profile_photo_url: "/images/M.A.jpg",
+                        profile_photo_url: user.gender === "male" ? "/images/m.png" : "/images/f.png",
                     }}
                     isEditing={isEditing}
                     setIsEditing={setIsEditing}

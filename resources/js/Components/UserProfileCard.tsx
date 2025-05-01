@@ -25,7 +25,7 @@ export default function UserProfileCard({
                 <img
                     src={user.profile_photo_url}
                     alt="Profile"
-                    className="w-24 h-24 rounded-full border-4 border-secondary object-cover"
+                    className="w-24 h-24 rounded-full border-2 border-black object-cover"
                 />
 
                 <div>
