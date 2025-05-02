@@ -10,27 +10,27 @@ export default function AuthenticatedLayout({
     const user = usePage().props.auth.user;
 
     return (
-        <div className="min-h-screen max-w-auto bg-gray-100">
+        <div className="min-h-screen bg-gray-100">
             <Sidebar user={user} />
 
-            <div className="flex flex-col ml-56">
-
-                {/* Top Nav bar for Authenticated */}
-                <nav className="border-b border-gray-100 self-end h-16 px-4">
-                { /* This can be turned into a component, kung makita mo ito josh, do this. if u ignore it'll refelct on u. */}
+            {/* Wrapper for main content */}
+            <div className="flex flex-col md:ml-56 pt-[104px] md:pt-0">
+                {/* Top Navbar (Desktop Only) */}
+                <nav className="hidden md:flex justify-end border-b border-gray-100 h-16 px-4 bg-white shadow-sm">
+                    {/* Josh: Make this into a component if you keep seeing it. 👀 */}
                     <NavLink
                         href={route("profile.edit")}
-                        className="flex flex-col rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none border border-gray-300 shadow-sm"
+                        className="flex items-center space-x-2 rounded-md px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border border-gray-300"
                         active={route().current("profile.edit")}
-                        >
-                        <i className="bx bx-user-circle text-lg mr-2" />
-                        {user.first_name} {user.last_name}
+                    >
+                        <i className="bx bx-user-circle text-lg" />
+                        <span>
+                            {user.first_name} {user.last_name}
+                        </span>
                     </NavLink>
-
-                {/* Gelo: your implementation was not the best way and a bad practicce, merong self-end sa tw. */}
-
                 </nav>
 
+                {/* Optional Page Header */}
                 {header && (
                     <header className="mt-2 max-w-7xl min-w-screen sm:px-6 lg:px-8">
                         <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg p-6">
@@ -39,7 +39,10 @@ export default function AuthenticatedLayout({
                     </header>
                 )}
 
-                <main className="flex-1 mt-2 px-6">{children}</main>
+                {/* Main Content */}
+                <main className="flex-1 mt-2 px-4 sm:px-6 lg:px-8">
+                    {children}
+                </main>
             </div>
         </div>
     );

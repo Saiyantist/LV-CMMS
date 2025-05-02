@@ -47,6 +47,7 @@ public function share(Request $request): array
                 'roles' => $request->user()->roles->map(function ($role) {
                     return ['name' => $role->name];
                 }),
+                'permissions' => $request->user()->getAllPermissions()->pluck('name')->toArray(),
             ] : null,
         ],
     ];

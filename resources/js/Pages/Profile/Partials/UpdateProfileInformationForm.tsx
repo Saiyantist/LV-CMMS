@@ -225,7 +225,8 @@ export default function UpdateProfileInformation({
 
                 {/* Save Button */}
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <PrimaryButton disabled={processing}
+                    className='bg-secondary hover:bg-primary text-white'>Save</PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}

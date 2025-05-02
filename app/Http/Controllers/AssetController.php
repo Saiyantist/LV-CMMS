@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
 
 class AssetController extends Controller
@@ -12,8 +13,16 @@ class AssetController extends Controller
      */
     public function index()
     {
-        //
+        // Fetch assets from the database
+        $assets = Asset::all();
+
+        // Return the Inertia view with assets data
+        return Inertia::render('AssetManagement', [
+            'assets' => $assets
+        ]);
     }
+
+
 
     /**
      * Show the form for creating a new resource.

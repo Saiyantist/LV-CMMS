@@ -15,9 +15,9 @@ return new class extends Migration
 
         Schema::create('work_orders', function (Blueprint $table) {
             $table->id();
-            $table->string('report_description');
+            $table->string('report_description')->nullable();
             $table->foreignId('location_id')->nullable()->constrained()->nullOnDelete();
-            $table->enum('status', ['Pending', 'Assigned', 'Ongoing', 'Overdue', 'Completed', 'Cancelled', 'Deleted'])->default('Pending');
+            $table->enum('status', ['Pending', 'Assigned', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined', 'Deleted'])->default('Pending');
             $table->enum('work_order_type', ['Work Order', 'Preventive Maintenance', 'Compliance'])->default('Work Order');
             $table->enum('label', ['Electrical', 'Plumbing', 'Painting', 'Carpentry', 'No Label'])->default('No Label'); /** If  work_order_typpe is "Work Order", must have label, otherwise, "No Label" */
             $table->enum('priority', ['Low', 'Medium', 'High', 'Critical'])->nullable(); /** This can be improved by automation, kkeywords: AI, Analysis, Rule Setting (pre-defined words) */
