@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Head, router, useForm } from "@inertiajs/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/Components/shadcnui/dropdown-menu";
 import { Button } from "@/Components/shadcnui/button";
 // import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
@@ -86,8 +93,9 @@ export default function CreateWorkOrderModal({
             className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50"
             onClick={onClose}
         >
-            <div className="bg-white rounded-lg shadow-lg w-full xl:max-w-3xl lg:max-w-2xl max-h-auto"
-            onClick={(e) => e.stopPropagation()}
+            <div
+                className="bg-white rounded-lg shadow-lg w-full xl:max-w-3xl lg:max-w-2xl max-h-auto"
+                onClick={(e) => e.stopPropagation()}
             >
                 <form
                     onSubmit={submit}
@@ -112,7 +120,8 @@ export default function CreateWorkOrderModal({
                     <div className="max-h-[70vh] overflow-y-auto px-6">
                         {/* Location Dropdown */}
 
-                        <div className="mb-4">
+                        {/* This is redundant, there are two loation dropdown so I commented this out... */}
+                        {/* <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700">
                                     Location
                                 </label>
@@ -138,7 +147,7 @@ export default function CreateWorkOrderModal({
                                         {errors.location_id}
                                     </p>
                                 )}
-                            </div>
+                            </div> */}
 
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">
@@ -147,17 +156,31 @@ export default function CreateWorkOrderModal({
                             <DropdownMenu>
                                 {/* <DropdownMenuLabel>Location</DropdownMenuLabel> */}
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" className="w-full mt-1 justify-start">
-                                        {locations.find((location) => location.id === parseInt(data.location_id))?.name || "Select a location"}
+                                    <Button
+                                        variant="outline"
+                                        className="w-full mt-1 justify-start"
+                                    >
+                                        {locations.find(
+                                            (location) =>
+                                                location.id ===
+                                                parseInt(data.location_id)
+                                        )?.name || "Select a location"}
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="xl:w-[42rem] lg:[32rem] md:w-[36rem] sm:w-[72rem]">
-                                    <DropdownMenuLabel>Select a location</DropdownMenuLabel>
+                                    <DropdownMenuLabel>
+                                        Select a location
+                                    </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     {locations.map((location) => (
                                         <DropdownMenuItem
                                             key={location.id}
-                                            onClick={() => setData("location_id", location.id.toString())}
+                                            onClick={() =>
+                                                setData(
+                                                    "location_id",
+                                                    location.id.toString()
+                                                )
+                                            }
                                         >
                                             {location.name}
                                         </DropdownMenuItem>
@@ -323,7 +346,7 @@ export default function CreateWorkOrderModal({
                                     {/* Assigned to */}
                                     <div className="flex-1 mb-4">
                                         <label className="block font-semibold text-gray-700">
-                                            Assigned to
+                                            Assign to
                                         </label>
                                         <select
                                             value={data.priority}
@@ -335,16 +358,14 @@ export default function CreateWorkOrderModal({
                                             }
                                             className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="">
-                                                Select Priority
+                                            <option value="Angelo">Angelo</option>
+                                            <option value="Den">Den</option>
+                                            <option value="Joshua">
+                                                Joshua
                                             </option>
-                                            <option value="Low">Low</option>
-                                            <option value="Medium">
-                                                Medium
-                                            </option>
-                                            <option value="High">High</option>
-                                            <option value="Critical">
-                                                Critical
+                                            <option value="Rie">Rie</option>
+                                            <option value="Vera">
+                                                Vera
                                             </option>
                                         </select>
                                     </div>

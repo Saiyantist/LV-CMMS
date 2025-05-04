@@ -276,7 +276,7 @@ export default function Register({ departments }: RegisterProps) {
                         Already registered?
                     </Link>
 
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                    <PrimaryButton className="ms-4 bg-secondary hover:bg-primary" disabled={processing}>
                         Register
                     </PrimaryButton>
                 </div>

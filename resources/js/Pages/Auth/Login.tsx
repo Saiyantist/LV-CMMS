@@ -105,7 +105,10 @@ export default function Login({
                         </Link>
                     )}
 
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                    <PrimaryButton
+                        className="ms-4 bg-secondary hover:bg-primary"
+                        disabled={processing}
+                    >
                         Log in
                     </PrimaryButton>
                 </div>
