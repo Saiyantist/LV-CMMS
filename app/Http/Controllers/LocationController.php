@@ -10,20 +10,12 @@ class LocationController extends Controller
 {
     public function index()
 {
-    $locations = Location::select('id', 'name')->get();
-
-    return Inertia::render('SubmitWorkOrder', [
-        'locations' => $locations
-    ]);
+   
 }
 
 public function create()
 {
-    $locations = Location::all(); // fetch all locations
-
-    return Inertia::render('SubmitWorkOrder', [
-        'locations' => $locations
-    ]);
+    
 }
 
 }

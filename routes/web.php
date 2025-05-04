@@ -75,7 +75,6 @@ Route::get('/register/external-user-registration', function () {
 
 
 
-
 // ROUTING PREVENTION FOR UNAUTHORIZED ACCESS/USERS
 
 // Asset Management and Preventive Maintenance should be restricted to work_order_manager, super_admin, and gasd_coordinator
