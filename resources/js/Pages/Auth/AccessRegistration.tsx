@@ -37,9 +37,7 @@ export default function AccessRegistration() {
                                 </p>
                             </div>
                             <Link
-                                href={route(
-                                    "access.registration-external-user-registration"
-                                )}
+                                href={route("register")}
                                 className="mt-4 mx-auto w-40 bg-primary text-white py-2 rounded-full shadow hover:bg-secondary transition"
                             >
                                 Register
@@ -62,9 +60,7 @@ export default function AccessRegistration() {
                                 </p>
                             </div>
                             <Link
-                                href={route(
-                                    "access.registration-internal-user-registration"
-                                )}
+                                href={route("register")}
                                 className="mt-4 mx-auto w-40 bg-primary text-white py-2 rounded-full shadow hover:bg-secondary transition"
                             >
                                 Register
@@ -75,7 +71,7 @@ export default function AccessRegistration() {
                     <div className="mt-6">
                         <Link
                             href={route("login")}
-                            className="text-sm text-white underline hover:text-gray-300 dark:text-gray-400 dark:hover:text-gray-100"
+                            className="text-sm text-gray-600 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
                         >
                             Already registered? Login here.
                         </Link>
