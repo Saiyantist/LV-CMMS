@@ -8,7 +8,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Models\Location;
+use App\Http\Controllers\LocationController;
 
 Route::get('/', function () {
     if (Auth::user() && Auth::user()->roles->isnotempty()) {
@@ -73,7 +73,6 @@ Route::get('/register/external-user-registration', function () {
 })->name('access.registration-external-user-registration');
 
 
-Route::get('/register/internal-user-registration', [RegisteredUserController::class, 'createInternal'])->name('access.registration-internal-user-registration');
 
 
 
@@ -82,11 +81,11 @@ Route::get('/register/internal-user-registration', [RegisteredUserController::cl
 // Asset Management and Preventive Maintenance should be restricted to work_order_manager, super_admin, and gasd_coordinator
 Route::middleware(['auth', 'verified', 'role:work_order_manager|super_admin|gasd_coordinator'])->group(function () {
     Route::get('/work-orders/asset-management', function () {
-        return Inertia::render('WorkOrders/AssetManagement');
+        return Inertia::render('AssetManagement/AssetManagement');
     })->name('work-orders.asset-management');
 
     Route::get('/work-orders/preventive-maintenance', function () {
-        return Inertia::render('WorkOrders/PreventiveMaintenance');
+        return Inertia::render('PMS/PreventiveMaintenance');
     })->name('work-orders.preventive-maintenance');
 });
 
@@ -102,6 +101,13 @@ Route::fallback(function () {
     return abort(403, 'Unauthorized access');
 });
 
+
+// Internal Registration
+Route::get('/register/internal-user-registration', [RegisteredUserController::class, 'createInternal'])->name('access.registration-internal-user-registration');
+
+
+// Submit Work Order for internal users
+Route::post('/work-orders', [WorkOrderController::class, 'stores'])->name('work-orders.stores');
 
 
 

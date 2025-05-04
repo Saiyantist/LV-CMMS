@@ -1,14 +1,5 @@
-import { Button } from "@/Components/shadcnui/button";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, usePage } from "@inertiajs/react";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/Components/shadcnui/dropdown-menu";
 import Chart from "./Admin/Chart";
 
 export default function Dashboard() {

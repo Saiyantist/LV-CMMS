@@ -1,22 +1,15 @@
-// resources/js/Components/ScrollToTopButton.tsx
-
-import { useEffect, useState } from "react";
 import { ChevronUp } from "lucide-react";
 
-export default function ScrollToTopButton() {
-    const [showScrollTop, setShowScrollTop] = useState(false);
+interface ScrollToTopButtonProps {
+    showScrollUpButton: boolean;
+    scrollToTop: () => void;
+}
 
-    useEffect(() => {
-        const onScroll = () => setShowScrollTop(window.scrollY > 100);
-        window.addEventListener("scroll", onScroll);
-        return () => window.removeEventListener("scroll", onScroll);
-    }, []);
-
-    const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    };
-
-    if (!showScrollTop) return null;
+const ScrollToTopButton: React.FC<ScrollToTopButtonProps> = ({
+    showScrollUpButton,
+    scrollToTop,
+}) => {
+    if (!showScrollUpButton) return null;
 
     return (
         <button
@@ -26,4 +19,6 @@ export default function ScrollToTopButton() {
             <ChevronUp size={20} />
         </button>
     );
-}
+};
+
+export default ScrollToTopButton;

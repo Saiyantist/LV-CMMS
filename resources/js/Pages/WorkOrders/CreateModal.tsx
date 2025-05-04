@@ -118,37 +118,6 @@ export default function CreateWorkOrderModal({
                     <hr className="my-4" />
 
                     <div className="max-h-[70vh] overflow-y-auto px-6">
-                        {/* Location Dropdown */}
-
-                        {/* This is redundant, there are two loation dropdown so I commented this out... */}
-                        {/* <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Location
-                                </label>
-                                <select
-                                    value={data.location_id}
-                                    onChange={(e) =>
-                                        setData("location_id", e.target.value)
-                                    }
-                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">Select a location</option>
-                                    {locations.map((location) => (
-                                        <option
-                                            key={location.id}
-                                            value={location.id}
-                                        >
-                                            {location.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.location_id && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.location_id}
-                                    </p>
-                                )}
-                            </div> */}
-
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">
                                 Location
@@ -358,15 +327,15 @@ export default function CreateWorkOrderModal({
                                             }
                                             className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="Angelo">Angelo</option>
+                                            <option value="Angelo">
+                                                Angelo
+                                            </option>
                                             <option value="Den">Den</option>
                                             <option value="Joshua">
                                                 Joshua
                                             </option>
                                             <option value="Rie">Rie</option>
-                                            <option value="Vera">
-                                                Vera
-                                            </option>
+                                            <option value="Vera">Vera</option>
                                         </select>
                                     </div>
                                 </div>

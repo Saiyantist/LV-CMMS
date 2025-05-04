@@ -66,12 +66,6 @@ const SubmitWorkOrder: React.FC = () => {
         return true;
     };
 
-    // const handleSubmit = (e: React.FormEvent) => {
-    //     e.preventDefault();
-    //     if (!validateForm()) return;
-    //     setShowConfirmModal(true); // ✅ Only show confirm modal
-    // };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateForm()) return;
