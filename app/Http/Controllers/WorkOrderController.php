@@ -254,4 +254,38 @@ public function submitWorkOrder(Request $request)
 
         return redirect()->route('work-orders.index')->with('success', 'Work order deleted successfully.');
     }
+
+
+    public function stores(Request $request)
+{
+    $validated = $request->validate([
+        'location_id' => 'required|exists:locations,id',
+        'report_description' => 'required|string|max:1000',
+        'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
+    // Create Work Order
+    $workOrder = WorkOrder::create([
+        'report_description' => $validated['report_description'],
+        'location_id' => $validated['location_id'],
+        'status' => 'Pending', // Default status
+        'requested_by' => auth()->id(),
+        'requested_at' => now(),
+    ]);
+
+    // Save attached images (if any)
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $uploadedImage) {
+            $path = $uploadedImage->store('work_orders', 'public');
+
+            $workOrder->images()->create([
+                'path' => $path,
+            ]);
+        }
+    }
+
+    return redirect()->route('work-orders.index')
+        ->with('success', 'Work order submitted successfully.');
+}
+
 }

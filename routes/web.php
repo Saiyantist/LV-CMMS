@@ -8,7 +8,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Models\Location;
+use App\Http\Controllers\LocationController;
 
 /**
  *  Guest Routes
@@ -27,11 +27,6 @@ Route::get('/', function () {
 Route::get('/register/external-user-registration', function () {
     return Inertia::render('Auth/ExternalRegistration'); 
 })->name('access/registration-external-user-registration');
-
-Route::get('/register/external-user-registration', function () {
-    return Inertia::render('Auth/ExternalRegistration'); 
-})->name('access.registration-external-user-registration');
-
 
 Route::get('/register/internal-user-registration', [RegisteredUserController::class, 'createInternal'])->name('access.registration-internal-user-registration');
 
@@ -55,8 +50,6 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-
 /**
  * User Role Management
  *      - for Role-based Access Control (RBAC)
@@ -77,14 +70,14 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
 
     // Asset Management and Preventive Maintenance should be restricted to work_order_manager or super_admin
     Route::middleware(['role_or_permission:super_admin|manage work orders'])->group(function () {
-        Route::get('/work-orders/asset-management', function () {
+        Route::get('/work-orders/asset-management', function () { // will change
             return Inertia::render('WorkOrders/AssetManagement');
         })->name('work-orders.asset-management');
-        Route::get('/work-orders/preventive-maintenance', function () {
+        Route::get('/work-orders/preventive-maintenance', function () { // will change
             return Inertia::render('WorkOrders/PreventiveMaintenance');
         })->name('work-orders.preventive-maintenance');
     });
-
+    
     Route::resource('work-orders', WorkOrderController::class); // ALWAYS put this at the end ng mga "/work-orders" routes.
 });
 
