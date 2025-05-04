@@ -26,7 +26,7 @@ Route::get('/', function () {
 
 Route::get('/register/external-user-registration', function () {
     return Inertia::render('Auth/ExternalRegistration'); 
-})->name('access/registration-external-user-registration');
+})->name('access.registration-external-user-registration');
 
 Route::get('/register/internal-user-registration', [RegisteredUserController::class, 'createInternal'])->name('access.registration-internal-user-registration');
 
