@@ -28,7 +28,8 @@ Route::get('/register/external-user-registration', function () {
     return Inertia::render('Auth/ExternalRegistration'); 
 })->name('access.registration-external-user-registration');
 
-Route::get('/register/internal-user-registration', [RegisteredUserController::class, 'createInternal'])->name('access.registration-internal-user-registration');
+Route::get('/register/internal-user-registration', [RegisteredUserController::class, 'createInternal']
+)->name('access.registration-internal-user-registration');
 
 /**
  * Authenticated Routes
@@ -67,14 +68,13 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
         return Inertia::render('WorkOrders/SubmitRequest');
     })->middleware('restrict_work_order_manager')->name('work-orders.submit-request'); // Submit Request should be restricted to non work_order_manager and non super_admin
 
-
     // Asset Management and Preventive Maintenance should be restricted to work_order_manager or super_admin
     Route::middleware(['role_or_permission:super_admin|manage work orders'])->group(function () {
         Route::get('/work-orders/asset-management', function () { // will change
-            return Inertia::render('WorkOrders/AssetManagement');
+            return Inertia::render('AssetManagement/AssetManagement');
         })->name('work-orders.asset-management');
         Route::get('/work-orders/preventive-maintenance', function () { // will change
-            return Inertia::render('WorkOrders/PreventiveMaintenance');
+            return Inertia::render('PreventiveMaintenance/PreventiveMaintenance');
         })->name('work-orders.preventive-maintenance');
     });
     

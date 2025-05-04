@@ -6,26 +6,6 @@ import GuestLayout from "@/Layouts/GuestLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { FormEventHandler } from "react";
 
-const getDateLimits = () => {
-    const today = new Date();
-    const minDate = new Date(
-        today.getFullYear() - 70,
-        today.getMonth(),
-        today.getDate()
-    )
-        .toISOString()
-        .split("T")[0]; // 70 years ago
-    const maxDate = new Date(
-        today.getFullYear() - 18,
-        today.getMonth(),
-        today.getDate()
-    )
-        .toISOString()
-        .split("T")[0]; // 18 years ago
-
-    return { minDate, maxDate };
-};
-
 export default function ExternalRegistration() {
     const { data, setData, post, processing, errors, reset } = useForm({
         first_name: "",
@@ -45,8 +25,6 @@ export default function ExternalRegistration() {
             onFinish: () => reset("password", "password_confirmation"),
         });
     };
-
-    const { minDate, maxDate } = getDateLimits();
 
     return (
         <GuestLayout>
@@ -105,7 +83,7 @@ export default function ExternalRegistration() {
                 {/* Gender */}
                 <div className="flex justify-stretch mt-4">
                     {/* Gender */}
-                    <div className="w-full ml-2">
+                    <div className="w-full">
                         <InputLabel htmlFor="gender" value="Gender" />
 
                         <select
