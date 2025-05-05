@@ -9,8 +9,8 @@ import {
     DropdownMenuTrigger,
 } from "@/Components/shadcnui/dropdown-menu";
 import { Button } from "@/Components/shadcnui/button";
-// import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-
+import axios from "axios";
+import { useRef } from "react";
 interface Location {
     id: number;
     name: string;
@@ -32,6 +32,11 @@ export default function CreateWorkOrderModal({
     onClose, // for modal, remove all instances if not modal ang paggagamitan along
 }: CreateWorkOrderProps) {
     const [previewImages, setPreviewImages] = useState<string[]>([]);
+    const [typedLocation, setTypedLocation] = useState("");
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
@@ -49,11 +54,26 @@ export default function CreateWorkOrderModal({
     });
 
     /** Handle Form Submission */
-    const submit = (e: React.FormEvent) => {
+    const submit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        let locationId = data.location_id;
+
+        // Check the typed location against existing locations
+        const existing = locations.find(loc => loc.name.toLowerCase() === typedLocation.toLowerCase());
+
+        if (existing) {
+            locationId = existing.id.toString();
+        } else {
+            
+            const response = await axios.post("/locations", { // Create the new location before creating the work order.
+                name: typedLocation.trim(),
+            });
+            locationId = response.data.id;
+        }
+
         const formData = new FormData();
-        formData.append("location_id", data.location_id);
+        formData.append("location_id", locationId);
         formData.append("report_description", data.report_description);
         data.images.forEach((image) => formData.append("images[]", image));
 
@@ -83,10 +103,29 @@ export default function CreateWorkOrderModal({
     };
 
     useEffect(() => {
+        /** Handle dropdown filtering */
+        const search = typedLocation.toLowerCase();
+        const matches = locations.filter(loc =>
+            loc.name.toLowerCase().includes(search)
+        );
+        setFilteredLocations(matches);
+
+        /** Handle click outside dropdown */
+        function handleClickOutside(e: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setShowDropdown(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside); // Add event listener to detect clicks outside the dropdown
+
+        /** Cleanup for dropdown and image previews */
+
         return () => {
-            previewImages.forEach((src) => URL.revokeObjectURL(src));
+            document.removeEventListener("mousedown", handleClickOutside);
+
+            previewImages.forEach((src) => URL.revokeObjectURL(src)); // Revoke object URLs for image previews
         };
-    }, [previewImages]);
+    }, [previewImages, typedLocation, locations]);
 
     return (
         <div
@@ -118,75 +157,42 @@ export default function CreateWorkOrderModal({
                     <hr className="my-4" />
 
                     <div className="max-h-[70vh] overflow-y-auto px-6">
-                        {/* Location Dropdown */}
+                        {/* Location Search Input */}
+                        <label className="block font-semibold text-gray-700">Location</label>
+                        <div ref={dropdownRef} className="mb-4 relative">
+                            <input
+                                type="text"
+                                value={typedLocation}
+                                onChange={(e) => {
+                                    setTypedLocation(e.target.value);
+                                    setShowDropdown(true);
+                                }}
+                                onFocus={() => setShowDropdown(true)}
+                                placeholder="Search or type a new location"
+                                className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            {showDropdown && (
+                                <ul className="absolute z-10 bg-white border w-full rounded shadow max-h-60 overflow-y-auto mt-1">
+                                    {filteredLocations.length > 0 ? (
+                                        filteredLocations.map((loc) => (
+                                            <li
+                                                key={loc.id}
+                                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                                onClick={() => {
+                                                    setData("location_id", loc.id.toString());
+                                                    setTypedLocation(loc.name);
+                                                    setShowDropdown(false);
+                                                }}
+                                            >
+                                                {loc.name}
+                                            </li>
+                                        ))
+                                    ) : (
+                                        <li className="px-4 py-2 text-gray-500 italic">New location will be created</li>
+                                    )}
+                                </ul>
+                            )}
 
-                        {/* This is redundant, there are two loation dropdown so I commented this out... */}
-                        {/* <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Location
-                                </label>
-                                <select
-                                    value={data.location_id}
-                                    onChange={(e) =>
-                                        setData("location_id", e.target.value)
-                                    }
-                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">Select a location</option>
-                                    {locations.map((location) => (
-                                        <option
-                                            key={location.id}
-                                            value={location.id}
-                                        >
-                                            {location.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.location_id && (
-                                    <p className="text-red-500 text-sm">
-                                        {errors.location_id}
-                                    </p>
-                                )}
-                            </div> */}
-
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Location
-                            </label>
-                            <DropdownMenu>
-                                {/* <DropdownMenuLabel>Location</DropdownMenuLabel> */}
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        className="w-full mt-1 justify-start"
-                                    >
-                                        {locations.find(
-                                            (location) =>
-                                                location.id ===
-                                                parseInt(data.location_id)
-                                        )?.name || "Select a location"}
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="xl:w-[42rem] lg:[32rem] md:w-[36rem] sm:w-[72rem]">
-                                    <DropdownMenuLabel>
-                                        Select a location
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    {locations.map((location) => (
-                                        <DropdownMenuItem
-                                            key={location.id}
-                                            onClick={() =>
-                                                setData(
-                                                    "location_id",
-                                                    location.id.toString()
-                                                )
-                                            }
-                                        >
-                                            {location.name}
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
                             {errors.location_id && (
                                 <p className="text-red-500 text-sm">
                                     {errors.location_id}
@@ -259,6 +265,9 @@ export default function CreateWorkOrderModal({
                                             }
                                             className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
                                         >
+                                            <option value="HVAC">
+                                                HVAC
+                                            </option>
                                             <option value="Electrical">
                                                 Electrical
                                             </option>
@@ -270,6 +279,12 @@ export default function CreateWorkOrderModal({
                                             </option>
                                             <option value="Carpentry">
                                                 Carpentry
+                                            </option>
+                                            <option value="Repairing">
+                                                Repairing
+                                            </option>
+                                            <option value="Welding">
+                                                Welding
                                             </option>
                                             <option value="No Label">
                                                 No Label
@@ -292,24 +307,14 @@ export default function CreateWorkOrderModal({
                                             }
                                             className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="Pending">
-                                                Pending
-                                            </option>
-                                            <option value="Assigned">
-                                                Assigned
-                                            </option>
-                                            <option value="Ongoing">
-                                                Ongoing
-                                            </option>
-                                            <option value="Overdue">
-                                                Overdue
-                                            </option>
-                                            <option value="Completed">
-                                                Completed
-                                            </option>
-                                            <option value="Cancelled">
-                                                Cancelled
-                                            </option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Assigned">Assigned</option>
+                                            <option value="Ongoing">Ongoing</option>
+                                            <option value="Overdue">Overdue</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="For Budget Request">For Budget Request</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                            <option value="Declined">Declined</option>
                                         </select>
                                     </div>
                                 </div>
@@ -358,15 +363,15 @@ export default function CreateWorkOrderModal({
                                             }
                                             className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="Angelo">Angelo</option>
+                                            <option value="Angelo">
+                                                Angelo
+                                            </option>
                                             <option value="Den">Den</option>
                                             <option value="Joshua">
                                                 Joshua
                                             </option>
                                             <option value="Rie">Rie</option>
-                                            <option value="Vera">
-                                                Vera
-                                            </option>
+                                            <option value="Vera">Vera</option>
                                         </select>
                                     </div>
                                 </div>

@@ -14,6 +14,7 @@ class WorkOrderController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * It is also used to pass the needed props to the modals for the create forrm and edit form.
      */
     public function index()
     {
@@ -65,18 +66,7 @@ class WorkOrderController extends Controller
      */
     public function create()
     {
-        $user = auth()->user();
-
-
-        return Inertia::render('WorkOrders/Create', [
-            'locations' => Location::select('id', 'name')->get(),
-            'user' => [
-                // ...$user->toArray(), // converts the user model to array including roles. downside is everything is sent to FE.
-                'id' => $user->id,
-                'name' => $user->first_name . ' ' . $user->last_name,
-                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
-            ],
-        ]);
+        // Not needed, the create form and edit form is handled in the main component by passing the data needed as props.
     }
 
     /**
@@ -178,6 +168,7 @@ public function submitWorkOrder(Request $request)
      */
     public function edit(WorkOrder $workOrder)
     {
+        // Not needed, the create form and edit form is handled in the main component by passing the data needed as props.
     }
 
     /**
@@ -186,31 +177,38 @@ public function submitWorkOrder(Request $request)
     public function update(StoreWorkOrderRequest $request, WorkOrder $workOrder)
     {
         $user = auth()->user();
-        
-        if (!$user->hasPermissionTo('manage work orders') && $workOrder->requested_by != $user->id) {
-            return back()->with('error', 'You are not allowed to update this work order.');
+        if(!$user->hasPermissionTo('manage work orders')) {
+            if ($workOrder->requested_by != $user->id) {
+                return redirect()->route('work-orders.index')->with('error', 'You are not allowed to update this work order.');
+            }
+            else if ($workOrder->status !== 'Pending') {
+                return redirect()->route('work-orders.index')->with('error', 'Only pending work orders can be updated by requesters.');
+            }
+
+            else {
+                $workOrder->update([
+                    'report_description' => $request->report_description,
+                    'location_id' => $request->location_id,
+                ]);
+            }
         }
 
-        if ($workOrder !== 'Pending' && !$user->hasPermissionTo('manage work orders')) {
-            return back()->with('error', 'Only pending work orders can be updated by requesters.');
+        else {
+            $workOrder->update([
+                'report_description' => $request->report_description,
+                'location_id' => $request->location_id,
+                'status' => $request->status,
+                'work_order_type' => $request->work_order_type,
+                'label' => $request->label,
+                'priority' => $request->priority,
+                'remarks' => $request->remarks,
+            ]);
         }
 
-        $workOrder->update([
-            'report_description' => $request->report_description,
-            'location_id' => $request->location_id,
-            'status' => $request->status,
-            'work_order_type' => $request->work_order_type,
-            'label' => $request->label,
-            'priority' => $request->priority,
-            'remarks' => $request->remarks,
-        ]);
-
-        /**
-         * Handle image uploads (if any)
-         */
+        // Handle image uploads
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $filename = uniqid('wo_') . '.' . $image->extension(); // prefix to be added to the image name 
+                $filename = 'wo_' . $workOrder->id . '_' . uniqid() . '.' . $image->extension(); // prefix to be added to the image name 
                 $path = $image->storeAs('work_orders', $filename, 'public'); // To save under storage/app/public/work_orders folder
                 Image::create([
                     'imageable_id' => $workOrder->id,
@@ -219,10 +217,8 @@ public function submitWorkOrder(Request $request)
                 ]);
             }
         }
-
-        /**
-         * Handle image deletions (if any)
-         */
+        
+        // Handle image deletions
         if ($request->has('deleted_images')) {
             foreach ($request->deleted_images as $imagePath) {
                 $removeFromUrl = config('app.url') . 'storage/'; // Remove app URL and 'storage/' prefix
@@ -234,7 +230,6 @@ public function submitWorkOrder(Request $request)
                 }
             }
         }
-
         return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
     }
 
@@ -247,7 +242,6 @@ public function submitWorkOrder(Request $request)
         $user = auth()->user();
 
         if (!$user->hasPermissionTo('manage work orders')) {
-            // dd(('You do not have permission to DELETE'));
             return back()->with('error', 'You do not have permission to delete this work order.');
         }
 
@@ -260,4 +254,38 @@ public function submitWorkOrder(Request $request)
 
         return redirect()->route('work-orders.index')->with('success', 'Work order deleted successfully.');
     }
+
+
+    public function stores(Request $request)
+{
+    $validated = $request->validate([
+        'location_id' => 'required|exists:locations,id',
+        'report_description' => 'required|string|max:1000',
+        'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
+    // Create Work Order
+    $workOrder = WorkOrder::create([
+        'report_description' => $validated['report_description'],
+        'location_id' => $validated['location_id'],
+        'status' => 'Pending', // Default status
+        'requested_by' => auth()->id(),
+        'requested_at' => now(),
+    ]);
+
+    // Save attached images (if any)
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $uploadedImage) {
+            $path = $uploadedImage->store('work_orders', 'public');
+
+            $workOrder->images()->create([
+                'path' => $path,
+            ]);
+        }
+    }
+
+    return redirect()->route('work-orders.index')
+        ->with('success', 'Work order submitted successfully.');
+}
+
 }

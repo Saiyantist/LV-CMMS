@@ -9,7 +9,6 @@ export default function Dashboard() {
         <AuthenticatedLayout>
             <Head title="Dashboard" />
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-                
                 {/* Welcome Card */}
                 <div className="overflow-hidden bg-white shadow-sm rounded-lg">
                     <div className="p-6 text-black text-lg sm:text-xl">
@@ -18,7 +17,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Chart Section */}
-                <div className="overflow-hidden bg-white shadow-sm rounded-lg p-6">
+                <div className="flex justify-center overflow-hidden bg-white shadow-sm rounded-lg p-6">
                     <Chart />
                 </div>
             </div>

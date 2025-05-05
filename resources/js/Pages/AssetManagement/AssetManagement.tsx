@@ -3,6 +3,7 @@ import { Head } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
 import CreateAssetModal from "./CreateAssetModal";
+import ViewAssetModal from "./ViewAssetModal";
 
 const AssetManagement: React.FC = () => {
     const assets = [
@@ -28,6 +29,9 @@ const AssetManagement: React.FC = () => {
 
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [isCreating, setIsCreating] = useState(false);
+    const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(
+        null
+    );
 
     const handleCheckboxChange = (assetId: number) => {
         setSelectedAssets((prev) =>
@@ -50,20 +54,16 @@ const AssetManagement: React.FC = () => {
             <Head title="Asset Management" />
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-                <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+                <header className="mb-6">
                     <div className="bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 sm:gap-6 text-black">
-                            {/* Title */}
+                        <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 text-black">
                             <h1 className="text-2xl font-semibold text-center sm:text-left">
                                 Asset Management
                             </h1>
-
-                            {/* Button */}
                             <div className="w-full sm:w-auto flex sm:ml-4 justify-center sm:justify-start">
                                 <PrimaryButton
                                     onClick={() => setIsCreating(true)}
-                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 
-                            text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
+                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md"
                                 >
                                     Add an Asset
                                 </PrimaryButton>
@@ -75,7 +75,7 @@ const AssetManagement: React.FC = () => {
                 {/* Desktop Table View */}
                 <div className="hidden sm:block overflow-x-auto">
                     <table className="min-w-full table-auto border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                        <thead className="bg-secondary dark:bg-gray-800 text-white dark:text-white">
+                        <thead className="bg-secondary text-white">
                             <tr>
                                 <th className="p-3 text-center">
                                     <input
@@ -88,28 +88,28 @@ const AssetManagement: React.FC = () => {
                                         className="accent-primary"
                                     />
                                 </th>
-                                <th className="text-auto border p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold">
                                     ID
                                 </th>
-                                <th className="text-auto border p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold">
                                     Asset Name
                                 </th>
-                                <th className="text-auto border p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold">
                                     Specification
                                 </th>
-                                <th className="text-auto border p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold">
                                     Location
                                 </th>
-                                <th className="text-auto border p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold">
                                     Condition
                                 </th>
-                                <th className="text-auto border p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold">
                                     Date Acquired
                                 </th>
-                                <th className="text-auto border border p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold">
                                     Last Maintenance
                                 </th>
-                                <th className="text-auto border p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold">
                                     Action
                                 </th>
                             </tr>
@@ -147,7 +147,12 @@ const AssetManagement: React.FC = () => {
                                     </td>
                                     <td className="p-3 text-center">
                                         <div className="flex justify-center gap-2">
-                                            <button className="bg-secondary text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-700 transition">
+                                            <button
+                                                onClick={() =>
+                                                    setViewingAsset(asset)
+                                                }
+                                                className="bg-secondary text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-700 transition"
+                                            >
                                                 View
                                             </button>
                                             <button className="bg-destructive text-white px-3 py-1.5 text-sm rounded-md hover:bg-red-700 transition">
@@ -168,7 +173,6 @@ const AssetManagement: React.FC = () => {
                             key={asset.id}
                             className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
                         >
-                            {/* Top-right Checkbox */}
                             <div className="absolute top-3 right-3">
                                 <input
                                     type="checkbox"
@@ -179,8 +183,6 @@ const AssetManagement: React.FC = () => {
                                     className="accent-primary"
                                 />
                             </div>
-
-                            {/* Info Section */}
                             <div className="space-y-1 pr-8 text-sm text-gray-800">
                                 <p>
                                     <span className="font-medium">ID:</span>{" "}
@@ -219,10 +221,11 @@ const AssetManagement: React.FC = () => {
                                     {asset.lastMaintenance}
                                 </p>
                             </div>
-
-                            {/* Action Buttons */}
                             <div className="mt-4 flex justify-between gap-2">
-                                <button className="flex-1 bg-secondary text-white px-3 py-2 text-sm rounded-md hover:bg-blue-700 transition">
+                                <button
+                                    onClick={() => setViewingAsset(asset)}
+                                    className="flex-1 bg-secondary text-white px-3 py-2 text-sm rounded-md hover:bg-blue-700 transition"
+                                >
                                     View
                                 </button>
                                 <button className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition">
@@ -234,12 +237,18 @@ const AssetManagement: React.FC = () => {
                 </div>
             </div>
 
-            {/* Add Asset Modal */}
             {isCreating && (
                 <CreateAssetModal
                     isOpen={isCreating}
                     onClose={() => setIsCreating(false)}
-                    onSave={() => setIsCreating(false)} // Here you can handle the logic for saving the asset
+                    onSave={() => setIsCreating(false)}
+                />
+            )}
+
+            {viewingAsset && (
+                <ViewAssetModal
+                    data={viewingAsset}
+                    onClose={() => setViewingAsset(null)}
                 />
             )}
         </Authenticated>
