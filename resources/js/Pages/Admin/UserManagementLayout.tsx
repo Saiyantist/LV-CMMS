@@ -2,7 +2,9 @@ import { UserRoleProps } from "@/types";
 
 interface Props extends UserRoleProps {
     selectedRole: { [key: number]: string };
-    setSelectedRole: React.Dispatch<React.SetStateAction<{ [key: number]: string }>>;
+    setSelectedRole: React.Dispatch<
+        React.SetStateAction<{ [key: number]: string }>
+    >;
     handleChangeRole: (userId: number) => void;
     handleRemoveRole: (userId: number) => void;
 }
@@ -44,10 +46,20 @@ export default function UserManagementLayout({
                                     {user.first_name} {user.last_name}
                                 </td>
                                 <td className="p-3">{user.birth_date}</td>
-                                <td className="p-3">+63 {user.contact_number}</td>
+                                <td className="p-3">
+                                    +63 {user.contact_number}
+                                </td>
                                 <td className="p-3">{user.email}</td>
                                 <td className="p-3">
-                                    {user.roles.map((r) => r.name).join(", ")}
+                                    {user.roles
+                                        .map((r) =>
+                                            r.name
+                                                .replace(/_/g, " ")
+                                                .replace(/\b\w/g, (c) =>
+                                                    c.toUpperCase()
+                                                )
+                                        )
+                                        .join(", ")}
                                 </td>
                                 <td className="p-3">
                                     <select
@@ -61,14 +73,19 @@ export default function UserManagementLayout({
                                         className="px-3 py-2 text-sm md:text-base border rounded text-black dark:text-white dark:bg-gray-700 dark:border-gray-600"
                                         disabled={
                                             auth.user.id === user.id &&
-                                            user.roles.some((r) => r.name === "super_admin")
+                                            user.roles.some(
+                                                (r) => r.name === "super_admin"
+                                            )
                                         }
                                     >
                                         <option value="" disabled>
                                             Select role
                                         </option>
                                         {roles.map((role) => (
-                                            <option key={role.id} value={role.name}>
+                                            <option
+                                                key={role.id}
+                                                value={role.name}
+                                            >
                                                 {role.name}
                                             </option>
                                         ))}
@@ -78,13 +95,17 @@ export default function UserManagementLayout({
                                     {auth.user.id !== user.id && (
                                         <div className="flex justify-center gap-2">
                                             <button
-                                                onClick={() => handleChangeRole(user.id)}
+                                                onClick={() =>
+                                                    handleChangeRole(user.id)
+                                                }
                                                 className="px-4 py-2 text-sm md:text-base bg-secondary text-white rounded dark:bg-blue-600 dark:hover:bg-blue-500"
                                             >
                                                 Update
                                             </button>
                                             <button
-                                                onClick={() => handleRemoveRole(user.id)}
+                                                onClick={() =>
+                                                    handleRemoveRole(user.id)
+                                                }
                                                 className="px-4 py-2 text-sm md:text-base bg-destructive text-white rounded dark:bg-red-600 dark:hover:bg-red-500"
                                             >
                                                 Remove
@@ -110,20 +131,30 @@ export default function UserManagementLayout({
                                 <strong>ID:</strong> {user.id}
                             </div>
                             <div>
-                                <strong>Name:</strong> {user.first_name} {user.last_name}
+                                <strong>Name:</strong> {user.first_name}{" "}
+                                {user.last_name}
                             </div>
                             <div>
                                 <strong>Birthday:</strong> {user.birth_date}
                             </div>
                             <div>
-                                <strong>Contact:</strong> +63 {user.contact_number}
+                                <strong>Contact:</strong> +63{" "}
+                                {user.contact_number}
                             </div>
                             <div>
                                 <strong>Email:</strong> {user.email}
                             </div>
                             <div>
                                 <strong>Current Role:</strong>{" "}
-                                {user.roles.map((r) => r.name).join(", ")}
+                                {user.roles
+                                    .map((r) =>
+                                        r.name
+                                            .replace(/_/g, " ")
+                                            .replace(/\b\w/g, (c) =>
+                                                c.toUpperCase()
+                                            )
+                                    )
+                                    .join(", ")}
                             </div>
 
                             <div className="mt-2">
@@ -138,7 +169,9 @@ export default function UserManagementLayout({
                                     className="w-full mt-1 px-3 py-2 text-sm md:text-base border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     disabled={
                                         auth.user.id === user.id &&
-                                        user.roles.some((r) => r.name === "super_admin")
+                                        user.roles.some(
+                                            (r) => r.name === "super_admin"
+                                        )
                                     }
                                 >
                                     <option value="" disabled>
@@ -155,13 +188,17 @@ export default function UserManagementLayout({
                             {auth.user.id !== user.id && (
                                 <div className="flex justify-between mt-3 gap-2">
                                     <button
-                                        onClick={() => handleChangeRole(user.id)}
+                                        onClick={() =>
+                                            handleChangeRole(user.id)
+                                        }
                                         className="w-1/2 px-4 py-2 text-sm md:text-base bg-secondary text-white rounded dark:bg-blue-600 dark:hover:bg-blue-500"
                                     >
                                         Update
                                     </button>
                                     <button
-                                        onClick={() => handleRemoveRole(user.id)}
+                                        onClick={() =>
+                                            handleRemoveRole(user.id)
+                                        }
                                         className="w-1/2 px-4 py-2 text-sm md:text-base bg-destructive text-white rounded dark:bg-red-600 dark:hover:bg-red-500"
                                     >
                                         Remove
