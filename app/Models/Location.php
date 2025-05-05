@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Location extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'added_by'];
 
     public function workOrders()
     {

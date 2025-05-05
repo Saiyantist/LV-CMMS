@@ -3,19 +3,22 @@
 namespace App\Http\Controllers;
 use App\Models\Location;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-
 
 class LocationController extends Controller
 {
-    public function index()
-{
-   
-}
+    public function store(Request $request)
+    {
+        $user = auth()->user();
 
-public function create()
-{
+        $validated = $request->validate([
+            'name' => 'required|string|max:50|unique:locations,name',
+        ]);
     
-}
-
+        $location = Location::create([
+            'name' => $validated['name'],
+            'added_by' => $user->id,
+        ]);
+    
+        return redirect()->back()->with('new_location_id', $location->id);
+    }
 }
