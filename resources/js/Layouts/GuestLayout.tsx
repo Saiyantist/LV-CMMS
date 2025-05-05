@@ -1,6 +1,5 @@
 import { PropsWithChildren } from "react";
 import NavBar from "@/Components/NavBar";
-// No import for lvbuilding — it should come from the public path
 
 export default function Guest({ children }: PropsWithChildren) {
     return (

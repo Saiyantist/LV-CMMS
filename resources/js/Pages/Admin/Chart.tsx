@@ -113,17 +113,7 @@ const Chart: React.FC = () => {
                 <div ref={chartRef} />
             </div>
 
-            {/* Footer */}
-            <div className="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between">
-                <div className="flex justify-between items-center pt-5">
-                    <button
-                        className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-center inline-flex items-center"
-                        type="button"
-                    >
-                        Last 7 days
-                    </button>
-                </div>
-            </div>
+         
         </div>
     );
 };

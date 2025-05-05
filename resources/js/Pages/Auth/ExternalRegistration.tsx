@@ -2,7 +2,7 @@ import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
-import GuestLayout from "@/Layouts/GuestLayout";
+import RegisterLayout from "@/Layouts/RegisterLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { FormEventHandler } from "react";
 
@@ -27,11 +27,18 @@ export default function ExternalRegistration() {
     };
 
     return (
-        <GuestLayout>
+        <RegisterLayout>
             <Head title="Register" />
 
             <form onSubmit={submit}>
                 {/* Name */}
+
+                <div>
+                    <h1 className="text-2xl font-bold text-center mb-8 text-secondary dark:text-white">
+                        External User
+                    </h1>
+                </div>
+
                 <div className="flex justify-stretch mt-2">
                     {/* First Name */}
                     <div className="w-full mr-2">
@@ -217,6 +224,6 @@ export default function ExternalRegistration() {
                     </PrimaryButton>
                 </div>
             </form>
-        </GuestLayout>
+        </RegisterLayout>
     );
 }
