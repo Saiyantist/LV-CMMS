@@ -54,7 +54,7 @@ export default function InternalRegistration({
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route("register"), {
+        post(route("register.internal"), {
             onFinish: () => reset("password", "password_confirmation"),
         });
     };
@@ -63,13 +63,16 @@ export default function InternalRegistration({
 
     return (
         <RegisterLayout>
-            <Head title="Register" />
+            <Head title="Registration for Internal" />
 
             <form onSubmit={submit}>
-                <div>
-                    <h1 className="text-2xl font-bold text-center mb-8 text-secondary dark:text-white">
-                        Internal User
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-center text-black dark:text-white">
+                        Registration Form
                     </h1>
+                    <h2 className="font-bold text-secondary text-center">
+                        for Internal User 
+                    </h2>
                 </div>
 
                 {/* Name */}
