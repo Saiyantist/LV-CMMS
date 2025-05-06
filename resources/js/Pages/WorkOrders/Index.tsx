@@ -1,7 +1,7 @@
 // WorkOrders.tsx
 import { useState, useEffect } from "react";
 import { PageProps } from "@/types";
-import { usePage } from "@inertiajs/react";
+import { usePage , router } from "@inertiajs/react";
 import IndexLayout from "./IndexLayout";
 
 export default function WorkOrders({
@@ -47,6 +47,21 @@ export default function WorkOrders({
         return wo.requested_by === userName;
     });
 
+    const handleDelete = (id: number) => {
+        const confirmDelete = confirm("Are you sure you want to delete this work order?");
+        if (confirmDelete) {
+            router.delete(`/work-orders/${id}`, {
+
+                // For testing purposes, replace with actual delete flash messages
+                onSuccess: () => {
+                    alert("Work order deleted successfully.");
+                },
+                onError: () => {
+                    alert("Failed to delete the work order. Please try again.");
+                },
+            });
+        }
+    }
     const handleScroll = () => {
         setShowScrollUpButton(window.scrollY > 300);
     };
@@ -108,6 +123,7 @@ export default function WorkOrders({
             scrollToTop={scrollToTop}
             getStatusColor={getStatusColor}
             getPriorityColor={getPriorityColor}
+            handleDelete={handleDelete}
         />
     );
 }
