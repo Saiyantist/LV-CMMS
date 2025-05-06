@@ -5,6 +5,7 @@ import {
     ClipboardList,
     Wrench,
     ShieldCheck,
+    FileText,
     Send,
     User,
     LogOut,
@@ -92,46 +93,35 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             : []),
     ];
 
-    const adminItems = isSuperAdmin || isWorkOrderManager
-        ? [
-            {
-                routeName:
-                "work-orders.asset-management",
-                href:
-                route(
-                    "work-orders.asset-management"
-                ) || "",
-                text: "Asset Management",
-                icon: (
-                    <Wrench
-                    size={14}
-                    className="mr-2"
-                    />
-                ),
-            },
-            {
-                routeName:
-                "work-orders.preventive-maintenance",
-                href:
-                route(
-                    "work-orders.preventive-maintenance"
-                ) || "",
-                text: "Preventive Maintenance",
-                icon: (
-                    <ShieldCheck
-                    size={14}
-                    className="mr-2"
-                    />
-                ),
-            },
-            isSuperAdmin &&{
-                routeName: "admin.manage-roles",
-                href: route("admin.manage-roles") || "",
-                icon: <User size={16} className="mr-2" />,
-                text: "User Management",
-            },
-        ]
-        : [];
+    const adminItems =
+        isSuperAdmin || isWorkOrderManager
+            ? [
+                  {
+                      routeName: "work-orders.asset-management",
+                      href: route("work-orders.asset-management") || "",
+                      text: "Asset Management",
+                      icon: <Wrench size={14} className="mr-2" />,
+                  },
+                  {
+                      routeName: "work-orders.preventive-maintenance",
+                      href: route("work-orders.preventive-maintenance") || "",
+                      text: "Preventive Maintenance",
+                      icon: <ShieldCheck size={14} className="mr-2" />,
+                  },
+                  {
+                      routeName: "work-orders.compliance-and-safety",
+                      href: route("work-orders.compliance-and-safety") || "",
+                      text: "Compliance and Safety",
+                      icon: <FileText size={14} className="mr-2" />,
+                  },
+                  isSuperAdmin && {
+                      routeName: "admin.manage-roles",
+                      href: route("admin.manage-roles") || "",
+                      icon: <User size={16} className="mr-2" />,
+                      text: "User Management",
+                  },
+              ]
+            : [];
 
     // Menu item rendering logic remains the same
     const isActive = (routeName: string) => currentRoute === routeName;

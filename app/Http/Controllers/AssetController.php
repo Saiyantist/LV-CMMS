@@ -17,7 +17,7 @@ class AssetController extends Controller
         $assets = Asset::all();
 
         // Return the Inertia view with assets data
-        return Inertia::render('AssetManagement', [
+        return Inertia::render('AssetManagement/AssetManagement', [
             'assets' => $assets
         ]);
     }

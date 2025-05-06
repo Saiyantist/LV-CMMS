@@ -54,17 +54,6 @@ const PreventiveMaintenance: React.FC = () => {
                             <h1 className="text-2xl font-semibold text-center sm:text-left">
                                 Preventive Maintenance
                             </h1>
-
-                            {/* Button */}
-                            {/* <div className="w-full sm:w-auto flex sm:ml-4 justify-center sm:justify-start">
-                                <PrimaryButton
-                                    onClick={() => setIsCreating(true)}
-                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 
-                                            text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
-                                >
-                                    Add an Asset
-                                </PrimaryButton>
-                            </div> */}
                         </div>
                     </div>
                 </header>
@@ -115,8 +104,11 @@ const PreventiveMaintenance: React.FC = () => {
                         </thead>
                         <tbody>
                             {assets.map((asset) => (
-                                <tr key={asset.id} className="border-b">
-                                    <td className="p-2 text-center">
+                                <tr
+                                    key={asset.id}
+                                    className="border-b text-center"
+                                >
+                                    <td className="p-2">
                                         <input
                                             type="checkbox"
                                             checked={selectedAssets.includes(
@@ -136,14 +128,12 @@ const PreventiveMaintenance: React.FC = () => {
                                         {asset.specification}
                                     </td>
                                     <td className="p-2">{asset.location}</td>
-                                    <td className="p-2 text-right">
-                                        {asset.condition}
-                                    </td>
-                                    <td className="p-2 text-right">TBD</td>
-                                    <td className="p-2 text-center">
+                                    <td className="p-2">{asset.condition}</td>
+                                    <td className="p-2">TBD</td>
+                                    <td className="p-2">
                                         {asset.lastMaintenance}
                                     </td>
-                                    <td className="p-4 text-center">
+                                    <td className="p-4">
                                         <div className="flex justify-center items-center gap-2">
                                             <button className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
                                                 Edit

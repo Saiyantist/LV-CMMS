@@ -25,6 +25,15 @@ const AssetManagement: React.FC = () => {
             dateAcquired: "2022-06-15",
             lastMaintenance: "2023-02-20",
         },
+        {
+            id: 3,
+            name: "Aircon",
+            specification: "Super Cool 3000",
+            location: "EFS 404",
+            condition: "Fair",
+            dateAcquired: "2022-06-15",
+            lastMaintenance: "2023-02-20",
+        },
     ];
 
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
@@ -76,8 +85,8 @@ const AssetManagement: React.FC = () => {
                 <div className="hidden sm:block overflow-x-auto">
                     <table className="min-w-full table-auto border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                         <thead className="bg-secondary text-white">
-                            <tr>
-                                <th className="p-3 text-center">
+                            <tr className="border border-white">
+                                <th className="p-3 text-center border border-white">
                                     <input
                                         type="checkbox"
                                         onChange={handleSelectAll}
@@ -88,28 +97,28 @@ const AssetManagement: React.FC = () => {
                                         className="accent-primary"
                                     />
                                 </th>
-                                <th className="p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold border border-white">
                                     ID
                                 </th>
-                                <th className="p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold border border-white">
                                     Asset Name
                                 </th>
-                                <th className="p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold border border-white">
                                     Specification
                                 </th>
-                                <th className="p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold border border-white">
                                     Location
                                 </th>
-                                <th className="p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold border border-white">
                                     Condition
                                 </th>
-                                <th className="p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold border border-white">
                                     Date Acquired
                                 </th>
-                                <th className="p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold border border-white">
                                     Last Maintenance
                                 </th>
-                                <th className="p-3 text-sm font-semibold">
+                                <th className="p-3 text-sm font-semibold border border-white">
                                     Action
                                 </th>
                             </tr>
@@ -132,17 +141,25 @@ const AssetManagement: React.FC = () => {
                                             className="accent-primary"
                                         />
                                     </td>
-                                    <td className="p-3">{asset.id}</td>
-                                    <td className="p-3">{asset.name}</td>
-                                    <td className="p-3">
+                                    <td className="p-3 text-center">
+                                        {asset.id}
+                                    </td>
+                                    <td className="p-3 text-center">
+                                        {asset.name}
+                                    </td>
+                                    <td className="p-3 text-center">
                                         {asset.specification}
                                     </td>
-                                    <td className="p-3">{asset.location}</td>
-                                    <td className="p-3">{asset.condition}</td>
-                                    <td className="p-3 text-right">
+                                    <td className="p-3 text-center">
+                                        {asset.location}
+                                    </td>
+                                    <td className="p-3 text-center">
+                                        {asset.condition}
+                                    </td>
+                                    <td className="p-3 text-center">
                                         {asset.dateAcquired}
                                     </td>
-                                    <td className="p-3 text-right">
+                                    <td className="p-3 text-center">
                                         {asset.lastMaintenance}
                                     </td>
                                     <td className="p-3 text-center">
