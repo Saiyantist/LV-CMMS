@@ -24,9 +24,13 @@ export default function Guest({ children }: PropsWithChildren) {
                 />
 
                 {/* Log in Header */}
-                <div className="relative text-center space-y-4 bg-white dark:bg-gray-900 px-8 py-2 rounded-sm">
-                    <h1 className="text-5xl font-bold text-primary">CMMS</h1>
-                    <h2>Log in to continue with us.</h2>
+                <div className="relative text-center space-y-2 sm:space-y-4 px-6 sm:px-8 py-2 sm:py-4">
+                    <h1 className="text-3xl sm:text-5xl font-bold text-white sm:text-primary">
+                        CMMS
+                    </h1>
+                    <h2 className="text-sm sm:text-base text-white sm:text-gray-700 dark:sm:text-gray-300">
+                        Log in to continue with us.
+                    </h2>
                 </div>
 
                 {/* Form content with rounded corners only for small screens */}

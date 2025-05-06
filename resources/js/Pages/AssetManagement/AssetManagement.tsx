@@ -4,6 +4,7 @@ import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
 import CreateAssetModal from "./CreateAssetModal";
 import ViewAssetModal from "./ViewAssetModal";
+// import { toast } from "sonner"; I will user this for delete action later.
 
 const AssetManagement: React.FC = () => {
     const assets = [
@@ -172,7 +173,18 @@ const AssetManagement: React.FC = () => {
                                             >
                                                 View
                                             </button>
-                                            <button className="bg-destructive text-white px-3 py-1.5 text-sm rounded-md hover:bg-red-700 transition">
+                                            <button
+                                                onClick={() => {
+                                                    const confirmed =
+                                                        window.confirm(
+                                                            "Are you sure you want to delete this asset? This action is irreversible and cannot be undone."
+                                                        );
+                                                    if (confirmed) {
+                                                        // Call your delete function here
+                                                    }
+                                                }}
+                                                className="bg-destructive text-white px-3 py-1.5 text-sm rounded-md hover:bg-red-700 transition"
+                                            >
                                                 Delete
                                             </button>
                                         </div>
@@ -245,7 +257,17 @@ const AssetManagement: React.FC = () => {
                                 >
                                     View
                                 </button>
-                                <button className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition">
+                                <button
+                                    onClick={() => {
+                                        const confirmed = window.confirm(
+                                            "Are you sure you want to delete this asset? This action is irreversible and cannot be undone."
+                                        );
+                                        if (confirmed) {
+                                            // Call your delete function here
+                                        }
+                                    }}
+                                    className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
+                                >
                                     Delete
                                 </button>
                             </div>
