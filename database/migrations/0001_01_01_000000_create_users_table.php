@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
-            $table->text('birth_date');
+            $table->text('birth_date')->nullable();
             $table->enum('gender', ['male', 'female', 'rather not say']);
             $table->text('contact_number');
             $table->text('job_position')->nullable();
-            $table->enum('staff_type', ['teaching', 'non-teaching', 'maintenance personnel']);
+            $table->enum('staff_type', ['teaching', 'non-teaching', 'maintenance personnel'])->nullable();
             $table->foreignId('department_id')->nullable()->constrained()->onDelete('set null');
             $table->string('email')->unique();
             $table->string('password');

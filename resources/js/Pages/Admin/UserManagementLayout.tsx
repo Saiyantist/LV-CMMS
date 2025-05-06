@@ -22,7 +22,7 @@ export default function UserManagementLayout({
         <div className="p-4 space-y-4">
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm text-white md:text-base">
+                <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm text-white md:text-sm">
                     <thead>
                         <tr className="bg-secondary dark:bg-gray-800">
                             <th className="border p-3">Id</th>

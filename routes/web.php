@@ -44,7 +44,6 @@ Route::get('/awaiting-approval', function () {
 
 Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::get('/dashboard', function () {
-        // dd(auth()->user()->getRoleNames(), auth()->user()->getAllPermissions()->pluck('name'));
         return Inertia::render('Dashboard');})->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -53,7 +52,7 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
 
 
 /**
- * User Role Management
+ * Autthenticated with Roles and Verified Email
  *      - for Role-based Access Control (RBAC)
  *      - ROUTING PREVENTION FOR UNAUTHORIZED ACCESS/USERS
  */
@@ -85,6 +84,8 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
     });
     
     Route::resource('work-orders', WorkOrderController::class); // ALWAYS put this at the end ng mga "/work-orders" routes.
+
+    Route::post('/locations', [LocationController::class, 'store']);
 });
 
 // Catch unauthorized attempts to access restricted pages

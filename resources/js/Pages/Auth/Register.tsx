@@ -23,7 +23,7 @@ export default function AccessRegistration() {
 
                     <div className="flex flex-col md:flex-row justify-center items-center gap-6">
                         {/* External User Card */}
-                        <div className="w-full md:w-1/2 bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md shadow-slate-500 min-h-[14rem] flex flex-col items-center justify-between text-center">
+                        <div className="w-full md:w-1/2 bg-form dark:bg-gray-700 p-6 rounded-lg shadow-md shadow-slate-500 min-h-[14rem] flex flex-col items-center justify-between text-center">
                             <div>
                                 <h2 className="text-xl font-bold text-secondary dark:text-white">
                                     Guest
@@ -51,7 +51,7 @@ export default function AccessRegistration() {
                         </div>
 
                         {/* Internal User Card */}
-                        <div className="w-full md:w-1/2 bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md shadow-slate-500 min-h-[14rem] flex flex-col items-center justify-between text-center">
+                        <div className="w-full md:w-1/2 bg-form dark:bg-gray-700 p-6 rounded-lg shadow-md shadow-slate-500 min-h-[14rem] flex flex-col items-center justify-between text-center">
                             <div>
                                 <h2 className="text-xl font-bold text-secondary dark:text-white">
                                     LVCC Employees

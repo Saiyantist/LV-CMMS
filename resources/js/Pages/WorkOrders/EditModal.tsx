@@ -284,7 +284,9 @@ export default function EditWorkOrderModal({
                                     <option value="Ongoing">Ongoing</option>
                                     <option value="Overdue">Overdue</option>
                                     <option value="Completed">Completed</option>
+                                    <option value="For Budget Request">For Budget Request</option>
                                     <option value="Cancelled">Cancelled</option>
+                                    <option value="Declined">Declined</option>
                                 </select>
                             </div>
 
@@ -325,11 +327,30 @@ export default function EditWorkOrderModal({
                                     }
                                     className="border p-2 w-full rounded-md text-sm"
                                 >
-                                    <option value="Electrical">
-                                        Electrical
-                                    </option>
-                                    <option value="Plumbing">Plumbing</option>
-                                    <option value="HVAC">HVAC</option>
+                                            <option value="HVAC">
+                                                HVAC
+                                            </option>
+                                            <option value="Electrical">
+                                                Electrical
+                                            </option>
+                                            <option value="Plumbing">
+                                                Plumbing
+                                            </option>
+                                            <option value="Painting">
+                                                Painting
+                                            </option>
+                                            <option value="Carpentry">
+                                                Carpentry
+                                            </option>
+                                            <option value="Repairing">
+                                                Repairing
+                                            </option>
+                                            <option value="Welding">
+                                                Welding
+                                            </option>
+                                            <option value="No Label">
+                                                No Label
+                                            </option>
                                 </select>
                             </div>
 

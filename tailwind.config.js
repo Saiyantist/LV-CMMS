@@ -23,6 +23,7 @@ export default {
     		colors: {
 				bluetitle: "#486284",
 				bluetext: "#8CA2C0",
+				form: "#eeeeee",
     			background: 'hsl(var(--background))',
     			foreground: 'hsl(var(--foreground))',
     			card: {

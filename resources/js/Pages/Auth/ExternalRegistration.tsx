@@ -21,25 +21,29 @@ export default function ExternalRegistration() {
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route("register"), {
+        post(route("register.external"), {
             onFinish: () => reset("password", "password_confirmation"),
         });
     };
 
     return (
         <RegisterLayout>
-            <Head title="Register" />
+            <Head title="Registration for External" />
 
             <form onSubmit={submit}>
-                {/* Name */}
 
-                <div>
-                    <h1 className="text-2xl font-bold text-center mb-8 text-secondary dark:text-white">
-                        External User
+                {/* Name */}
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-center text-black dark:text-white">
+                        Registration Form
                     </h1>
+                    <h2 className="font-bold text-secondary text-center">
+                        for External User 
+                    </h2>
                 </div>
 
                 <div className="flex justify-stretch mt-2">
+
                     {/* First Name */}
                     <div className="w-full mr-2">
                         <InputLabel htmlFor="first_name" value="First Name" />
@@ -89,6 +93,7 @@ export default function ExternalRegistration() {
 
                 {/* Gender */}
                 <div className="flex justify-stretch mt-4">
+
                     {/* Gender */}
                     <div className="w-full">
                         <InputLabel htmlFor="gender" value="Gender" />
@@ -158,6 +163,7 @@ export default function ExternalRegistration() {
 
                 {/* Password and Confirm Password */}
                 <div className="flex justify-stretch mt-4">
+                    
                     {/* Password */}
                     <div className="w-full mr-2">
                         <InputLabel htmlFor="password" value="Password" />

@@ -22,7 +22,7 @@ export default function Register({ children }: PropsWithChildren) {
                 />
 
                 {/* Centered form content with top margin */}
-                <div className="relative z-10 mt-20 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl bg-white px-4 py-8 shadow-md sm:rounded-3xl dark:bg-gray-800">
+                <div className="relative z-10 mt-20 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl bg-form px-4 py-8 shadow-md rounded-lg dark:bg-gray-800">
                     {children}
                 </div>
             </main>
