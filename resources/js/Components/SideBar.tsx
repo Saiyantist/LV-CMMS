@@ -14,6 +14,7 @@ import {
     ChevronUp,
     UserCircle,
     Settings,
+    BriefcaseBusiness,
 } from "lucide-react";
 
 interface Role {
@@ -52,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
     const menuItems = [
         // Check if the user is not an external_requester before rendering "Work Order"
-        ...(user.roles.some((role) => role.name !== "external_requester")
+        ...(user.roles.some((role) => role.name !== "external_requester" && role.name !== "maintenance_personnel" && role.name !== "communications_officer") // REFACTOR these sheez
             ? [
                   {
                       text: "Work Order",
@@ -90,6 +91,24 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                       ],
                   },
               ]
+            : []),
+
+        // Check if the user is a maintenance personnel to render "Assigned Tasks" page
+        ...(user.roles.some((role) => role.name === "maintenance_personnel")
+            ? [
+                {
+                    routeName: "work-orders.assigned-tasks",
+                    href: route("work-orders.assigned-tasks") || "",
+                    text: "Assigned Tasks",
+                    icon: <BriefcaseBusiness size={16} className="mr-2" />,
+                },
+                {   
+                    routeName: "work-orders.index",
+                    href: route("work-orders.index") || "",
+                    text: "Work Order List",
+                    icon: <ClipboardList size={16} className="mr-2" />,
+                }
+            ]
             : []),
     ];
 
