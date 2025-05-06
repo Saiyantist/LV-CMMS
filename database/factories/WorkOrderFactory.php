@@ -23,7 +23,7 @@ class WorkOrderFactory extends Factory
         return [
             'report_description' => fake()->sentence(),
             'location_id' => Location::inRandomOrder()->first()?->id ?? Location::factory(),
-            'status' => fake()->randomElement(['Pending', 'Assigned', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined', 'Deleted']),
+            'status' => fake()->randomElement(['Pending', 'Assigned', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined']),
             'work_order_type' => fake()->randomElement(['Work Order', 'Preventive Maintenance', 'Compliance']),
             'label' => fake()->randomElement(['Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label']),
             'priority' => fake()->randomElement(['Low', 'Medium', 'High', 'Critical']),

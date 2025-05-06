@@ -15,6 +15,7 @@ interface Props {
     isCreating: boolean;
     editingWorkOrder: any;
     showScrollUpButton: boolean;
+    handleDelete: (id: number) => void;
     setActiveTab: (tab: string) => void;
     setIsCreating: (val: boolean) => void;
     setEditingWorkOrder: (workOrder: any) => void;
@@ -38,6 +39,7 @@ export default function IndexLayout({
     scrollToTop,
     getStatusColor,
     getPriorityColor,
+    handleDelete,
 }: Props) {
     return (
         <AuthenticatedLayout>
@@ -72,7 +74,7 @@ export default function IndexLayout({
                             <div className="w-full sm:w-auto flex justify-center sm:justify-start">
                                 <PrimaryButton
                                     onClick={() => setIsCreating(true)}
-                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 
+                                    className="bg-primary text-white hover:bg-secondary transition-all duration-300 
                             text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
                                 >
                                     Add Work Order
@@ -85,15 +87,15 @@ export default function IndexLayout({
 
             {/* Tabs - Desktop */}
             <div className="hidden md:flex mt-4 pl-4">
-                <div className="flex divide-x divide-gray-300 border-t border-x border-gray-300 bg-white rounded-t-md overflow-hidden">
+                <div className="flex overflow-hidden">
                     {tabs.map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 text-sm sm:text-base font-medium transition-colors duration-200 whitespace-nowrap
+                            className={`px-4 text-sm sm:text-base font-medium transition-colors duration-200 whitespace-nowrap border h-12 border-primary
                 ${
                     activeTab === tab
-                        ? "bg-secondary text-white"
+                        ? "bg-primary text-white"
                         : "bg-white text-black hover:bg-gray-100"
                 }
                 rounded-t-md`}
@@ -176,7 +178,7 @@ export default function IndexLayout({
                                         workOrder.requested_at
                                     ).toLocaleDateString()}
                                 </td>
-                                <td className="border px-6 py-4">
+                                <td className="border px-6 py-4 gap-2 flex justify-center">
                                     <PrimaryButton
                                         className="bg-secondary"
                                         onClick={() =>
@@ -184,6 +186,12 @@ export default function IndexLayout({
                                         }
                                     >
                                         Edit
+                                    </PrimaryButton>
+                                    <PrimaryButton
+                                        className="bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700 transition"
+                                        onClick={() => handleDelete(workOrder.id)}
+                                    >
+                                        Delete
                                     </PrimaryButton>
                                 </td>
                             </tr>
@@ -193,7 +201,7 @@ export default function IndexLayout({
             </div>
 
             {/* Mobile Card View */}
-            <div className="sm:hidden flex flex-col gap-4 mt-4 px-4">
+            <div className="md:hidden flex flex-col gap-4 mt-4 px-4">
                 {filteredWorkOrders.map((workOrder) => (
                     <div
                         key={workOrder.id}
@@ -246,12 +254,18 @@ export default function IndexLayout({
                         </div>
 
                         {/* Action Button */}
-                        <div className="mt-4 flex justify-end">
+                        <div className="mt-4 flex justify-end gap-2">
                             <PrimaryButton
                                 className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:bg-blue-700 transition"
                                 onClick={() => setEditingWorkOrder(workOrder)}
                             >
                                 Edit
+                            </PrimaryButton>
+                            <PrimaryButton
+                                className="bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700 transition"
+                                onClick={() => handleDelete(workOrder.id)}
+                            >
+                                Delete
                             </PrimaryButton>
                         </div>
                     </div>

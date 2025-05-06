@@ -19,6 +19,6 @@ class LocationController extends Controller
             'added_by' => $user->id,
         ]);
     
-        return redirect()->back()->with('new_location_id', $location->id);
+        return response()->json(['id' => $location->id]);
     }
 }

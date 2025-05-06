@@ -1,4 +1,3 @@
-import { Link } from "@inertiajs/react";
 import { Pencil, ArrowLeft } from "lucide-react"; // Optional icons
 
 export default function UserProfileCard({
@@ -29,8 +28,12 @@ export default function UserProfileCard({
                 />
 
                 <div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{user.name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{user.role}</p>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        {user.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {user.role}
+                    </p>
                 </div>
             </div>
 

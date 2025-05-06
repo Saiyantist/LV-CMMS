@@ -53,7 +53,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({ data, onClose }) => {
                     </svg>
                 </button>
 
-                <div className="w-12 h-12 border-2 border-green-500 bg-white text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                {/* <div className="w-12 h-12 border-2 border-green-500 bg-white text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -68,7 +68,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({ data, onClose }) => {
                             d="M5 13l4 4L19 7"
                         />
                     </svg>
-                </div>
+                </div> */}
 
                 <h2 className="text-xl font-semibold mb-4 text-center">
                     Asset Details

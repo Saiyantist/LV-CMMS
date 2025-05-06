@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
 /**
  * Autthenticated with Roles and Verified Email
  *      - for Role-based Access Control (RBAC)
@@ -72,9 +73,14 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
         Route::get('/work-orders/asset-management', function () { // will change
             return Inertia::render('AssetManagement/AssetManagement');
         })->name('work-orders.asset-management');
+        
         Route::get('/work-orders/preventive-maintenance', function () { // will change
             return Inertia::render('PreventiveMaintenance/PreventiveMaintenance');
         })->name('work-orders.preventive-maintenance');
+
+        Route::get('/work-orders/compliance-and-safety', function () {
+            return Inertia::render('ComplianceAndSafety/ComplianceAndSafety');
+        })->name('work-orders.compliance-and-safety');
     });
     
     Route::resource('work-orders', WorkOrderController::class); // ALWAYS put this at the end ng mga "/work-orders" routes.

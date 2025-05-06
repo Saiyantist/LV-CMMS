@@ -32,8 +32,12 @@ export default function AccessRegistration() {
                                     (External Users)
                                 </p>
                                 <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 leading-6">
-                                    If you are not from La Verdad Christian College,
-                                    <span className="font-semibold text-secondary"> please register here</span>
+                                    If you are not from La Verdad Christian
+                                    College,
+                                    <span className="font-semibold text-secondary">
+                                        {" "}
+                                        please register here
+                                    </span>
                                 </p>
                             </div>
                             <Link
@@ -56,8 +60,12 @@ export default function AccessRegistration() {
                                     (Internal Users)
                                 </p>
                                 <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 leading-6">
-                                    If you are an employee of La Verdad Christian College,
-                                    <span className="font-semibold text-secondary"> please register here</span>
+                                    If you are an employee of La Verdad
+                                    Christian College,
+                                    <span className="font-semibold text-secondary">
+                                        {" "}
+                                        please register here
+                                    </span>
                                 </p>
                             </div>
                             <Link
@@ -71,13 +79,18 @@ export default function AccessRegistration() {
                         </div>
                     </div>
 
-                    <div className="mt-6 mx-44 bg-primary bg-opacity-60 p-4 rounded-lg hover:bg-opacity-80 transition">
-                        <Link
-                            href={route("login")}
-                            className="text-sm text-white underline hover:text-gray-200 dark:text-gray-400 dark:hover:text-gray-100"
-                        >
-                            Already registered? Login here.
-                        </Link>
+                    <div className="mt-6 flex justify-center">
+                        <div className="bg-secondary bg-opacity-30 p-4 rounded-lg hover:bg-opacity-80 transition w-fit">
+                            <p className="text-sm text-white dark:text-gray-400">
+                                Already registered?{" "}
+                                <Link
+                                    href={route("login")}
+                                    className="underline text-white transition duration-200 ease-in-out hover:text-gray-200 dark:hover:text-gray-100"
+                                >
+                                    Login here.
+                                </Link>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </main>
