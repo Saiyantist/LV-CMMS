@@ -27,10 +27,10 @@ export default function WorkOrders({
             : [];
 
     /**
-     * Filter work orders based on role
+     * Filter work orders based on status
+     * For Work Order Manager and Super Admin, show all work orders in respective tabs according to status
      */
     const filteredWorkOrders = workOrders.filter((wo) => {
-        // For Work Order Manager and Super Admin, show all work orders
         if (
             user.permissions.includes("manage work orders")
         ) {
@@ -44,7 +44,7 @@ export default function WorkOrders({
             if (activeTab === "Declined") return wo.status === "Cancelled";
             return true;
         }
-        return wo.requested_by === userName;
+        return wo;
     });
 
     const handleDelete = (id: number) => {
