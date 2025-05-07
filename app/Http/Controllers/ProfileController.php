@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Department;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,28 @@ class ProfileController extends Controller
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            // Pass full user information to the profile edit page
+            // GELO: Check if all of these is necessary, or baka profile_photo_url lang ang need maaipasa.
+            // 'user' => $request->user()->only([
+            //     'id',
+            //     'first_name',
+            //     'last_name',
+            //     'contact',
+            //     'number',
+            //     'birthday',
+            //     'gender',
+            //     'staff_type',
+            //     'department_id',
+            //     'role',
+            //     'profile_photo_url',
+            // ]),
+            // 'auth' => [
+            //     'user' => $request->user()->only([
+            //         'id', 'first_name', 'last_name', 'contact_number',
+            //         'birth_date', 'gender', 'staff_type', 'department_id', 'email', 'roles'
+            //     ]),
+            // ],
+            'departments' => Department::all(),
         ]);
     }
 
@@ -37,7 +60,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit');
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**

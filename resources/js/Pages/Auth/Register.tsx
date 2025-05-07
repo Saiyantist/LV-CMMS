@@ -1,289 +1,97 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { Head, Link } from "@inertiajs/react";
+import NavBar from "@/Components/NavBar";
 
-function maxDate(){
-    // Calculate the maximum date (18 years ago from today)
-    const today = new Date();
-    const minDate = new Date(today.getFullYear() - 70, today.getMonth(), today.getDate()) // Optional: Limit to 70 years old max
-    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-    const maxDateString = maxDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-    const minDateString = minDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-
-    return {maxDateString, minDateString};
-}
-
-interface Department {
-    id: number;
-    name: string;
-}
-
-interface RegisterProps {
-    departments: Department[];
-}
-
-export default function Register({ departments }: RegisterProps) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        first_name: '',
-        last_name: '',
-        birth_date: '',
-        gender: '',
-        contact_number: '',
-        staff_type: '',
-        department_id: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-    });
-
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
-    };
-
-    const { minDateString, maxDateString } = maxDate();
-
+export default function AccessRegistration() {
     return (
-        <GuestLayout>
-            <Head title="Register" />
+        <div className="min-h-screen bg-[url('/images/lvbuilding.jpg')] bg-cover bg-center relative">
+            <Head title="Select User Type" />
 
-            <form onSubmit={submit}>
+            {/* Overlay for readability */}
+            <div className="absolute inset-0 bg-black/50 z-0" />
 
-                {/* Name */}
-                <div className='flex justify-stretch mt-2'>
+            {/* NavBar */}
+            <div className="relative z-20">
+                <NavBar />
+            </div>
 
-                    {/* First Name */}
-                    <div className='w-full mr-2'>
-                        <InputLabel htmlFor="first_name" value="First Name" />
+            {/* Main Content */}
+            <main className="relative z-10 flex items-center justify-center min-h-screen pt-32 px-4">
+                <div className="bg-transparent p-6 rounded-lg shadow-lg w-full max-w-3xl text-center">
+                    <h1 className="text-3xl font-bold mb-8 text-white dark:text-white">
+                        Access Registration
+                    </h1>
 
-                        <TextInput
-                            id="first_name"
-                            name="first_name"
-                            value={data.first_name}
-                            className="mt-1 block w-full"
-                            autoComplete="first_name"
-                            isFocused={true}
-                            onChange={(e) => setData('first_name', e.target.value)}
-                            required
-                        />
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-6">
+                        {/* External User Card */}
+                        <div className="w-full md:w-1/2 bg-form dark:bg-gray-700 p-6 rounded-lg shadow-md shadow-slate-500 min-h-[14rem] flex flex-col items-center justify-between text-center">
+                            <div>
+                                <h2 className="text-xl font-bold text-secondary dark:text-white">
+                                    Guest
+                                </h2>
+                                <p className="font-semibold text-sm italic text-gray-600 dark:text-gray-300 mb-2">
+                                    (External Users)
+                                </p>
+                                <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 leading-6">
+                                    If you are
+                                    <span className="font-semibold text-secondary">
+                                        {" "}not{" "}
+                                    </span>
+                                    from La Verdad Christian College
+                                </p>
+                            </div>
+                            <Link
+                                href={route(
+                                    "access.registration-external-user-registration"
+                                )}
+                                className="mt-4 mx-auto w-40 bg-primary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-full shadow hover:bg-secondary transition"
+                            >
+                                Register here
+                            </Link>
+                        </div>
 
-                        <InputError message={errors.first_name} className="mt-2" />
+                        {/* Internal User Card */}
+                        <div className="w-full md:w-1/2 bg-form dark:bg-gray-700 p-6 rounded-lg shadow-md shadow-slate-500 min-h-[14rem] flex flex-col items-center justify-between text-center">
+                            <div>
+                                <h2 className="text-xl font-bold text-secondary dark:text-white">
+                                    LVCC Employees
+                                </h2>
+                                <p className="font-bold text-sm italic text-gray-600 dark:text-gray-300 mb-2">
+                                    (Internal Users)
+                                </p>
+                                <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 leading-6">
+                                    If you are an
+                                    <span className="font-semibold text-secondary">
+                                        {" "}employee{" "}
+                                    </span>
+                                    of La Verdad Christian College
+                                </p>
+                            </div>
+                            <Link
+                                href={route(
+                                    "access.registration-internal-user-registration"
+                                )}
+                                className="mt-4 mx-auto w-40 bg-primary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-full shadow hover:bg-secondary transition"
+                            >
+                                Register here
+                            </Link>
+                        </div>
                     </div>
 
-                    {/* Last Name */}
-                    <div className='w-full ml-2'>
-                        <InputLabel htmlFor="last_name" value="Last Name" />
-
-                        <TextInput
-                            id="last_name"
-                            name="last_name"
-                            value={data.last_name}
-                            className="mt-1 block w-full"
-                            autoComplete="last_name"
-                            isFocused={true}
-                            onChange={(e) => setData('last_name', e.target.value)}
-                            required
-                        />
-
-                        <InputError message={errors.last_name} className="mt-2" />
+                    <div className="mt-6 flex justify-center">
+                        <div className="bg-secondary bg-opacity-30 p-4 rounded-lg hover:bg-opacity-80 transition w-fit">
+                            <p className="text-sm text-white dark:text-gray-400">
+                                Already registered?{" "}
+                                <Link
+                                    href={route("login")}
+                                    className="underline text-white transition duration-200 ease-in-out hover:text-gray-200 dark:hover:text-gray-100"
+                                >
+                                    Login here.
+                                </Link>
+                            </p>
+                        </div>
                     </div>
-                    
                 </div>
-                
-                {/* Birth Date and Gender */}
-                <div className='flex justify-stretch mt-4'>
-
-                    {/* Birth date */}
-                    <div className='w-full mr-2'>
-                        <InputLabel htmlFor="birth_date" value="Birth Date" />
-
-                        <TextInput
-                            id="birth_date"
-                            type="date"
-                            name="birth_date"
-                            value={data.birth_date}
-                            className="mt-1 block w-full"
-                            autoComplete="bday"
-                            min={minDateString} // 70 years olds
-                            max={maxDateString} // 18 years olds
-                            onChange={(e) => setData("birth_date", e.target.value)}
-                            required
-                        />
-                        <InputError message={errors.birth_date} className="mt-2" />
-                    </div>
-
-                    {/* Gender */}
-                    <div className='w-full ml-2'>
-                        <InputLabel htmlFor="gender" value="Gender" />
-
-                        <select
-                            id="gender"
-                            name="gender"
-                            value={data.gender}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-                            onChange={(e) => setData("gender", e.target.value)}
-                            required
-                        >
-                            <option value="">Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="rather not say">Rather not say</option>
-                        </select>
-
-                        <InputError message={errors.gender} className="mt-2" />
-                    </div>
-                </div>
-
-                {/* Contact Number */}
-                <div className='mt-4'>
-                    <InputLabel htmlFor="contact_number" value="Contact Number" />
-                    <TextInput
-                        id="contact_number"
-                        type="tel"
-                        name="contact_number"
-                        value={data.contact_number}
-                        className="mt-1 block w-full"
-                        placeholder="9XXXXXXXXX"
-                        maxLength={10}
-                        onChange={(e) => setData("contact_number", e.target.value)}
-                        required
-                    />
-                    <InputError message={errors.contact_number} className="mt-2" />
-                </div>
-
-                {/* Staff type and Department */}
-                <div className='flex justify-stretch mt-4'>
-
-                    {/* Staff type */}
-                    <div className="w-full mr-2">
-                        <InputLabel htmlFor="staff_type" value="Type of Staff" />
-
-                        <select
-                            id="staff_type"
-                            name="staff_type"
-                            value={data.staff_type}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-                            onChange={(e) => setData("staff_type", e.target.value)}
-                            required
-                        >
-                            <option value="">Select Type</option>
-                            <option value="teaching">Teaching</option>
-                            <option value="non-teaching">Non-teaching</option>
-                        </select>
-
-                        <InputError message={errors.staff_type} className="mt-2" />
-                    </div>
-
-                    {/* Department */}
-                    <div className='w-full ml-2'>
-                        <InputLabel htmlFor="department" value="Department" />
-
-                        <select
-                            id="department_id"
-                            name="department_id"
-                            value={data.department_id}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-                            onChange={(e) => setData("department_id", e.target.value)}
-                            required
-                        >
-                            <option value="">Select Department</option>
-                            {departments.map(dept => (
-                                <option key={dept.id} value={dept.id}>{dept.name}</option>
-                            ))}
-                        </select>
-
-                        <InputError message={errors.department_id} className="mt-2" />
-                    </div>
-
-                </div>
-
-                {/* Email */}
-                <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
-
-                {/* Password and Confirm Password */}
-                <div className='flex justify-stretch mt-4'>
-
-                    {/* Password */}
-                    <div className="w-full mr-2">
-                        <InputLabel htmlFor="password" value="Password" />
-
-                        <TextInput
-                            id="password"
-                            type="password"
-                            name="password"
-                            value={data.password}
-                            className="mt-1 block w-full"
-                            autoComplete="new-password"
-                            onChange={(e) => setData('password', e.target.value)}
-                            required
-                        />
-
-                        <InputError message={errors.password} className="mt-2" />
-                    </div>
-
-                    {/* Confirm Password */}
-                    <div className="w-full ml-2">
-                        <InputLabel
-                            htmlFor="password_confirmation"
-                            value="Confirm Password"
-                        />
-
-                        <TextInput
-                            id="password_confirmation"
-                            type="password"
-                            name="password_confirmation"
-                            value={data.password_confirmation}
-                            className="mt-1 block w-full"
-                            autoComplete="new-password"
-                            onChange={(e) =>
-                                setData('password_confirmation', e.target.value)
-                            }
-                            required
-                        />
-
-                        <InputError
-                            message={errors.password_confirmation}
-                            className="mt-2"
-                        />
-                    </div>
-
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
-                    >
-                        Already registered?
-                    </Link>
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
+            </main>
+        </div>
     );
 }

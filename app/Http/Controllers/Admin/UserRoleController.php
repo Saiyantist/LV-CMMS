@@ -15,7 +15,6 @@ class UserRoleController extends Controller
 {
     public function index()
     {
-        // $users = User::with('roles')->get();
         $users = User::with('roles')->get()->map(function ($user) {
             return [
                 'id' => $user->id,
@@ -32,18 +31,11 @@ class UserRoleController extends Controller
             ];
         });
         
-        // dd($users);
-
         return inertia('Admin/UserManagement', [
             'users' => $users,
             'roles' => Role::all(),
             'auth' => ['user' => auth()->user()]
         ]);
-        // return inertia('Admin/UserManagement', [
-        //     'users' => User::with('roles')->get(),
-        //     'roles' => Role::all(),
-        //     'auth' => ['user' => auth()->user()]
-        // ]);
     }
     public function updateRole(Request $request, User $user)
     {

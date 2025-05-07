@@ -1,27 +1,24 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, usePage } from '@inertiajs/react';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { Head, usePage } from "@inertiajs/react";
+import Chart from "./Admin/Chart";
 
 export default function Dashboard() {
-
     const user = usePage().props.auth.user;
 
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    Dashboard
-                </h2>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title="Dashboard" />
-
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-                        <div className="p-6 text-gray-900 dark:text-gray-100">
-                            You're logged in! {user.first_name} {user.last_name}
-                        </div>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+                {/* Welcome Card */}
+                <div className="overflow-hidden bg-white shadow-sm rounded-lg">
+                    <div className="p-6 text-black text-lg sm:text-xl">
+                        Welcome {user.first_name} {user.last_name}!
                     </div>
+                </div>
+
+                {/* Chart Section */}
+                <div className="flex justify-center overflow-hidden bg-white shadow-sm rounded-lg p-6">
+                    <Chart />
                 </div>
             </div>
         </AuthenticatedLayout>

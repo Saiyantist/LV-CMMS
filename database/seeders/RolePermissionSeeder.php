@@ -52,22 +52,21 @@ class RolePermissionSeeder extends Seeder
                 'request work orders', 'view own work orders', 'cancel own work orders',
                 'request event services', 'view own event services', 'cancel own event services',
             ],
-            'gasd_coordinator' => ['manage work orders'], 
-            'maintenance_personnel' => ['view work orders assigned to them', 'update assigned work order status'],
-            'communications_officer' => ['manage event services'],
+            'gasd_coordinator' => [
+                'manage work orders', 'request work orders',
+            ], 
+            'maintenance_personnel' => [
+                'view own work orders', 'cancel own work orders',
+                'view work orders assigned to them', 'update assigned work order status'
+            ],
+            'communications_officer' => [
+                'manage event services',
+                'request work orders', 'view own work orders', 'cancel own work orders'
+            ],
             'super_admin' => [],
         ];
 
         // Assign Permissions to Roles
-        foreach ($roles as $roleName => $rolePermissions) {
-            $role = Role::firstOrCreate(['name' => $roleName]);
-
-            if ($roleName === 'super_admin') {
-                $role->syncPermissions(Permission::all()); // Give Super Admin all permissions
-            } else {
-                $role->syncPermissions($rolePermissions);
-            }
-        }        // Assign Permissions to Roles
         foreach ($roles as $roleName => $rolePermissions) {
             $role = Role::firstOrCreate(['name' => $roleName]);
 

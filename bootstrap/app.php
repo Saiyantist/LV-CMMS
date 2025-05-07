@@ -24,6 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'hasRole' => \App\Http\Middleware\EnsureUserHasRole::class,
+            'restrict_external' => \App\Http\Middleware\RestrictExternalRequester::class,
+            'restrict_work_order_manager' => \App\Http\Middleware\RestrictWorkOrderManager::class,
         ]);
         //
     })
