@@ -95,31 +95,37 @@ export default function Login({
                     </label>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between w-full">
+                {/* <div className="mt-4 flex items-center justify-between w-full"> */}
+                <div className="mt-4 flex">
                     {canResetPassword && (
                         <Link
                             href={route("password.request")}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                            className="rounded-md text-sm text-secondary underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
                         >
                             Forgot your password?
                         </Link>
                     )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
                 </div>
 
-                <div className="mt-4 text-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Don't have an account yet?{" "}
-                    </span>
-                    <Link
-                        href="/register"
-                        className="text-indigo-600 underline hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200"
+                <div className="mt-4 flex flex-col items-center justify-between space-y-2 w-full">
+                    <PrimaryButton
+                        className="bg-secondary hover:bg-primary w-full rounded-xl flex items-center justify-center"
+                        disabled={processing}
                     >
-                        Sign up now.
-                    </Link>
+                        Log in
+                    </PrimaryButton>
+
+                    <div>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                            Don't have an account yet?{" "}
+                        </span>
+                        <Link
+                            href="/register"
+                            className="text-sm font-bold text-secondary hover:text-primary hover:underline dark:hover:text-secondary"
+                        >
+                            Register
+                        </Link>
+                    </div>
                 </div>
             </form>
         </GuestLayout>

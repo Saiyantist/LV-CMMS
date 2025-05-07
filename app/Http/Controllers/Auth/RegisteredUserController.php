@@ -22,10 +22,17 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register', [
+        return Inertia::render('Auth/Register',[
             'departments' => Department::all(),
         ]);
     }
+
+    public function createInternal(): Response
+{
+    return Inertia::render('Auth/InternalRegistration', [
+        'departments' => Department::all(),
+    ]);
+}
 
     /**
      * Handle an incoming registration request.
@@ -34,21 +41,7 @@ class RegisteredUserController extends Controller
      */
     public function store(RegisterRequest $request): RedirectResponse
     {
-        // $request->validate([
-        //     'first_name' => 'required|string|max:20',
-        //     'last_name' => 'required|string|max:40',
-        //     'birth_date' => 'required|date|max:255',
-        //     'gender' => 'required|string|max:255',
-        //     'contact_number' => 'required|integer|digits:10',
-        //     'staff_type' => ['required', 'in:teaching,non-teaching'],
-        //     'department_id' => ['required', 'exists:departments,id'],
-        //     'email' => 'required|string|lowercase|email|regex:/^[a-zA-Z0-9._%+-]+@lv\.edu\.ph$/i|max:255|unique:'.User::class,
-        //     'password' => ['required', 'confirmed', Rules\Password::defaults()], // Ctrl + Click on the 'Rules\Password' to customize the default rules
-        // ]);
-
-        // Validation handled in RegisterRequest
-
-        // Create the user
+        // Create the new user
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,

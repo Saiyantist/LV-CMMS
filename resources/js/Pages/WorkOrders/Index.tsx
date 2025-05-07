@@ -1,50 +1,129 @@
+// WorkOrders.tsx
+import { useState, useEffect } from "react";
 import { PageProps } from "@/types";
-import { Head, Link } from "@inertiajs/react";
+import { usePage , router } from "@inertiajs/react";
+import IndexLayout from "./IndexLayout";
 
-interface WorkOrder {
-    id: number;
-    report_description: string;
-    location: { name: string } | null;
-    status: string;
-    priority: string;
-    requested_at: string;
-}
+export default function WorkOrders({
+    workOrders,
+    locations,
+    user,
+}: PageProps<{
+    workOrders: any[];
+    locations: { id: number; name: string }[];
+    user: any;
+}>) {
+    const [isCreating, setIsCreating] = useState(false);
+    const [activeTab, setActiveTab] = useState("Pending");
+    const [editingWorkOrder, setEditingWorkOrder] = useState(null);
+    const [showScrollUpButton, setShowScrollUpButton] = useState(false);
 
-export default function WorkOrders({ workOrders }: PageProps<{ workOrders: WorkOrder[] }>) {
+    const pageUser = usePage().props.auth.user;
+    const userName = `${pageUser.first_name} ${pageUser.last_name}`;
+
+    const tabs =
+        user.permissions.includes("manage work orders")
+            ? ["Pending", "Accepted", "For Budget Request", "Declined"]
+            : [];
+
+    /**
+     * Filter work orders based on status
+     * For Work Order Manager and Super Admin, show all work orders in respective tabs according to status
+     */
+    const filteredWorkOrders = workOrders.filter((wo) => {
+        if (
+            user.permissions.includes("manage work orders")
+        ) {
+            if (activeTab === "Pending") return wo.status === "Pending";
+            if (activeTab === "Accepted")
+                return ["Assigned", "Ongoing", "Overdue", "Completed"].includes(
+                    wo.status
+                );
+            if (activeTab === "For Budget Request")
+                return wo.status === "For Budget Request";
+            if (activeTab === "Declined") return wo.status === "Cancelled";
+            return true;
+        }
+        return wo;
+    });
+
+    const handleDelete = (id: number) => {
+        const confirmDelete = confirm("Are you sure you want to delete this work order?");
+        if (confirmDelete) {
+            router.delete(`/work-orders/${id}`, {
+
+                // For testing purposes, replace with actual delete flash messages
+                onSuccess: () => {
+                    alert("Work order deleted successfully.");
+                },
+                onError: () => {
+                    alert("Failed to delete the work order. Please try again.");
+                },
+            });
+        }
+    }
+    const handleScroll = () => {
+        setShowScrollUpButton(window.scrollY > 300);
+    };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "Pending":
+                return "bg-yellow-100 text-yellow-800";
+            case "Assigned":
+                return "bg-blue-200 text-blue-800";
+            case "Ongoing":
+                return "bg-green-200 text-green-800";
+            case "Overdue":
+                return "bg-red-200 text-red-800";
+            case "Completed":
+                return "bg-teal-200 text-teal-800";
+            case "Cancelled":
+                return "bg-red-300 text-red-900";
+            default:
+                return "bg-gray-200 text-gray-800";
+        }
+    };
+
+    const getPriorityColor = (priority: string) => {
+        switch (priority) {
+            case "Low":
+                return "bg-green-100 text-green-700";
+            case "Medium":
+                return "bg-yellow-100 text-yellow-700";
+            case "High":
+                return "bg-red-100 text-red-700";
+            default:
+                return "bg-gray-200 text-gray-700";
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
     return (
-        <>
-            <Head title="Work Orders"/>
-            <h1 className="text-xl font-bold mb-4">Work Orders</h1>
-            <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                <tr className="bg-gray-100">
-                    <th className="border px-4 py-2">ID</th>
-                    <th className="border px-4 py-2">Description</th>
-                    <th className="border px-4 py-2">Location</th>
-                    <th className="border px-4 py-2">Status</th>
-                    <th className="border px-4 py-2">Priority</th>
-                    <th className="border px-4 py-2">Requested At</th>
-                    <th className="border px-4 py-2">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {workOrders.map((workOrder) => (
-                    <tr key={workOrder.id} className="border-t">
-                    <td className="border px-4 py-2">{workOrder.id}</td>
-                    <td className="border px-4 py-2">{workOrder.report_description}</td>
-                    <td className="border px-4 py-2">{workOrder.location?.name || "N/A"}</td>
-                    <td className="border px-4 py-2">{workOrder.status}</td>
-                    <td className="border px-4 py-2">{workOrder.priority}</td>
-                    <td className="border px-4 py-2">{new Date(workOrder.requested_at).toLocaleDateString()}</td>
-                    <td className="border px-4 py-2">
-                        <Link href={`/work-orders/${workOrder.id}/edit`} className="text-blue-600 hover:text-blue-800">
-                            Edit
-                        </Link>
-                    </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-        </>
-    )
+        <IndexLayout
+            user={user}
+            locations={locations}
+            filteredWorkOrders={filteredWorkOrders}
+            tabs={tabs}
+            activeTab={activeTab}
+            isCreating={isCreating}
+            editingWorkOrder={editingWorkOrder}
+            showScrollUpButton={showScrollUpButton}
+            setActiveTab={setActiveTab}
+            setIsCreating={setIsCreating}
+            setEditingWorkOrder={setEditingWorkOrder}
+            scrollToTop={scrollToTop}
+            getStatusColor={getStatusColor}
+            getPriorityColor={getPriorityColor}
+            handleDelete={handleDelete}
+        />
+    );
 }

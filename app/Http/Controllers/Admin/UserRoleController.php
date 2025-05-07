@@ -36,11 +36,6 @@ class UserRoleController extends Controller
             'roles' => Role::all(),
             'auth' => ['user' => auth()->user()]
         ]);
-        // return inertia('Admin/UserManagement', [
-        //     'users' => User::with('roles')->get(),
-        //     'roles' => Role::all(),
-        //     'auth' => ['user' => auth()->user()]
-        // ]);
     }
     public function updateRole(Request $request, User $user)
     {
