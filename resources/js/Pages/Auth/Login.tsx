@@ -105,7 +105,6 @@ export default function Login({
                             Forgot your password?
                         </Link>
                     )}
-
                 </div>
 
                 <div className="mt-4 flex flex-col items-center justify-between space-y-2 w-full">
@@ -122,7 +121,7 @@ export default function Login({
                         </span>
                         <Link
                             href="/register"
-                            className="text-sm font-bold text-secondary hover:text-primary dark:text-white dark:hover:text-secondary"
+                            className="text-sm font-bold text-secondary hover:text-primary hover:underline dark:hover:text-secondary"
                         >
                             Register
                         </Link>
