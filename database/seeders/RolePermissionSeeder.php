@@ -55,7 +55,10 @@ class RolePermissionSeeder extends Seeder
             'gasd_coordinator' => [
                 'manage work orders', 'request work orders',
             ], 
-            'maintenance_personnel' => ['view work orders assigned to them', 'update assigned work order status'],
+            'maintenance_personnel' => [
+                'view own work orders', 'cancel own work orders',
+                'view work orders assigned to them', 'update assigned work order status'
+            ],
             'communications_officer' => [
                 'manage event services',
                 'request work orders', 'view own work orders', 'cancel own work orders'

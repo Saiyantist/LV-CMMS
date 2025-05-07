@@ -50,7 +50,44 @@ class WorkOrderController extends Controller
             'workOrders' => $formattedWorkOrders,
             'locations' => Location::select('id', 'name')->get(),
             'user' => [
-                // ...$user->toArray(), // converts the user model to array including roles. downside is everything is sent to FE.
+                'id' => $user->id,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'roles' => $user->roles->map(function ($role) {
+                    return ['name' => $role->name];
+                }),
+                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+            ],
+        ]);
+    }
+
+    public function assignedWorkOrders()
+    {
+        $user = auth()->user();
+
+        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'images'])
+            ->where('assigned_to', $user->id)
+            ->get()
+            ->map(function ($wo) {
+                return [
+                    'id' => $wo->id,
+                    'location_id' => $wo->location_id,
+                    'report_description' => $wo->report_description,
+                    'status' => $wo->status,
+                    'work_order_type' => $wo->work_order_type,
+                    'label' => $wo->label,
+                    'priority' => $wo->priority,
+                    'remarks' => $wo->remarks,
+                    'requested_at' => $wo->created_at->toDateString(),
+                    'location' => $wo->location ? ['name' => $wo->location->name] : null,
+                    'images' => $wo->images->pluck('url')->toArray(),
+                ];
+            });
+
+        return Inertia::render('WorkOrders/AssignedWorkOrders',
+        [
+            'workOrders' => $workOrders,
+            'locations' => Location::select('id', 'name')->get(),
+            'user' => [
                 'id' => $user->id,
                 'name' => $user->first_name . ' ' . $user->last_name,
                 'roles' => $user->roles->map(function ($role) {
