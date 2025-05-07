@@ -32,21 +32,20 @@ export default function AccessRegistration() {
                                     (External Users)
                                 </p>
                                 <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 leading-6">
-                                    If you are not from La Verdad Christian
-                                    College,
+                                    If you are
                                     <span className="font-semibold text-secondary">
-                                        {" "}
-                                        please register here
+                                        {" "}not{" "}
                                     </span>
+                                    from La Verdad Christian College
                                 </p>
                             </div>
                             <Link
                                 href={route(
                                     "access.registration-external-user-registration"
                                 )}
-                                className="mt-4 mx-auto w-40 bg-primary text-white text-xs font-semibold tracking-widest py-3 rounded-full shadow hover:bg-secondary transition"
+                                className="mt-4 mx-auto w-40 bg-primary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-full shadow hover:bg-secondary transition"
                             >
-                                REGISTER
+                                Register here
                             </Link>
                         </div>
 
@@ -60,21 +59,20 @@ export default function AccessRegistration() {
                                     (Internal Users)
                                 </p>
                                 <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 leading-6">
-                                    If you are an employee of La Verdad
-                                    Christian College,
+                                    If you are an
                                     <span className="font-semibold text-secondary">
-                                        {" "}
-                                        please register here
+                                        {" "}employee{" "}
                                     </span>
+                                    of La Verdad Christian College
                                 </p>
                             </div>
                             <Link
                                 href={route(
                                     "access.registration-internal-user-registration"
                                 )}
-                                className="mt-4 mx-auto w-40 bg-primary text-white text-xs font-semibold tracking-widest py-3 rounded-full shadow hover:bg-secondary transition"
+                                className="mt-4 mx-auto w-40 bg-primary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-full shadow hover:bg-secondary transition"
                             >
-                                REGISTER
+                                Register here
                             </Link>
                         </div>
                     </div>

@@ -51,7 +51,7 @@ export default function EditWorkOrderModal({
             (loc) => String(loc.id) === String(workOrder.location_id)
         )?.name || "";
 
-    const { data, setData, put, errors, processing } = useForm({
+    const { data, setData, errors, processing } = useForm({
         // location_id: initialLocation,
         location_id: workOrder.location_id, // <- use raw ID or string here
         report_description: workOrder.report_description,
