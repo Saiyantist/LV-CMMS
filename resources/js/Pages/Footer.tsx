@@ -1,19 +1,21 @@
+import React from "react";
+
 const Footer = () => {
     return (
-        <div className="w-full px-6 lg:px-12 pt-16 bg-primary">
+        <div className="w-full px-6 lg:px-12 pt-16 bg-secondary">
             <div className="grid gap-10 row-gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="sm:col-span-2">
                     <div className="inline-flex items-center">
                         <img
                             src="/images/lvlogo.jpg"
                             alt="La Verdad Christian College Logo"
-                            className="w-12"
+                            className="w-12 h-12 rounded-full object-cover"
                         />
                         <span className="ml-2 text-xl font-bold tracking-wide text-gray-200 uppercase">
                             La Verdad Christian College, Inc.
                         </span>
                     </div>
-                    <div className="mt-6 lg:max-w-sm">
+                    {/* <div className="mt-6 lg:max-w-sm">
                         <p className="text-sm text-gray-200">
                             La Verdad Christian College provides students a high
                             quality and carefully defined educational program
@@ -22,7 +24,7 @@ const Footer = () => {
                             frontrunner in providing academic excellence and
                             morally upright principles.
                         </p>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="space-y-2 text-sm">
                     <p className="text-base font-bold tracking-wide text-gray-200">
@@ -60,7 +62,7 @@ const Footer = () => {
                         >
                             <svg
                                 viewBox="0 0 24 24"
-                                fill="#1877F2"
+                                fill="white" // Icon color changed to white
                                 className="h-5"
                             >
                                 <path
@@ -77,7 +79,7 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
-            <div className="flex flex-col-reverse justify-between pt-5 pb-10 border-t lg:flex-row">
+            <div className="flex flex-col-reverse justify-between pt-5 pb-10 border-t border-gray-700 lg:flex-row">
                 <p className="text-sm text-gray-200">
                     © Copyright 2025 LVCC Inc. All rights reserved.
                 </p>
