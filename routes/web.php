@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\LocationController;
+use App\Models\Location;
 
 /**
  *  Guest Routes
@@ -56,6 +57,13 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
  *      - for Role-based Access Control (RBAC)
  *      - ROUTING PREVENTION FOR UNAUTHORIZED ACCESS/USERS
  */
+
+ 
+//  Getting all locations
+Route::get('/work-orders/submit-request', [LocationController::class, 'index']
+)->name('work-orders.submit-request');
+
+Route::get('/locations', [LocationController::class, 'index'])->name('locations.index');
 
 Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::get('/admin/manage-roles', [UserRoleController::class, 'index'])->name('admin.manage-roles');

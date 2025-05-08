@@ -1,21 +1,11 @@
 import { useEffect, useState } from "react";
 import { Head, router, useForm } from "@inertiajs/react";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/Components/shadcnui/dropdown-menu";
-import { Button } from "@/Components/shadcnui/button";
 import axios from "axios";
 import { useRef } from "react";
 interface Location {
     id: number;
     name: string;
 }
-
 interface CreateWorkOrderProps {
     locations: Location[];
     user: {
@@ -36,7 +26,6 @@ export default function CreateWorkOrderModal({
     const [showDropdown, setShowDropdown] = useState(false);
     const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
-
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
@@ -60,13 +49,15 @@ export default function CreateWorkOrderModal({
         let locationId = data.location_id;
 
         // Check the typed location against existing locations
-        const existing = locations.find(loc => loc.name.toLowerCase() === typedLocation.toLowerCase());
+        const existing = locations.find(
+            (loc) => loc.name.toLowerCase() === typedLocation.toLowerCase()
+        );
 
         if (existing) {
             locationId = existing.id.toString();
         } else {
-            
-            const response = await axios.post("/locations", { // Create the new location before creating the work order.
+            const response = await axios.post("/locations", {
+                // Create the new location before creating the work order.
                 name: typedLocation.trim(),
             });
             locationId = response.data.id;
@@ -105,14 +96,17 @@ export default function CreateWorkOrderModal({
     useEffect(() => {
         /** Handle dropdown filtering */
         const search = typedLocation.toLowerCase();
-        const matches = locations.filter(loc =>
+        const matches = locations.filter((loc) =>
             loc.name.toLowerCase().includes(search)
         );
         setFilteredLocations(matches);
 
         /** Handle click outside dropdown */
         function handleClickOutside(e: MouseEvent) {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target as Node)
+            ) {
                 setShowDropdown(false);
             }
         }
@@ -158,7 +152,9 @@ export default function CreateWorkOrderModal({
 
                     <div className="max-h-[70vh] overflow-y-auto px-6">
                         {/* Location Search Input */}
-                        <label className="block font-semibold text-gray-700">Location</label>
+                        <label className="block font-semibold text-gray-700">
+                            Location
+                        </label>
                         <div ref={dropdownRef} className="mb-4 relative">
                             <input
                                 type="text"
@@ -179,7 +175,10 @@ export default function CreateWorkOrderModal({
                                                 key={loc.id}
                                                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                                 onClick={() => {
-                                                    setData("location_id", loc.id.toString());
+                                                    setData(
+                                                        "location_id",
+                                                        loc.id.toString()
+                                                    );
                                                     setTypedLocation(loc.name);
                                                     setShowDropdown(false);
                                                 }}
@@ -188,7 +187,9 @@ export default function CreateWorkOrderModal({
                                             </li>
                                         ))
                                     ) : (
-                                        <li className="px-4 py-2 text-gray-500 italic">New location will be created</li>
+                                        <li className="px-4 py-2 text-gray-500 italic">
+                                            New location will be created
+                                        </li>
                                     )}
                                 </ul>
                             )}
@@ -265,9 +266,7 @@ export default function CreateWorkOrderModal({
                                             }
                                             className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="HVAC">
-                                                HVAC
-                                            </option>
+                                            <option value="HVAC">HVAC</option>
                                             <option value="Electrical">
                                                 Electrical
                                             </option>
@@ -307,14 +306,30 @@ export default function CreateWorkOrderModal({
                                             }
                                             className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="Pending">Pending</option>
-                                            <option value="Assigned">Assigned</option>
-                                            <option value="Ongoing">Ongoing</option>
-                                            <option value="Overdue">Overdue</option>
-                                            <option value="Completed">Completed</option>
-                                            <option value="For Budget Request">For Budget Request</option>
-                                            <option value="Cancelled">Cancelled</option>
-                                            <option value="Declined">Declined</option>
+                                            <option value="Pending">
+                                                Pending
+                                            </option>
+                                            <option value="Assigned">
+                                                Assigned
+                                            </option>
+                                            <option value="Ongoing">
+                                                Ongoing
+                                            </option>
+                                            <option value="Overdue">
+                                                Overdue
+                                            </option>
+                                            <option value="Completed">
+                                                Completed
+                                            </option>
+                                            <option value="For Budget Request">
+                                                For Budget Request
+                                            </option>
+                                            <option value="Cancelled">
+                                                Cancelled
+                                            </option>
+                                            <option value="Declined">
+                                                Declined
+                                            </option>
                                         </select>
                                     </div>
                                 </div>

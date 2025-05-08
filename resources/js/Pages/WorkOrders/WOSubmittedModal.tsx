@@ -13,6 +13,7 @@ interface Props {
     location: string;
     description: string;
     images: { url: string; name: string }[];
+    onViewWorkOrders: () => void; // Add this property
 }
 
 const formatDate = (dateString: string) => {
@@ -32,6 +33,7 @@ const WOSubmittedModal: React.FC<Props> = ({
     location,
     description,
     images,
+    onViewWorkOrders, // Destructure the new property
 }) => {
     if (!isOpen) return null;
 
@@ -113,10 +115,9 @@ const WOSubmittedModal: React.FC<Props> = ({
                     </div>
                 </div>
 
-                {/* Close Button */}
-                <div className="mt-6 text-right">
+                <div className="mt-6 flex justify-end gap-4">
                     <Link
-                        href={route("work-orders.index")} // Use Inertia's Link with route
+                        href="/work-orders"
                         className="px-4 py-2 bg-secondary text-white rounded hover:bg-primary"
                     >
                         View Work Orders

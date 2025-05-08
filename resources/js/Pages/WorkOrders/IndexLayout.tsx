@@ -189,7 +189,9 @@ export default function IndexLayout({
                                     </PrimaryButton>
                                     <PrimaryButton
                                         className="bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700 transition"
-                                        onClick={() => handleDelete(workOrder.id)}
+                                        onClick={() =>
+                                            handleDelete(workOrder.id)
+                                        }
                                     >
                                         Delete
                                     </PrimaryButton>
