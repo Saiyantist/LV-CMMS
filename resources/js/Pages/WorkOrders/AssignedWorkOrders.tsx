@@ -349,6 +349,206 @@ const AssignedTask: React.FC = () => {
             priority: "Low",
             status: "Assigned",
         },
+        {
+            id: "31",
+            location: "DSR 425",
+            description: "Inspect the roof for leaks",
+            workOrderType: "Inspection",
+            dateAssigned: "March 14, 2025",
+            targetDate: "January 19, 2024",
+            priority: "High",
+            status: "Assigned",
+        },
+        {
+            id: "32",
+            location: "DSR 426",
+            description: "Repair the office elevator",
+            workOrderType: "Repair",
+            dateAssigned: "March 14, 2025",
+            targetDate: "December 22, 2023",
+            priority: "Critical",
+            status: "On Going",
+        },
+        {
+            id: "33",
+            location: "DSR 427",
+            description: "Replace the office signage",
+            workOrderType: "Replacement",
+            dateAssigned: "March 15, 2025",
+            targetDate: "January 07, 2024",
+            priority: "Medium",
+            status: "Assigned",
+        },
+        {
+            id: "34",
+            location: "DSR 428",
+            description: "Clean the office parking lot",
+            workOrderType: "Cleaning",
+            dateAssigned: "March 15, 2025",
+            targetDate: "December 29, 2023",
+            priority: "Low",
+            status: "Assigned",
+        },
+        {
+            id: "35",
+            location: "DSR 429",
+            description: "Upgrade the office Wi-Fi",
+            workOrderType: "Upgrade",
+            dateAssigned: "March 16, 2025",
+            targetDate: "January 15, 2024",
+            priority: "Critical",
+            status: "On Going",
+        },
+        {
+            id: "36",
+            location: "DSR 430",
+            description: "Inspect the office plumbing",
+            workOrderType: "Inspection",
+            dateAssigned: "March 16, 2025",
+            targetDate: "January 20, 2024",
+            priority: "High",
+            status: "Assigned",
+        },
+        {
+            id: "37",
+            location: "DSR 431",
+            description: "Fix the office heating system",
+            workOrderType: "Repair",
+            dateAssigned: "March 17, 2025",
+            targetDate: "December 23, 2023",
+            priority: "Critical",
+            status: "On Going",
+        },
+        {
+            id: "38",
+            location: "DSR 432",
+            description: "Replace the office curtains",
+            workOrderType: "Replacement",
+            dateAssigned: "March 17, 2025",
+            targetDate: "January 08, 2024",
+            priority: "Medium",
+            status: "Assigned",
+        },
+        {
+            id: "39",
+            location: "DSR 433",
+            description: "Clean the office storage area",
+            workOrderType: "Cleaning",
+            dateAssigned: "March 18, 2025",
+            targetDate: "December 30, 2023",
+            priority: "Low",
+            status: "Assigned",
+        },
+        {
+            id: "40",
+            location: "DSR 434",
+            description: "Upgrade the office lighting",
+            workOrderType: "Upgrade",
+            dateAssigned: "March 18, 2025",
+            targetDate: "January 16, 2024",
+            priority: "Critical",
+            status: "On Going",
+        },
+        {
+            id: "41",
+            location: "DSR 435",
+            description: "Inspect the office fire exits",
+            workOrderType: "Inspection",
+            dateAssigned: "March 19, 2025",
+            targetDate: "January 21, 2024",
+            priority: "High",
+            status: "Assigned",
+        },
+        {
+            id: "42",
+            location: "DSR 436",
+            description: "Repair the office water cooler",
+            workOrderType: "Repair",
+            dateAssigned: "March 19, 2025",
+            targetDate: "December 24, 2023",
+            priority: "Medium",
+            status: "On Going",
+        },
+        {
+            id: "43",
+            location: "DSR 437",
+            description: "Replace the office flooring",
+            workOrderType: "Replacement",
+            dateAssigned: "March 20, 2025",
+            targetDate: "January 09, 2024",
+            priority: "Critical",
+            status: "Assigned",
+        },
+        {
+            id: "44",
+            location: "DSR 438",
+            description: "Clean the office kitchen",
+            workOrderType: "Cleaning",
+            dateAssigned: "March 20, 2025",
+            targetDate: "December 31, 2023",
+            priority: "Low",
+            status: "Assigned",
+        },
+        {
+            id: "45",
+            location: "DSR 439",
+            description: "Upgrade the office software",
+            workOrderType: "Upgrade",
+            dateAssigned: "March 21, 2025",
+            targetDate: "January 17, 2024",
+            priority: "Critical",
+            status: "On Going",
+        },
+        {
+            id: "46",
+            location: "DSR 440",
+            description: "Inspect the office wiring",
+            workOrderType: "Inspection",
+            dateAssigned: "March 21, 2025",
+            targetDate: "January 22, 2024",
+            priority: "High",
+            status: "Assigned",
+        },
+        {
+            id: "47",
+            location: "DSR 441",
+            description: "Fix the office ventilation",
+            workOrderType: "Repair",
+            dateAssigned: "March 22, 2025",
+            targetDate: "December 25, 2023",
+            priority: "Critical",
+            status: "On Going",
+        },
+        {
+            id: "48",
+            location: "DSR 442",
+            description: "Replace the office monitors",
+            workOrderType: "Replacement",
+            dateAssigned: "March 22, 2025",
+            targetDate: "January 10, 2024",
+            priority: "Medium",
+            status: "Assigned",
+        },
+        {
+            id: "49",
+            location: "DSR 443",
+            description: "Clean the office meeting rooms",
+            workOrderType: "Cleaning",
+            dateAssigned: "March 23, 2025",
+            targetDate: "January 01, 2024",
+            priority: "Low",
+            status: "Assigned",
+        },
+        {
+            id: "50",
+            location: "DSR 444",
+            description: "Upgrade the office security",
+            workOrderType: "Upgrade",
+            dateAssigned: "March 23, 2025",
+            targetDate: "January 18, 2024",
+            priority: "Critical",
+            status: "On Going",
+        },
     ];
 
     // Define columns for the data table
@@ -408,50 +608,101 @@ const AssignedTask: React.FC = () => {
         <AuthenticatedLayout>
             <Head title="Assigned Work Orders" />
 
-            <div>
+            <div className="container mx-auto py-4">
                 <header>
-                    <h1 className="text-xl font-bold mb-4">Work Orders</h1>
+                    <h1 className="text-xl font-bold">Assigned Work Orders</h1>
                 </header>
 
                 {/* Tabs */}
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="bg-gray-200 text-black rounded-md">
-                        <TabsTrigger value="list">List</TabsTrigger>
-                        <TabsTrigger value="month">Month</TabsTrigger>
-                        <TabsTrigger value="week">Week</TabsTrigger>
-                    </TabsList>
+                <div className="relative -mt-2">
+                    <Tabs value={activeTab} onValueChange={setActiveTab}>
+                        <TabsList className="bg-gray-200 text-black rounded-md absolute top-0 left-0 z-10 mb-4">
+                            <TabsTrigger value="list">List</TabsTrigger>
+                            <TabsTrigger value="month">Month</TabsTrigger>
+                            <TabsTrigger value="week">Week</TabsTrigger>
+                        </TabsList>
 
-                    {/* List View */}
-                    <TabsContent value="list">
-                        <div className="overflow-x-auto">
-                            <Datatable columns={columns} data={workOrders} />
-                        </div>
-                    </TabsContent>
+                        {/* List View */}
+                        <TabsContent value="list" className="mt-8">
+                            <div className="overflow-x-auto">
+                                <Datatable columns={columns} data={workOrders} />
+                            </div>
+                        </TabsContent>
 
-                    {/* Month View */}
-                    {/* <TabsContent value="month">
-                        <FullCalendar
-                            plugins={[dayGridPlugin]}
-                            initialView="dayGridMonth"
-                            events={workOrders.map((order) => ({
-                                title: order.title,
-                                date: order.date,
-                            }))}
-                        />
-                    </TabsContent> */}
-
-                    {/* Week View */}
-                    {/* <TabsContent value="week">
-                        <FullCalendar
-                            plugins={[timeGridPlugin]}
-                            initialView="timeGridWeek"
-                            events={workOrders.map((order) => ({
-                                title: order.title,
-                                date: order.date,
-                            }))}
-                        />
-                    </TabsContent> */}
-                </Tabs>
+                        {/* Month View */}
+                        <TabsContent value="month" className="mt-8">
+                            <div className="bg-white p-4 rounded-lg shadow-md">
+                                <h2 className="text-lg font-semibold mb-4">
+                                    Month View
+                                </h2>
+                                {/* FullCalendar component for month view */}
+                                {/* <FullCalendar
+                                    plugins={[dayGridPlugin]}
+                                    initialView="dayGridMonth"
+                                    events={workOrders.map((wo) => ({
+                                        title: wo.description,
+                                        start: wo.dateAssigned,
+                                        end: wo.targetDate,
+                                    }))}
+                                    eventColor="#378006"
+                                    headerToolbar={{
+                                        left: "prev,next today",
+                                        center: "title",
+                                        right: "dayGridMonth,timeGridWeek,timeGridDay",
+                                    }}
+                                    buttonText={{
+                                        today: "Today",
+                                        month: "Month",
+                                        week: "Week",
+                                        day: "Day",
+                                    }}
+                                    height="auto"
+                                    eventClick={(info) => {
+                                        alert(
+                                            `Event: ${info.event.title}\nStart: ${info.event.start}\nEnd: ${info.event.end}`
+                                        );
+                                    }}
+                                /> */}
+                            </div>
+                        </TabsContent>
+                        
+                        {/* Week View */}
+                        <TabsContent value="week" className="mt-8">
+                            <div className="bg-white p-4 rounded-lg shadow-md">
+                                <h2 className="text-lg font-semibold mb-4">
+                                    Week View
+                                </h2>
+                                {/* FullCalendar component for week view */}
+                                {/* <FullCalendar
+                                    plugins={[timeGridPlugin]}
+                                    initialView="timeGridWeek"
+                                    events={workOrders.map((wo) => ({
+                                        title: wo.description,
+                                        start: wo.dateAssigned,
+                                        end: wo.targetDate,
+                                    }))}
+                                    eventColor="#378006"
+                                    headerToolbar={{
+                                        left: "prev,next today",
+                                        center: "title",
+                                        right: "timeGridWeek,timeGridDay",
+                                    }}
+                                    buttonText={{
+                                        today: "Today",
+                                        week: "Week",
+                                        day: "Day",
+                                    }}
+                                    height="auto"
+                                    eventClick={(info) => {
+                                        alert(
+                                            `Event: ${info.event.title}\nStart: ${info.event.start}\nEnd: ${info.event.end}`
+                                        );
+                                    }}
+                                /> */}
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                </div>
             </div>
         </AuthenticatedLayout>
     );

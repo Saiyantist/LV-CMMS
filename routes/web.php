@@ -83,7 +83,7 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
         })->name('work-orders.compliance-and-safety');
     });
     
-    Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])->name('work-orders.assigned-tasks');
+    Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])->middleware('role:maintenance_personne|super_admin')->name('work-orders.assigned-tasks');
 
     Route::resource('work-orders', WorkOrderController::class); // ALWAYS put this at the end ng mga "/work-orders" routes.
 

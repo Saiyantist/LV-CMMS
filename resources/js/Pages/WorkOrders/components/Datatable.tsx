@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
     type ColumnDef,
-    type ColumnFiltersState,
     type SortingState,
     flexRender,
     getCoreRowModel,
@@ -40,7 +39,7 @@ export function Datatable<TData, TValue>({
     data,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [globalFilter, setGlobalFilter] = useState<string>(""); // Single search input
 
     const table = useReactTable({
         data,
@@ -49,31 +48,39 @@ export function Datatable<TData, TValue>({
         getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
-        onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
         state: {
             sorting,
-            columnFilters,
+            globalFilter,
+        },
+        globalFilterFn: (row, columnId, filterValue) => {
+            // Combine filtering for description, location, and priority
+            const searchValue = filterValue.toLowerCase();
+            return (
+                row.getValue("description")?.toLowerCase().includes(searchValue) ||
+                row.getValue("location")?.toLowerCase().includes(searchValue) ||
+                row.getValue("priority")?.toLowerCase().includes(searchValue)
+            );
         },
     });
 
+    // Get the total number of filtered rows
+    const totalFilteredRows = table.getFilteredRowModel().rows.length;
+
     return (
         <>
-            <div className="flex justify-end py-4">
+            <div className="flex justify-end pb-4">
                 <div className="flex items-center gap-2">
+                    {/* Combined Search Input */}
                     <div className="relative">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search Description"
-                            value={
-                                (table.getColumn("description")
-                                    ?.getFilterValue() as string) ?? ""
-                            }
+                            placeholder="Search"
+                            value={globalFilter}
                             onChange={(event) =>
-                                table.getColumn("description")
-                                    ?.setFilterValue(event.target.value)
+                                setGlobalFilter(event.target.value)
                             }
-                            className="h-10 w-[250px] pl-8 rounded-md border"
+                            className="h-10 w-52 pl-8 rounded-md border"
                         />
                     </div>
                     <Button
@@ -141,50 +148,60 @@ export function Datatable<TData, TValue>({
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between space-x-2 py-4">
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                        className="gap-1"
-                    >
-                        <ChevronLeft className="h-4 w-4" /> Previous
-                    </Button>
-                    {[1, 2, 3].map((page) => (
+            {totalFilteredRows > 5 && (
+                <div className="flex items-center justify-between space-x-2 py-4">
+                    <div className="flex items-center gap-2">
+                        {/* Previous Button */}
                         <Button
-                            key={page}
-                            variant={
-                                table.getState().pagination.pageIndex ===
-                                page - 1
-                                    ? "default"
-                                    : "outline"
-                            }
+                            variant="outline"
                             size="sm"
-                            onClick={() => table.setPageIndex(page - 1)}
-                            className={
-                                table.getState().pagination.pageIndex ===
-                                page - 1
-                                    ? "bg-primary"
-                                    : ""
-                            }
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                            className="gap-1"
                         >
-                            {page}
+                            <ChevronLeft className="h-4 w-4" /> Previous
                         </Button>
-                    ))}
-                    <div className="px-2">...</div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                        className="gap-1"
-                    >
-                        Next <ChevronRight className="h-4 w-4" />
-                    </Button>
+
+                        {/* Page Buttons */}
+                        {(() => {
+                            const pageIndex = table.getState().pagination.pageIndex;
+                            const pageCount = table.getPageCount();
+                            const startPage = Math.max(0, pageIndex - 1); // Show 1 page before the current page
+                            const endPage = Math.min(pageCount, pageIndex + 2); // Show 2 pages after the current page
+
+                            return [...Array(pageCount).keys()]
+                                .slice(startPage, endPage)
+                                .map((page) => (
+                                    <Button
+                                        key={page}
+                                        variant={
+                                            pageIndex === page ? "default" : "outline"
+                                        }
+                                        size="sm"
+                                        onClick={() => table.setPageIndex(page)}
+                                        // disabled={pageIndex === page} // Disable the current page button
+                                        className={
+                                            pageIndex === page ? "bg-primary" : ""
+                                        }
+                                    >
+                                        {page + 1}
+                                    </Button>
+                                ));
+                        })()}
+
+                        {/* Next Button */}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                            className="gap-1"
+                        >
+                            Next <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            )}
         </>
     );
 }
