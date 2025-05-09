@@ -1,4 +1,4 @@
-import NavBar from "@/Components/NavBar";
+    import NavBar from "@/Components/NavBar";
 import About from "./About";
 import Features from "./Features";
 import Footer from "./Footer";
@@ -28,7 +28,7 @@ const Home = () => {
                             Management System
                         </h1>
                         <p className="mt-4 text-lg sm:text-2xl lg:text-3xl drop-shadow-md">
-                            With Facility Scheduling.
+                            With Event Services
                         </p>
 
                         <Link

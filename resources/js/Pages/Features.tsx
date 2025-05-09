@@ -26,7 +26,7 @@ const features = [
             "Gain valuable insights into operational performance with real-time reports and interactive dashboards. Track key metrics for better decision-making.",
     },
     {
-        name: "Facility Scheduling",
+        name: "Event Services",
         image: "/images/calendar.png",
         description:
             "Optimize the use of facilities by managing reservations, avoiding conflicts, and ensuring smooth operations with real-time updates.",
