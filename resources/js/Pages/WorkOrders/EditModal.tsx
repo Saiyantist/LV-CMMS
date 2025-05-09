@@ -11,6 +11,7 @@ interface EditWorkOrderProps {
         id: number;
         location_id: string;
         report_description: string;
+        asset: any;
         status: string;
         work_order_type: string;
         label: string;
@@ -55,6 +56,7 @@ export default function EditWorkOrderModal({
         // location_id: initialLocation,
         location_id: workOrder.location_id, // <- use raw ID or string here
         report_description: workOrder.report_description,
+        asset: workOrder.asset,
         images: [] as File[],
         status: workOrder.status,
         work_order_type: workOrder.work_order_type,
@@ -145,6 +147,22 @@ export default function EditWorkOrderModal({
         };
     }, []);
 
+    const getAssetDetails = (workOrder: any) => {
+        if (workOrder.asset) {
+            return {
+                id: workOrder.asset.id,
+                name: workOrder.asset.name,
+                location_id: workOrder.asset.location_id,
+                location_name: locations.find(
+                    (loc) => loc.id === workOrder.asset.location_id
+                )?.name || "No Location",
+            };
+        }
+        return null;
+    };
+    
+    const assetDetails = getAssetDetails(workOrder);
+
     return (
         <div
             className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50"
@@ -229,6 +247,22 @@ export default function EditWorkOrderModal({
                                 {errors.report_description}
                             </p>
                         )}
+                    </div>
+
+                    {/* Asset */}
+                    <div>
+                        <label className="block font-semibold">
+                            Asset
+                        </label>
+                        <div className="w-full border p-2 rounded-md text-sm">
+                            {assetDetails ? (
+                                <p>
+                                    {assetDetails.name} - {assetDetails.location_name}
+                                </p>
+                            ) : (
+                                <p>No Asset Attached.</p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Image Upload */}

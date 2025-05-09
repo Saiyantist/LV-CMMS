@@ -16,7 +16,7 @@ class Asset extends Model
         'preventive_maintenance_interval_value',
         'preventive_maintenance_interval_unit',
         'last_maintained_at',
-        'qr_code',
+        // 'qr_code',
     ];
 
     public function location()

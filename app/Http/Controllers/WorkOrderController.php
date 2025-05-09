@@ -12,6 +12,9 @@ use Inertia\Inertia;
 
 class WorkOrderController extends Controller
 {
+
+    // --------------- Resource Controller Methods ---------------
+
     /**
      * Display a listing of the resource.
      * It is also used to pass the needed props to the modals for the create forrm and edit form.
@@ -42,6 +45,13 @@ class WorkOrderController extends Controller
                 'requested_at' => $wo->created_at->toDateString(),
                 'location' => $wo->location ? ['name' => $wo->location->name] : null,
                 'images' => $wo->images->pluck('url')->toArray(), // ✅ important part
+                'asset' => $wo->asset ? [
+                    'id' => $wo->asset->id,
+                    'name' => $wo->asset->name,
+                    'specification_details' => $wo->asset->specification_details,
+                    'status' => $wo->asset->status,
+                    'location_id' => $wo->asset->location_id,
+                ] : null,
             ];
         });
 
@@ -58,52 +68,6 @@ class WorkOrderController extends Controller
                 'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
             ],
         ]);
-    }
-
-    public function assignedWorkOrders()
-    {
-        $user = auth()->user();
-
-        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'images'])
-            ->where('assigned_to', $user->id)
-            ->get()
-            ->map(function ($wo) {
-                return [
-                    'id' => $wo->id,
-                    'location_id' => $wo->location_id,
-                    'report_description' => $wo->report_description,
-                    'status' => $wo->status,
-                    'work_order_type' => $wo->work_order_type,
-                    'label' => $wo->label,
-                    'priority' => $wo->priority,
-                    'remarks' => $wo->remarks,
-                    'requested_at' => $wo->created_at->toDateString(),
-                    'location' => $wo->location ? ['name' => $wo->location->name] : null,
-                    'images' => $wo->images->pluck('url')->toArray(),
-                ];
-            });
-
-        return Inertia::render('WorkOrders/AssignedWorkOrders',
-        [
-            'workOrders' => $workOrders,
-            'locations' => Location::select('id', 'name')->get(),
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->first_name . ' ' . $user->last_name,
-                'roles' => $user->roles->map(function ($role) {
-                    return ['name' => $role->name];
-                }),
-                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
-            ],
-        ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        // Not needed, the create form and edit form is handled in the main component by passing the data needed as props.
     }
 
     /**
@@ -150,55 +114,6 @@ class WorkOrderController extends Controller
     {
         //
     }
-
-
-
-    // In WorkOrderController.php
-public function submitWorkOrder(Request $request)
-{
-    // Assuming the front-end sends data similar to `SubmitWorkOrder.tsx`
-    $user = auth()->user();
-    
-    // Validate the request data
-    $validated = $request->validate([
-        'report_description' => 'required|string|max:1000',
-        'location_id' => 'required|exists:locations,id',
-        'images.*' => 'nullable|image|max:5120', // If any images are being uploaded
-    ]);
-
-    // Logic for creating a new WorkOrder
-    $isWorkOrderManager = $user->hasPermissionTo('manage work orders');
-
-    $workOrder = WorkOrder::create([
-        'report_description' => $request->report_description,
-        'location_id' => $request->location_id,
-        'requested_at' => now(),
-        'requested_by' => $user->id,
-        'status' => $isWorkOrderManager ? ($request->status ?? 'Pending') : 'Pending',
-        'work_order_type' => $isWorkOrderManager ? ($request->work_order_type ?? 'Work Order') : 'Work Order',
-        'label' => $isWorkOrderManager ? ($request->label ?? 'No Label') : 'No Label',
-        'priority' => $isWorkOrderManager ? $request->priority : null,
-        'remarks' => $isWorkOrderManager ? $request->remarks : null,
-    ]);
-
-    // Handle image uploads (if any)
-    if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $image) {
-            $filename = uniqid('wo_') . '.' . $image->extension();
-            $path = $image->storeAs('work_orders', $filename, 'public');
-            Image::create([
-                'imageable_id' => $workOrder->id,
-                'imageable_type' => WorkOrder::class,
-                'path' => $path,
-            ]);
-        }
-    }
-
-    return redirect()->route('work-orders.index')->with('success', 'Work order created successfully.');
-}
-
-
-
 
     /**
      * Show the form for editing the specified resource.
@@ -270,7 +185,6 @@ public function submitWorkOrder(Request $request)
         return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
     }
 
-
     /**
      * Remove the specified resource from storage.
      */
@@ -294,6 +208,89 @@ public function submitWorkOrder(Request $request)
 
         // return redirect()->route('work-orders.index')->with('success', 'Work order deleted successfully.');
         return response()->json(['success' => 'Work order deleted successfully.'], 200);
+    }
+
+    // --------------- Custom Methods ---------------
+
+    public function assignedWorkOrders()
+    {
+        $user = auth()->user();
+
+        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'images'])
+            ->where('assigned_to', $user->id)
+            ->get()
+            ->map(function ($wo) {
+                return [
+                    'id' => $wo->id,
+                    'location_id' => $wo->location_id,
+                    'report_description' => $wo->report_description,
+                    'status' => $wo->status,
+                    'work_order_type' => $wo->work_order_type,
+                    'label' => $wo->label,
+                    'priority' => $wo->priority,
+                    'remarks' => $wo->remarks,
+                    'requested_at' => $wo->created_at->toDateString(),
+                    'location' => $wo->location ? ['name' => $wo->location->name] : null,
+                    'images' => $wo->images->pluck('url')->toArray(),
+                ];
+            });
+
+        return Inertia::render('WorkOrders/AssignedWorkOrders',
+        [
+            'workOrders' => $workOrders,
+            'locations' => Location::select('id', 'name')->get(),
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'roles' => $user->roles->map(function ($role) {
+                    return ['name' => $role->name];
+                }),
+                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+            ],
+        ]);
+    }
+
+    public function submitWorkOrder(Request $request)
+    {
+        // Assuming the front-end sends data similar to `SubmitWorkOrder.tsx`
+        $user = auth()->user();
+        
+        // Validate the request data
+        $validated = $request->validate([
+            'report_description' => 'required|string|max:1000',
+            'location_id' => 'required|exists:locations,id',
+            'images.*' => 'nullable|image|max:5120', // If any images are being uploaded
+        ]);
+
+        // Logic for creating a new WorkOrder
+        $isWorkOrderManager = $user->hasPermissionTo('manage work orders');
+
+        $workOrder = WorkOrder::create([
+            'report_description' => $request->report_description,
+            'location_id' => $request->location_id,
+            'requested_at' => now(),
+            'requested_by' => $user->id,
+            'status' => $isWorkOrderManager ? ($request->status ?? 'Pending') : 'Pending',
+            'work_order_type' => $isWorkOrderManager ? ($request->work_order_type ?? 'Work Order') : 'Work Order',
+            'label' => $isWorkOrderManager ? ($request->label ?? 'No Label') : 'No Label',
+            'priority' => $isWorkOrderManager ? $request->priority : null,
+            'remarks' => $isWorkOrderManager ? $request->remarks : null,
+        ]);
+
+        // Handle image uploads (if any)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $filename = uniqid('wo_') . '.' . $image->extension();
+                $path = $image->storeAs('work_orders', $filename, 'public');
+                Image::create([
+                    'imageable_id' => $workOrder->id,
+                    'imageable_type' => WorkOrder::class,
+                    'path' => $path,
+                ]);
+            }
+        }
+
+        return redirect()->route('work-orders.index')->with('success', 'Work order created successfully.');
     }
 
 }

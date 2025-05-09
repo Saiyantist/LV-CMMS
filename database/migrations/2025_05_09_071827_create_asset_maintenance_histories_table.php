@@ -14,13 +14,11 @@ return new class extends Migration
         Schema::create('asset_maintenance_histories', function (Blueprint $table) {
             $table->id();
             $table->text('downtime_reason');
-            $table->enum('status', ['Failed', 'Under Maintenance', 'Operational'])->default('Failed');
-            $table->dateTime('maintained_at');
-            $table->dateTime('failed_at')->nullable();
-    
+            $table->enum('status', ['Failed', 'Under Maintenance', 'Resolved', 'End of Useful Life'])->nullable();
+            $table->dateTime('maintained_at')->nullable();
+            $table->dateTime('failed_at'); // Upon creation of an individual record, it means that the asset has already failed.
             $table->foreignId('work_order_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('asset_id')->constrained()->cascadeOnDelete();
-    
             $table->timestamps();
         });
     }
