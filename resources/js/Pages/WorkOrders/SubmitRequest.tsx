@@ -1,13 +1,14 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Head, router, usePage, useForm } from "@inertiajs/react";
 import { Toaster, toast } from "sonner";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import ConfirmModal from "@/Components/ConfirmModal";
 import WOSubmittedModal from "./WOSubmittedModal";
 import SubmitRequestLayout from "./SubmitRequestLayout";
+import axios from "axios";
 
 const SubmitWorkOrder: React.FC = () => {
-    const { data, setData, post, reset } = useForm({
+    const { data, setData, reset } = useForm({
         location_id: "",
         report_description: "",
         images: [] as File[],
@@ -17,15 +18,6 @@ const SubmitWorkOrder: React.FC = () => {
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [successData, setSuccessData] = useState<{
-        location: string;
-        description: string;
-        images: { url: string; name: string }[];
-    }>({
-        location: "",
-        description: "",
-        images: [],
-    });
 
     const user = usePage().props.auth.user;
 
@@ -47,6 +39,35 @@ const SubmitWorkOrder: React.FC = () => {
         [data.images]
     );
 
+    const [submittedData, setSubmittedData] = useState({
+        location: "",
+        description: "",
+        images: [] as { url: string; name: string }[],
+    });
+
+    useEffect(() => {
+        /** Fetch all locations from the backend */
+        const fetchLocations = async () => {
+            try {
+                const response = await axios.get("/locations");
+                setLocations(response.data);
+            } catch (error) {
+                console.error("Error fetching locations:", error);
+            }
+        };
+
+        fetchLocations();
+    }, []);
+
+    useEffect(() => {
+        /** Filter locations based on typed input */
+        const search = typedLocation.toLowerCase();
+        const matches = locations.filter((loc) =>
+            loc.name.toLowerCase().includes(search)
+        );
+        setFilteredLocations(matches);
+    }, [typedLocation, locations]);
+
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
         if (!data.location_id.trim())
@@ -61,68 +82,77 @@ const SubmitWorkOrder: React.FC = () => {
         return true;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent): Promise<boolean> => {
         e.preventDefault();
-        if (!validateForm()) return;
-        setSuccessData({
-            location: data.location_id,
-            description: data.report_description,
-            images: filePreviews,
-        });
+        if (!validateForm()) return false;
+
+        // Show confirmation modal
         setShowConfirmModal(true);
+        return true;
     };
 
-    const handleConfirmSubmit = () => {
-        setShowConfirmModal(false);
-        setIsLoading(true);
+    const handleConfirmSubmit = async () => {
+        setIsLoading(true); // Start loading
+        setShowConfirmModal(false); // Close the confirmation modal
 
         const formData = new FormData();
         formData.append("location_id", data.location_id);
         formData.append("report_description", data.report_description);
         data.images.forEach((image) => formData.append("images[]", image));
 
-        router.post("/work-orders", formData, {
-            forceFormData: true,
-        });
-
-        setTimeout(() => {
-            setIsLoading(false);
-            toast.success("Work order submitted successfully!");
-            setSuccessData({
-                location: data.location_id,
-                description: data.report_description,
-                images: filePreviews,
+        try {
+            // Simulate a successful submission to the backend
+            await axios.post("/work-orders", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
             });
-            setShowSuccessModal(true);
-            reset();
+
+            // Store submitted data before resetting the form
+            setSubmittedData({
+                location: typedLocation,
+                description: data.report_description,
+                images: filePreviews, // Include file previews in submitted data
+            });
+
+            setIsLoading(false);
+            setShowSuccessModal(true); // Show the success modal
+            toast.success("Work order submitted successfully!"); // Show success toast
+            reset(); // Reset the form
             setErrors({});
             setTypedLocation("");
             setFilteredLocations([]);
             setShowDropdown(false);
-        }, 1000);
+        } catch (error) {
+            setIsLoading(false);
+            toast.error("Failed to submit the work order. Please try again."); // Show error toast
+        }
     };
 
     const handleLocationInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const typed = e.target.value;
         setTypedLocation(typed);
         setData("location_id", typed);
+
         if (typed.trim()) {
-            setFilteredLocations(
-                locations.filter((loc) =>
-                    loc.name.toLowerCase().includes(typed.toLowerCase())
-                )
+            const matches = locations.filter((loc) =>
+                loc.name.toLowerCase().includes(typed.toLowerCase())
             );
-            setShowDropdown(true);
+            setFilteredLocations(matches); // Update filtered locations
+            setShowDropdown(true); // Show dropdown when input is not empty
         } else {
-            setFilteredLocations([]);
-            setShowDropdown(false);
+            setFilteredLocations(locations); // Show all locations if input is empty
+            setShowDropdown(false); // Collapse dropdown if input is cleared
         }
+    };
+
+    const handleFocusInput = () => {
+        setFilteredLocations(locations); // Show all locations on focus
+        setShowDropdown(true);
     };
 
     const handleSelectLocation = (loc: { id: number; name: string }) => {
         setData("location_id", loc.id.toString());
         setTypedLocation(loc.name);
-        setShowDropdown(false);
+        setShowDropdown(false); // Collapse dropdown on selection
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,7 +181,13 @@ const SubmitWorkOrder: React.FC = () => {
             <Toaster position="top-right" richColors />
 
             <SubmitRequestLayout
-                data={data}
+                data={{
+                    ...data,
+                    user: {
+                        id: user.id,
+                        name: `${user.first_name} ${user.last_name}`,
+                    },
+                }}
                 errors={errors}
                 isLoading={isLoading}
                 filePreviews={filePreviews}
@@ -164,8 +200,10 @@ const SubmitWorkOrder: React.FC = () => {
                 handleSelectLocation={handleSelectLocation}
                 handleFileChange={handleFileChange}
                 setData={setData}
+                onFocusInput={handleFocusInput} // Pass focus handler
             />
 
+            {/* ConfirmModal */}
             {showConfirmModal && (
                 <ConfirmModal
                     message="Are you sure you want to submit this request?"
@@ -176,15 +214,18 @@ const SubmitWorkOrder: React.FC = () => {
 
             <WOSubmittedModal
                 isOpen={showSuccessModal}
-                onClose={() => setShowSuccessModal(false)}
-                dateRequested={new Date().toLocaleDateString()}
+                dateRequested={new Date().toISOString()} // Use the current date as the request date
                 user={{
                     first_name: user.first_name,
                     last_name: user.last_name,
+                }} // Pass user details
+                location={submittedData.location || "No location provided"} // Use submitted data for location
+                description={submittedData.description || "No description provided"} // Use submitted data for description
+                images={submittedData.images || []} // Use submitted data for images
+                onClose={() => setShowSuccessModal(false)} // Close modal handler
+                onViewWorkOrders={() => {
+                    console.log("View Work Orders clicked"); // Add a handler for onViewWorkOrders
                 }}
-                location={successData.location}
-                description={successData.description}
-                images={successData.images}
             />
         </Authenticated>
     );

@@ -35,10 +35,21 @@ export default function Guest({ children }: PropsWithChildren) {
 
                 {/* Form content with rounded corners only for small screens */}
                 <div className="relative z-10 mt-4 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl px-4 py-8 sm:rounded-sm md:rounded-none bg-white dark:bg-gray-800">
+                {/* Form content with rounded corners only for small screens */}
+                <div className="relative z-10 mt-4 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl px-4 py-8 sm:rounded-sm md:rounded-none bg-white dark:bg-gray-800">
                     {children}
                 </div>
             </main>
+            </main>
 
+            {/* Image only for larger screens */}
+            <section
+                className="hidden md:block h-full bg-cover bg-center"
+                style={{ backgroundImage: `url('/images/lvbuilding.jpg')` }}
+                aria-label="Company building"
+            >
+                <span className="sr-only">Company office building</span>
+            </section>
             {/* Image only for larger screens */}
             <section
                 className="hidden md:block h-full bg-cover bg-center"

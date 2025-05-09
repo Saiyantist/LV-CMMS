@@ -105,6 +105,7 @@ export default function Login({
                             Forgot your password?
                         </Link>
                     )}
+
                 </div>
 
                 <div className="mt-4 flex flex-col items-center justify-between space-y-2 w-full">

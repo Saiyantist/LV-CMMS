@@ -105,7 +105,7 @@ export default function CreateWorkOrderModal({
     useEffect(() => {
         /** Handle dropdown filtering */
         const search = typedLocation.toLowerCase();
-        const matches = locations.filter(loc =>
+        const matches = locations.filter((loc) =>
             loc.name.toLowerCase().includes(search)
         );
         setFilteredLocations(matches);
@@ -158,7 +158,9 @@ export default function CreateWorkOrderModal({
 
                     <div className="max-h-[70vh] overflow-y-auto px-6">
                         {/* Location Search Input */}
-                        <label className="block font-semibold text-gray-700">Location</label>
+                        <label className="block font-semibold text-gray-700">
+                            Location
+                        </label>
                         <div ref={dropdownRef} className="mb-4 relative">
                             <input
                                 type="text"

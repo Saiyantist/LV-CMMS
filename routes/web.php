@@ -57,6 +57,13 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
  *      - ROUTING PREVENTION FOR UNAUTHORIZED ACCESS/USERS
  */
 
+ 
+//  Getting all locations
+Route::get('/work-orders/submit-request', [LocationController::class, 'index']
+)->name('work-orders.submit-request');
+
+Route::get('/locations', [LocationController::class, 'index'])->name('locations.index');
+
 Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::get('/admin/manage-roles', [UserRoleController::class, 'index'])->name('admin.manage-roles');
     Route::patch('/admin/manage-roles/{user}/role', [UserRoleController::class, 'updateRole'])->name('admin.update.role');

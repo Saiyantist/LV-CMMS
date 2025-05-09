@@ -32,7 +32,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({ data, onClose }) => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-[400px] md:w-[500px] lg:w-[600px] relative">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-[500px] md:w-[600px] lg:w-[700px] relative">
                 <button
                     onClick={onClose}
                     className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
@@ -52,6 +52,23 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({ data, onClose }) => {
                         />
                     </svg>
                 </button>
+
+                {/* <div className="w-12 h-12 border-2 border-green-500 bg-white text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                        />
+                    </svg>
+                </div> */}
 
                 <h2 className="text-xl font-semibold mb-4 text-center">
                     Asset Details
@@ -109,6 +126,15 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({ data, onClose }) => {
                         </div>
                     </div>
                 )}
+
+                <div className="flex justify-between sm:justify-end space-x-4 mt-6">
+                    <button
+                        onClick={onClose}
+                        className="w-full sm:w-auto text-white bg-secondary border-0 py-2 px-4 focus:outline-none hover:bg-primary rounded-full text-sm"
+                    >
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
     );
