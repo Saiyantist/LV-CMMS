@@ -220,12 +220,14 @@ const SubmitWorkOrder: React.FC = () => {
                     last_name: user.last_name,
                 }} // Pass user details
                 location={submittedData.location || "No location provided"} // Use submitted data for location
-                description={submittedData.description || "No description provided"} // Use submitted data for description
+                description={
+                    submittedData.description || "No description provided"
+                } // Use submitted data for description
                 images={submittedData.images || []} // Use submitted data for images
                 onClose={() => setShowSuccessModal(false)} // Close modal handler
-                onViewWorkOrders={() => {
-                    console.log("View Work Orders clicked"); // Add a handler for onViewWorkOrders
-                }}
+                // onViewWorkOrders={() => {
+                //     console.log("View Work Orders clicked"); // Add a handler for onViewWorkOrders
+                // }}
             />
         </Authenticated>
     );

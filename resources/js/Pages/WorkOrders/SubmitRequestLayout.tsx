@@ -162,7 +162,10 @@ const SubmitRequestLayout: React.FC<Props> = ({
                                         name="description"
                                         value={data.report_description}
                                         onChange={(e) =>
-                                            setData("report_description", e.target.value)
+                                            setData(
+                                                "report_description",
+                                                e.target.value
+                                            )
                                         }
                                         className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"
                                     />
@@ -174,7 +177,10 @@ const SubmitRequestLayout: React.FC<Props> = ({
                                 </div>
 
                                 <div className="p-2 w-full">
-                                    <label htmlFor="photos" className="leading-7 text-sm text-gray-600">
+                                    <label
+                                        htmlFor="photos"
+                                        className="leading-7 text-sm text-gray-600"
+                                    >
                                         Upload Photos
                                     </label>
                                     <input
@@ -209,7 +215,6 @@ const SubmitRequestLayout: React.FC<Props> = ({
                                     >
                                         Clear
                                     </button>
-
                                     <button
                                         type="submit"
                                         className={`text-white bg-secondary border-0 py-2 px-6 sm:px-8 rounded-3xl text-base sm:text-lg transition ${
