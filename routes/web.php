@@ -51,11 +51,25 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
 });
 
 
+//  Getting all locations
+Route::get('/work-orders/submit-request', [LocationController::class, 'index']
+)->name('work-orders.submit-request');
+
+Route::get('/locations', [LocationController::class, 'index'])->name('locations.index');
+
+
 /**
  * Autthenticated with Roles and Verified Email
  *      - for Role-based Access Control (RBAC)
  *      - ROUTING PREVENTION FOR UNAUTHORIZED ACCESS/USERS
  */
+
+ 
+//  Getting all locations
+Route::get('/work-orders/submit-request', [LocationController::class, 'index']
+)->name('work-orders.submit-request');
+
+Route::get('/locations', [LocationController::class, 'index'])->name('locations.index');
 
 Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::get('/admin/manage-roles', [UserRoleController::class, 'index'])->name('admin.manage-roles');
@@ -83,7 +97,7 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
         })->name('work-orders.compliance-and-safety');
     });
     
-    Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])->middleware('role:maintenance_personne|super_admin')->name('work-orders.assigned-tasks');
+    Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])->middleware(['role:maintenance_personnel|super_admin'])->name('work-orders.assigned-tasks');
 
     Route::resource('work-orders', WorkOrderController::class); // ALWAYS put this at the end ng mga "/work-orders" routes.
 

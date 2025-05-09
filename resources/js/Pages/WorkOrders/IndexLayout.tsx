@@ -77,7 +77,7 @@ export default function IndexLayout({
                                     className="bg-primary text-white hover:bg-secondary transition-all duration-300 
                             text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
                                 >
-                                    Add Work Order
+                                    + Add Work Order
                                 </PrimaryButton>
                             </div>
                         )}
@@ -107,19 +107,21 @@ export default function IndexLayout({
             </div>
 
             {/* Tabs - Mobile */}
-            <div className="md:hidden flex justify-end px-4 mt-4">
-                <select
-                    value={activeTab}
-                    onChange={(e) => setActiveTab(e.target.value)}
-                    className="border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-secondary focus:border-secondary"
-                >
-                    {tabs.map((tab) => (
-                        <option key={tab} value={tab}>
-                            {tab}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            { user.permissions.includes("manage work orders") && (
+                <div className="md:hidden flex justify-end px-4 mt-4">
+                    <select
+                        value={activeTab}
+                        onChange={(e) => setActiveTab(e.target.value)}
+                        className="border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-secondary focus:border-secondary"
+                    >
+                        {tabs.map((tab) => (
+                            <option key={tab} value={tab}>
+                                {tab}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
 
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto bg-white shadow-lg rounded-md mt-4">

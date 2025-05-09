@@ -47,6 +47,7 @@ export default function Guest({ children }: PropsWithChildren) {
             >
                 <span className="sr-only">Company office building</span>
             </section>
+
         </div>
     );
 }
