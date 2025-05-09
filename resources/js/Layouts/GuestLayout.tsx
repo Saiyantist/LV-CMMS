@@ -47,14 +47,7 @@ export default function Guest({ children }: PropsWithChildren) {
             >
                 <span className="sr-only">Company office building</span>
             </section>
-            {/* Image only for larger screens */}
-            <section
-                className="hidden md:block h-full bg-cover bg-center"
-                style={{ backgroundImage: `url('/images/lvbuilding.jpg')` }}
-                aria-label="Company building"
-            >
-                <span className="sr-only">Company office building</span>
-            </section>
+
         </div>
     );
 }
