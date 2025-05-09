@@ -36,6 +36,18 @@ class WorkOrder extends Model
         return $this->belongsTo(Asset::class);
     }
 
+    public function maintenanceHistories()  
+    {
+        return $this->hasManyThrough(
+            AssetMaintenanceHistory::class,
+            Asset::class,
+            'id',         // Local key on Asset: Primary key on Asset used to join with AssetMaintenanceHistory
+            'asset_id',   // Foreign key on AssetMaintenanceHistory: References the Asset model
+            'asset_id',   // Foreign key on WorkOrder: References the Asset model
+            'id'          // Local key on Asset: Primary key on Asset used to join with WorkOrder
+        );
+    }
+
     public function scheduledMaintenance()
     {
         return $this->hasOne(ScheduledMaintenance::class, 'work_order_id');

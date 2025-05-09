@@ -34,6 +34,11 @@ class Asset extends Model
         return $this->hasMany(ScheduledMaintenance::class, 'asset_id');
     }
 
+    public function maintenanceHistories()
+    {
+        return $this->hasMany(AssetMaintenanceHistory::class);
+    }
+
     /**
      * If asset photos would be stored, uncomment this block.
      */
