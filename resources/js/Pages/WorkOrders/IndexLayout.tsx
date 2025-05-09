@@ -77,7 +77,7 @@ export default function IndexLayout({
                                     className="bg-primary text-white hover:bg-secondary transition-all duration-300 
                             text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
                                 >
-                                    Add Work Order
+                                    + Add Work Order
                                 </PrimaryButton>
                             </div>
                         )}
