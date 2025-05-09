@@ -31,19 +31,17 @@ export default function ExternalRegistration() {
             <Head title="Registration for External" />
 
             <form onSubmit={submit}>
-
                 {/* Name */}
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-center text-black dark:text-white">
                         Registration Form
                     </h1>
                     <h2 className="font-bold text-secondary text-center">
-                        for External User 
+                        for External User
                     </h2>
                 </div>
 
                 <div className="flex justify-stretch mt-2">
-
                     {/* First Name */}
                     <div className="w-full mr-2">
                         <InputLabel htmlFor="first_name" value="First Name" />
@@ -91,11 +89,10 @@ export default function ExternalRegistration() {
                     </div>
                 </div>
 
-                {/* Gender */}
-                <div className="flex justify-stretch mt-4">
-
+                {/* Gender and Contact Number */}
+                <div className="flex justify-between mt-4 space-x-4">
                     {/* Gender */}
-                    <div className="w-full">
+                    <div className="w-1/2">
                         <InputLabel htmlFor="gender" value="Gender" />
 
                         <select
@@ -116,31 +113,32 @@ export default function ExternalRegistration() {
 
                         <InputError message={errors.gender} className="mt-2" />
                     </div>
-                </div>
 
-                {/* Contact Number */}
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="contact_number"
-                        value="Contact Number"
-                    />
-                    <TextInput
-                        id="contact_number"
-                        type="tel"
-                        name="contact_number"
-                        value={data.contact_number}
-                        className="mt-1 block w-full"
-                        placeholder="9XXXXXXXXX"
-                        maxLength={10}
-                        onChange={(e) =>
-                            setData("contact_number", e.target.value)
-                        }
-                        required
-                    />
-                    <InputError
-                        message={errors.contact_number}
-                        className="mt-2"
-                    />
+                    {/* Contact Number */}
+                    <div className="w-1/2">
+                        <InputLabel
+                            htmlFor="contact_number"
+                            value="Contact Number"
+                        />
+
+                        <TextInput
+                            id="contact_number"
+                            type="tel"
+                            name="contact_number"
+                            value={data.contact_number}
+                            className="mt-1 block w-full"
+                            placeholder="9XXXXXXXXX"
+                            maxLength={10}
+                            onChange={(e) =>
+                                setData("contact_number", e.target.value)
+                            }
+                            required
+                        />
+                        <InputError
+                            message={errors.contact_number}
+                            className="mt-2"
+                        />
+                    </div>
                 </div>
 
                 {/* Email */}
@@ -163,7 +161,6 @@ export default function ExternalRegistration() {
 
                 {/* Password and Confirm Password */}
                 <div className="flex justify-stretch mt-4">
-                    
                     {/* Password */}
                     <div className="w-full mr-2">
                         <InputLabel htmlFor="password" value="Password" />
@@ -212,6 +209,24 @@ export default function ExternalRegistration() {
                             className="mt-2"
                         />
                     </div>
+                </div>
+
+                <br />
+
+                <div>
+                    <label
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <input type="checkbox" name="privacy_policy" />
+                        <span>
+                            I understand, and I will agree with the privacy
+                            policy
+                        </span>
+                    </label>
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">

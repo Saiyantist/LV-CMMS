@@ -41,11 +41,11 @@ export default function InternalRegistration({
     const { data, setData, post, processing, errors, reset } = useForm({
         first_name: "",
         last_name: "",
-        birth_date: "",
         gender: "",
         contact_number: "",
         staff_type: "",
         department_id: "",
+        work_group: "",
         email: "",
         password: "",
         password_confirmation: "",
@@ -71,7 +71,7 @@ export default function InternalRegistration({
                         Registration Form
                     </h1>
                     <h2 className="font-bold text-secondary text-center">
-                        for Internal User 
+                        for Internal User
                     </h2>
                 </div>
 
@@ -79,7 +79,7 @@ export default function InternalRegistration({
                 <div className="flex justify-stretch mt-2">
                     {/* First Name */}
                     <div className="w-full mr-2">
-                        <InputLabel htmlFor="first_name" value="First Name" />
+                        <InputLabel htmlFor="first_name" value="First Name *" />
 
                         <TextInput
                             id="first_name"
@@ -102,7 +102,7 @@ export default function InternalRegistration({
 
                     {/* Last Name */}
                     <div className="w-full ml-2">
-                        <InputLabel htmlFor="last_name" value="Last Name" />
+                        <InputLabel htmlFor="last_name" value="Last Name *" />
 
                         <TextInput
                             id="last_name"
@@ -124,35 +124,10 @@ export default function InternalRegistration({
                     </div>
                 </div>
 
-                {/* Birth Date and Gender */}
                 <div className="flex justify-stretch mt-4">
-                    {/* Birth date */}
-                    <div className="w-full mr-2">
-                        <InputLabel htmlFor="birth_date" value="Birth Date" />
-
-                        <TextInput
-                            id="birth_date"
-                            type="date"
-                            name="birth_date"
-                            value={data.birth_date}
-                            className="mt-1 block w-full"
-                            autoComplete="bday"
-                            min={minDate} // 70 years olds
-                            max={maxDate} // 18 years olds
-                            onChange={(e) =>
-                                setData("birth_date", e.target.value)
-                            }
-                            required
-                        />
-                        <InputError
-                            message={errors.birth_date}
-                            className="mt-2"
-                        />
-                    </div>
-
                     {/* Gender */}
                     <div className="w-full ml-2">
-                        <InputLabel htmlFor="gender" value="Gender" />
+                        <InputLabel htmlFor="gender" value="Gender *" />
 
                         <select
                             id="gender"
@@ -178,7 +153,7 @@ export default function InternalRegistration({
                 <div className="mt-4">
                     <InputLabel
                         htmlFor="contact_number"
-                        value="Contact Number"
+                        value="Contact Number *"
                     />
                     <TextInput
                         id="contact_number"
@@ -199,13 +174,13 @@ export default function InternalRegistration({
                     />
                 </div>
 
-                {/* Staff type and Department */}
+                {/* Staff type and Department/Work Group */}
                 <div className="flex justify-stretch mt-4">
                     {/* Staff type */}
                     <div className="w-full mr-2">
                         <InputLabel
                             htmlFor="staff_type"
-                            value="Type of Staff"
+                            value="Type of Staff *"
                         />
 
                         <select
@@ -220,6 +195,9 @@ export default function InternalRegistration({
                         >
                             <option value="">Select Type</option>
                             <option value="teaching">Teaching</option>
+                            <option value="maintenance">
+                                Maintenance Personnel
+                            </option>
                             <option value="non-teaching">Non-teaching</option>
                         </select>
 
@@ -230,37 +208,68 @@ export default function InternalRegistration({
                     </div>
 
                     {/* Department */}
-                    <div className="w-full ml-2">
-                        <InputLabel htmlFor="department" value="Department" />
+                    {["teaching", "non-teaching"].includes(data.staff_type) && (
+                        <div className="w-full ml-2">
+                            <InputLabel
+                                htmlFor="department"
+                                value="Department *"
+                            />
 
-                        <select
-                            id="department_id"
-                            name="department_id"
-                            value={data.department_id}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-                            onChange={(e) =>
-                                setData("department_id", e.target.value)
-                            }
-                            required
-                        >
-                            <option value="">Select Department</option>
-                            {departments?.map((dept) => (
-                                <option key={dept.id} value={dept.id}>
-                                    {dept.name}
-                                </option>
-                            ))}
-                        </select>
+                            <select
+                                id="department_id"
+                                name="department_id"
+                                value={data.department_id}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                                onChange={(e) =>
+                                    setData("department_id", e.target.value)
+                                }
+                                required
+                            >
+                                <option value="">Select Department</option>
+                                {departments?.map((dept) => (
+                                    <option key={dept.id} value={dept.id}>
+                                        {dept.name}
+                                    </option>
+                                ))}
+                            </select>
 
-                        <InputError
-                            message={errors.department_id}
-                            className="mt-2"
-                        />
-                    </div>
+                            <InputError
+                                message={errors.department_id}
+                                className="mt-2"
+                            />
+                        </div>
+                    )}
+
+                    {/* Work Group */}
+                    {data.staff_type === "maintenance" && (
+                        <div className="w-full ml-2">
+                            <InputLabel
+                                htmlFor="work_group"
+                                value="Work Group *"
+                            />
+
+                            <TextInput
+                                id="work_group"
+                                name="work_group"
+                                value={data.work_group}
+                                className="mt-1 block w-full"
+                                onChange={(e) =>
+                                    setData("work_group", e.target.value)
+                                }
+                                required
+                            />
+
+                            <InputError
+                                message={errors.work_group}
+                                className="mt-2"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Email */}
                 <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="Email *" />
 
                     <TextInput
                         id="email"
@@ -280,7 +289,7 @@ export default function InternalRegistration({
                 <div className="flex justify-stretch mt-4">
                     {/* Password */}
                     <div className="w-full mr-2">
-                        <InputLabel htmlFor="password" value="Password" />
+                        <InputLabel htmlFor="password" value="Password *" />
 
                         <TextInput
                             id="password"
@@ -305,7 +314,7 @@ export default function InternalRegistration({
                     <div className="w-full ml-2">
                         <InputLabel
                             htmlFor="password_confirmation"
-                            value="Confirm Password"
+                            value="Confirm Password *"
                         />
 
                         <TextInput
@@ -326,6 +335,24 @@ export default function InternalRegistration({
                             className="mt-2"
                         />
                     </div>
+                </div>
+
+                <br />
+
+                <div>
+                    <label
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <input type="checkbox" name="privacy_policy" />
+                        <span>
+                            I understand, and I will agree with the privacy
+                            policy
+                        </span>
+                    </label>
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">

@@ -77,7 +77,7 @@ export default function AccessRegistration() {
                         </div>
                     </div>
 
-                    <div className="mt-6 flex justify-center">
+                    {/* <div className="mt-6 flex justify-center">
                         <div className="bg-secondary bg-opacity-30 p-4 rounded-lg hover:bg-opacity-80 transition w-fit">
                             <p className="text-sm text-white dark:text-gray-400">
                                 Already registered?{" "}
@@ -89,7 +89,7 @@ export default function AccessRegistration() {
                                 </Link>
                             </p>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </main>
         </div>
