@@ -17,7 +17,6 @@ class LocationController extends Controller
 
         return response()->json($locations);
     }
-
     public function store(Request $request)
     {
         $user = auth()->user();

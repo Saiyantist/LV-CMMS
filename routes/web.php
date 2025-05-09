@@ -51,6 +51,13 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
 });
 
 
+//  Getting all locations
+Route::get('/work-orders/submit-request', [LocationController::class, 'index']
+)->name('work-orders.submit-request');
+
+Route::get('/locations', [LocationController::class, 'index'])->name('locations.index');
+
+
 /**
  * Autthenticated with Roles and Verified Email
  *      - for Role-based Access Control (RBAC)
