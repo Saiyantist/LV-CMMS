@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AssetMaintenanceHistory;
 use App\Models\Department;
 use App\Models\Location;
 use App\Models\User;
@@ -25,5 +26,6 @@ class DatabaseSeeder extends Seeder
         User::factory(30)->create();
         
         WorkOrder::factory(50)->create();
+        $this->call(AssetMaintenanceHistorySeeder::class);
     }
 }
