@@ -14,7 +14,9 @@ class AssetController extends Controller
     public function index()
     {
         // Fetch assets from the database
-        $assets = Asset::all();
+        $assets = Asset::with(['location:id,name', 'maintenanceHistories'])->get();
+
+        // $assets = Asset::all();
 
         // Return the Inertia view with assets data
         return Inertia::render('AssetManagement/AssetManagement', [

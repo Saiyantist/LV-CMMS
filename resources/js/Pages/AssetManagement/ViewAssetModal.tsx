@@ -16,11 +16,14 @@ interface ViewAssetModalProps {
     data: {
         id: number;
         name: string;
-        specification: string;
-        location: string;
-        condition: string;
-        dateAcquired: string;
-        lastMaintenance: string;
+        specification_details: string;
+        location: {
+            id: number;
+            name: string;
+        }
+        status: string;
+        date_acquired: string;
+        last_maintained_at: string;
         imageUrl?: string; // Optional field for image URL
     };
     onClose: () => void;
@@ -86,26 +89,26 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({ data, onClose }) => {
                         </div>
                         <div className="flex mb-2">
                             <strong className="w-1/3">Specification:</strong>
-                            <span className="ml-2">{data.specification}</span>
+                            <span className="ml-2">{data.specification_details}</span>
                         </div>
                         <div className="flex mb-2">
                             <strong className="w-1/3">Location:</strong>
-                            <span className="ml-2">{data.location}</span>
+                            <span className="ml-2">{data.location.name}</span>
                         </div>
                         <div className="flex mb-2">
                             <strong className="w-1/3">Condition:</strong>
-                            <span className="ml-2">{data.condition}</span>
+                            <span className="ml-2">{data.status}</span>
                         </div>
                         <div className="flex mb-2">
                             <strong className="w-1/3">Date Acquired:</strong>
                             <span className="ml-2">
-                                {formatDate(data.dateAcquired)}
+                                {formatDate(data.date_acquired)}
                             </span>
                         </div>
                         <div className="flex mb-2">
                             <strong className="w-1/3">Last Maintenance:</strong>
                             <span className="ml-2">
-                                {formatDate(data.lastMaintenance)}
+                                {formatDate(data.last_maintained_at)}
                             </span>
                         </div>
                     </div>

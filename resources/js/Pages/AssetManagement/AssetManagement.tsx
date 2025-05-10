@@ -1,42 +1,35 @@
 import React, { useState } from "react";
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
 import CreateAssetModal from "./CreateAssetModal";
 import ViewAssetModal from "./ViewAssetModal";
 // import { toast } from "sonner"; I will user this for delete action later.
+interface Asset {
+    id: number;
+    name: string;
+    specification_details: string;
+    location: {
+        id: number;
+        name: string;
+    }
+    status: string;
+    date_acquired: string;
+    last_maintained_at: string;
+    maintenance_histories: {
+        id: number;
+        downtime_reason: string;
+        status: string;
+        failed_at: string;
+        maintained_at: string;
+    };
+}
 
 const AssetManagement: React.FC = () => {
-    const assets = [
-        {
-            id: 1,
-            name: "Asset 1",
-            specification: "Spec 1",
-            location: "Location 1",
-            condition: "Good",
-            dateAcquired: "2023-01-01",
-            lastMaintenance: "2023-04-10",
-        },
-        {
-            id: 2,
-            name: "Asset 2",
-            specification: "Spec 2",
-            location: "Location 2",
-            condition: "Fair",
-            dateAcquired: "2022-06-15",
-            lastMaintenance: "2023-02-20",
-        },
-        {
-            id: 3,
-            name: "Aircon",
-            specification: "Super Cool 3000",
-            location: "EFS 404",
-            condition: "Fair",
-            dateAcquired: "2022-06-15",
-            lastMaintenance: "2023-02-20",
-        },
-    ];
 
+    const { props } = usePage();
+    const assets = props.assets as Asset[]; // Assuming assets are passed as props
+    console.log(assets);
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [isCreating, setIsCreating] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(
@@ -125,7 +118,7 @@ const AssetManagement: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {assets.map((asset) => (
+                            {assets.map((asset: Asset) => (
                                 <tr
                                     key={asset.id}
                                     className="border-b hover:bg-gray-50 transition-colors"
@@ -145,23 +138,24 @@ const AssetManagement: React.FC = () => {
                                     <td className="p-3 text-center">
                                         {asset.id}
                                     </td>
-                                    <td className="p-3 text-center">
+                                    <td className="p-3">
                                         {asset.name}
                                     </td>
                                     <td className="p-3 text-center">
-                                        {asset.specification}
+                                        {asset.specification_details}
                                     </td>
                                     <td className="p-3 text-center">
-                                        {asset.location}
+                                        {asset.location.name}
+                                    </td>
+
+                                    <td className="p-3 text-center">
+                                        {asset.status}
                                     </td>
                                     <td className="p-3 text-center">
-                                        {asset.condition}
+                                        {asset.date_acquired}
                                     </td>
                                     <td className="p-3 text-center">
-                                        {asset.dateAcquired}
-                                    </td>
-                                    <td className="p-3 text-center">
-                                        {asset.lastMaintenance}
+                                        {asset.last_maintained_at}
                                     </td>
                                     <td className="p-3 text-center">
                                         <div className="flex justify-center gap-2">
@@ -223,31 +217,31 @@ const AssetManagement: React.FC = () => {
                                 </p>
                                 <p>
                                     <span className="font-medium">Spec:</span>{" "}
-                                    {asset.specification}
+                                    {asset.specification_details}
                                 </p>
                                 <p>
                                     <span className="font-medium">
                                         Location:
                                     </span>{" "}
-                                    {asset.location}
+                                    {asset.location.name}
                                 </p>
                                 <p>
                                     <span className="font-medium">
                                         Condition:
                                     </span>{" "}
-                                    {asset.condition}
+                                    {asset.status}
                                 </p>
                                 <p>
                                     <span className="font-medium">
                                         Acquired:
                                     </span>{" "}
-                                    {asset.dateAcquired}
+                                    {asset.date_acquired}
                                 </p>
                                 <p>
                                     <span className="font-medium">
                                         Last Maintenance:
                                     </span>{" "}
-                                    {asset.lastMaintenance}
+                                    {asset.last_maintained_at}
                                 </p>
                             </div>
                             <div className="mt-4 flex justify-between gap-2">

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Head, router, usePage, useForm } from "@inertiajs/react";
 import { Toaster, toast } from "sonner";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
@@ -8,27 +8,29 @@ import SubmitRequestLayout from "./SubmitRequestLayout";
 import axios from "axios";
 
 const SubmitWorkOrder: React.FC = () => {
+    const { props } = usePage();
+    const user = usePage().props.auth.user;
+
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const locations = props.locations as { id: number; name: string }[];
     const { data, setData, reset } = useForm({
         location_id: "",
         report_description: "",
         images: [] as File[],
     });
-
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-    const user = usePage().props.auth.user;
-
-    const [locations, setLocations] = useState<{ id: number; name: string }[]>(
-        []
-    );
-    const [filteredLocations, setFilteredLocations] = useState<
-        { id: number; name: string }[]
-    >([]);
+    const [filteredLocations, setFilteredLocations] = useState<{ id: number; name: string }[]>([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [typedLocation, setTypedLocation] = useState("");
+    const [submittedData, setSubmittedData] = useState({
+        location: "",
+        description: "",
+        images: [] as { url: string; name: string }[],
+    });
 
     const filePreviews = useMemo(
         () =>
@@ -39,26 +41,6 @@ const SubmitWorkOrder: React.FC = () => {
         [data.images]
     );
 
-    const [submittedData, setSubmittedData] = useState({
-        location: "",
-        description: "",
-        images: [] as { url: string; name: string }[],
-    });
-
-    useEffect(() => {
-        /** Fetch all locations from the backend */
-        const fetchLocations = async () => {
-            try {
-                const response = await axios.get("/locations");
-                setLocations(response.data);
-            } catch (error) {
-                console.error("Error fetching locations:", error);
-            }
-        };
-
-        fetchLocations();
-    }, []);
-
     useEffect(() => {
         /** Filter locations based on typed input */
         const search = typedLocation.toLowerCase();
@@ -66,6 +48,19 @@ const SubmitWorkOrder: React.FC = () => {
             loc.name.toLowerCase().includes(search)
         );
         setFilteredLocations(matches);
+
+        /** Handle click outside dropdown */
+        function handleClickOutside(e: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setShowDropdown(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside); // Add event listener to detect clicks outside the dropdown
+
+                return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+
+        };
     }, [typedLocation, locations]);
 
     const validateForm = () => {
@@ -95,8 +90,23 @@ const SubmitWorkOrder: React.FC = () => {
         setIsLoading(true); // Start loading
         setShowConfirmModal(false); // Close the confirmation modal
 
+        let locationId = data.location_id;
+        
+        // Check the typed location against existing locations
+        const existing = locations.find(loc => loc.name.toLowerCase() === typedLocation.toLowerCase());
+
+        if (existing) {
+            locationId = existing.id.toString();
+        } else {
+            
+            const response = await axios.post("/locations", { // Create the new location before creating the work order.
+                name: typedLocation.trim(),
+            });
+            locationId = response.data.id;
+        }
+
         const formData = new FormData();
-        formData.append("location_id", data.location_id);
+        formData.append("location_id", locationId);
         formData.append("report_description", data.report_description);
         data.images.forEach((image) => formData.append("images[]", image));
 
@@ -127,7 +137,7 @@ const SubmitWorkOrder: React.FC = () => {
         }
     };
 
-    const handleLocationInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLocationInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const typed = e.target.value;
         setTypedLocation(typed);
         setData("location_id", typed);
@@ -194,6 +204,7 @@ const SubmitWorkOrder: React.FC = () => {
                 typedLocation={typedLocation}
                 showDropdown={showDropdown}
                 filteredLocations={filteredLocations}
+                dropdownRef={dropdownRef}
                 handleSubmit={handleSubmit}
                 handleCancel={handleCancel}
                 handleLocationInput={handleLocationInput}
@@ -224,7 +235,10 @@ const SubmitWorkOrder: React.FC = () => {
                     submittedData.description || "No description provided"
                 } // Use submitted data for description
                 images={submittedData.images || []} // Use submitted data for images
-                onClose={() => setShowSuccessModal(false)} // Close modal handler
+                onClose={() => {
+                    setShowSuccessModal(false); // Close modal handler
+                    window.location.reload(); // Refresh the page
+                }}
                 // onViewWorkOrders={() => {
                 //     console.log("View Work Orders clicked"); // Add a handler for onViewWorkOrders
                 // }}

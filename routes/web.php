@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\UserRoleController;
+use App\Http\Controllers\AssetController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -50,26 +51,11 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-//  Getting all locations
-Route::get('/work-orders/submit-request', [LocationController::class, 'index']
-)->name('work-orders.submit-request');
-
-Route::get('/locations', [LocationController::class, 'index'])->name('locations.index');
-
-
 /**
  * Autthenticated with Roles and Verified Email
  *      - for Role-based Access Control (RBAC)
  *      - ROUTING PREVENTION FOR UNAUTHORIZED ACCESS/USERS
  */
-
- 
-//  Getting all locations
-Route::get('/work-orders/submit-request', [LocationController::class, 'index']
-)->name('work-orders.submit-request');
-
-Route::get('/locations', [LocationController::class, 'index'])->name('locations.index');
 
 Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::get('/admin/manage-roles', [UserRoleController::class, 'index'])->name('admin.manage-roles');
@@ -78,15 +64,15 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () {
-    Route::get('/work-orders/submit-request', function () {
-        return Inertia::render('WorkOrders/SubmitRequest');
-    })->middleware('restrict_work_order_manager')->name('work-orders.submit-request'); // Submit Request should be restricted to non work_order_manager and non super_admin
+
+    // Submit Request should be restricted to non work_order_manager and non super_admin
+    Route::get('/work-orders/submit-request', [WorkOrderController::class, 'create'])
+        ->middleware('restrict_work_order_manager')
+        ->name('work-orders.submit-request');
 
     // Asset Management and Preventive Maintenance should be restricted to work_order_manager or super_admin
     Route::middleware(['role_or_permission:super_admin|manage work orders'])->group(function () {
-        Route::get('/work-orders/asset-management', function () { // will change
-            return Inertia::render('AssetManagement/AssetManagement');
-        })->name('work-orders.asset-management');
+        Route::get('/work-orders/asset-management', [AssetController::class, 'index'])->name('work-orders.asset-management');
         
         Route::get('/work-orders/preventive-maintenance', function () { // will change
             return Inertia::render('PreventiveMaintenance/PreventiveMaintenance');
@@ -97,7 +83,9 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
         })->name('work-orders.compliance-and-safety');
     });
     
-    Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])->middleware(['role:maintenance_personnel|super_admin'])->name('work-orders.assigned-tasks');
+    Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])
+        ->middleware(['role:maintenance_personnel|super_admin'])
+        ->name('work-orders.assigned-tasks');
 
     Route::resource('work-orders', WorkOrderController::class); // ALWAYS put this at the end ng mga "/work-orders" routes.
 

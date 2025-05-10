@@ -11,12 +11,9 @@ class LocationController extends Controller
 {
     public function index(Request $request)
     {
-        // Optionally filter locations based on a query parameter
-        $query = $request->input('query', '');
-        $locations = Location::where('name', 'like', '%' . $query . '%')->get();
-
-        return response()->json($locations);
+        //
     }
+
     public function store(Request $request)
     {
         $user = auth()->user();

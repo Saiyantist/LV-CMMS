@@ -12,6 +12,7 @@ interface Props {
     typedLocation: string;
     showDropdown: boolean;
     filteredLocations: { id: number; name: string }[];
+    dropdownRef: React.RefObject<HTMLDivElement>;
     handleSubmit: (e: React.FormEvent) => Promise<boolean>;
     handleCancel: () => void;
     handleLocationInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -29,6 +30,7 @@ const SubmitRequestLayout: React.FC<Props> = ({
     typedLocation,
     showDropdown,
     filteredLocations,
+    dropdownRef,
     handleSubmit,
     handleCancel,
     handleLocationInput,
@@ -37,27 +39,8 @@ const SubmitRequestLayout: React.FC<Props> = ({
     setData,
     onFocusInput,
 }) => {
-    const dropdownRef = useRef<HTMLDivElement>(null); // Ref for dropdown
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false); // State for ConfirmModal visibility
     const [isSubmitted, setIsSubmitted] = useState(false); // Track successful submission
-
-    useEffect(() => {
-        /** Handle click outside dropdown */
-        const handleClickOutside = (e: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(e.target as Node)
-            ) {
-                setData("showDropdown", false); // Close dropdown on outside click
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [setData]);
-
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
