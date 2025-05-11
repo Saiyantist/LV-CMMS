@@ -12,8 +12,10 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import {
+    ChevronDown,
     ChevronLeft,
     ChevronRight,
+    ChevronUp,
     Search,
     SlidersHorizontal,
 } from "lucide-react";
@@ -98,19 +100,35 @@ export function Datatable<TData, TValue>({
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                      header.column.columnDef
-                                                          .header,
-                                                      header.getContext()
-                                                  )}
-                                        </TableHead>
-                                    );
-                                })}
+                                {headerGroup.headers.map((header) => (
+                                    <TableHead key={header.id} className="hover:bg-secondary hover:text-white">
+                                        {header.isPlaceholder ? null : (
+                                            <div
+                                                onClick={
+                                                    header.column.getCanSort()
+                                                        ? header.column.getToggleSortingHandler()
+                                                        : undefined
+                                                }
+                                                className={`flex items-center ${
+                                                    header.column.getCanSort()
+                                                        ? "cursor-pointer"
+                                                        : "cursor-default"
+                                                }`}
+                                            >
+                                                {flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                                {header.column.getIsSorted() === "asc" && (
+                                                    <ChevronUp className="ml-2 h-4 w-4" />
+                                                )}
+                                                {header.column.getIsSorted() === "desc" && (
+                                                    <ChevronDown className="ml-2 h-4 w-4" />
+                                                )}
+                                            </div>
+                                        )}
+                                    </TableHead>
+                                ))}
                             </TableRow>
                         ))}
                     </TableHeader>

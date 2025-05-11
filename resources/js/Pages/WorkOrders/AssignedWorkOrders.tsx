@@ -567,6 +567,8 @@ const AssignedTask: React.FC = () => {
             accessorKey: "description",
             header: "Description",
             cell: ({ row }) => <div>{row.getValue("description")}</div>,
+            enableSorting: false,
+            
         },
         {
             accessorKey: "workOrderType",
@@ -601,6 +603,7 @@ const AssignedTask: React.FC = () => {
                     View
                 </Button>
             ),
+            enableSorting: false,
         },
     ];
 
