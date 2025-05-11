@@ -116,8 +116,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         isSuperAdmin || isWorkOrderManager
             ? [
                   {
-                      routeName: "work-orders.asset-management",
-                      href: route("work-orders.asset-management") || "",
+                      routeName: "assets.index",
+                      href: route("assets.index") || "",
                       text: "Asset Management",
                       icon: <Wrench size={14} className="mr-2" />,
                   },

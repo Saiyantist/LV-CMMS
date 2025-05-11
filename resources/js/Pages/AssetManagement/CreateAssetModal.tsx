@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { toast } from "sonner"; // Importing toast
+import { router } from "@inertiajs/react";
 
 interface AddAssetModalProps {
+    locations: Location[];
     isOpen: boolean;
     onClose: () => void;
     onSave: (asset: {
         name: string;
-        specification: string;
-        location: string;
-        condition: string;
-        dateAcquired: string;
-        lastMaintenance?: string; // Optional
+        specification_details: string;
+        location_id: string;
+        status: string;
+        date_acquired: string;
+        last_maintained_at?: string; // Optional
         image?: File | null; // Optional
         preventiveMaintenance?: {
             description: string;
@@ -21,15 +23,21 @@ interface AddAssetModalProps {
     }) => void;
 }
 
-const AddAssetModal: React.FC<AddAssetModalProps> = ({
+interface Location {
+    id: number;
+    name: string;
+}
+
+export default function AddAssetModal({
+    locations,
     isOpen,
     onClose,
     onSave,
-}) => {
+}: AddAssetModalProps) {
     const [name, setName] = useState("");
-    const [specification, setSpecification] = useState("");
+    const [specificationDetails, setSpecificationDetails] = useState("");
     const [location, setLocation] = useState("");
-    const [condition, setCondition] = useState("");
+    const [status, setStatus] = useState("");
     const [dateAcquired, setDateAcquired] = useState("");
     const [lastMaintenance, setLastMaintenance] = useState("");
     const [image, setImage] = useState<File | null>(null);
@@ -66,36 +74,53 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
     };
 
     const handleConfirmSubmit = () => {
-        try {
-            // Trigger success toast first
-            toast.success("Asset saved successfully!");
+    try {
+        // Trigger success toast first
+        toast.success("Saving asset...");
 
-            // Simulate saving asset and then close modal after toast
-            setTimeout(() => {
-                onSave({
-                    name,
-                    specification,
-                    location,
-                    condition,
-                    dateAcquired,
-                    lastMaintenance: lastMaintenance || undefined,
-                    image: image || undefined,
-                    preventiveMaintenance: isPreventiveMaintenance
-                        ? {
-                              description,
-                              assignTo,
-                              schedule,
-                          }
-                        : undefined,
-                });
-                setShowConfirmModal(false); // Close confirmation modal after toast
-                onClose(); // Close the main modal after the confirmation
-            }, 500); // Give time for the toast to show
-        } catch (error) {
-            toast.error("Failed to save asset. Please try again.");
-            setShowConfirmModal(false); // Ensure the modal closes on failure as well
+        // Prepare the form data
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("specification_details", specificationDetails);
+        formData.append("location_id", location);
+        formData.append("status", status);
+        formData.append("date_acquired", dateAcquired);
+        if (lastMaintenance) {
+            formData.append("last_maintained_at", lastMaintenance);
         }
-    };
+        if (image) {
+            formData.append("image", image);
+        }
+        if (isPreventiveMaintenance) {
+            formData.append(
+                "preventiveMaintenance",
+                JSON.stringify({
+                    description,
+                    assignTo,
+                    schedule,
+                })
+            );
+        }
+
+        // Use Inertia's post method to send the data
+        router.post("/assets", formData, {
+            onSuccess: () => {
+                toast.success("Asset saved successfully!");
+                setShowConfirmModal(false); // Close confirmation modal
+                onClose(); // Close the main modal
+            },
+            onError: (errors) => {
+                console.error(errors);
+                toast.error("Failed to save asset. Please check the form and try again.");
+            },
+        });
+    } catch (error) {
+        // Handle unexpected errors
+        console.error(error);
+        toast.error("An unexpected error occurred. Please try again.");
+        setShowConfirmModal(false); // Ensure the modal closes on failure as well
+    }
+};
 
     if (!isOpen) return null;
 
@@ -125,18 +150,14 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                             <label className="block text-sm font-medium text-gray-700">
                                 Specification
                             </label>
-                            <select
-                                value={specification}
-                                onChange={(e) =>
-                                    setSpecification(e.target.value)
-                                }
+                            <input
+                                type="text"
+                                value={specificationDetails}
+                                onChange={(e) => setSpecificationDetails(e.target.value)} // Update the specification state
                                 className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                                placeholder="Enter Specification"
                                 required
-                            >
-                                <option value="">Select Specification</option>
-                                <option value="Spec 1">Spec 1</option>
-                                <option value="Spec 2">Spec 2</option>
-                            </select>
+                            />
                         </div>
                     </div>
 
@@ -148,13 +169,16 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                             </label>
                             <select
                                 value={location}
-                                onChange={(e) => setLocation(e.target.value)}
+                                onChange={(e) => setLocation(e.target.value)} // Update the location state
                                 className="w-full mt-1 p-2 border border-gray-300 rounded-md"
                                 required
                             >
                                 <option value="">Select Location</option>
-                                <option value="Location 1">Location 1</option>
-                                <option value="Location 2">Location 2</option>
+                                {locations.map((loc) => (
+                                    <option key={loc.id} value={loc.id}>
+                                        {loc.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -163,14 +187,16 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                                 Condition
                             </label>
                             <select
-                                value={condition}
-                                onChange={(e) => setCondition(e.target.value)}
+                                value={status}
+                                onChange={(e) => setStatus(e.target.value)}
                                 className="w-full mt-1 p-2 border border-gray-300 rounded-md"
                                 required
                             >
                                 <option value="">Select Condition</option>
-                                <option value="New">New</option>
-                                <option value="Used">Used</option>
+                                <option value="Functional">Functional</option>
+                                <option value="Failed">Failed</option>
+                                <option value="Under Maintenance">Under Maintenance</option>
+                                <option value="End of Useful Life">End of Useful Life</option>
                             </select>
                         </div>
 
@@ -491,5 +517,3 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
         </div>
     );
 };
-
-export default AddAssetModal;

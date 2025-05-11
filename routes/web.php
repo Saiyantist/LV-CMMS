@@ -63,17 +63,32 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
     Route::delete('/admin/manage-roles/{user}/role', [UserRoleController::class, 'removeRole'])->name('admin.remove.role');
 });
 
+/** 
+ * Computerized Maintenance Management System (CMMS) Routes
+ *      - Work Order Management
+ *      - Asset Management
+ *      - Preventive Maintenance
+ *      - Compliance and Safety
+ */
 Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () {
 
-    // Submit Request should be restricted to non work_order_manager and non super_admin
     Route::get('/work-orders/submit-request', [WorkOrderController::class, 'create'])
-        ->middleware('restrict_work_order_manager')
+        ->middleware('restrict_work_order_manager') // Internal users only
         ->name('work-orders.submit-request');
 
-    // Asset Management and Preventive Maintenance should be restricted to work_order_manager or super_admin
+    Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])
+        ->middleware(['role:maintenance_personnel|super_admin']) // Maintenance Personnel and Super Admins only
+        ->name('work-orders.assigned-tasks');
+
+    /**
+     *  Asset Management, Preventive Maintenance, and Compliance and Safety
+     *      - Accessible only to Super Admins and Users with the "manage work orders" perms.
+     */
     Route::middleware(['role_or_permission:super_admin|manage work orders'])->group(function () {
-        Route::get('/work-orders/asset-management', [AssetController::class, 'index'])->name('work-orders.asset-management');
-        
+
+
+        Route::resource('assets', AssetController::class);
+
         Route::get('/work-orders/preventive-maintenance', function () { // will change
             return Inertia::render('PreventiveMaintenance/PreventiveMaintenance');
         })->name('work-orders.preventive-maintenance');
@@ -83,10 +98,7 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
         })->name('work-orders.compliance-and-safety');
     });
     
-    Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])
-        ->middleware(['role:maintenance_personnel|super_admin'])
-        ->name('work-orders.assigned-tasks');
-
+    
     Route::resource('work-orders', WorkOrderController::class); // ALWAYS put this at the end ng mga "/work-orders" routes.
 
     Route::post('/locations', [LocationController::class, 'store']);

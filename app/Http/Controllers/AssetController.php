@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use App\Models\Location;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -20,18 +21,9 @@ class AssetController extends Controller
 
         // Return the Inertia view with assets data
         return Inertia::render('AssetManagement/AssetManagement', [
-            'assets' => $assets
+            'assets' => $assets,
+            'locations' => Location::all(),
         ]);
-    }
-
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -39,15 +31,21 @@ class AssetController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        // WILL CHANGE INTO A FORM REQUEST VALIDATION CLASS
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Asset $asset)
-    {
-        //
+        // Initial pa lang, there's no validation for preventive maintenance yet bc 'di pa plantsa 'yon.
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'specification_details' => 'required|string',
+            'location_id' => 'required|exists:locations,id',
+            'date_acquired' => 'required|date',
+        ]);
+
+        // Create a new asset using the validated data
+        Asset::create($validatedData);
+
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'Asset created successfully.');
     }
 
     /**

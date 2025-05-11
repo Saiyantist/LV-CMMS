@@ -25,11 +25,18 @@ interface Asset {
     };
 }
 
+interface Location {
+    id: number;
+    name: string;
+}
+
 const AssetManagement: React.FC = () => {
 
     const { props } = usePage();
-    const assets = props.assets as Asset[]; // Assuming assets are passed as props
-    console.log(assets);
+
+    const assets = props.assets as Asset[]; // Gotten from the controller
+    const locations = props.locations as Location[]; // Gotten from the controller
+
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [isCreating, setIsCreating] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(
@@ -272,6 +279,7 @@ const AssetManagement: React.FC = () => {
 
             {isCreating && (
                 <CreateAssetModal
+                    locations={locations}
                     isOpen={isCreating}
                     onClose={() => setIsCreating(false)}
                     onSave={() => setIsCreating(false)}
