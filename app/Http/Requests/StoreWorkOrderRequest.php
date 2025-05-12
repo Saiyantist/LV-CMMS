@@ -33,9 +33,9 @@ class StoreWorkOrderRequest extends FormRequest
 
         if ($user->hasPermissionTo('manage work orders')) {
             $rules = array_merge($rules, [
-                'status' => ['required', Rule::in(['Pending', 'Assigned', 'Ongoing', 'Overdue', 'Completed', 'Cancelled'])],
+                'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
                 'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
-                'label' => ['required', Rule::in(['Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
+                'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
                 'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // AI-generated in the future
                 'remarks' => 'nullable|string|max:1000',
             ]);

@@ -9,6 +9,7 @@ import ScrollToTopButton from "@/Components/ScrollToTopButton";
 interface Props {
     user: any;
     locations: any[];
+    maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
     filteredWorkOrders: any[];
     tabs: string[];
     activeTab: string;
@@ -27,6 +28,7 @@ interface Props {
 export default function IndexLayout({
     user,
     locations,
+    maintenancePersonnel,
     filteredWorkOrders,
     tabs,
     activeTab,
@@ -50,6 +52,7 @@ export default function IndexLayout({
                 <CreateWorkOrderModal
                     locations={locations}
                     user={user}
+                    maintenancePersonnel={maintenancePersonnel}
                     onClose={() => setIsCreating(false)}
                 />
             )}

@@ -55,10 +55,13 @@ class WorkOrderController extends Controller
             ];
         });
 
+        // dd(User::role('maintenance_personnel')->with('roles')->get());
+
         return Inertia::render('WorkOrders/Index',
         [
             'workOrders' => $formattedWorkOrders,
             'locations' => Location::select('id', 'name')->get(),
+            'maintenancePersonnel' => User::role('maintenance_personnel')->with('roles')->get(),
             'user' => [
                 'id' => $user->id,
                 'name' => $user->first_name . ' ' . $user->last_name,
@@ -261,6 +264,37 @@ class WorkOrderController extends Controller
             ],
         ]);
     }
+
+    public function storePreventiveMaintenanceWorkOrder(Request $request)
+    {
+        $user = auth()->user();
+
+        // Validate the request data
+        $validated = $request->validate([
+            'report_description' => 'required|string|max:1000',
+            'location_id' => 'required|exists:locations,id',
+            'images.*' => 'nullable|image|max:5120', // If any images are being uploaded
+        ]);
+
+        $workOrder = WorkOrder::create([
+            'report_description' => $request->report_description,
+            'location_id' => $request->location_id,
+            'requested_at' => now(),
+            'requested_by' => $user->id,
+            'status' => $isWorkOrderManager ? ($request->status ?? 'Pending') : 'Pending',
+            'work_order_type' => $isWorkOrderManager ? ($request->work_order_type ?? 'Work Order') : 'Work Order',
+            'label' => $isWorkOrderManager ? ($request->label ?? 'No Label') : 'No Label',
+            'priority' => $isWorkOrderManager ? $request->priority : null,
+            'remarks' => $isWorkOrderManager ? $request->remarks : null,
+        ]);
+
+
+
+        return redirect()->route('work-orders.index')->with('success', 'Preventive maintenance work order created successfully.');
+    }
+        // Logic for storing preventive maintenance work order
+        // This method can be used to handle the specific logic for preventive maintenance work orders
+        // You can create a new method in the WorkOrder model to handle this logic if needed
 
     // public function submitWorkOrder(Request $request)
     // {

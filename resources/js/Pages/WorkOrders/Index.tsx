@@ -7,11 +7,13 @@ import IndexLayout from "./IndexLayout";
 export default function WorkOrders({
     workOrders,
     locations,
+    maintenancePersonnel,
     user,
 }: PageProps<{
     workOrders: any[];
     locations: { id: number; name: string }[];
-    user: any;
+    maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
+    user: { id: number; name: string; roles: string[]; permissions: string[] };
 }>) {
     const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState("Pending");
@@ -76,6 +78,8 @@ export default function WorkOrders({
                 return "bg-yellow-100 text-yellow-800";
             case "Assigned":
                 return "bg-blue-200 text-blue-800";
+            case "Scheduled":
+                return "bg-blue-200 text-blue-800";
             case "Ongoing":
                 return "bg-green-200 text-green-800";
             case "Overdue":
@@ -111,6 +115,7 @@ export default function WorkOrders({
         <IndexLayout
             user={user}
             locations={locations}
+            maintenancePersonnel={maintenancePersonnel}
             filteredWorkOrders={filteredWorkOrders}
             tabs={tabs}
             activeTab={activeTab}

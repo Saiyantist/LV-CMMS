@@ -18,9 +18,11 @@ interface Location {
 
 interface CreateWorkOrderProps {
     locations: Location[];
+    maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
     user: {
         id: number;
         name: string;
+        roles: string[];
         permissions: string[];
     };
     onClose: () => void;
@@ -28,6 +30,7 @@ interface CreateWorkOrderProps {
 
 export default function CreateWorkOrderModal({
     locations,
+    maintenancePersonnel,
     user,
     onClose, // for modal, remove all instances if not modal ang paggagamitan along
 }: CreateWorkOrderProps) {
@@ -37,6 +40,7 @@ export default function CreateWorkOrderModal({
     const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
+    // console.log("maintenancePersonnel", maintenancePersonnel);
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
@@ -49,6 +53,7 @@ export default function CreateWorkOrderModal({
             work_order_type: "Work Order",
             label: "No Label",
             priority: "",
+            assigned_to: "",
             remarks: "",
         }),
     });
@@ -82,6 +87,7 @@ export default function CreateWorkOrderModal({
             formData.append("work_order_type", data.work_order_type || "");
             formData.append("label", data.label || "");
             formData.append("priority", data.priority || "");
+            formData.append("assigned_to", data.assigned_to || "");
             formData.append("remarks", data.remarks || "");
         }
 
@@ -337,17 +343,11 @@ export default function CreateWorkOrderModal({
                                             }
                                             className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="">
-                                                Select Priority
-                                            </option>
+                                            <option value="">Select Priority</option>
                                             <option value="Low">Low</option>
-                                            <option value="Medium">
-                                                Medium
-                                            </option>
+                                            <option value="Medium">Medium</option>
                                             <option value="High">High</option>
-                                            <option value="Critical">
-                                                Critical
-                                            </option>
+                                            <option value="Critical">Critical</option>
                                         </select>
                                     </div>
                                     {/* Assigned to */}
@@ -356,24 +356,21 @@ export default function CreateWorkOrderModal({
                                             Assign to
                                         </label>
                                         <select
-                                            value={data.priority}
+                                            value={data.assigned_to}
                                             onChange={(e) =>
                                                 setData(
-                                                    "priority",
+                                                    "assigned_to",
                                                     e.target.value
                                                 )
                                             }
                                             className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="Angelo">
-                                                Angelo
-                                            </option>
-                                            <option value="Den">Den</option>
-                                            <option value="Joshua">
-                                                Joshua
-                                            </option>
-                                            <option value="Rie">Rie</option>
-                                            <option value="Vera">Vera</option>
+                                            <option value="">Select Personnel</option>
+                                            {maintenancePersonnel.map((person) => (
+                                                <option key={person.id} value={person.id}>
+                                                    {person.first_name} {person.last_name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
