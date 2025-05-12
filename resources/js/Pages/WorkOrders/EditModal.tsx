@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Head, router, useForm, usePage } from "@inertiajs/react";
+import { Head, router, useForm } from "@inertiajs/react";
 
 interface Location {
     id: number;
@@ -9,7 +9,7 @@ interface Location {
 interface EditWorkOrderProps {
     workOrder: {
         id: number;
-        location_id: string;
+        location: { id: number; name: string };
         report_description: string;
         asset: any;
         status: string;
@@ -35,26 +35,24 @@ export default function EditWorkOrderModal({
     onClose,
 }: EditWorkOrderProps) {
     const [deletedImages, setDeletedImages] = useState<string[]>([]);
-    const [typedLocation, setTypedLocation] = useState<string>("");
     const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
-
-    // const initialLocation =
-    //     locations.find(
-    //         (loc) => String(loc.id) === String(workOrder.location_id)
-    //     )?.name || workOrder.location_id;
-
+    
     const initialLocationName =
-        locations.find(
-            (loc) => String(loc.id) === String(workOrder.location_id)
-        )?.name || "";
+    locations.find(
+        (loc) => loc.id === Number(workOrder.location.id)
+    )?.name || "";
+
+    console.log(workOrder.location.id);
+    
+    // Set the default value for the location input
+    const [typedLocation, setTypedLocation] = useState<string>(initialLocationName);
 
     const { data, setData, errors, processing } = useForm({
-        // location_id: initialLocation,
-        location_id: workOrder.location_id, // <- use raw ID or string here
+        location_id: workOrder.location.id,
         report_description: workOrder.report_description,
         asset: workOrder.asset,
         images: [] as File[],
@@ -69,7 +67,7 @@ export default function EditWorkOrderModal({
         e.preventDefault();
         const formData = new FormData();
         formData.append("_method", "PUT");
-        formData.append("location_id", data.location_id);
+        formData.append("location_id", String(data.location_id));
         formData.append("report_description", data.report_description);
 
         data.images.forEach((image) => formData.append("images[]", image));
@@ -115,9 +113,9 @@ export default function EditWorkOrderModal({
 
         // ✅ Submit ID if it's a known location, else submit raw string
         if (matchedLocation) {
-            setData("location_id", String(matchedLocation.id));
+            setData("location_id", (matchedLocation.id));
         } else {
-            setData("location_id", value);
+            setData("location_id", Number(value));
         }
 
         const filtered = locations.filter((loc) =>
@@ -399,6 +397,7 @@ export default function EditWorkOrderModal({
                                     }
                                     className="border p-2 w-full rounded-md text-sm"
                                 >
+                                    <option value="">Select Priority</option>
                                     <option value="Low">Low</option>
                                     <option value="Medium">Medium</option>
                                     <option value="High">High</option>

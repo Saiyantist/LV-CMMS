@@ -95,13 +95,13 @@ export function Datatable<TData, TValue>({
                     </Button>
                 </div>
             </div>
-            <div className="rounded-md border">
-                <Table>
+            <div className="rounded-md border bg-white">
+                <Table className="text-xs">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="hover:bg-secondary hover:text-white">
+                                    <TableHead key={header.id}>
                                         {header.isPlaceholder ? null : (
                                             <div
                                                 onClick={
@@ -109,22 +109,24 @@ export function Datatable<TData, TValue>({
                                                         ? header.column.getToggleSortingHandler()
                                                         : undefined
                                                 }
-                                                className={`flex items-center ${
+                                                    className={`flex items-center justify-start ${
                                                     header.column.getCanSort()
                                                         ? "cursor-pointer"
                                                         : "cursor-default"
                                                 }`}
                                             >
-                                                {flexRender(
+                                                <span>{flexRender(
                                                     header.column.columnDef.header,
                                                     header.getContext()
-                                                )}
-                                                {header.column.getIsSorted() === "asc" && (
-                                                    <ChevronUp className="ml-2 h-4 w-4" />
-                                                )}
-                                                {header.column.getIsSorted() === "desc" && (
-                                                    <ChevronDown className="ml-2 h-4 w-4" />
-                                                )}
+                                                )}</span>
+                                                <span className="w-4 ml-2">
+                                                    {header.column.getIsSorted() === "asc" && (
+                                                        <ChevronUp className="h-4 w-4" />
+                                                    )}
+                                                    {header.column.getIsSorted() === "desc" && (
+                                                        <ChevronDown className="h-4 w-4" />
+                                                    )}
+                                                </span>
                                             </div>
                                         )}
                                     </TableHead>
@@ -142,7 +144,8 @@ export function Datatable<TData, TValue>({
                                     }
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell key={cell.id}
+                                            className="text-muted-foreground">
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()

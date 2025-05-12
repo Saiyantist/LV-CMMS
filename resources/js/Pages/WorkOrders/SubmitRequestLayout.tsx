@@ -79,7 +79,7 @@ const SubmitRequestLayout: React.FC<Props> = ({
                             <div className="flex flex-wrap -m-2">
                                 <div className="p-2 w-full">
                                     <label className="block text-sm font-medium text-gray-700">
-                                        Location
+                                        Location <span className="text-red-500">*</span>
                                     </label>
                                     <div ref={dropdownRef} className="relative">
                                         <input
@@ -138,7 +138,7 @@ const SubmitRequestLayout: React.FC<Props> = ({
                                         htmlFor="description"
                                         className="leading-7 text-sm text-gray-600"
                                     >
-                                        Description
+                                        Description <span className="text-red-500">*</span>
                                     </label>
                                     <textarea
                                         id="description"

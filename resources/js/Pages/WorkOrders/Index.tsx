@@ -4,17 +4,40 @@ import { PageProps } from "@/types";
 import { usePage , router } from "@inertiajs/react";
 import IndexLayout from "./IndexLayout";
 
+
 export default function WorkOrders({
     workOrders,
     locations,
     maintenancePersonnel,
     user,
 }: PageProps<{
-    workOrders: any[];
+    workOrders: {
+        id: number;
+        report_description: string;
+        status: string;
+        work_order_type: string;
+        label: string;
+        priority: string;
+        remarks: string;
+        requested_at: string;
+        location: {
+            id: number;
+            name: string;
+        };
+        images: string;
+        asset: {
+            id: number;
+            name: string;
+            specification_details: string;
+            status: string;
+            location_id: number;
+        }[];
+    }[];
     locations: { id: number; name: string }[];
     maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
     user: { id: number; name: string; roles: string[]; permissions: string[] };
 }>) {
+
     const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState("Pending");
     const [editingWorkOrder, setEditingWorkOrder] = useState(null);
@@ -43,7 +66,7 @@ export default function WorkOrders({
                 );
             if (activeTab === "For Budget Request")
                 return wo.status === "For Budget Request";
-            if (activeTab === "Declined") return wo.status === "Cancelled";
+            if (activeTab === "Declined") return wo.status === "Cancelled" || wo.status === "Declined";
             return true;
         }
         return wo;
@@ -75,24 +98,29 @@ export default function WorkOrders({
     const getStatusColor = (status: string) => {
         switch (status) {
             case "Pending":
-                return "bg-yellow-100 text-yellow-800";
+                return "bg-gray-100 text-gray-800 border-gray-300";
             case "Assigned":
-                return "bg-blue-200 text-blue-800";
+                return "bg-blue-100 text-blue-800 border-blue-300";
             case "Scheduled":
-                return "bg-blue-200 text-blue-800";
+                return "bg-purple-100 text-purple-800 border-purple-300";
             case "Ongoing":
-                return "bg-green-200 text-green-800";
+                return "bg-yellow-100 text-yellow-800 border-yellow-300";
             case "Overdue":
-                return "bg-red-200 text-red-800";
+                return "bg-red-100 text-red-800 border-red-300";
             case "Completed":
-                return "bg-teal-200 text-teal-800";
+                return "bg-green-100 text-green-800 border-green-300";
+            case "For Budget Request":
+                return "bg-orange-100 text-orange-800 border-orange-300";
             case "Cancelled":
-                return "bg-red-300 text-red-900";
+                return "bg-gray-200 text-gray-600 border-gray-400";
+            case "Declined":
+                return "bg-pink-100 text-pink-800 border-pink-300";
+            case "Deleted":
+                return "bg-black text-white border-black";
             default:
-                return "bg-gray-200 text-gray-800";
+                return "bg-gray-100 text-gray-800 border-gray-300";
         }
     };
-
     const getPriorityColor = (priority: string) => {
         switch (priority) {
             case "Low":
@@ -101,8 +129,10 @@ export default function WorkOrders({
                 return "bg-yellow-100 text-yellow-700";
             case "High":
                 return "bg-red-100 text-red-700";
+            case "Critical":
+                return "bg-red-400 text-red-50";
             default:
-                return "bg-gray-200 text-gray-700";
+                return "text-gray-400";
         }
     };
 

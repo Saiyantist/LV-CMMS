@@ -35,15 +35,17 @@ class WorkOrderController extends Controller
         $formattedWorkOrders = $workOrders->get()->map(function ($wo) {
             return [
                 'id' => $wo->id,
-                'location_id' => $wo->location_id,
                 'report_description' => $wo->report_description,
                 'status' => $wo->status,
                 'work_order_type' => $wo->work_order_type,
                 'label' => $wo->label,
-                'priority' => $wo->priority,
+                'priority' => $wo->priority ?: "No Priority",
                 'remarks' => $wo->remarks,
                 'requested_at' => $wo->created_at->toDateString(),
-                'location' => $wo->location ? ['name' => $wo->location->name] : null,
+                'location' => [
+                    'id' => $wo->location_id,
+                    'name' => $wo->location ? $wo->location->name : null,
+                ],
                 'images' => $wo->images->pluck('url')->toArray(), // ✅ important part
                 'asset' => $wo->asset ? [
                     'id' => $wo->asset->id,
@@ -55,7 +57,7 @@ class WorkOrderController extends Controller
             ];
         });
 
-        // dd(User::role('maintenance_personnel')->with('roles')->get());
+        // dd($formattedWorkOrders);
 
         return Inertia::render('WorkOrders/Index',
         [
@@ -237,16 +239,25 @@ class WorkOrderController extends Controller
             ->map(function ($wo) {
                 return [
                     'id' => $wo->id,
-                    'location_id' => $wo->location_id,
                     'report_description' => $wo->report_description,
                     'status' => $wo->status,
                     'work_order_type' => $wo->work_order_type,
                     'label' => $wo->label,
-                    'priority' => $wo->priority,
+                    'priority' => $wo->priority ?: "No Priority",
                     'remarks' => $wo->remarks,
                     'requested_at' => $wo->created_at->toDateString(),
-                    'location' => $wo->location ? ['name' => $wo->location->name] : null,
-                    'images' => $wo->images->pluck('url')->toArray(),
+                    'location' => [
+                        'id' => $wo->location_id,
+                        'name' => $wo->location ? $wo->location->name : null,
+                    ],
+                    'images' => $wo->images->pluck('url')->toArray(), // ✅ important part
+                    'asset' => $wo->asset ? [
+                        'id' => $wo->asset->id,
+                        'name' => $wo->asset->name,
+                        'specification_details' => $wo->asset->specification_details,
+                        'status' => $wo->asset->status,
+                        'location_id' => $wo->asset->location_id,
+                    ] : null,
                 ];
             });
 

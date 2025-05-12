@@ -5,6 +5,10 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import CreateWorkOrderModal from "./CreateModal";
 import EditWorkOrderModal from "./EditModal";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
+import { StatusCell } from "./components/StatusCell";
+import { Button } from "@/Components/shadcnui/button";
+import { ColumnDef } from "@tanstack/react-table";
+import { Datatable } from "./components/Datatable";
 
 interface Props {
     user: any;
@@ -25,6 +29,31 @@ interface Props {
     getPriorityColor: (priority: string) => string;
 }
 
+interface WorkOrders
+{
+    id: number;
+    report_description: string;
+    work_order_type: string;
+    label: string;
+    priority: string;
+    remarks: string;
+    requested_at: string;
+    location: {
+        id: number;
+        name: string;
+    };
+    images: string;
+    asset: {
+        id: number;
+        name: string;
+        specification_details: string;
+        status: string;
+        location_id: number;
+    }[];
+};
+
+
+
 export default function IndexLayout({
     user,
     locations,
@@ -43,6 +72,91 @@ export default function IndexLayout({
     getPriorityColor,
     handleDelete,
 }: Props) {
+
+    // Define columns for the data table
+    const columns: ColumnDef<WorkOrders>[] = [
+        {
+            accessorKey: "id",
+            header: "ID",
+            cell: ({ row }) => <div>{row.getValue("id")}</div>,
+        },
+        {
+            accessorKey: "location.name",
+            header: "Location",
+            cell: ({ row }) => <div>{row.original.location.name}</div>,
+        },
+        {
+            accessorKey: "report_description",
+            header: "Description",
+            cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
+            enableSorting: false,
+        },
+        {
+            accessorKey: "work_order_type",
+            header: "Work Order Type",
+            cell: ({ row }) => <div>{row.getValue("work_order_type")}</div>,
+        },
+        {
+            accessorKey: "requested_at",
+            header: "Date Requested",
+            cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
+        },
+        {
+            accessorKey: "priority",
+            header: "Priority",
+            cell: ({ row }) => (
+                <div className={`px-2 py-1 rounded ${getPriorityColor(row.getValue("priority"))}`}>
+                    {row.getValue("priority")}
+                </div>
+            ),
+        },
+        {
+            accessorKey: "label",
+            header: "Label",
+            cell: ({ row }) => <div>{row.getValue("label")}</div>,
+        },
+        ...(activeTab !== "Pending" || user.roles[0].name === "maintenance_personnel"
+            ? [
+                  {
+                      accessorKey: "status",
+                      header: "Status",
+                      cell: ({ row }: { row: { getValue: (key: string) => any } }) => (
+                          <StatusCell value={row.getValue("status")} userRole=""/>
+                      ),
+                  },
+              ]
+            : []),
+        {
+            id: "actions",
+            header: "Action",
+            cell: ({ row }) => (
+                <div className="flex gap-2">
+                    {/* <Button
+                        className="bg-primary hover:bg-secondary text-white h-8 rounded"
+                        onClick={() => console.log("View Work Order", row.original.id)}
+                    >
+                        View
+                    </Button> */}
+                    <PrimaryButton
+                        className="bg-secondary"
+                        onClick={() =>
+                            setEditingWorkOrder(row.original)
+                        }
+                    >
+                        Edit
+                    </PrimaryButton>
+                    <PrimaryButton
+                        className="bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700 transition"
+                        onClick={() => handleDelete(row.original.id)}
+                    >
+                        Delete
+                    </PrimaryButton>
+                </div>
+            ),
+            enableSorting: false,
+        },
+    ];
+    
     return (
         <AuthenticatedLayout>
             <Head title="Work Orders" />
@@ -72,18 +186,16 @@ export default function IndexLayout({
                         <h1 className="text-2xl font-semibold text-center sm:text-left">
                             Work Orders
                         </h1>
-                        {(user.permissions.includes("manage work orders") ||
-                            user.permissions.includes("super_admin")) && (
                             <div className="w-full sm:w-auto flex justify-center sm:justify-start">
                                 <PrimaryButton
                                     onClick={() => setIsCreating(true)}
-                                    className="bg-primary text-white hover:bg-secondary transition-all duration-300 
+                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 
                             text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
                                 >
                                     + Add Work Order
                                 </PrimaryButton>
                             </div>
-                        )}
+                        {/* )} */}
                     </div>
                 </div>
             </header>
@@ -91,21 +203,25 @@ export default function IndexLayout({
             {/* Tabs - Desktop */}
             <div className="hidden md:flex mt-4 pl-4">
                 <div className="flex overflow-hidden">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-4 text-sm sm:text-base font-medium transition-colors duration-200 whitespace-nowrap border h-12 border-primary
-                ${
-                    activeTab === tab
-                        ? "bg-primary text-white"
-                        : "bg-white text-black hover:bg-gray-100"
-                }
-                rounded-t-md`}
-                        >
-                            {tab}
-                        </button>
-                    ))}
+                    {tabs.length > 0 ? (
+                        tabs.map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-4 text-sm sm:text-base font-medium transition-colors duration-200 whitespace-nowrap border h-12 border-b
+                    ${
+                        activeTab === tab
+                            ? "bg-secondary text-white"
+                            : "bg-white text-black hover:bg-secondary hover:text-white"
+                    }
+                    rounded-t-md`}
+                            >
+                                {tab}
+                            </button>
+                        ))
+                    ) : (
+                        <div className="h-12 bg-white"></div> // Spacer
+                    )}
                 </div>
             </div>
 
@@ -127,8 +243,11 @@ export default function IndexLayout({
             )}
 
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto bg-white shadow-lg rounded-md mt-4">
-                <table className="w-full table-auto border-collapse text-sm text-gray-700">
+            <div className="hidden md:block overflow-x-auto rounded-md -mt-10">
+
+                <Datatable columns={columns} data={filteredWorkOrders}/>
+
+                {/* <table className="w-full table-auto border-collapse text-sm text-gray-700">
                     <thead>
                         <tr className="bg-secondary text-white">
                             <th className="border px-6 py-3 text-auto">ID</th>
@@ -202,7 +321,7 @@ export default function IndexLayout({
                             </tr>
                         ))}
                     </tbody>
-                </table>
+                </table> */}
             </div>
 
             {/* Mobile Card View */}
