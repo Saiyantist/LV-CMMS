@@ -110,6 +110,9 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
 // Event Services Routes
 Route::get('/booking-calendar', [EventServicesController::class, 'index'])->name('booking-calendar');
 
+
+// 
+
 // Catch unauthorized attempts to access restricted pages
 Route::fallback(function () {
     return abort(403, 'Unauthorized access');

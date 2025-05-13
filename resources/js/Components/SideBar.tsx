@@ -15,6 +15,7 @@ import {
     UserCircle,
     Settings,
     BriefcaseBusiness,
+    Calendar
 } from "lucide-react";
 
 interface Role {
@@ -163,8 +164,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                   {
                       routeName: "booking-calendar",
                       href: route("booking-calendar") || "",
-                      text: "Event Services",
-                      icon: <BriefcaseBusiness size={16} className="mr-2" />,
+                      text: "Booking Calendar",
+                      icon: <Calendar size={16} className="mr-2" />,
                   },
               ];
 
