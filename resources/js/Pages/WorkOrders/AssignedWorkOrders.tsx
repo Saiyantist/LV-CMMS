@@ -47,14 +47,14 @@ const AssignedTask: React.FC = () => {
             header: "Description",
             cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
             enableSorting: false,
+            meta: {
+                headerClassName: "w-1/2",
+            },
         },
         {
             accessorKey: "priority",
             header: "Priority",
             cell: ({ row }) => <div>{row.getValue("priority")}</div>,
-            meta: {
-                headerClassName: "",
-            },
         },
         {
             accessorKey: "status",

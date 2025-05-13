@@ -68,7 +68,7 @@ export function StatusCell({ value, userRole }: StatusCellProps) {
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="outline"
-                        className={`px-2.5 py-1 h-8 border rounded flex items-center justify-between gap-1 ${getStatusColor(
+                        className={`px-5 py-1 h-6 border rounded flex items-center justify-between gap-1 ${getStatusColor(
                             value
                         )}`}
                     >
@@ -78,7 +78,7 @@ export function StatusCell({ value, userRole }: StatusCellProps) {
                 </DropdownMenuTrigger>
             ) : (
                 <span
-                    className={`px-2.5 py-1 h-8 border rounded inline-flex items-center ${getStatusColor(
+                    className={`px-5 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(
                         value
                     )}`}
                 >

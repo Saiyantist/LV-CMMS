@@ -104,7 +104,6 @@ export default function IndexLayout({
             cell: ({ row }) => <div>{row.original.location.name}</div>,
             meta: {
                 headerClassName: "w-32",
-                cellClassName: "pl-[1.5rem]",
                 searchable: true,
             },
         },
@@ -115,7 +114,7 @@ export default function IndexLayout({
             enableSorting: false,
             meta: {
                 headerClassName: "w-1/5",
-                cellClassName: "truncate ... max-w-16",
+                cellClassName: "truncate ... max-w-16 px-2",
                 searchable: true,
             },
             
@@ -190,7 +189,7 @@ export default function IndexLayout({
                         View
                     </Button> */}
                     <Button
-                        className="bg-primary h-8"
+                        className="bg-primary h-8 text-xs rounded-sm"
                         onClick={() =>
                             setEditingWorkOrder(row.original)
                         }
@@ -198,7 +197,7 @@ export default function IndexLayout({
                         Edit
                     </Button>
                     <Button
-                        className="bg-red-600 h-8 text-white text-sm rounded-md hover:bg-red-800 transition"
+                        className="bg-red-600 h-8 text-white text-xs rounded-sm hover:bg-red-800 transition"
                         onClick={() => handleDelete(row.original.id)}
                     >
                         Delete

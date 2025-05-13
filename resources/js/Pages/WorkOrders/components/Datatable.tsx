@@ -40,7 +40,7 @@ interface DataTableProps<TData, TValue> {
 export function Datatable<TData, TValue>({
     columns,
     data,
-    placeholder = "Search"
+    placeholder
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -97,7 +97,7 @@ export function Datatable<TData, TValue>({
                             onChange={(event) =>
                                 setSearchQuery(event.target.value)
                             }
-                            className="h-10 w-52 pl-8 rounded-md border"
+                            className="h-10 w-52 pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
                         />
                     </div>
                     <Button
@@ -132,18 +132,18 @@ export function Datatable<TData, TValue>({
                                                         : "cursor-default"
                                                 }`}
                                             >
-                                                <span className="min-w-26">{flexRender(
+                                                <span>
+                                                    {header.column.getIsSorted() === "asc" && (
+                                                        <ChevronUp className="h-4 w-4 ml-2" />
+                                                    )}
+                                                    {header.column.getIsSorted() === "desc" && (
+                                                        <ChevronDown className="h-4 w-4 ml-2" />
+                                                    )}
+                                                </span>
+                                                <span>{flexRender(
                                                     header.column.columnDef.header,
                                                     header.getContext()
                                                 )}</span>
-                                                <span className="w-4 ml-2">
-                                                    {header.column.getIsSorted() === "asc" && (
-                                                        <ChevronUp className="h-4 w-4" />
-                                                    )}
-                                                    {header.column.getIsSorted() === "desc" && (
-                                                        <ChevronDown className="h-4 w-4" />
-                                                    )}
-                                                </span>
                                             </div>
                                         )}
                                     </TableHead>
@@ -164,7 +164,7 @@ export function Datatable<TData, TValue>({
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}
                                             className={`text-muted-foreground ${cell.column.columnDef.meta?.cellClassName || ""}`}>
-                                            <span className="bg-red-100">
+                                            <span className="flex items-center justify-center">
                                                 {flexRender(
                                                     cell.column.columnDef.cell,
                                                     cell.getContext()
