@@ -40,8 +40,6 @@ export default function CreateWorkOrderModal({
     const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // console.log("maintenancePersonnel", maintenancePersonnel);
-
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
     const { data, setData, post, errors } = useForm({

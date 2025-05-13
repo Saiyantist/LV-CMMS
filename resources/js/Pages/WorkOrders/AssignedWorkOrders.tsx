@@ -38,6 +38,9 @@ const AssignedTask: React.FC = () => {
             accessorKey: "id",
             header: "ID",
             cell: ({ row }) => <div>{row.getValue("id")}</div>,
+            meta: {
+                headerClassName: "w-12",
+            },
         },
         {
             accessorKey: "report_description",
@@ -49,17 +52,21 @@ const AssignedTask: React.FC = () => {
             accessorKey: "priority",
             header: "Priority",
             cell: ({ row }) => <div>{row.getValue("priority")}</div>,
+            meta: {
+                headerClassName: "",
+            },
         },
         {
             accessorKey: "status",
             header: "Status",
             cell: ({ row }) => <StatusCell value={row.getValue("status")} userRole={userRole} />,
+            enableSorting: false,
         },
         {
             id: "actions",
             header: "Action",
             cell: () => (
-                <Button className="bg-primary hover:bg-secondary text-white h-8 rounded">
+                <Button className="bg-primary hover:bg-secondary text-white text-xs h-8 w-14 rounded">
                     View
                 </Button>
             ),

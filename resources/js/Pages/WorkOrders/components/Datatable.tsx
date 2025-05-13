@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
     type ColumnDef,
     type SortingState,
@@ -34,36 +34,51 @@ import {
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
+    placeholder?: string;
 }
 
 export function Datatable<TData, TValue>({
     columns,
     data,
+    placeholder = "Search"
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
-    const [globalFilter, setGlobalFilter] = useState<string>(""); // Single search input
+
+    const [searchQuery, setSearchQuery] = useState("");
+
+    // ✅ Get only searchable columns
+    const searchableColumns = useMemo(
+        () =>
+            columns.filter(
+                (col) => col.meta?.searchable && col.accessorKey
+            ) as ColumnDef<TData, TValue>[],
+        [columns]
+    );
+
+    // ✅ Apply search filtering dynamically based on meta.searchable
+    const filteredData = useMemo(() => {
+        if (!searchQuery) return data;
+
+        return data.filter((item) =>
+            searchableColumns.some((col) => {
+                const keys = (col.accessorKey as string).split(".");
+                const value = keys.reduce((obj, key) => obj?.[key], item);
+                return value?.toString().toLowerCase().includes(searchQuery.toLowerCase());
+            })
+        );
+    }, [data, searchQuery, searchableColumns]);
 
     const table = useReactTable({
-        data,
+        data: filteredData, // ✅ use filteredData instead of raw data
         columns,
+        state: {
+            sorting,
+        },
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        state: {
-            sorting,
-            globalFilter,
-        },
-        globalFilterFn: (row, columnId, filterValue) => {
-            // Combine filtering for description, location, and priority
-            const searchValue = filterValue.toLowerCase();
-            return (
-                row.getValue("description")?.toLowerCase().includes(searchValue) ||
-                row.getValue("location")?.toLowerCase().includes(searchValue) ||
-                row.getValue("priority")?.toLowerCase().includes(searchValue)
-            );
-        },
     });
 
     // Get the total number of filtered rows
@@ -71,16 +86,16 @@ export function Datatable<TData, TValue>({
 
     return (
         <>
-            <div className="flex justify-end pb-4">
+            {/* Combined Search Input */}
+            <div className="flex justify-end pb-4 mt-1">
                 <div className="flex items-center gap-2">
-                    {/* Combined Search Input */}
                     <div className="relative">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search"
-                            value={globalFilter}
+                            placeholder={placeholder}
+                            value={searchQuery}
                             onChange={(event) =>
-                                setGlobalFilter(event.target.value)
+                                setSearchQuery(event.target.value)
                             }
                             className="h-10 w-52 pl-8 rounded-md border"
                         />
@@ -95,13 +110,15 @@ export function Datatable<TData, TValue>({
                     </Button>
                 </div>
             </div>
-            <div className="rounded-md border bg-white">
+
+            {/* Datatable */}
+            <div className="rounded-md border bg-white overflow-auto">
                 <Table className="text-xs">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
+                                    <TableHead key={header.id} className={`h-10 font-bold text-primary ${header.column.columnDef.meta?.headerClassName || ""}`}>
                                         {header.isPlaceholder ? null : (
                                             <div
                                                 onClick={
@@ -109,13 +126,13 @@ export function Datatable<TData, TValue>({
                                                         ? header.column.getToggleSortingHandler()
                                                         : undefined
                                                 }
-                                                    className={`flex items-center justify-start ${
+                                                    className={`flex items-center justify-center ${
                                                     header.column.getCanSort()
                                                         ? "cursor-pointer"
                                                         : "cursor-default"
                                                 }`}
                                             >
-                                                <span>{flexRender(
+                                                <span className="min-w-26">{flexRender(
                                                     header.column.columnDef.header,
                                                     header.getContext()
                                                 )}</span>
@@ -142,14 +159,17 @@ export function Datatable<TData, TValue>({
                                     data-state={
                                         row.getIsSelected() && "selected"
                                     }
+                                    className="h-6"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}
-                                            className="text-muted-foreground">
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
+                                            className={`text-muted-foreground ${cell.column.columnDef.meta?.cellClassName || ""}`}>
+                                            <span className="bg-red-100">
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </span>
                                         </TableCell>
                                     ))}
                                 </TableRow>
@@ -169,7 +189,7 @@ export function Datatable<TData, TValue>({
             </div>
 
             {/* Pagination */}
-            {totalFilteredRows > 5 && (
+            {totalFilteredRows > 10 && (
                 <div className="flex items-center justify-between space-x-2 py-4">
                     <div className="flex items-center gap-2">
                         {/* Previous Button */}
