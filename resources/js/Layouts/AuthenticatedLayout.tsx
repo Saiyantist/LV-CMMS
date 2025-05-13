@@ -11,7 +11,7 @@ export default function AuthenticatedLayout({
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <Sidebar user={user} />
+            <Sidebar user={{ ...user, permissions: user.permissions ?? [] }} />
 
             {/* Wrapper for main content */}
             <div className="flex flex-col md:ml-56 pt-[104px] md:pt-0">

@@ -132,7 +132,7 @@ const ComplianceAndSafety: React.FC = () => {
                     onClose={() => setIsCreating(false)}
                     onCreate={() => {
                         // Add your logic for creating compliance and safety here
-                        console.log("Compliance and Safety created");
+                        // console.log("Compliance and Safety created");
                         setIsCreating(false);
                     }}
                 />

@@ -13,7 +13,12 @@ import { Datatable } from "./components/Datatable";
 interface Props {
     user: any;
     locations: any[];
-    maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
+    maintenancePersonnel: {
+        id: number;
+        first_name: string;
+        last_name: string;
+        roles: { id: number; name: string };
+    }[];
     filteredWorkOrders: any[];
     tabs: string[];
     activeTab: string;
@@ -29,8 +34,7 @@ interface Props {
     getPriorityColor: (priority: string) => string;
 }
 
-interface WorkOrders
-{
+interface WorkOrders {
     id: number;
     report_description: string;
     work_order_type: string;
@@ -50,9 +54,7 @@ interface WorkOrders
         status: string;
         location_id: number;
     }[];
-};
-
-
+}
 
 export default function IndexLayout({
     user,
@@ -72,7 +74,6 @@ export default function IndexLayout({
     getPriorityColor,
     handleDelete,
 }: Props) {
-
     // Define columns for the data table
     const columns: ColumnDef<WorkOrders>[] = [
         {
@@ -105,7 +106,11 @@ export default function IndexLayout({
             accessorKey: "priority",
             header: "Priority",
             cell: ({ row }) => (
-                <div className={`px-2 py-1 rounded ${getPriorityColor(row.getValue("priority"))}`}>
+                <div
+                    className={`px-2 py-1 rounded ${getPriorityColor(
+                        row.getValue("priority")
+                    )}`}
+                >
                     {row.getValue("priority")}
                 </div>
             ),
@@ -115,13 +120,21 @@ export default function IndexLayout({
             header: "Label",
             cell: ({ row }) => <div>{row.getValue("label")}</div>,
         },
-        ...(activeTab !== "Pending" || user.roles[0].name === "maintenance_personnel"
+        ...(activeTab !== "Pending" ||
+        user.roles[0].name === "maintenance_personnel"
             ? [
                   {
                       accessorKey: "status",
                       header: "Status",
-                      cell: ({ row }: { row: { getValue: (key: string) => any } }) => (
-                          <StatusCell value={row.getValue("status")} userRole=""/>
+                      cell: ({
+                          row,
+                      }: {
+                          row: { getValue: (key: string) => any };
+                      }) => (
+                          <StatusCell
+                              value={row.getValue("status")}
+                              userRole=""
+                          />
                       ),
                   },
               ]
@@ -139,9 +152,7 @@ export default function IndexLayout({
                     </Button> */}
                     <PrimaryButton
                         className="bg-secondary"
-                        onClick={() =>
-                            setEditingWorkOrder(row.original)
-                        }
+                        onClick={() => setEditingWorkOrder(row.original)}
                     >
                         Edit
                     </PrimaryButton>
@@ -156,7 +167,7 @@ export default function IndexLayout({
             enableSorting: false,
         },
     ];
-    
+
     return (
         <AuthenticatedLayout>
             <Head title="Work Orders" />
@@ -186,15 +197,15 @@ export default function IndexLayout({
                         <h1 className="text-2xl font-semibold text-center sm:text-left">
                             Work Orders
                         </h1>
-                            <div className="w-full sm:w-auto flex justify-center sm:justify-start">
-                                <PrimaryButton
-                                    onClick={() => setIsCreating(true)}
-                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 
+                        <div className="w-full sm:w-auto flex justify-center sm:justify-start">
+                            <PrimaryButton
+                                onClick={() => setIsCreating(true)}
+                                className="bg-secondary text-white hover:bg-primary transition-all duration-300 
                             text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
-                                >
-                                    + Add Work Order
-                                </PrimaryButton>
-                            </div>
+                            >
+                                + Add Work Order
+                            </PrimaryButton>
+                        </div>
                         {/* )} */}
                     </div>
                 </div>
@@ -226,7 +237,7 @@ export default function IndexLayout({
             </div>
 
             {/* Tabs - Mobile */}
-            { user.permissions.includes("manage work orders") && (
+            {user.permissions.includes("manage work orders") && (
                 <div className="md:hidden flex justify-end px-4 mt-4">
                     <select
                         value={activeTab}
@@ -244,84 +255,7 @@ export default function IndexLayout({
 
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto rounded-md -mt-10">
-
-                <Datatable columns={columns} data={filteredWorkOrders}/>
-
-                {/* <table className="w-full table-auto border-collapse text-sm text-gray-700">
-                    <thead>
-                        <tr className="bg-secondary text-white">
-                            <th className="border px-6 py-3 text-auto">ID</th>
-                            <th className="border px-6 py-3 text-auto">
-                                Description
-                            </th>
-                            <th className="border px-6 py-3 text-auto">
-                                Location
-                            </th>
-                            <th className="border px-6 py-3 text-auto">
-                                Status
-                            </th>
-                            <th className="border px-6 py-3 text-auto">
-                                Priority
-                            </th>
-                            <th className="border px-6 py-3 text-auto">
-                                Requested At
-                            </th>
-                            <th className="border px-6 py-3 text-auto">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredWorkOrders.map((workOrder) => (
-                            <tr key={workOrder.id} className="hover:bg-gray-50">
-                                <td className="border px-6 py-4 text-center">
-                                    {workOrder.id}
-                                </td>
-                                <td className="border px-6 py-4">
-                                    {workOrder.report_description}
-                                </td>
-                                <td className="border px-6 py-4">
-                                    {workOrder.location?.name || "N/A"}
-                                </td>
-                                <td
-                                    className={`border px-6 py-4 ${getStatusColor(
-                                        workOrder.status
-                                    )}`}
-                                >
-                                    {workOrder.status}
-                                </td>
-                                <td
-                                    className={`border px-6 py-4 ${getPriorityColor(
-                                        workOrder.priority
-                                    )}`}
-                                >
-                                    {workOrder.priority}
-                                </td>
-                                <td className="border px-6 py-4">
-                                    {new Date(
-                                        workOrder.requested_at
-                                    ).toLocaleDateString()}
-                                </td>
-                                <td className="border px-6 py-4 gap-2 flex justify-center">
-                                    <PrimaryButton
-                                        className="bg-secondary"
-                                        onClick={() =>
-                                            setEditingWorkOrder(workOrder)
-                                        }
-                                    >
-                                        Edit
-                                    </PrimaryButton>
-                                    <PrimaryButton
-                                        className="bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700 transition"
-                                        onClick={() => handleDelete(workOrder.id)}
-                                    >
-                                        Delete
-                                    </PrimaryButton>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table> */}
+                <Datatable columns={columns} data={filteredWorkOrders} />
             </div>
 
             {/* Mobile Card View */}

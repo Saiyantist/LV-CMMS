@@ -53,7 +53,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
     const menuItems = [
         // Check if the user is not an external_requester before rendering "Work Order"
-        ...(user.roles.some((role) => role.name !== "external_requester" && role.name !== "maintenance_personnel" && role.name !== "communications_officer") // REFACTOR these sheez
+        ...(user.roles.some(
+            (role) =>
+                role.name !== "external_requester" &&
+                role.name !== "maintenance_personnel" &&
+                role.name !== "communications_officer"
+        ) // REFACTOR these sheez
             ? [
                   {
                       text: "Work Order",
@@ -96,50 +101,58 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         // Check if the user is a maintenance personnel to render "Assigned Tasks" page
         ...(user.roles.some((role) => role.name === "maintenance_personnel")
             ? [
-                {
-                    routeName: "work-orders.assigned-tasks",
-                    href: route("work-orders.assigned-tasks") || "",
-                    text: "Assigned Tasks",
-                    icon: <BriefcaseBusiness size={16} className="mr-2" />,
-                },
-                {   
-                    routeName: "work-orders.index",
-                    href: route("work-orders.index") || "",
-                    text: "Work Order List",
-                    icon: <ClipboardList size={16} className="mr-2" />,
-                }
-            ]
+                  {
+                      routeName: "work-orders.assigned-tasks",
+                      href: route("work-orders.assigned-tasks") || "",
+                      text: "Assigned Tasks",
+                      icon: <BriefcaseBusiness size={16} className="mr-2" />,
+                  },
+                  {
+                      routeName: "work-orders.index",
+                      href: route("work-orders.index") || "",
+                      text: "Work Order List",
+                      icon: <ClipboardList size={16} className="mr-2" />,
+                  },
+              ]
             : []),
     ];
+
+    // Helper to check if a route exists in Ziggy
+    const hasRoute = (name: string) => {
+        return typeof route().has === "function"
+            ? route().has(name)
+            : false;
+    };
 
     const adminItems =
         isSuperAdmin || isWorkOrderManager
             ? [
-                  {
+                  hasRoute("assets.index") && {
                       routeName: "assets.index",
                       href: route("assets.index") || "",
                       text: "Asset Management",
                       icon: <Wrench size={14} className="mr-2" />,
                   },
-                  {
+                  hasRoute("work-orders.preventive-maintenance") && {
                       routeName: "work-orders.preventive-maintenance",
                       href: route("work-orders.preventive-maintenance") || "",
                       text: "Preventive Maintenance",
                       icon: <ShieldCheck size={14} className="mr-2" />,
                   },
-                  {
+                  hasRoute("work-orders.compliance-and-safety") && {
                       routeName: "work-orders.compliance-and-safety",
                       href: route("work-orders.compliance-and-safety") || "",
                       text: "Compliance and Safety",
                       icon: <FileText size={14} className="mr-2" />,
                   },
-                  isSuperAdmin && {
-                      routeName: "admin.manage-roles",
-                      href: route("admin.manage-roles") || "",
-                      icon: <User size={16} className="mr-2" />,
-                      text: "User Management",
-                  },
-              ]
+                  isSuperAdmin &&
+                      hasRoute("admin.manage-roles") && {
+                          routeName: "admin.manage-roles",
+                          href: route("admin.manage-roles") || "",
+                          icon: <User size={16} className="mr-2" />,
+                          text: "User Management",
+                      },
+              ].filter(Boolean)
             : [];
 
     // Menu item rendering logic remains the same
@@ -181,7 +194,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             </button>
             {isDropdownOpen && (
                 <ul>
-                    {item.children?.map((child) =>
+                    {item.children?.map((child: any) =>
                         renderMenuItem({ ...child, isChild: true })
                     )}
                 </ul>

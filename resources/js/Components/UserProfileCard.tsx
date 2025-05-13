@@ -8,7 +8,7 @@ export default function UserProfileCard({
 }: {
     user: {
         name: string;
-        role: string;
+        roles: { name: string }[];
         profile_photo_url: string;
     };
     isEditing: boolean;
@@ -32,7 +32,9 @@ export default function UserProfileCard({
                         {user.name}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {user.role}
+                        {user.roles && user.roles.length > 0
+                            ? user.roles.map((r) => r.name).join(", ")
+                            : "User"}
                     </p>
                 </div>
             </div>
