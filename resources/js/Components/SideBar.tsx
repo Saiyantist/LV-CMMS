@@ -115,13 +115,11 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                   },
               ]
             : []),
+        // Place Event Services tab under Compliance and Safety (handled in adminItems)
     ];
 
-    // Helper to check if a route exists in Ziggy
     const hasRoute = (name: string) => {
-        return typeof route().has === "function"
-            ? route().has(name)
-            : false;
+        return typeof route().has === "function" ? route().has(name) : false;
     };
 
     const adminItems =
@@ -145,6 +143,13 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                       text: "Compliance and Safety",
                       icon: <FileText size={14} className="mr-2" />,
                   },
+                  // Event Services tab (always visible for all users)
+                  {
+                      routeName: "booking-calendar",
+                      href: route("booking-calendar") || "",
+                      text: "Event Services",
+                      icon: <BriefcaseBusiness size={16} className="mr-2" />,
+                  },
                   isSuperAdmin &&
                       hasRoute("admin.manage-roles") && {
                           routeName: "admin.manage-roles",
@@ -153,7 +158,15 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                           text: "User Management",
                       },
               ].filter(Boolean)
-            : [];
+            : [
+                  // For non-admins, show Event Services tab after menuItems
+                  {
+                      routeName: "booking-calendar",
+                      href: route("booking-calendar") || "",
+                      text: "Event Services",
+                      icon: <BriefcaseBusiness size={16} className="mr-2" />,
+                  },
+              ];
 
     // Menu item rendering logic remains the same
     const isActive = (routeName: string) => currentRoute === routeName;

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\EventServicesController;
 
 /**
  *  Guest Routes
@@ -103,6 +104,11 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
 
     Route::post('/locations', [LocationController::class, 'store']);
 });
+
+
+
+// Event Services Routes
+Route::get('/booking-calendar', [EventServicesController::class, 'index'])->name('booking-calendar');
 
 // Catch unauthorized attempts to access restricted pages
 Route::fallback(function () {
