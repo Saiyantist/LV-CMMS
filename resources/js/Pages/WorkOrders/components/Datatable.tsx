@@ -40,7 +40,7 @@ interface DataTableProps<TData, TValue> {
 export function Datatable<TData, TValue>({
     columns,
     data,
-    placeholder
+    placeholder = "Search",
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -134,10 +134,10 @@ export function Datatable<TData, TValue>({
                                             >
                                                 <span>
                                                     {header.column.getIsSorted() === "asc" && (
-                                                        <ChevronUp className="h-4 w-4 ml-2" />
+                                                        <ChevronUp className="h-4 w-4" />
                                                     )}
                                                     {header.column.getIsSorted() === "desc" && (
-                                                        <ChevronDown className="h-4 w-4 ml-2" />
+                                                        <ChevronDown className="h-4 w-4" />
                                                     )}
                                                 </span>
                                                 <span>{flexRender(

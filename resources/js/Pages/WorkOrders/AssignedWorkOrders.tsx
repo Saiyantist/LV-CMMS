@@ -95,7 +95,7 @@ const AssignedTask: React.FC = () => {
                         {/* List View */}
                         <TabsContent value="list" className="mt-8">
                             <div className="overflow-x-auto">
-                                <Datatable columns={columns} data={workOrders} />
+                                <Datatable columns={columns} data={workOrders} placeholder="Search here"/>
                             </div>
                         </TabsContent>
 
