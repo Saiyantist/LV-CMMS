@@ -110,8 +110,10 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
 // Event Services Routes
 Route::get('/booking-calendar', [EventServicesController::class, 'index'])->name('booking-calendar');
 
-
-// 
+// Event Services Request Route
+Route::get('/event-services/request', function () {
+    return Inertia::render('EventServices/EventServicesRequest');
+})->name('event-services.request');
 
 // Catch unauthorized attempts to access restricted pages
 Route::fallback(function () {

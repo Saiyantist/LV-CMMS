@@ -15,7 +15,7 @@ import {
     UserCircle,
     Settings,
     BriefcaseBusiness,
-    Calendar
+    Calendar,
 } from "lucide-react";
 
 interface Role {
@@ -118,7 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             : []),
         // Place Event Services tab under Compliance and Safety (handled in adminItems)
     ];
-    
+
     const hasRoute = (name: string) => {
         return typeof route().has === "function" ? route().has(name) : false;
     };
@@ -144,12 +144,19 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                       text: "Compliance and Safety",
                       icon: <FileText size={14} className="mr-2" />,
                   },
-                  // Event Services tab (always visible for all users)
+                  // Event Services tab
                   {
                       routeName: "booking-calendar",
                       href: route("booking-calendar") || "",
                       text: "Event Services",
-                      icon: <BriefcaseBusiness size={16} className="mr-2" />,
+                      icon: <Calendar size={16} className="mr-2" />,
+                  },
+                  // Event Services Request tab (placed under Event Services)
+                  {
+                      routeName: "event-services.request",
+                      href: route("event-services.request") || "",
+                      text: "Event Services Request",
+                      icon: <FileText size={16} className="mr-2" />,
                   },
                   isSuperAdmin &&
                       hasRoute("admin.manage-roles") && {
@@ -160,12 +167,17 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                       },
               ].filter(Boolean)
             : [
-                  // For non-admins, show Event Services tab after menuItems
                   {
                       routeName: "booking-calendar",
                       href: route("booking-calendar") || "",
-                      text: "Booking Calendar",
+                      text: "Event Services",
                       icon: <Calendar size={16} className="mr-2" />,
+                  },
+                  {
+                      routeName: "event-services.request",
+                      href: route("event-services.request") || "",
+                      text: "Event Services Request",
+                      icon: <FileText size={16} className="mr-2" />,
                   },
               ];
 
