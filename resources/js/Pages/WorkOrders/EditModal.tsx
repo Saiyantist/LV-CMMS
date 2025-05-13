@@ -45,8 +45,6 @@ export default function EditWorkOrderModal({
     locations.find(
         (loc) => loc.id === Number(workOrder.location.id)
     )?.name || "";
-
-    console.log(workOrder.location.id);
     
     // Set the default value for the location input
     const [typedLocation, setTypedLocation] = useState<string>(initialLocationName);

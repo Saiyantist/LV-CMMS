@@ -64,17 +64,27 @@ export function StatusCell({ value, userRole }: StatusCellProps) {
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant="outline"
-                    className={`px-2.5 py-1 h-8 border rounded flex items-center justify-between gap-1 ${getStatusColor(
+            {userRole === "maintenance_personnel" ? (
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="outline"
+                        className={`px-5 py-1 h-6 border rounded flex items-center justify-between gap-1 ${getStatusColor(
+                            value
+                        )}`}
+                    >
+                        {value}
+                        <ChevronDown className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+            ) : (
+                <span
+                    className={`px-5 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(
                         value
                     )}`}
                 >
                     {value}
-                    <ChevronDown className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
+                </span>
+            )}
             <DropdownMenuContent align="end">
                 {statuses.map((status) => (
                     <DropdownMenuItem

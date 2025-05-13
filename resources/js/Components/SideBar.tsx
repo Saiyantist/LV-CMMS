@@ -118,7 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             : []),
         // Place Event Services tab under Compliance and Safety (handled in adminItems)
     ];
-
+    
     const hasRoute = (name: string) => {
         return typeof route().has === "function" ? route().has(name) : false;
     };
@@ -220,14 +220,15 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         <>
             {/* --- Desktop Sidebar --- */}
             <div className="hidden md:flex fixed min-h-screen max-h-screen bg-primary w-56 flex-col">
-                <div className="flex items-center justify-center h-24">
+                <div className="flex items-center justify-center mt-4 py-4">
                     <img
                         src="/images/Lvlogo.jpg"
                         alt="Logo"
-                        className="h-20 w-auto object-contain rounded-full"
+                        className="h-16 w-auto object-contain rounded-full"
                     />
                 </div>
 
+                {/* Top Links */}
                 <ul className="flex flex-col py-4 flex-grow">
                     <li>
                         <Link
@@ -250,6 +251,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     {adminItems.map(renderMenuItem)}
                 </ul>
 
+                {/* Bottom Links */}
                 <ul className="py-4">
                     <li>
                         <Link

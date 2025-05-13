@@ -9,6 +9,7 @@ import { StatusCell } from "./components/StatusCell";
 import { Button } from "@/Components/shadcnui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { Datatable } from "./components/Datatable";
+import { cloneElement } from "react";
 
 interface Props {
     user: any;
@@ -54,7 +55,11 @@ interface WorkOrders {
         status: string;
         location_id: number;
     }[];
-}
+    assigned_to: {
+        id: number;
+        name: string;
+    };
+};
 
 export default function IndexLayout({
     user,
@@ -80,27 +85,49 @@ export default function IndexLayout({
             accessorKey: "id",
             header: "ID",
             cell: ({ row }) => <div>{row.getValue("id")}</div>,
+            meta: {
+                headerClassName: "w-12",
+                searchable: true,
+            },
+        },
+        {
+            accessorKey: "requested_at",
+            header: "Date Requested",
+            cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
+            meta: {
+                headerClassName: "w-[8rem]",
+            },
         },
         {
             accessorKey: "location.name",
             header: "Location",
             cell: ({ row }) => <div>{row.original.location.name}</div>,
+            meta: {
+                headerClassName: "w-32",
+                searchable: true,
+            },
         },
         {
             accessorKey: "report_description",
             header: "Description",
             cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
             enableSorting: false,
+            meta: {
+                headerClassName: "w-1/5",
+                cellClassName: "truncate ... max-w-16 px-2",
+                searchable: true,
+            },
+            
         },
         {
             accessorKey: "work_order_type",
             header: "Work Order Type",
             cell: ({ row }) => <div>{row.getValue("work_order_type")}</div>,
-        },
-        {
-            accessorKey: "requested_at",
-            header: "Date Requested",
-            cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
+            meta : {
+                headerClassName: "w-40",
+                cellClassName: "text-center",   
+                searchable: true,
+            }
         },
         {
             accessorKey: "priority",
@@ -114,11 +141,19 @@ export default function IndexLayout({
                     {row.getValue("priority")}
                 </div>
             ),
+            meta : {
+                headerClassName: "max-w-20",    
+                cellClassName: "text-center",    
+            },
         },
         {
-            accessorKey: "label",
-            header: "Label",
-            cell: ({ row }) => <div>{row.getValue("label")}</div>,
+            accessorKey: "assigned_to.name",
+            header: "Assigned to",
+            cell: ({ row }) => <div>{row.original.assigned_to?.name || "Unassigned"}</div>,
+            meta: {
+                cellClassName: "text-center",  
+                searchable: true,
+            },
         },
         ...(activeTab !== "Pending" ||
         user.roles[0].name === "maintenance_personnel"
@@ -136,6 +171,9 @@ export default function IndexLayout({
                               userRole=""
                           />
                       ),
+                      meta : {
+                          cellClassName: "text-center",
+                      },
                   },
               ]
             : []),
@@ -150,18 +188,20 @@ export default function IndexLayout({
                     >
                         View
                     </Button> */}
-                    <PrimaryButton
-                        className="bg-secondary"
-                        onClick={() => setEditingWorkOrder(row.original)}
+                    <Button
+                        className="bg-primary h-8 text-xs rounded-sm"
+                        onClick={() =>
+                            setEditingWorkOrder(row.original)
+                        }
                     >
                         Edit
-                    </PrimaryButton>
-                    <PrimaryButton
-                        className="bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700 transition"
+                    </Button>
+                    <Button
+                        className="bg-red-600 h-8 text-white text-xs rounded-sm hover:bg-red-800 transition"
                         onClick={() => handleDelete(row.original.id)}
                     >
                         Delete
-                    </PrimaryButton>
+                    </Button>
                 </div>
             ),
             enableSorting: false,
@@ -255,7 +295,84 @@ export default function IndexLayout({
 
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto rounded-md -mt-10">
-                <Datatable columns={columns} data={filteredWorkOrders} />
+
+                <Datatable columns={columns} data={filteredWorkOrders} placeholder="Search here"/>
+
+                {/* <table className="w-full table-auto border-collapse text-sm text-gray-700">
+                    <thead>
+                        <tr className="bg-secondary text-white">
+                            <th className="border px-6 py-3 text-auto">ID</th>
+                            <th className="border px-6 py-3 text-auto">
+                                Description
+                            </th>
+                            <th className="border px-6 py-3 text-auto">
+                                Location
+                            </th>
+                            <th className="border px-6 py-3 text-auto">
+                                Status
+                            </th>
+                            <th className="border px-6 py-3 text-auto">
+                                Priority
+                            </th>
+                            <th className="border px-6 py-3 text-auto">
+                                Requested At
+                            </th>
+                            <th className="border px-6 py-3 text-auto">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredWorkOrders.map((workOrder) => (
+                            <tr key={workOrder.id} className="hover:bg-gray-50">
+                                <td className="border px-6 py-4 text-center">
+                                    {workOrder.id}
+                                </td>
+                                <td className="border px-6 py-4">
+                                    {workOrder.report_description}
+                                </td>
+                                <td className="border px-6 py-4">
+                                    {workOrder.location?.name || "N/A"}
+                                </td>
+                                <td
+                                    className={`border px-6 py-4 ${getStatusColor(
+                                        workOrder.status
+                                    )}`}
+                                >
+                                    {workOrder.status}
+                                </td>
+                                <td
+                                    className={`border px-6 py-4 ${getPriorityColor(
+                                        workOrder.priority
+                                    )}`}
+                                >
+                                    {workOrder.priority}
+                                </td>
+                                <td className="border px-6 py-4">
+                                    {new Date(
+                                        workOrder.requested_at
+                                    ).toLocaleDateString()}
+                                </td>
+                                <td className="border px-6 py-4 gap-2 flex justify-center">
+                                    <PrimaryButton
+                                        className="bg-secondary"
+                                        onClick={() =>
+                                            setEditingWorkOrder(workOrder)
+                                        }
+                                    >
+                                        Edit
+                                    </PrimaryButton>
+                                    <PrimaryButton
+                                        className="bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700 transition"
+                                        onClick={() => handleDelete(workOrder.id)}
+                                    >
+                                        Delete
+                                    </PrimaryButton>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table> */}
             </div>
 
             {/* Mobile Card View */}

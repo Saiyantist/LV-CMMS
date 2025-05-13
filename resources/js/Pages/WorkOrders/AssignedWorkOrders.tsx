@@ -38,12 +38,18 @@ const AssignedTask: React.FC = () => {
             accessorKey: "id",
             header: "ID",
             cell: ({ row }) => <div>{row.getValue("id")}</div>,
+            meta: {
+                headerClassName: "w-12",
+            },
         },
         {
             accessorKey: "report_description",
             header: "Description",
             cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
             enableSorting: false,
+            meta: {
+                headerClassName: "w-1/2",
+            },
         },
         {
             accessorKey: "priority",
@@ -54,12 +60,13 @@ const AssignedTask: React.FC = () => {
             accessorKey: "status",
             header: "Status",
             cell: ({ row }) => <StatusCell value={row.getValue("status")} userRole={userRole} />,
+            enableSorting: false,
         },
         {
             id: "actions",
             header: "Action",
             cell: () => (
-                <Button className="bg-primary hover:bg-secondary text-white h-8 rounded">
+                <Button className="bg-primary hover:bg-secondary text-white text-xs h-8 w-14 rounded">
                     View
                 </Button>
             ),
@@ -88,7 +95,7 @@ const AssignedTask: React.FC = () => {
                         {/* List View */}
                         <TabsContent value="list" className="mt-8">
                             <div className="overflow-x-auto">
-                                <Datatable columns={columns} data={workOrders} />
+                                <Datatable columns={columns} data={workOrders} placeholder="Search here"/>
                             </div>
                         </TabsContent>
 

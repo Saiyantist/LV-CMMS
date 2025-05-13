@@ -54,10 +54,12 @@ class WorkOrderController extends Controller
                     'status' => $wo->asset->status,
                     'location_id' => $wo->asset->location_id,
                 ] : null,
+                'assigned_to' => $wo->assignedTo ? [
+                    'id' => $wo->assignedTo->id,
+                    'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
+                ] : null,
             ];
         });
-
-        // dd($formattedWorkOrders);
 
         return Inertia::render('WorkOrders/Index',
         [
