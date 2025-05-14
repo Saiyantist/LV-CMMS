@@ -49,12 +49,16 @@ const AssignedTask: React.FC = () => {
             enableSorting: false,
             meta: {
                 headerClassName: "w-1/2",
+                searchable: true,
             },
         },
         {
             accessorKey: "priority",
             header: "Priority",
             cell: ({ row }) => <div>{row.getValue("priority")}</div>,
+            meta: {
+                filterable: true,
+            },
         },
         {
             accessorKey: "status",

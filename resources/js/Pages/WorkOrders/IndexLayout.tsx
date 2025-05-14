@@ -107,6 +107,7 @@ export default function IndexLayout({
             meta: {
                 headerClassName: "w-32",
                 searchable: true,
+                filterable: true,
             },
         },
         {
@@ -146,6 +147,7 @@ export default function IndexLayout({
             meta : {
                 headerClassName: "max-w-20",    
                 cellClassName: "text-center",    
+                filterable: true,
             },
         },
         {
@@ -155,6 +157,7 @@ export default function IndexLayout({
             meta: {
                 cellClassName: "text-center",  
                 searchable: true,
+                filterable: true,
             },
         },
         ...(activeTab !== "Pending" ||
@@ -174,7 +177,9 @@ export default function IndexLayout({
                           />
                       ),
                       meta : {
-                          cellClassName: "text-center",
+                        cellClassName: "text-center",
+                        filterable: true,
+
                       },
                   },
               ]
@@ -254,30 +259,6 @@ export default function IndexLayout({
             </header>
 
             {/* Tabs - Desktop */}
-            {/* <div className="hidden md:flex mt-4 pl-4">
-                <div className="flex overflow-hidden">
-                    {tabs.length > 0 ? (
-                        tabs.map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-4 text-sm sm:text-base font-medium transition-colors duration-200 whitespace-nowrap border h-12 border-b
-                    ${
-                        activeTab === tab
-                            ? "bg-secondary text-white"
-                            : "bg-white text-black hover:bg-secondary hover:text-white"
-                    }
-                    rounded-t-md`}
-                            >
-                                {tab}
-                            </button>
-                        ))
-                    ) : (
-                        <div className="h-12 bg-white"></div> // Spacer
-                    )}
-                </div>
-            </div> */}
-
             <div className="hidden md:flex mt-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
                     <TabsList className="bg-gray-200 text-black rounded-md mb-4">
