@@ -5,14 +5,17 @@ import { useState } from "react";
 import { Upload, X, FileText } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Gallery from "./Gallery";
+import DateTimeSelection from "./Date&Time";
 
 export default function EventServicesRequest() {
     const [file, setFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
     const [error, setError] = useState<string | null>(null);
+    const [selectedGalleryItem, setSelectedGalleryItem] = useState<
+        number | null
+    >(null);
 
-    // Steps for the progress indicator
     const steps = [
         { id: 1, name: "Proof of Approval" },
         { id: 2, name: "Requested Venue" },
@@ -22,7 +25,6 @@ export default function EventServicesRequest() {
         { id: 6, name: "Compliance and Consent" },
     ];
 
-    // File handling functions
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setFile(e.target.files[0]);
@@ -59,8 +61,24 @@ export default function EventServicesRequest() {
             }
             setError(null);
             setCurrentStep(2);
+        } else if (currentStep === 2) {
+            if (!selectedGalleryItem) {
+                setError("Please select a venue to continue.");
+                return;
+            }
+            setError(null);
+            setCurrentStep(3);
+        } else if (currentStep < steps.length) {
+            setError(null);
+            setCurrentStep(currentStep + 1);
         }
-        // Add more step logic as needed
+    };
+
+    const handleBack = () => {
+        if (currentStep > 1) {
+            setError(null);
+            setCurrentStep(currentStep - 1);
+        }
     };
 
     return (
@@ -145,7 +163,8 @@ export default function EventServicesRequest() {
                                         Select a file or drag and drop here
                                     </p>
                                     <p className="text-gray-500 text-sm mb-4">
-                                        JPG, PNG or PDF, file size no more than 10MB
+                                        JPG, PNG or PDF, file size no more than
+                                        10MB
                                     </p>
                                     <button>SELECT FILE</button>
                                     <input
@@ -166,7 +185,10 @@ export default function EventServicesRequest() {
                                                     {file.name}
                                                 </p>
                                                 <p className="text-sm text-gray-500">
-                                                    {Math.round(file.size / 1024)}kb
+                                                    {Math.round(
+                                                        file.size / 1024
+                                                    )}
+                                                    kb
                                                 </p>
                                             </div>
                                         </div>
@@ -193,26 +215,42 @@ export default function EventServicesRequest() {
                                     Example: 112424_EnglishMonth
                                 </p>
                             </div>
-                            <div className="flex justify-between mt-16">
-                                <button
-                                    className="px-8 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md py-2"
-                                    disabled
-                                >
-                                    Back
-                                </button>
-                                <button
-                                    className="px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-md py-2"
-                                    onClick={handleContinue}
-                                >
-                                    Continue
-                                </button>
-                            </div>
                         </div>
                     </div>
                 )}
                 {/* Step 2: Gallery */}
                 {currentStep === 2 && (
-                    <Gallery />
+                    <Gallery
+                        selectedId={selectedGalleryItem}
+                        onSelect={(id: number) => {
+                            setSelectedGalleryItem(id);
+                            setError(null);
+                        }}
+                    />
+                )}
+                {/* Step 3: Date & Time */}
+                {currentStep === 3 && <DateTimeSelection />}
+                {/* ...other steps can be added here... */}
+                {/* Navigation Buttons (always visible) */}
+                <div className="flex justify-between mt-16 max-w-2xl mx-auto">
+                    <button
+                        className="px-8 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md py-2"
+                        onClick={handleBack}
+                        disabled={currentStep === 1}
+                    >
+                        Back
+                    </button>
+                    <button
+                        className="px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-md py-2"
+                        onClick={handleContinue}
+                    >
+                        Continue
+                    </button>
+                </div>
+                {error && (
+                    <div className="text-red-500 text-sm mt-2 text-center">
+                        {error}
+                    </div>
                 )}
             </div>
         </AuthenticatedLayout>
