@@ -118,7 +118,7 @@ export function Datatable<TData, TValue>({
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className={`h-10 font-bold text-primary ${header.column.columnDef.meta?.headerClassName || ""}`}>
+                                    <TableHead key={header.id} className={`h-10 font-bold text-primary bg-stone-50 ${header.column.columnDef.meta?.headerClassName || ""}`}>
                                         {header.isPlaceholder ? null : (
                                             <div
                                                 onClick={

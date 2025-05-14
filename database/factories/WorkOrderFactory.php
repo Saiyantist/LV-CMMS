@@ -27,10 +27,11 @@ class WorkOrderFactory extends Factory
             'work_order_type' => fake()->randomElement(['Work Order', 'Preventive Maintenance', 'Compliance']),
             'label' => fake()->randomElement(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label']),
             'priority' => fake()->randomElement(['Low', 'Medium', 'High', 'Critical']),
-            'requested_at' => fake()->dateTimeBetween('-2 month', 'now'),
-            'completed_at' => fake()->optional(0.3)->dateTimeBetween('now', '+1 month'),
+            'requested_at' => fake()->dateTimeBetween('-2 month', 'now')->format('Y-m-d H:i:s'),
+            'scheduled_at' => fake()->optional(0.3)->dateTimeBetween('+3 days', '+2 month')?->format('Y-m-d H:i:s'),
+            'completed_at' => fake()->optional(0.3)->dateTimeBetween('+1 week', '+2 month')?->format('Y-m-d H:i:s'),
             'remarks' => fake()->optional()->sentence(),
-            'asset_id' => fake()->boolean(80) ? Asset::inRandomOrder()->first()?->id : null, // 50% chance of having an asset
+            'asset_id' => fake()->boolean(80) ? Asset::inRandomOrder()->first()?->id : null, // 80% chance of having an asset
             'requested_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'assigned_to' => User::inRandomOrder()->first()?->id ?? User::factory(),
         ];

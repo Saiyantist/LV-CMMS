@@ -29,6 +29,7 @@ class WorkOrderController extends Controller
             $workOrders->where('requested_by', $user->id);
         }
 
+        
         /**
          * Format work orders to include images
          */
@@ -41,10 +42,11 @@ class WorkOrderController extends Controller
                 'label' => $wo->label,
                 'priority' => $wo->priority ?: "No Priority",
                 'remarks' => $wo->remarks,
-                'requested_at' => $wo->created_at->toDateString(),
+                'requested_at' => \Carbon\Carbon::parse($wo->requested_at)->format('m/d/Y'),
+                'scheduled_at' => $wo->scheduled_at ? \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y') : "Not Scheduled",
                 'location' => [
                     'id' => $wo->location_id,
-                    'name' => $wo->location ? $wo->location->name : null,
+                    'name' => $wo->location->name,
                 ],
                 'images' => $wo->images->pluck('url')->toArray(), // ✅ important part
                 'asset' => $wo->asset ? [
@@ -54,6 +56,10 @@ class WorkOrderController extends Controller
                     'status' => $wo->asset->status,
                     'location_id' => $wo->asset->location_id,
                 ] : null,
+                'requested_by' => [
+                    'id' => $wo->requestedBy->id,
+                    'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
+                ],
                 'assigned_to' => $wo->assignedTo ? [
                     'id' => $wo->assignedTo->id,
                     'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
@@ -277,7 +283,11 @@ class WorkOrderController extends Controller
             ],
         ]);
     }
-
+    
+    /**
+     *  Storing preventive maintenance work orders:
+     *      - This method handles specific logic for preventive maintenance work orders
+     */
     public function storePreventiveMaintenanceWorkOrder(Request $request)
     {
         $user = auth()->user();
@@ -305,51 +315,4 @@ class WorkOrderController extends Controller
 
         return redirect()->route('work-orders.index')->with('success', 'Preventive maintenance work order created successfully.');
     }
-        // Logic for storing preventive maintenance work order
-        // This method can be used to handle the specific logic for preventive maintenance work orders
-        // You can create a new method in the WorkOrder model to handle this logic if needed
-
-    // public function submitWorkOrder(Request $request)
-    // {
-    //     // Assuming the front-end sends data similar to `SubmitWorkOrder.tsx`
-    //     $user = auth()->user();
-        
-    //     // Validate the request data
-    //     $validated = $request->validate([
-    //         'report_description' => 'required|string|max:1000',
-    //         'location_id' => 'required|exists:locations,id',
-    //         'images.*' => 'nullable|image|max:5120', // If any images are being uploaded
-    //     ]);
-
-    //     // Logic for creating a new WorkOrder
-    //     $isWorkOrderManager = $user->hasPermissionTo('manage work orders');
-
-    //     $workOrder = WorkOrder::create([
-    //         'report_description' => $request->report_description,
-    //         'location_id' => $request->location_id,
-    //         'requested_at' => now(),
-    //         'requested_by' => $user->id,
-    //         'status' => $isWorkOrderManager ? ($request->status ?? 'Pending') : 'Pending',
-    //         'work_order_type' => $isWorkOrderManager ? ($request->work_order_type ?? 'Work Order') : 'Work Order',
-    //         'label' => $isWorkOrderManager ? ($request->label ?? 'No Label') : 'No Label',
-    //         'priority' => $isWorkOrderManager ? $request->priority : null,
-    //         'remarks' => $isWorkOrderManager ? $request->remarks : null,
-    //     ]);
-
-    //     // Handle image uploads (if any)
-    //     if ($request->hasFile('images')) {
-    //         foreach ($request->file('images') as $image) {
-    //             $filename = uniqid('wo_') . '.' . $image->extension();
-    //             $path = $image->storeAs('work_orders', $filename, 'public');
-    //             Image::create([
-    //                 'imageable_id' => $workOrder->id,
-    //                 'imageable_type' => WorkOrder::class,
-    //                 'path' => $path,
-    //             ]);
-    //         }
-    //     }
-
-    //     return redirect()->route('work-orders.index')->with('success', 'Work order created successfully.');
-    // }
-
 }

@@ -43,6 +43,7 @@ interface WorkOrders {
     priority: string;
     remarks: string;
     requested_at: string;
+    scheduled_at: string;
     location: {
         id: number;
         name: string;
@@ -121,9 +122,9 @@ export default function IndexLayout({
             
         },
         {
-            accessorKey: "work_order_type",
-            header: "Work Order Type",
-            cell: ({ row }) => <div>{row.getValue("work_order_type")}</div>,
+            accessorKey: "scheduled_at",
+            header: "Target Date",
+            cell: ({ row }) => <div>{row.getValue("scheduled_at")}</div>,
             meta : {
                 headerClassName: "w-40",
                 cellClassName: "text-center",   

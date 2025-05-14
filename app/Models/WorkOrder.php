@@ -19,6 +19,7 @@ class WorkOrder extends Model
         'label',
         'priority',
         'requested_at',
+        'scheduled_at',
         'completed_at',
         'remarks',
         'asset_id',
@@ -46,11 +47,6 @@ class WorkOrder extends Model
             'asset_id',   // Foreign key on WorkOrder: References the Asset model
             'id'          // Local key on Asset: Primary key on Asset used to join with WorkOrder
         );
-    }
-
-    public function scheduledMaintenance()
-    {
-        return $this->hasOne(ScheduledMaintenance::class, 'work_order_id');
     }
 
     public function images()

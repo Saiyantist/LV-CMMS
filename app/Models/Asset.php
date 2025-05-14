@@ -29,11 +29,6 @@ class Asset extends Model
         return $this->hasMany(WorkOrder::class);
     }
 
-    public function scheduledMaintenances()
-    {
-        return $this->hasMany(ScheduledMaintenance::class, 'asset_id');
-    }
-
     public function maintenanceHistories()
     {
         return $this->hasMany(AssetMaintenanceHistory::class);
