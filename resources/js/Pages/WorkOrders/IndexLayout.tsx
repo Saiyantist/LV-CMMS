@@ -9,7 +9,7 @@ import { StatusCell } from "./components/StatusCell";
 import { Button } from "@/Components/shadcnui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { Datatable } from "./components/Datatable";
-import { cloneElement } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 
 interface Props {
     user: any;
@@ -79,6 +79,7 @@ export default function IndexLayout({
     getPriorityColor,
     handleDelete,
 }: Props) {
+
     // Define columns for the data table
     const columns: ColumnDef<WorkOrders>[] = [
         {
@@ -114,7 +115,7 @@ export default function IndexLayout({
             enableSorting: false,
             meta: {
                 headerClassName: "w-1/5",
-                cellClassName: "truncate ... max-w-16 px-2",
+                cellClassName: "max-w-16 px-2",
                 searchable: true,
             },
             
@@ -252,7 +253,7 @@ export default function IndexLayout({
             </header>
 
             {/* Tabs - Desktop */}
-            <div className="hidden md:flex mt-4 pl-4">
+            {/* <div className="hidden md:flex mt-4 pl-4">
                 <div className="flex overflow-hidden">
                     {tabs.length > 0 ? (
                         tabs.map((tab) => (
@@ -274,6 +275,17 @@ export default function IndexLayout({
                         <div className="h-12 bg-white"></div> // Spacer
                     )}
                 </div>
+            </div> */}
+
+            <div className="hidden md:flex mt-4">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="bg-gray-200 text-black rounded-md mb-4">
+                        <TabsTrigger value="Pending">Pending</TabsTrigger>
+                        <TabsTrigger value="Accepted">Accepted</TabsTrigger>
+                        <TabsTrigger value="For Budget Request">For Budget Request</TabsTrigger>
+                        <TabsTrigger value="Declined">Declined</TabsTrigger>
+                    </TabsList>
+                </Tabs>
             </div>
 
             {/* Tabs - Mobile */}
@@ -294,7 +306,7 @@ export default function IndexLayout({
             )}
 
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto rounded-md -mt-10">
+            <div className="hidden md:block overflow-x-auto rounded-md -mt-[3.8rem]">
 
                 <Datatable columns={columns} data={filteredWorkOrders} placeholder="Search here"/>
 
