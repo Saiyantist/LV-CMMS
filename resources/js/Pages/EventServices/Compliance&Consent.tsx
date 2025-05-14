@@ -1,0 +1,131 @@
+// resources/js/Pages/Components/ComplianceAndConsent.tsx
+
+import React from "react";
+
+const ComplianceAndConsent = ({
+    dataPrivacyAgreed,
+    onChangeDataPrivacy,
+    equipmentPolicyAgreed,
+    onChangeEquipmentPolicy,
+    consentChoice,
+    onConsentChange,
+}: {
+    dataPrivacyAgreed: boolean;
+    onChangeDataPrivacy: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    equipmentPolicyAgreed: boolean;
+    onChangeEquipmentPolicy: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    consentChoice: string;
+    onConsentChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
+    return (
+        <div className="space-y-8">
+            {/* Data Privacy Notice */}
+            <div className="border-b pb-6">
+                <h2 className="text-lg font-semibold mb-2 text-gray-900">
+                    Data Privacy Notice <span className="text-red-500">*</span>
+                </h2>
+                <p className="text-sm text-gray-700 mb-4">
+                    In compliance with data privacy laws, such as, but not
+                    limited to, Republic Act No. 10173 (Philippine Data Privacy
+                    Act of 2012) and implementing rules and regulations, we
+                    within the Organization of La Verdad Christian College, Inc.
+                    (LVCC), collect and process your personal information in
+                    this Request Form for Event Services purposes only, keeping
+                    them securely and with confidentiality using our
+                    organizational, technical, and physical security measures,
+                    and retain them in accordance with our Retention Policy. We
+                    don’t share them to any external group without your consent,
+                    unless otherwise stated in our Privacy Notice. You have the
+                    right to be informed, to object, to access, to rectify, to
+                    erase or to block the processing of your personal
+                    information, as well as your right to data portability, to
+                    file a complaint and be entitled to damages for violation of
+                    your rights under this data privacy.
+                </p>
+                <p className="text-sm text-gray-700 mb-4">
+                    For your data privacy inquiries, you may reach our Data
+                    Protection Officer through:{" "}
+                    <a
+                        href="mailto:dpo@laverdad.edu.ph"
+                        className="text-blue-600 underline"
+                    >
+                        dpo@laverdad.edu.ph
+                    </a>
+                </p>
+                <label className="inline-flex items-center space-x-2">
+                    <input
+                        type="checkbox"
+                        checked={dataPrivacyAgreed}
+                        onChange={onChangeDataPrivacy}
+                        className="form-checkbox text-blue-600"
+                    />
+                    <span>
+                        I have read and agree to the data privacy policy
+                    </span>
+                </label>
+            </div>
+
+            {/* Equipment Return Policy */}
+            <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                    Compliance and Consent{" "}
+                    <span className="text-red-500">*</span>
+                </h2>
+                <h3 className="font-medium text-gray-800 mb-1">
+                    Equipment Return Policy
+                </h3>
+                <p className="text-sm text-gray-700 mb-4">
+                    The borrower acknowledges full responsibility for the use,
+                    maintenance, and timely return of all borrowed equipment and
+                    facilities, ensuring they are returned in the same condition
+                    as when received, and agrees to cover any damages or losses
+                    that occur during the borrowing period.
+                </p>
+                <label className="inline-flex items-center space-x-2 mb-4 block">
+                    <input
+                        type="checkbox"
+                        checked={equipmentPolicyAgreed}
+                        onChange={onChangeEquipmentPolicy}
+                        className="form-checkbox text-blue-600"
+                    />
+                    <span>
+                        I acknowledge and agree to the equipment return policy
+                    </span>
+                </label>
+
+                <p className="text-sm text-gray-700 mb-2">
+                    I voluntarily give my consent in collecting, processing,
+                    recording, using, and retaining my personal information for
+                    the above-mentioned purpose in accordance with this Privacy
+                    Notice.
+                </p>
+                <div className="space-y-2">
+                    <label className="flex items-center space-x-2">
+                        <input
+                            type="radio"
+                            name="consent"
+                            value="agree" 
+                            checked={consentChoice === "agree"}
+                            onChange={onConsentChange}
+                            className="form-radio text-blue-600"
+                        />
+                        <span>I agree</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                        <input
+                            type="radio"
+                            name="consent"
+                            value="disagree"
+                            checked={consentChoice === "disagree"}
+                            onChange={onConsentChange}
+                            className="form-radio text-blue-600"
+                        />
+                        <span>I disagree</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default ComplianceAndConsent;

@@ -8,15 +8,51 @@ import Gallery from "./Gallery";
 import DateTimeSelection from "./Date&Time";
 import EventDetails from "./EventDetails";
 import RequestedServices from "./RequestedServices";
+import ComplianceAndConsent from "./Compliance&Consent";
+import EventSummaryModal from "./EventSummaryModal";
 
 export default function EventServicesRequest() {
-    const [file, setFile] = useState<File | null>(null);
-    const [isDragging, setIsDragging] = useState(false);
+    // Step state
     const [currentStep, setCurrentStep] = useState(1);
     const [error, setError] = useState<string | null>(null);
+    const [showSummary, setShowSummary] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+
+    // Step 1: File
+    const [file, setFile] = useState<File | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+
+    // Step 2: Venue
     const [selectedGalleryItem, setSelectedGalleryItem] = useState<
         number | null
     >(null);
+
+    // Step 3: Date & Time
+    const [dateRange, setDateRange] = useState<string>("");
+    const [timeRange, setTimeRange] = useState<string>("");
+
+    // Step 4: Event Details
+    const [eventDetails, setEventDetails] = useState<{
+        eventName: string;
+        department: string;
+        eventPurpose: string;
+        participants: string;
+        participantCount: string;
+    }>({
+        eventName: "",
+        department: "",
+        eventPurpose: "",
+        participants: "",
+        participantCount: "",
+    });
+
+    // Step 5: Requested Services
+    const [requestedServices, setRequestedServices] = useState<string[]>([]);
+
+    // Step 6: Compliance & Consent
+    const [dataPrivacyAgreed, setDataPrivacyAgreed] = useState(false);
+    const [equipmentPolicyAgreed, setEquipmentPolicyAgreed] = useState(false);
+    const [consentChoice, setConsentChoice] = useState("");
 
     const steps = [
         { id: 1, name: "Proof of Approval" },
@@ -55,32 +91,62 @@ export default function EventServicesRequest() {
         setFile(null);
     };
 
+    // Validation and step logic
     const handleContinue = () => {
+        setError(null);
         if (currentStep === 1) {
             if (!file) {
                 setError("Please upload a file before continuing.");
                 return;
             }
-            setError(null);
             setCurrentStep(2);
         } else if (currentStep === 2) {
             if (!selectedGalleryItem) {
                 setError("Please select a venue to continue.");
                 return;
             }
-            setError(null);
             setCurrentStep(3);
-        } else if (currentStep < steps.length) {
-            setError(null);
-            setCurrentStep(currentStep + 1);
+        } else if (currentStep === 3) {
+            if (!dateRange || !timeRange) {
+                setError("Please select both date and time.");
+                return;
+            }
+            setCurrentStep(4);
+        } else if (currentStep === 4) {
+            if (
+                !eventDetails.eventName ||
+                !eventDetails.department ||
+                !eventDetails.eventPurpose ||
+                !eventDetails.participants ||
+                !eventDetails.participantCount
+            ) {
+                setError("Please fill out all event details.");
+                return;
+            }
+            setCurrentStep(5);
+        } else if (currentStep === 5) {
+            setCurrentStep(6);
+        } else if (currentStep === 6) {
+            if (
+                !dataPrivacyAgreed ||
+                !equipmentPolicyAgreed ||
+                consentChoice !== "agree"
+            ) {
+                setError("You must agree to all terms and consent to proceed.");
+                return;
+            }
+            setShowSummary(true);
         }
     };
 
     const handleBack = () => {
-        if (currentStep > 1) {
-            setError(null);
-            setCurrentStep(currentStep - 1);
+        setError(null);
+        if (showSummary) {
+            setShowSummary(false);
+            setShowSuccess(false);
+            return;
         }
+        if (currentStep > 1) setCurrentStep(currentStep - 1);
     };
 
     return (
@@ -96,7 +162,7 @@ export default function EventServicesRequest() {
                     <br />
                 </div>
                 <div className="mb-8">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
                         {steps.map((step, index) => (
                             <div
                                 key={step.id}
@@ -116,7 +182,7 @@ export default function EventServicesRequest() {
                                         {step.id}
                                     </div>
                                     {index < steps.length - 1 && (
-                                        <div className="absolute top-1/2 left-full w-full h-[1px] bg-gray-300 -translate-y-1/2 z-0"></div>
+                                        <div className="flex-1 h-px bg-gray-300 mx-2"></div>
                                     )}
                                 </div>
                                 <span
@@ -231,18 +297,61 @@ export default function EventServicesRequest() {
                     />
                 )}
                 {/* Step 3: Date & Time */}
-                {currentStep === 3 && <DateTimeSelection />}
+                {currentStep === 3 && (
+                    <DateTimeSelection
+                        value={{
+                            dateRange,
+                            timeRange,
+                        }}
+                        onChange={({
+                            dateRange,
+                            timeRange,
+                        }: {
+                            dateRange: string;
+                            timeRange: string;
+                        }) => {
+                            setDateRange(dateRange);
+                            setTimeRange(timeRange);
+                        }}
+                    />
+                )}
                 {/* Step 4: Event Details */}
-                {currentStep === 4 && <EventDetails />}
+                {currentStep === 4 && (
+                    <EventDetails
+                        value={eventDetails}
+                        onChange={setEventDetails}
+                    />
+                )}
                 {/* Step 5: Requested Services */}
-                {currentStep === 5 && <RequestedServices />}
-                {/* ...other steps can be added here... */}
-                {/* Navigation Buttons (always visible) */}
+                {currentStep === 5 && (
+                    <RequestedServices
+                        value={requestedServices}
+                        onChange={setRequestedServices}
+                    />
+                )}
+                {/* Step 6: Compliance and Consent */}
+                {currentStep === 6 && (
+                    <ComplianceAndConsent
+                        dataPrivacyAgreed={dataPrivacyAgreed}
+                        onChangeDataPrivacy={(e) =>
+                            setDataPrivacyAgreed(e.target.checked)
+                        }
+                        equipmentPolicyAgreed={equipmentPolicyAgreed}
+                        onChangeEquipmentPolicy={(e) =>
+                            setEquipmentPolicyAgreed(e.target.checked)
+                        }
+                        consentChoice={consentChoice}
+                        onConsentChange={(e) =>
+                            setConsentChoice(e.target.value)
+                        }
+                    />
+                )}
+                {/* Navigation Buttons */}
                 <div className="flex justify-between mt-16 max-w-2xl mx-auto">
                     <button
                         className="px-8 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md py-2"
                         onClick={handleBack}
-                        disabled={currentStep === 1}
+                        disabled={currentStep === 1 && !showSummary}
                     >
                         Back
                     </button>
@@ -250,7 +359,9 @@ export default function EventServicesRequest() {
                         className="px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-md py-2"
                         onClick={handleContinue}
                     >
-                        Continue
+                        {currentStep === 6 && !showSummary
+                            ? "Review"
+                            : "Continue"}
                     </button>
                 </div>
                 {error && (
@@ -258,6 +369,36 @@ export default function EventServicesRequest() {
                         {error}
                     </div>
                 )}
+                {/* Summary Modal */}
+                <EventSummaryModal
+                    open={showSummary || showSuccess}
+                    onClose={() => {
+                        if (showSuccess) {
+                            setShowSummary(false);
+                            setShowSuccess(false);
+                            setCurrentStep(1);
+                            // Optionally reset all form data here
+                        } else {
+                            setShowSummary(false);
+                        }
+                    }}
+                    onSubmit={() => {
+                        // On submit, show the success step
+                        setShowSuccess(true);
+                    }}
+                    data={{
+                        file,
+                        venue: selectedGalleryItem ? "Auditorium" : "",
+                        dateRange,
+                        timeRange,
+                        eventDetails,
+                        requestedServices,
+                        dataPrivacyAgreed,
+                        equipmentPolicyAgreed,
+                        consentChoice,
+                        showSuccess,
+                    }}
+                />
             </div>
         </AuthenticatedLayout>
     );
