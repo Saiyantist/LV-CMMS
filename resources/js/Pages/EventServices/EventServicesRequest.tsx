@@ -6,6 +6,8 @@ import { Upload, X, FileText } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Gallery from "./Gallery";
 import DateTimeSelection from "./Date&Time";
+import EventDetails from "./EventDetails";
+import RequestedServices from "./RequestedServices";
 
 export default function EventServicesRequest() {
     const [file, setFile] = useState<File | null>(null);
@@ -83,7 +85,7 @@ export default function EventServicesRequest() {
 
     return (
         <AuthenticatedLayout>
-            <div className="max-w-5xl mx-auto p-4 md:p-6 bg-white min-h-screen">
+            <div className="w-[99%] mx-auto p-4 md:p-6 bg-white min-h-screen">
                 {/* Progress Steps */}
                 <div className="text-center">
                     <h1 className="text-3xl font-bold mb-2">Event Services</h1>
@@ -230,6 +232,10 @@ export default function EventServicesRequest() {
                 )}
                 {/* Step 3: Date & Time */}
                 {currentStep === 3 && <DateTimeSelection />}
+                {/* Step 4: Event Details */}
+                {currentStep === 4 && <EventDetails />}
+                {/* Step 5: Requested Services */}
+                {currentStep === 5 && <RequestedServices />}
                 {/* ...other steps can be added here... */}
                 {/* Navigation Buttons (always visible) */}
                 <div className="flex justify-between mt-16 max-w-2xl mx-auto">
