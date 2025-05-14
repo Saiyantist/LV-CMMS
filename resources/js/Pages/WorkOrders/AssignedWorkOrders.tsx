@@ -17,7 +17,6 @@ import { StatusCell } from "./components/StatusCell";
 // import dayGridPlugin from "@fullcalendar/daygrid"; // Month view
 // import timeGridPlugin from "@fullcalendar/timegrid"; // Week view
 
-// Define the WorkOrder interface
 interface WorkOrder {
     id: string;
     report_description: string;
@@ -25,11 +24,8 @@ interface WorkOrder {
     priority: "Low" | "Medium" | "High" | "Critical";
     location: { id: number; name: string };
 }
-const AssignedTask: React.FC = () => {
+export default function AssignedTask({ user, workOrders }: { user: any; workOrders: WorkOrder[] }) {
     const [activeTab, setActiveTab] = useState("list");
-    const user = usePage().props.auth.user;
-
-    const workOrders = usePage().props.workOrders as WorkOrder[];
     const userRole = user.roles[0].name; // Assuming the first role is the primary role
 
     // Define columns for the data table
@@ -180,6 +176,4 @@ const AssignedTask: React.FC = () => {
             </div>
         </AuthenticatedLayout>
     );
-};
-
-export default AssignedTask;
+}

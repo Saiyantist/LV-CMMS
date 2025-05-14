@@ -116,7 +116,7 @@ export default function IndexLayout({
             cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
             enableSorting: false,
             meta: {
-                headerClassName: "w-1/5",
+                headerClassName: "w-[22%]",
                 cellClassName: "max-w-16 px-2",
                 searchable: true,
             },

@@ -2,14 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\AssetMaintenanceHistory;
-use App\Models\Department;
-use App\Models\Location;
 use App\Models\User;
 use App\Models\WorkOrder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -23,9 +19,9 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSeeder::class);
         $this->call(LocationSeeder::class);
         $this->call(AssetSeeder::class);
-        User::factory(30)->create();
+        User::factory(50)->create();
         
-        WorkOrder::factory(50)->create();
+        WorkOrder::factory(100)->create();
         $this->call(AssetMaintenanceHistorySeeder::class);
     }
 }
