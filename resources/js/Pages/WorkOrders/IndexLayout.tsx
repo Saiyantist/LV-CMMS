@@ -1,15 +1,17 @@
 // IndexLayout.tsx
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
-import PrimaryButton from "@/Components/PrimaryButton";
-import CreateWorkOrderModal from "./CreateModal";
-import EditWorkOrderModal from "./EditModal";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
-import { StatusCell } from "./components/StatusCell";
+import PrimaryButton from "@/Components/PrimaryButton";
+import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 import { Button } from "@/Components/shadcnui/button";
 import { ColumnDef } from "@tanstack/react-table";
+import CreateWorkOrderModal from "./CreateModal";
+import EditWorkOrderModal from "./EditModal";
+import { StatusCell } from "./components/StatusCell";
 import { Datatable } from "./components/Datatable";
-import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
+import { getPriorityColor } from "@/utils/getPriorityColor";
+import { getStatusColor } from "@/utils/getStatusColor";
 
 interface Props {
     user: any;
@@ -31,8 +33,6 @@ interface Props {
     setIsCreating: (val: boolean) => void;
     setEditingWorkOrder: (workOrder: any) => void;
     scrollToTop: () => void;
-    getStatusColor: (status: string) => string;
-    getPriorityColor: (priority: string) => string;
 }
 
 interface WorkOrders {
@@ -76,8 +76,6 @@ export default function IndexLayout({
     setIsCreating,
     setEditingWorkOrder,
     scrollToTop,
-    getStatusColor,
-    getPriorityColor,
     handleDelete,
 }: Props) {
 
@@ -105,7 +103,7 @@ export default function IndexLayout({
             header: "Location",
             cell: ({ row }) => <div>{row.original.location.name}</div>,
             meta: {
-                headerClassName: "w-32",
+                headerClassName: "max-w-16",
                 searchable: true,
                 filterable: true,
             },
@@ -127,7 +125,7 @@ export default function IndexLayout({
             header: "Target Date",
             cell: ({ row }) => <div>{row.getValue("scheduled_at")}</div>,
             meta : {
-                headerClassName: "w-40",
+                headerClassName: "max-w-20",
                 cellClassName: "text-center",   
                 searchable: true,
             }
@@ -155,6 +153,7 @@ export default function IndexLayout({
             header: "Assigned to",
             cell: ({ row }) => <div>{row.original.assigned_to?.name || "Unassigned"}</div>,
             meta: {
+                headerClassName: "max-w-32",
                 cellClassName: "text-center",  
                 searchable: true,
                 filterable: true,
@@ -173,7 +172,7 @@ export default function IndexLayout({
                       }) => (
                           <StatusCell
                               value={row.getValue("status")}
-                              userRole=""
+                              user={user}
                           />
                       ),
                       meta : {
@@ -259,16 +258,18 @@ export default function IndexLayout({
             </header>
 
             {/* Tabs - Desktop */}
-            <div className="hidden md:flex mt-4">
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="bg-gray-200 text-black rounded-md mb-4">
-                        <TabsTrigger value="Pending">Pending</TabsTrigger>
-                        <TabsTrigger value="Accepted">Accepted</TabsTrigger>
-                        <TabsTrigger value="For Budget Request">For Budget Request</TabsTrigger>
-                        <TabsTrigger value="Declined">Declined</TabsTrigger>
-                    </TabsList>
-                </Tabs>
-            </div>
+            {user.permissions.includes("manage work orders") && (
+                <div className="hidden md:flex mt-4">
+                    <Tabs value={activeTab} onValueChange={setActiveTab}>
+                        <TabsList className="bg-gray-200 text-black rounded-md mb-4">
+                            <TabsTrigger value="Pending">Pending</TabsTrigger>
+                            <TabsTrigger value="Accepted">Accepted</TabsTrigger>
+                            <TabsTrigger value="For Budget Request">For Budget Request</TabsTrigger>
+                            <TabsTrigger value="Declined">Declined</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                </div>
+            )}
 
             {/* Tabs - Mobile */}
             {user.permissions.includes("manage work orders") && (
@@ -288,9 +289,12 @@ export default function IndexLayout({
             )}
 
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto rounded-md -mt-[3.8rem]">
-
-                <Datatable columns={columns} data={filteredWorkOrders} placeholder="Search here"/>
+            <div
+                className={`hidden md:block overflow-x-auto rounded-md -mt-[3.8rem] ${
+                    !user.permissions.includes("manage work orders") ? "-mt-1" : ""
+                }`}
+            >
+                <Datatable columns={columns} data={filteredWorkOrders} placeholder="Search here" />
 
                 {/* <table className="w-full table-auto border-collapse text-sm text-gray-700">
                     <thead>

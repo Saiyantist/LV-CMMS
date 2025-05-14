@@ -18,13 +18,14 @@ class WorkOrder extends Model
         'work_order_type',
         'label',
         'priority',
+        'requested_by',
         'requested_at',
+        'assigned_to',
+        'assigned_at',
         'scheduled_at',
         'completed_at',
         'remarks',
         'asset_id',
-        'requested_by',
-        'assigned_to',
     ];
 
     public function location()

@@ -21,13 +21,14 @@ return new class extends Migration
             $table->enum('work_order_type', ['Work Order', 'Preventive Maintenance', 'Compliance'])->default('Work Order');
             $table->enum('label', ['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])->default('No Label'); /** If  work_order_type is "Work Order", must have label, otherwise, "No Label" */
             $table->enum('priority', ['Low', 'Medium', 'High', 'Critical'])->nullable(); /** This can be improved by automation, keywords: AI, Analysis, Rule Setting (pre-defined words) */
+            $table->foreignId('requested_by')->constrained('users')->cascadeOnDelete();
             $table->timestamp('requested_at');
+            $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('assigned_at')->nullable();
             $table->timestamp('scheduled_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->text('remarks')->nullable();
             $table->foreignId('asset_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('requested_by')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });      

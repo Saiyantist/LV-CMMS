@@ -42,8 +42,18 @@ class WorkOrderController extends Controller
                 'label' => $wo->label,
                 'priority' => $wo->priority ?: "No Priority",
                 'remarks' => $wo->remarks,
+                'requested_by' => [
+                    'id' => $wo->requestedBy->id,
+                    'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
+                ],
                 'requested_at' => \Carbon\Carbon::parse($wo->requested_at)->format('m/d/Y'),
-                'scheduled_at' => $wo->scheduled_at ? \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y') : "Not Scheduled",
+                'assigned_to' => [
+                    'id' => $wo->assignedTo->id,
+                    'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
+                ],
+                'assigned_at' => \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y'),
+                'scheduled_at' => \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y'),
+                'completed_at' => \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y'),
                 'location' => [
                     'id' => $wo->location_id,
                     'name' => $wo->location->name,
@@ -252,8 +262,19 @@ class WorkOrderController extends Controller
                     'work_order_type' => $wo->work_order_type,
                     'label' => $wo->label,
                     'priority' => $wo->priority ?: "No Priority",
+                    'requested_by' => [
+                        'id' => $wo->requestedBy->id,
+                        'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
+                    ],
+                    'requested_at' => \Carbon\Carbon::parse($wo->requested_at)->format('m/d/Y'),
+                    'assigned_to' => [
+                        'id' => $wo->assignedTo->id,
+                        'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
+                    ],
+                    'assigned_at' => \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y'),
+                    'scheduled_at' => \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y'),
+                    'completed_at' => \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y'),
                     'remarks' => $wo->remarks,
-                    'requested_at' => $wo->created_at->toDateString(),
                     'location' => [
                         'id' => $wo->location_id,
                         'name' => $wo->location ? $wo->location->name : null,
@@ -268,7 +289,7 @@ class WorkOrderController extends Controller
                     ] : null,
                 ];
             });
-
+            
         return Inertia::render('WorkOrders/AssignedWorkOrders',
         [
             'workOrders' => $workOrders,

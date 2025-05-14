@@ -11,10 +11,17 @@ import {
 
 interface StatusCellProps {
     value: string;
-    userRole: string; // Add userRole to determine the role
-}
+    user: {
+        id: number;
+        roles: {
+            id: number;
+            name: string;
+        }[];
+        permissions: string[];
+    };
+}; 
 
-export function StatusCell({ value, userRole }: StatusCellProps) {
+export function StatusCell({ value, user }: StatusCellProps) {
     const getStatusColor = (status: string) => {
         switch (status) {
             case "Pending":
@@ -58,13 +65,13 @@ export function StatusCell({ value, userRole }: StatusCellProps) {
 
     // Filter statuses based on user role
     const statuses =
-        userRole === "maintenance_personnel"
+        user.roles[0].name === "maintenance_personnel"
             ? ["Assigned", "Ongoing", "Completed"] // Restricted statuses for maintenance personnel
             : allStatuses; // All statuses for other roles
 
     return (
         <DropdownMenu>
-            {userRole === "maintenance_personnel" ? (
+            {user.roles[0].name === "maintenance_personnel" || user.permissions.includes("update assigned work order status") ? (
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="outline"

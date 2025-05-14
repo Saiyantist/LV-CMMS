@@ -9,33 +9,44 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, usePage } from "@inertiajs/react";
 import { Button } from "@/Components/shadcnui/button";
 import { ColumnDef } from "@tanstack/react-table";
-
 import { Datatable } from "./components/Datatable";
 import { StatusCell } from "./components/StatusCell";
+import { getPriorityColor } from "@/utils/getPriorityColor";
 
 // import FullCalendar from "@fullcalendar/react"; // FullCalendar library
 // import dayGridPlugin from "@fullcalendar/daygrid"; // Month view
 // import timeGridPlugin from "@fullcalendar/timegrid"; // Week view
 
-interface WorkOrder {
-    id: string;
-    report_description: string;
-    status: "Assigned" | "Ongoing" | "Completed";
-    priority: "Low" | "Medium" | "High" | "Critical";
-    location: { id: number; name: string };
-}
-export default function AssignedTask({ user, workOrders }: { user: any; workOrders: WorkOrder[] }) {
+export default function AssignedTask({ user, workOrders }: { user: {id: number; roles: { id: number; name: string; }; permissions: string[]; }; workOrders: any }) {
     const [activeTab, setActiveTab] = useState("list");
-    const userRole = user.roles[0].name; // Assuming the first role is the primary role
 
     // Define columns for the data table
-    const columns: ColumnDef<WorkOrder>[] = [
+    const columns: ColumnDef<null>[] = [
         {
             accessorKey: "id",
             header: "ID",
             cell: ({ row }) => <div>{row.getValue("id")}</div>,
             meta: {
                 headerClassName: "w-12",
+                searchable: true,
+            },
+        },
+        {
+            accessorKey: "assigned_at",
+            header: "Date Assigned",
+            cell: ({ row }) => <div>{row.getValue("assigned_at")}</div>,
+            meta: {
+                headerClassName: "w-[8rem]",
+            },
+        },
+        {
+            accessorKey: "location.name",
+            header: "Location",
+            cell: ({ row }) => <div>{row.original.location.name}</div>,
+            meta: {
+                headerClassName: "max-w-16",
+                searchable: true,
+                filterable: true,
             },
         },
         {
@@ -44,22 +55,51 @@ export default function AssignedTask({ user, workOrders }: { user: any; workOrde
             cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
             enableSorting: false,
             meta: {
-                headerClassName: "w-1/2",
+                headerClassName: "w-[22%]",
+                cellClassName: "max-w-16 px-2",
                 searchable: true,
             },
         },
         {
             accessorKey: "priority",
             header: "Priority",
-            cell: ({ row }) => <div>{row.getValue("priority")}</div>,
+            cell: ({ row }) => (
+                <div
+                    className={`px-2 py-1 rounded ${getPriorityColor(
+                        row.getValue("priority")
+                    )}`}
+                >
+                    {row.getValue("priority")}
+                </div>
+            ),
             meta: {
+                headerClassName: "max-w-20",    
+                cellClassName: "text-center",    
                 filterable: true,
+            },
+        },
+        {
+            accessorKey: "scheduled_at",
+            header: "Target Date",
+            cell: ({ row }) => <div>{row.getValue("scheduled_at")}</div>,
+            meta: {
+                headerClassName: "max-w-20",
+                cellClassName: "text-center",   
+                searchable: true,
+            },
+        },
+        {
+            accessorKey: "work_order_type",
+            header: "Work Order Type",
+            cell: ({ row }) => <div>{row.getValue("work_order_type")}</div>,
+            meta: {
+                headerClassName: "w-[8rem]",
             },
         },
         {
             accessorKey: "status",
             header: "Status",
-            cell: ({ row }) => <StatusCell value={row.getValue("status")} userRole={userRole} />,
+            cell: ({ row }) => <StatusCell value={row.getValue("status")} user={user} />,
             enableSorting: false,
         },
         {

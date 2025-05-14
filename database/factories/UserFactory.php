@@ -28,13 +28,14 @@ class UserFactory extends Factory
     public function definition(): array
     {
         $firstName = fake()->firstName();
+        $lastName = fake()->lastName();
         return [
             'first_name' => $firstName,
-            'last_name' => fake()->lastName(),
+            'last_name' => $lastName,
             'birth_date' => fake()->date('Y-m-d','-21 years'),
             'gender' => fake()->randomElement(['male', 'female', 'rather not say']),
             'contact_number' => '09' . fake()->randomNumber(9, true),
-            'email' => Str::lower($firstName) . '@laverdad.edu.ph',
+            'email' => Str::lower($firstName) . '.' . Str::lower($lastName) . '@laverdad.edu.ph',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'staff_type' => fake()->randomElement(['teaching', 'non-teaching']),

@@ -48,7 +48,12 @@ export default function Login({
 
             <form onSubmit={submit}>
                 <div>
-                    <InputLabel htmlFor="email" value="Email *" />
+                    <div className="flex">
+                        <InputLabel htmlFor="email" value="Email" />
+                        {errors.email && (
+                            <span className="text-red-500 ml-1">*</span>
+                        )}
+                    </div>
 
                     <TextInput
                         id="email"
@@ -67,7 +72,13 @@ export default function Login({
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password *" />
+                    <div className="flex">
+                        <InputLabel htmlFor="password" value="Password" />
+                        {errors.password && (
+                            <span className="text-red-500 ml-1">*</span>
+                        )}
+
+                    </div>
 
                     <TextInput
                         id="password"
