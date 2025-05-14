@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useRef, useEffect } from "react";
 import {
-    type ColumnDef,
+    type ColumnDef as BaseColumnDef,
     type SortingState,
     flexRender,
     getCoreRowModel,
@@ -30,6 +30,17 @@ import {
     TableRow,
 } from "@/Components/shadcnui/table";
 import FilterModal from "./FilterModal";
+
+interface ColumnMeta<TData> {
+  headerClassName?: string;
+  cellClassName?: string;
+  searchable?: boolean;
+  filterable?: boolean;
+}
+
+type ColumnDef<TData, TValue> = BaseColumnDef<TData, TValue> & {
+  meta?: ColumnMeta<TData>;
+};
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]

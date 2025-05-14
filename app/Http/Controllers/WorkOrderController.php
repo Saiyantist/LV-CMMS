@@ -8,6 +8,7 @@ use App\Models\Location;
 use App\Models\User;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class WorkOrderController extends Controller
@@ -164,6 +165,30 @@ class WorkOrderController extends Controller
     public function update(StoreWorkOrderRequest $request, WorkOrder $workOrder)
     {
         $user = auth()->user();
+
+        // dd($user->hasRole('maintenance_personnel'));
+
+        // Check if the user is a maintenance personnel
+        if ($user->hasRole('maintenance_personnel')) {
+            // Ensure the work order is assigned to the user
+            if ($workOrder->assigned_to !== $user->id) {
+                return response()->json(['error' => 'You are not allowed to update this work order.'], 403);
+            }
+
+            // Validate the status update
+            $allowedStatuses = ['Ongoing', 'Completed']; // Allowed statuses for maintenance personnel
+            $validated = $request->validate([
+                'status' => ['required', 'string', Rule::in($allowedStatuses)],
+            ]);
+
+            // Update the status
+            $workOrder->update([
+                'status' => $validated['status'],
+            ]);
+
+            return response()->json(['success' => 'Work order status updated successfully.'], 200);
+        }
+
         if(!$user->hasPermissionTo('manage work orders')) {
             if ($workOrder->requested_by != $user->id) {
                 return redirect()->route('work-orders.index')->with('error', 'You are not allowed to update this work order.');
@@ -303,6 +328,11 @@ class WorkOrderController extends Controller
                 'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
             ],
         ]);
+    }
+
+    public function updateWorkOrderStatus(WorkOrder $workOrder, Request $request)
+    {
+        // Hmm
     }
     
     /**

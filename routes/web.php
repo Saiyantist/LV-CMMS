@@ -71,7 +71,7 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
  *      - Preventive Maintenance
  *      - Compliance and Safety
  */
-Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () {
+Route::middleware(['auth', 'restrict_external', 'verified', 'hasRole'])->group(function () {
 
     Route::get('/work-orders/submit-request', [WorkOrderController::class, 'create'])
         ->middleware('restrict_work_order_manager') // Internal users only
@@ -98,7 +98,6 @@ Route::middleware(['auth', 'restrict_external', 'verified'])->group(function () 
             return Inertia::render('ComplianceAndSafety/ComplianceAndSafety');
         })->name('work-orders.compliance-and-safety');
     });
-    
     
     Route::resource('work-orders', WorkOrderController::class); // ALWAYS put this at the end ng mga "/work-orders" routes.
 

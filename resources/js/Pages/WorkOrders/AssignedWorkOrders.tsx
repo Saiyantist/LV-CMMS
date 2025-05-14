@@ -17,11 +17,11 @@ import { getPriorityColor } from "@/utils/getPriorityColor";
 // import dayGridPlugin from "@fullcalendar/daygrid"; // Month view
 // import timeGridPlugin from "@fullcalendar/timegrid"; // Week view
 
-export default function AssignedTask({ user, workOrders }: { user: {id: number; roles: { id: number; name: string; }; permissions: string[]; }; workOrders: any }) {
+export default function AssignedTask({ user, workOrders }: { user: {id: number; roles: { id: number; name: string; }[]; permissions: string[]; }; workOrders: any }) {
     const [activeTab, setActiveTab] = useState("list");
 
     // Define columns for the data table
-    const columns: ColumnDef<null>[] = [
+    const columns: ColumnDef<{ id: number; location?: { name?: string }; }>[] = [
         {
             accessorKey: "id",
             header: "ID",
@@ -42,7 +42,7 @@ export default function AssignedTask({ user, workOrders }: { user: {id: number; 
         {
             accessorKey: "location.name",
             header: "Location",
-            cell: ({ row }) => <div>{row.original.location.name}</div>,
+            cell: ({ row }) => <div>{row.original.location?.name || "N/A"}</div>,
             meta: {
                 headerClassName: "max-w-16",
                 searchable: true,
@@ -99,7 +99,7 @@ export default function AssignedTask({ user, workOrders }: { user: {id: number; 
         {
             accessorKey: "status",
             header: "Status",
-            cell: ({ row }) => <StatusCell value={row.getValue("status")} user={user} />,
+            cell: ({ row }) => <StatusCell value={row.getValue("status")} user={user} row={row}/>,
             enableSorting: false,
         },
         {

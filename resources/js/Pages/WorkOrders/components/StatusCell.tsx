@@ -8,6 +8,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/Components/shadcnui/dropdown-menu";
+import { router } from '@inertiajs/react';
 
 interface StatusCellProps {
     value: string;
@@ -19,9 +20,14 @@ interface StatusCellProps {
         }[];
         permissions: string[];
     };
+    row: {
+        original: {
+            id: number;
+        };
+    };
 }; 
 
-export function StatusCell({ value, user }: StatusCellProps) {
+export function StatusCell({ value, user, row }: StatusCellProps) {
     const getStatusColor = (status: string) => {
         switch (status) {
             case "Pending":
@@ -49,6 +55,20 @@ export function StatusCell({ value, user }: StatusCellProps) {
         }
     };
 
+    // console.log(row);
+
+    // const handleUpdate = (status: string) => {
+    //     router.put(`/work-orders/${row.original.id}`, { status }, {
+    //     onSuccess: () => {
+    //         console.log(`Status changed to ${status}`);
+    //         // Optionally, refresh the table or show a success message
+    //     },
+    //     onError: (errors) => {
+    //         console.error('Failed to update status', errors);
+    //     },
+    //     });
+    // };
+
     // Define all statuses
     const allStatuses = [
         "Pending",
@@ -66,7 +86,7 @@ export function StatusCell({ value, user }: StatusCellProps) {
     // Filter statuses based on user role
     const statuses =
         user.roles[0].name === "maintenance_personnel"
-            ? ["Assigned", "Ongoing", "Completed"] // Restricted statuses for maintenance personnel
+            ? ["Ongoing", "Completed"] // Restricted statuses for maintenance personnel
             : allStatuses; // All statuses for other roles
 
     return (
@@ -96,7 +116,10 @@ export function StatusCell({ value, user }: StatusCellProps) {
                 {statuses.map((status) => (
                     <DropdownMenuItem
                         key={status}
-                        onClick={() => console.log(`Status changed to ${status}`)}
+                        onClick={() =>
+                            console.log("Change status to", status)
+                            // handleUpdate(status)
+                        }
                     >
                         {status}
                     </DropdownMenuItem>
