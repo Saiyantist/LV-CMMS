@@ -269,11 +269,11 @@ export default function EventServicesRequest() {
                                     </div>
                                 </div>
                             )}
-                            {error && (
+                            {/* {error && (
                                 <div className="text-red-500 text-sm mt-2 text-center">
                                     {error}
                                 </div>
-                            )}
+                            )} */}
                             <div className="text-gray-500 text-sm mt-4">
                                 <p>
                                     Kindly use this naming format:
@@ -346,6 +346,13 @@ export default function EventServicesRequest() {
                         }
                     />
                 )}
+
+                {error && (
+                    <div className="text-red-500 text-sm mt-2 text-center">
+                        {error}
+                    </div>
+                )}
+
                 {/* Navigation Buttons */}
                 <div className="flex justify-between mt-16 max-w-2xl mx-auto">
                     <button
@@ -364,11 +371,7 @@ export default function EventServicesRequest() {
                             : "Continue"}
                     </button>
                 </div>
-                {error && (
-                    <div className="text-red-500 text-sm mt-2 text-center">
-                        {error}
-                    </div>
-                )}
+
                 {/* Summary Modal */}
                 <EventSummaryModal
                     open={showSummary || showSuccess}

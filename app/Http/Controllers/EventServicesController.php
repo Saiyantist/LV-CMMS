@@ -94,7 +94,25 @@ class EventServicesController extends Controller
             ],
         ];
 
-        $listEvents = [
+        $listEvents = $this->getDummyBookings();
+
+        return Inertia::render('EventServices/booking-calendar', [
+            'calendarEvents' => $calendarEvents,
+            'listEvents' => $listEvents,
+        ]);
+    }
+
+    public function myBookings()
+    {
+        $bookings = $this->getDummyBookings();
+        return Inertia::render('EventServices/MyBookings', [
+            'bookings' => $bookings,
+        ]);
+    }
+
+    private function getDummyBookings()
+    {
+        return [
             [
                 "id" => "1",
                 "date" => "March 02, 2025",
@@ -186,10 +204,5 @@ class EventServicesController extends Controller
                 "status" => "Not Started",
             ],
         ];
-
-        return Inertia::render('EventServices/booking-calendar', [
-            'calendarEvents' => $calendarEvents,
-            'listEvents' => $listEvents,
-        ]);
     }
 }

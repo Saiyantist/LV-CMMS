@@ -16,6 +16,7 @@ import {
     Settings,
     BriefcaseBusiness,
     Calendar,
+    Book,
 } from "lucide-react";
 
 interface Role {
@@ -158,6 +159,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                       text: "Event Services Request",
                       icon: <FileText size={16} className="mr-2" />,
                   },
+                  {
+                      routeName: "event-services.my-bookings",
+                      href: route("event-services.my-bookings") || "",
+                      text: "My Bookings",
+                      icon: <Book size={16} className="mr-2" />,
+                  },
                   isSuperAdmin &&
                       hasRoute("admin.manage-roles") && {
                           routeName: "admin.manage-roles",
@@ -178,6 +185,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                       href: route("event-services.request") || "",
                       text: "Event Services Request",
                       icon: <FileText size={16} className="mr-2" />,
+                  },
+                  {
+                      routeName: "event-services.my-bookings",
+                      href: route("event-services.my-bookings") || "",
+                      text: "My Bookings",
+                      icon: <Book size={16} className="mr-2" />,
                   },
               ];
 
@@ -384,7 +397,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     </div>
 
                     {/* Admin Items (if any) */}
-                    {adminItems.length > 0 && (
+                    {/* {adminItems.length > 0 && (
                         <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
                             {adminItems.map((item) => (
                                 <Link
@@ -401,7 +414,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 </Link>
                             ))}
                         </div>
-                    )}
+                    )} */}
 
                     {/* Settings and Logout */}
                     <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">

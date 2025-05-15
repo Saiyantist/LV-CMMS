@@ -1,0 +1,3 @@
+export const bookingsData = [
+    // ...your existing dummy bookings array...
+];

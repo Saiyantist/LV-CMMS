@@ -109,10 +109,19 @@ Route::middleware(['auth', 'restrict_external', 'verified', 'hasRole'])->group(f
 // Event Services Routes
 Route::get('/booking-calendar', [EventServicesController::class, 'index'])->name('booking-calendar');
 
+// My Bookings Route (use controller method)
+Route::get('/event-services/my-bookings', [EventServicesController::class, 'MyBookings'])->name('event-services.my-bookings');
+
+// My Bookings Page Route (renders the page/component, not the data)
+Route::get('/event-services/my-bookings-page', function () {
+    return Inertia::render('EventServices/MyBookings');
+})->name('event-services.my-bookings-page');
+
 // Event Services Request Route
 Route::get('/event-services/request', function () {
     return Inertia::render('EventServices/EventServicesRequest');
 })->name('event-services.request');
+
 
 // Catch unauthorized attempts to access restricted pages
 Route::fallback(function () {

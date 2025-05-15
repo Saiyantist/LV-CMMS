@@ -61,10 +61,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
                         className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base text-gray-700 py-2 px-3 outline-none"
                     >
                         <option value="">Select Department</option>
-                        <option value="marketing">Marketing</option>
-                        <option value="hr">Human Resources</option>
-                        <option value="it">IT</option>
-                        <option value="finance">Finance</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="HR">Human Resources</option>
+                        <option value="IT">IT</option>
+                        <option value="Finance">Finance</option>
                     </select>
                 </div>
             </div>
