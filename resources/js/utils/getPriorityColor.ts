@@ -5,9 +5,9 @@ export const getPriorityColor = (priority: string) => {
             case "Medium":
                 return "bg-yellow-100 text-yellow-700";
             case "High":
-                return "bg-red-100 text-red-700";
+                return "bg-orange-200 text-red-700";
             case "Critical":
-                return "bg-red-400 text-red-50";
+                return "bg-red-200 text-red-50";
             default:
                 return "text-gray-400";
         }

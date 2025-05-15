@@ -190,14 +190,14 @@ export function Datatable<TData, TValue>({ columns, data, placeholder = "Search"
                     {header.isPlaceholder ? null : (
                       <div
                         onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
-                        className={`flex items-center justify-center ${
+                        className={`flex items-center justify-center gap-1 ${
                           header.column.getCanSort() ? "cursor-pointer" : "cursor-default"
                         }`}
                       >
                         <span>
-                          {header.column.getCanSort() && !header.column.getIsSorted() ? <ChevronsUpDown className="h-4 w-4"/> : null}
-                          {header.column.getIsSorted() === "asc" && <ChevronUp className="h-4 w-4" />}
-                          {header.column.getIsSorted() === "desc" && <ChevronDown className="h-4 w-4" />}
+                          {header.column.getCanSort() && !header.column.getIsSorted() ? <ChevronsUpDown className="h-3 w-3"/> : null}
+                          {header.column.getIsSorted() === "asc" && <ChevronUp className="h-3 w-3" />}
+                          {header.column.getIsSorted() === "desc" && <ChevronDown className="h-3 w-3" />}
                         </span>
                         <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
                       </div>
