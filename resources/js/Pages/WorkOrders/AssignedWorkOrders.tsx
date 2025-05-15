@@ -20,6 +20,7 @@ import { getPriorityColor } from "@/utils/getPriorityColor";
 export default function AssignedTask({ user, workOrders }: { user: {id: number; roles: { id: number; name: string; }[]; permissions: string[]; }; workOrders: any }) {
     const [activeTab, setActiveTab] = useState("list");
 
+    
     // Define columns for the data table
     const columns: ColumnDef<{ id: number; location?: { name?: string }; }>[] = [
         {
@@ -92,8 +93,10 @@ export default function AssignedTask({ user, workOrders }: { user: {id: number; 
             accessorKey: "work_order_type",
             header: "Work Order Type",
             cell: ({ row }) => <div>{row.getValue("work_order_type")}</div>,
+            enableSorting: false,
             meta: {
-                headerClassName: "w-[8rem]",
+                headerClassName: "w-[10rem]",
+                filterable: true,
             },
         },
         {
@@ -101,12 +104,16 @@ export default function AssignedTask({ user, workOrders }: { user: {id: number; 
             header: "Status",
             cell: ({ row }) => <StatusCell value={row.getValue("status")} user={user} row={row}/>,
             enableSorting: false,
+            meta: {
+                filterable: true,
+            }
+            
         },
         {
             id: "actions",
             header: "Action",
             cell: () => (
-                <Button className="bg-primary hover:bg-secondary text-white text-xs h-8 w-14 rounded">
+                <Button className="bg-primary hover:bg-secondary text-white text-xs h-6 w-14 rounded">
                     View
                 </Button>
             ),

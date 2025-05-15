@@ -166,29 +166,19 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
-        // dd($user->hasRole('maintenance_personnel'));
-
-        // Check if the user is a maintenance personnel
+        /** Maintenance Personnel */
         if ($user->hasRole('maintenance_personnel')) {
-            // Ensure the work order is assigned to the user
+
             if ($workOrder->assigned_to !== $user->id) {
                 return response()->json(['error' => 'You are not allowed to update this work order.'], 403);
             }
 
-            // Validate the status update
-            $allowedStatuses = ['Ongoing', 'Completed']; // Allowed statuses for maintenance personnel
-            $validated = $request->validate([
-                'status' => ['required', 'string', Rule::in($allowedStatuses)],
-            ]);
+            $workOrder->update(['status' => $request->status]);
 
-            // Update the status
-            $workOrder->update([
-                'status' => $validated['status'],
-            ]);
-
-            return response()->json(['success' => 'Work order status updated successfully.'], 200);
+            return redirect()->route('work-orders.assigned-tasks')->with('success', 'Work Order updated successfully.');
         }
 
+        /** Internal Requester */
         if(!$user->hasPermissionTo('manage work orders')) {
             if ($workOrder->requested_by != $user->id) {
                 return redirect()->route('work-orders.index')->with('error', 'You are not allowed to update this work order.');
@@ -196,7 +186,6 @@ class WorkOrderController extends Controller
             else if ($workOrder->status !== 'Pending') {
                 return redirect()->route('work-orders.index')->with('error', 'Only pending work orders can be updated by requesters.');
             }
-
             else {
                 $workOrder->update([
                     'report_description' => $request->report_description,
@@ -205,7 +194,17 @@ class WorkOrderController extends Controller
             }
         }
 
+        /** Work Order Manager */
+        
         else {
+            
+            // Update Status only (from status dropdown)
+            if ($request->route()->getName() === 'work-orders.update'){
+                $workOrder->update(['status' => $request->status,]);
+                return redirect()->route('work-orders.index')->with('success', 'Work Order status updated successfully.');
+            }
+
+            // Update Work Order (expected from edit work order modal)
             $workOrder->update([
                 'report_description' => $request->report_description,
                 'location_id' => $request->location_id,

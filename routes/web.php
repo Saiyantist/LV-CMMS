@@ -74,11 +74,11 @@ Route::middleware(['auth', 'role:super_admin', 'verified'])->group(function () {
 Route::middleware(['auth', 'restrict_external', 'verified', 'hasRole'])->group(function () {
 
     Route::get('/work-orders/submit-request', [WorkOrderController::class, 'create'])
-        ->middleware('restrict_work_order_manager') // Internal users only
+        ->middleware('restrict_work_order_manager') // Internal and Maintenance Personnel only
         ->name('work-orders.submit-request');
 
     Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])
-        ->middleware(['role:maintenance_personnel|super_admin']) // Maintenance Personnel and Super Admins only
+        ->middleware(['role:maintenance_personnel']) // Maintenance Personnel only
         ->name('work-orders.assigned-tasks');
 
     /**

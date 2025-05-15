@@ -23,8 +23,11 @@ interface StatusCellProps {
     row: {
         original: {
             id: number;
+            status: string;
+
         };
     };
+    // row: any;
 }; 
 
 export function StatusCell({ value, user, row }: StatusCellProps) {
@@ -54,20 +57,21 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
                 return "bg-gray-100 text-gray-800 border-gray-300";
         }
     };
+    
+    const handleUpdate = (status: string, rowId: number,) => {
 
-    // console.log(row);
-
-    // const handleUpdate = (status: string) => {
-    //     router.put(`/work-orders/${row.original.id}`, { status }, {
-    //     onSuccess: () => {
-    //         console.log(`Status changed to ${status}`);
-    //         // Optionally, refresh the table or show a success message
-    //     },
-    //     onError: (errors) => {
-    //         console.error('Failed to update status', errors);
-    //     },
-    //     });
-    // };
+        if (row.original.status == "Ongoing" || row.original.status == "Assigned"){
+            router.put(`/work-orders/${rowId}`, { status }, {
+            onError: (errors) => {
+                console.error('Failed to update status', errors);
+            },
+            });
+        }
+        else {
+            console.log("bawal i-update")
+            // FE show toast message to the page.
+        }
+    };
 
     // Define all statuses
     const allStatuses = [
@@ -91,39 +95,36 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
 
     return (
         <DropdownMenu>
-            {user.roles[0].name === "maintenance_personnel" || user.permissions.includes("update assigned work order status") ? (
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="outline"
-                        className={`px-5 py-1 h-6 border rounded flex items-center justify-between gap-1 ${getStatusColor(
-                            value
-                        )}`}
-                    >
-                        {value}
-                        <ChevronDown className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-            ) : (
-                <span
-                    className={`px-5 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(
-                        value
-                    )}`}
+            {(user.roles[0].name === "maintenance_personnel" && (window.route && window.route().current("work-orders.assigned-tasks"))) ? (
+            <DropdownMenuTrigger asChild>
+                <Button
+                variant={"link"}
+                className={`px-5 py-1 !h-6 border rounded flex items-center justify-between gap-1 text-xs hover:no-underline ${getStatusColor(
+                    value
+                )}`}
                 >
-                    {value}
-                </span>
+                {value}
+                <ChevronDown className="h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            ) : (
+            <span
+                className={`px-5 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(
+                value
+                )}`}
+            >
+                {value}
+            </span>
             )}
-            <DropdownMenuContent align="end">
-                {statuses.map((status) => (
-                    <DropdownMenuItem
-                        key={status}
-                        onClick={() =>
-                            console.log("Change status to", status)
-                            // handleUpdate(status)
-                        }
-                    >
-                        {status}
-                    </DropdownMenuItem>
-                ))}
+            <DropdownMenuContent align="center">
+            {statuses.map((status) => (
+                <DropdownMenuItem
+                key={status}
+                onClick={() => {handleUpdate(status, row.original.id)}}
+                >
+                {status}
+                </DropdownMenuItem>
+            ))}
             </DropdownMenuContent>
         </DropdownMenu>
     );

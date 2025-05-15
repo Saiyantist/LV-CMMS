@@ -15,6 +15,7 @@ import {
     ChevronDown,
     ChevronLeft,
     ChevronRight,
+    ChevronsUpDown,
     ChevronUp,
     Search,
     SlidersHorizontal,
@@ -200,6 +201,7 @@ export function Datatable<TData, TValue>({ columns, data, placeholder = "Search"
                         }`}
                       >
                         <span>
+                          {header.column.getCanSort() && !header.column.getIsSorted() ? <ChevronsUpDown className="h-4 w-4"/> : null}
                           {header.column.getIsSorted() === "asc" && <ChevronUp className="h-4 w-4" />}
                           {header.column.getIsSorted() === "desc" && <ChevronDown className="h-4 w-4" />}
                         </span>
@@ -229,8 +231,8 @@ export function Datatable<TData, TValue>({ columns, data, placeholder = "Search"
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                <TableCell colSpan={columns.length} className="h-24 text-md text-center">
+                  No results found.
                 </TableCell>
               </TableRow>
             )}

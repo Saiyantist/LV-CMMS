@@ -80,139 +80,196 @@ export default function IndexLayout({
 }: Props) {
 
     // Define columns for the data table
-    const columns: ColumnDef<WorkOrders>[] = [
-        {
-            accessorKey: "id",
-            header: "ID",
-            cell: ({ row }) => <div>{row.getValue("id")}</div>,
-            meta: {
-                headerClassName: "w-12",
-                searchable: true,
-            },
-        },
-        {
-            accessorKey: "requested_at",
-            header: "Date Requested",
-            cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
-            meta: {
-                headerClassName: "w-[8rem]",
-            },
-        },
-        {
-            accessorKey: "location.name",
-            header: "Location",
-            cell: ({ row }) => <div>{row.original.location.name}</div>,
-            meta: {
-                headerClassName: "max-w-16",
-                searchable: true,
-                filterable: true,
-            },
-        },
-        {
-            accessorKey: "report_description",
-            header: "Description",
-            cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
-            enableSorting: false,
-            meta: {
-                headerClassName: "w-[22%]",
-                cellClassName: "max-w-16 px-2",
-                searchable: true,
-            },
-            
-        },
-        {
-            accessorKey: "scheduled_at",
-            header: "Target Date",
-            cell: ({ row }) => <div>{row.getValue("scheduled_at")}</div>,
-            meta : {
-                headerClassName: "max-w-20",
-                cellClassName: "text-center",   
-                searchable: true,
-            }
-        },
-        {
-            accessorKey: "priority",
-            header: "Priority",
-            cell: ({ row }) => (
-                <div
-                    className={`px-2 py-1 rounded ${getPriorityColor(
-                        row.getValue("priority")
-                    )}`}
-                >
-                    {row.getValue("priority")}
-                </div>
-            ),
-            meta : {
-                headerClassName: "max-w-20",    
-                cellClassName: "text-center",    
-                filterable: true,
-            },
-        },
-        {
-            accessorKey: "assigned_to.name",
-            header: "Assigned to",
-            cell: ({ row }) => <div>{row.original.assigned_to?.name || "Unassigned"}</div>,
-            meta: {
-                headerClassName: "max-w-32",
-                cellClassName: "text-center",  
-                searchable: true,
-                filterable: true,
-            },
-        },
-        ...(activeTab !== "Pending" ||
-        user.roles[0].name === "maintenance_personnel"
-            ? [
-                  {
-                      accessorKey: "status",
-                      header: "Status",
-                      cell: ({
-                          row,
-                      }: {
-                          row: { getValue: (key: string) => any };
-                      }) => (
-                          <StatusCell
-                              value={row.getValue("status")}
-                              user={user}
-                          />
-                      ),
-                      meta : {
-                        cellClassName: "text-center",
-                        filterable: true,
+    let columns: ColumnDef<WorkOrders>[];
 
-                      },
-                  },
-              ]
-            : []),
-        {
-            id: "actions",
-            header: "Action",
-            cell: ({ row }) => (
-                <div className="flex gap-2">
-                    {/* <Button
-                        className="bg-primary hover:bg-secondary text-white h-8 rounded"
-                        onClick={() => console.log("View Work Order", row.original.id)}
+    const isRequesterOrPersonnel =
+        user.roles[0].name === "internal_requester" ||
+        user.roles[0].name === "maintenance_personnel";
+    const canManage = user.permissions.includes("manage work orders");
+
+    if (isRequesterOrPersonnel) {
+        columns = [
+            {
+                accessorKey: "requested_at",
+                header: "Date Requested",
+                cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
+                meta: { headerClassName: "w-1/8" },
+            },
+            {
+                accessorKey: "location.name",
+                header: "Location",
+                cell: ({ row }) => <div>{row.original.location.name}</div>,
+                meta: {
+                    headerClassName: "max-w-1/8",
+                    searchable: true,
+                    filterable: true,
+                },
+            },
+            {
+                accessorKey: "report_description",
+                header: "Description",
+                cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
+                enableSorting: false,
+                meta: {
+                    headerClassName: "w-1/2",
+                    cellClassName: "max-w-16 px-2 text-left",
+                    searchable: true,
+                },
+            },
+            {
+                accessorKey: "status",
+                header: "Status",
+                cell: ({ row }) => (
+                    <StatusCell
+                        value={row.getValue("status")}
+                        user={user}
+                        row={row}
+                    />
+                ),
+                meta: {
+                    cellClassName: "text-center",
+                    filterable: true,
+                },
+            },
+            {
+                id: "actions",
+                header: "Actions",
+                cell: ({ row }) => (
+                    <div className="flex gap-2">
+                        <Button
+                            className="bg-primary h-6 text-xs rounded-sm"
+                            onClick={() => setEditingWorkOrder(row.original)}
+                        >
+                            View
+                        </Button>
+                    </div>
+                ),
+                enableSorting: false,
+            },
+        ];
+    } else if (canManage) {
+        columns = [
+            {
+                accessorKey: "id",
+                header: "ID",
+                cell: ({ row }) => <div>{row.getValue("id")}</div>,
+                meta: {
+                    headerClassName: "w-12",
+                    searchable: true,
+                },
+            },
+            {
+                accessorKey: "requested_at",
+                header: "Date Requested",
+                cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
+                meta: { headerClassName: "w-[8rem]" },
+            },
+            {
+                accessorKey: "location.name",
+                header: "Location",
+                cell: ({ row }) => <div>{row.original.location.name}</div>,
+                meta: {
+                    headerClassName: "w-[10rem]",
+                    searchable: true,
+                    filterable: true,
+                },
+            },
+            {
+                accessorKey: "report_description",
+                header: "Description",
+                cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
+                enableSorting: false,
+                meta: {
+                    headerClassName: "w-[23%]",
+                    cellClassName: "max-w-16 px-2",
+                    searchable: true,
+                },
+            },
+            {
+                accessorKey: "scheduled_at",
+                header: "Target Date",
+                cell: ({ row }) => <div>{row.getValue("scheduled_at")}</div>,
+                meta: {
+                    headerClassName: "max-w-[6rem]",
+                    cellClassName: "text-center",
+                    searchable: true,
+                },
+            },
+            {
+                accessorKey: "priority",
+                header: "Priority",
+                cell: ({ row }) => (
+                    <div
+                        className={`px-2 py-1 rounded ${getPriorityColor(
+                            row.getValue("priority")
+                        )}`}
                     >
-                        View
-                    </Button> */}
-                    <Button
-                        className="bg-primary h-8 text-xs rounded-sm"
-                        onClick={() =>
-                            setEditingWorkOrder(row.original)
-                        }
-                    >
-                        Edit
-                    </Button>
-                    <Button
-                        className="bg-red-600 h-8 text-white text-xs rounded-sm hover:bg-red-800 transition"
-                        onClick={() => handleDelete(row.original.id)}
-                    >
-                        Delete
-                    </Button>
-                </div>
-            ),
-            enableSorting: false,
-        },
-    ];
+                        {row.getValue("priority")}
+                    </div>
+                ),
+                meta: {
+                    headerClassName: "max-w-20",
+                    cellClassName: "text-center",
+                    filterable: true,
+                },
+            },
+            {
+                accessorKey: "assigned_to.name",
+                header: "Assigned to",
+                cell: ({ row }) => <div>{row.original.assigned_to?.name || "Unassigned"}</div>,
+                meta: {
+                    headerClassName: "max-w-32",
+                    cellClassName: "text-center",
+                    searchable: true,
+                    filterable: true,
+                },
+            },
+            ...(activeTab !== "Pending"
+                ? [
+                    {
+                        accessorKey: "status",
+                        header: "Status",
+                        cell: ({ row }) => (
+                            <StatusCell
+                                value={row.getValue("status")}
+                                user={user}
+                                row={row}
+                            />
+                        ),
+                        enableSorting: false,
+                        meta: {
+                            headerClassName: "max-w-10",
+                            cellClassName: "text-center",
+                            filterable: true,
+                        },
+                    },
+                ]
+                : []), /** Hide status if activeTab is "Pending" */
+            {
+                id: "actions",
+                header: "Action",
+                cell: ({ row }) => (
+                    <div className="flex gap-2">
+                        <Button
+                            className="bg-primary h-6 text-xs rounded-sm"
+                            onClick={() => setEditingWorkOrder(row.original)}
+                        >
+                            Edit
+                        </Button>
+                        <Button
+                            className="bg-red-600 h-6 text-white text-xs rounded-sm hover:bg-red-800 transition"
+                            onClick={() => handleDelete(row.original.id)}
+                        >
+                            Delete
+                        </Button>
+                    </div>
+                ),
+                enableSorting: false,
+            },
+        ];
+    } else {
+        columns = [];
+    }
 
     return (
         <AuthenticatedLayout>
@@ -290,8 +347,8 @@ export default function IndexLayout({
 
             {/* Desktop Table View */}
             <div
-                className={`hidden md:block overflow-x-auto rounded-md -mt-[3.8rem] ${
-                    !user.permissions.includes("manage work orders") ? "-mt-1" : ""
+                className={`hidden md:block overflow-x-auto rounded-md -mt-[4.1rem] ${
+                    !user.permissions.includes("manage work orders") ? "!-mt-[0.7rem]" : ""
                 }`}
             >
                 <Datatable columns={columns} data={filteredWorkOrders} placeholder="Search here" />
