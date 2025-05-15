@@ -12,6 +12,7 @@ import { StatusCell } from "./components/StatusCell";
 import { Datatable } from "./components/Datatable";
 import { getPriorityColor } from "@/utils/getPriorityColor";
 import { getStatusColor } from "@/utils/getStatusColor";
+import { prioritySorting } from "@/utils/prioritySorting";
 
 interface Props {
     user: any;
@@ -207,6 +208,7 @@ export default function IndexLayout({
                         {row.getValue("priority")}
                     </div>
                 ),
+                sortingFn: prioritySorting,
                 meta: {
                     headerClassName: "max-w-20",
                     cellClassName: "text-center",
@@ -316,9 +318,9 @@ export default function IndexLayout({
 
             {/* Tabs - Desktop */}
             {user.permissions.includes("manage work orders") && (
-                <div className="hidden md:flex mt-4">
+                <div className="hidden md:flex">
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="bg-gray-200 text-black rounded-md mb-4">
+                        <TabsList className="bg-gray-200 text-black rounded-md mb-6">
                             <TabsTrigger value="Pending">Pending</TabsTrigger>
                             <TabsTrigger value="Accepted">Accepted</TabsTrigger>
                             <TabsTrigger value="For Budget Request">For Budget Request</TabsTrigger>

@@ -12,6 +12,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Datatable } from "./components/Datatable";
 import { StatusCell } from "./components/StatusCell";
 import { getPriorityColor } from "@/utils/getPriorityColor";
+import { prioritySorting } from "@/utils/prioritySorting";
 
 // import FullCalendar from "@fullcalendar/react"; // FullCalendar library
 // import dayGridPlugin from "@fullcalendar/daygrid"; // Month view
@@ -73,6 +74,7 @@ export default function AssignedTask({ user, workOrders }: { user: {id: number; 
                     {row.getValue("priority")}
                 </div>
             ),
+            sortingFn: prioritySorting,
             meta: {
                 headerClassName: "max-w-20",    
                 cellClassName: "text-center",    
