@@ -397,7 +397,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     </div>
 
                     {/* Admin Items (if any) */}
-                    {/* {adminItems.length > 0 && (
+                    {adminItems.length > 0 && (
                         <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
                             {adminItems.map((item) => (
                                 <Link
@@ -414,7 +414,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 </Link>
                             ))}
                         </div>
-                    )} */}
+                    )}
 
                     {/* Settings and Logout */}
                     <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
