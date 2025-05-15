@@ -83,12 +83,6 @@ export function Datatable<TData, TValue>({ columns, data, placeholder = "Search"
     [columns],
   )
 
-  // Get only filterable columns
-  const filterableColumns = useMemo(
-    () => columns.filter((col) => col.meta?.filterable && col.accessorKey) as ColumnDef<TData, TValue>[],
-    [columns],
-  )
-
   // Apply search filtering
   const filteredData = useMemo(() => {
     let filtered = data

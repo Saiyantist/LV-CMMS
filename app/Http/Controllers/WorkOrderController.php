@@ -48,10 +48,10 @@ class WorkOrderController extends Controller
                     'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
                 ],
                 'requested_at' => \Carbon\Carbon::parse($wo->requested_at)->format('m/d/Y'),
-                'assigned_to' => [
+                'assigned_to' => $wo->assignedTo ? [
                     'id' => $wo->assignedTo->id,
                     'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
-                ],
+                ] : null,
                 'assigned_at' => \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y'),
                 'scheduled_at' => \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y'),
                 'completed_at' => \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y'),
@@ -291,10 +291,10 @@ class WorkOrderController extends Controller
                         'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
                     ],
                     'requested_at' => \Carbon\Carbon::parse($wo->requested_at)->format('m/d/Y'),
-                    'assigned_to' => [
+                    'assigned_to' => $wo->assignedTo ? [
                         'id' => $wo->assignedTo->id,
                         'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
-                    ],
+                    ] : null,
                     'assigned_at' => \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y'),
                     'scheduled_at' => \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y'),
                     'completed_at' => \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y'),
