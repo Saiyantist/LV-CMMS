@@ -12,7 +12,7 @@ interface Asset {
     location: {
         id: number;
         name: string;
-    }
+    };
     status: string;
     date_acquired: string;
     last_maintained_at: string;
@@ -31,7 +31,6 @@ interface Location {
 }
 
 const AssetManagement: React.FC = () => {
-
     const { props } = usePage();
 
     const assets = props.assets as Asset[]; // Gotten from the controller
@@ -63,25 +62,25 @@ const AssetManagement: React.FC = () => {
         <Authenticated>
             <Head title="Asset Management" />
 
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-                <header className="mb-6">
-                    <div className="bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 text-black">
-                            <h1 className="text-2xl font-semibold text-center sm:text-left">
-                                Asset Management
-                            </h1>
-                            <div className="w-full sm:w-auto flex sm:ml-4 justify-center sm:justify-start">
-                                <PrimaryButton
-                                    onClick={() => setIsCreating(true)}
-                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md"
-                                >
-                                    Add an Asset
-                                </PrimaryButton>
-                            </div>
+            <header className="mb-6">
+                <div className="bg-white shadow-sm sm:rounded-lg">
+                    <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 text-black">
+                        <h1 className="text-2xl font-semibold text-center sm:text-left">
+                            Asset Management
+                        </h1>
+                        <div className="w-full sm:w-auto flex sm:ml-4 justify-center sm:justify-start">
+                            <PrimaryButton
+                                onClick={() => setIsCreating(true)}
+                                className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md"
+                            >
+                                Add an Asset
+                            </PrimaryButton>
                         </div>
                     </div>
-                </header>
+                </div>
+            </header>
 
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
                 {/* Desktop Table View */}
                 <div className="hidden sm:block overflow-x-auto">
                     <table className="min-w-full table-auto border border-gray-200 rounded-lg shadow-sm overflow-hidden">
@@ -145,9 +144,7 @@ const AssetManagement: React.FC = () => {
                                     <td className="p-3 text-center">
                                         {asset.id}
                                     </td>
-                                    <td className="p-3">
-                                        {asset.name}
-                                    </td>
+                                    <td className="p-3">{asset.name}</td>
                                     <td className="p-3 text-center">
                                         {asset.specification_details}
                                     </td>

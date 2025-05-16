@@ -46,18 +46,15 @@ const PreventiveMaintenance: React.FC = () => {
         <Authenticated>
             <Head title="Preventive Maintenance" />
 
-            <div className="p-4">
-                <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
-                    <div className="bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 sm:gap-6 text-black">
-                            {/* Title */}
-                            <h1 className="text-2xl font-semibold text-center sm:text-left">
-                                Preventive Maintenance
-                            </h1>
-                        </div>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+                <div className="overflow-hidden bg-white shadow-sm rounded-lg">
+                    <div className="p-6 text-black text-lg sm:text-xl text-center sm:text-left">
+                        Preventive Maintenance
                     </div>
-                </header>
+                </div>
+            </div>
 
+            <div className="p-4">
                 {/* Desktop Table */}
                 <div className="hidden sm:block overflow-x-auto">
                     <table className="min-w-full table-auto border border-gray-200">

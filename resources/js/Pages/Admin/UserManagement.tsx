@@ -59,16 +59,16 @@ export default function UserManagement({ users, roles, auth }: UserRoleProps) {
     };
 
     return (
-        <AuthenticatedLayout
-            header={
+        <AuthenticatedLayout>
+            <Head title="User Management" />
+
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
                 <div className="overflow-hidden bg-white shadow-sm rounded-lg">
-                    <div className="p-6 text-black text-lg sm:text-xl">
+                    <div className="p-6 text-black text-lg sm:text-xl text-center sm:text-left">
                         User Management
                     </div>
                 </div>
-            }
-        >
-            <Head title="User Management" />
+            </div>
 
             <UserManagementLayout
                 users={users}
