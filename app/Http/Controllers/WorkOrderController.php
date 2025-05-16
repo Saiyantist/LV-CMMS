@@ -30,7 +30,6 @@ class WorkOrderController extends Controller
             $workOrders->where('requested_by', $user->id);
         }
 
-        
         /**
          * Format work orders to include images
          */
@@ -218,12 +217,20 @@ class WorkOrderController extends Controller
         if ($user->hasRole('maintenance_personnel')) {
 
             if ($workOrder->assigned_to !== $user->id) {
-                return response()->json(['error' => 'You are not allowed to update this work order.'], 403);
+                return redirect()->route('work-orders.assigned-tasks')->with(['error' => 'You are not allowed to update this work order.']);
             }
 
-            $workOrder->update(['status' => $request->status]);
+            $validTransitions = [
+                'Assigned' => ['Ongoing', 'Completed'],
+                'Ongoing' => ['Assigned', 'Completed'],
+            ];
 
-            return redirect()->route('work-orders.assigned-tasks')->with('success', 'Work Order updated successfully.');
+            if (isset($validTransitions[$workOrder->status]) && in_array($request->status, $validTransitions[$workOrder->status])) {
+                $workOrder->update(['status' => $request->status]);
+                return redirect()->route('work-orders.assigned-tasks')->with(['success' => 'Work Order updated successfully']);
+            }
+
+            return redirect()->route('work-orders.assigned-tasks')->with(['error' => 'Can only update "Assigned" and "Ongoing".']);
         }
 
         /** Internal Requester */

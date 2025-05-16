@@ -29,8 +29,6 @@ class StoreWorkOrderRequest extends FormRequest
     {
         $user = auth()->user();
 
-        // dd($this->route()->getName());
-
         if ($this->route()->getName() === 'work-orders.update') {
             if ($user->hasRole('maintenance_personnel')){
                 return $rules =  [ 'status' => ['required', Rule::in(['Ongoing', 'Completed'])]];
