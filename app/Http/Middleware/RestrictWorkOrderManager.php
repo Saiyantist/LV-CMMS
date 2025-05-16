@@ -16,7 +16,7 @@ class RestrictWorkOrderManager
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->user()->hasPermissionTo('manage work orders')) {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized to access this page');
         }
 
         return $next($request);
