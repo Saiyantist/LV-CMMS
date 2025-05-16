@@ -425,7 +425,11 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
     return (
         <AuthenticatedLayout>
             <div className="container mx-auto py-6">
-                <h1 className="text-2xl font-bold mb-6">My Bookings</h1>
+                <div className="bg-white p-4 rounded mb-6">
+                    <h1 className="text-2xl font-bold text-center md:text-left">
+                        My Bookings
+                    </h1>
+                </div>
 
                 <div className="flex justify-between mb-6">
                     <div className="relative w-80">

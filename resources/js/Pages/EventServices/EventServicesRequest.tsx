@@ -47,7 +47,9 @@ export default function EventServicesRequest() {
     });
 
     // Step 5: Requested Services
-    const [requestedServices, setRequestedServices] = useState<string[]>([]);
+    const [requestedServices, setRequestedServices] = useState<
+        Record<string, string[]>
+    >({});
 
     // Step 6: Compliance & Consent
     const [dataPrivacyAgreed, setDataPrivacyAgreed] = useState(false);
@@ -140,6 +142,7 @@ export default function EventServicesRequest() {
     };
 
     const handleBack = () => {
+        // window.scrollTo({ top: 0, behavior: "smooth" });
         setError(null);
         if (showSummary) {
             setShowSummary(false);
@@ -290,7 +293,7 @@ export default function EventServicesRequest() {
                 {currentStep === 2 && (
                     <Gallery
                         selectedId={selectedGalleryItem}
-                        onSelect={(id: number) => {
+                        onSelect={(id: number | null) => {
                             setSelectedGalleryItem(id);
                             setError(null);
                         }}

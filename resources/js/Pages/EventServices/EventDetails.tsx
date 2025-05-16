@@ -115,17 +115,32 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
                         Number of Participants
                     </label>
                     <input
-                        type="number"
+                        type="text"
                         id="participantCount"
                         name="participantCount"
-                        max={10000}
                         value={value.participantCount}
-                        onChange={(e) =>
-                            onChange({
-                                ...value,
-                                participantCount: e.target.value,
-                            })
-                        }
+                        onChange={(e) => {
+                            const raw = e.target.value;
+
+                            // Allow only digits
+                            if (/^\d*$/.test(raw)) {
+                                const num = Number(raw);
+
+                                if (raw === "") {
+                                    onChange({
+                                        ...value,
+                                        participantCount: "",
+                                    });
+                                } else if (num >= 1 && num <= 9999) {
+                                    onChange({
+                                        ...value,
+                                        participantCount: raw,
+                                    });
+                                }
+                            }
+                        }}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-6 transition-colors duration-200 ease-in-out"
                     />
                 </div>

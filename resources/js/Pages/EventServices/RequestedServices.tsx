@@ -45,10 +45,15 @@ const servicesCategories = [
     },
 ];
 
-const RequestedServices = () => {
-    const [selectedServices, setSelectedServices] = useState<
-        Record<string, string[]>
-    >({});
+interface RequestedServicesProps {
+    value: Record<string, string[]>;
+    onChange: (val: Record<string, string[]>) => void;
+}
+
+const RequestedServices: React.FC<RequestedServicesProps> = ({
+    value,
+    onChange,
+}) => {
     const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(
         null
     );
@@ -59,14 +64,13 @@ const RequestedServices = () => {
     };
 
     const handleCheckboxChange = (category: string, service: string) => {
-        setSelectedServices((prev) => {
-            const current = prev[category] || [];
-            return {
-                ...prev,
-                [category]: current.includes(service)
-                    ? current.filter((item) => item !== service)
-                    : [...current, service],
-            };
+        const current = value[category] || [];
+        const updated = current.includes(service)
+            ? current.filter((item) => item !== service)
+            : [...current, service];
+        onChange({
+            ...value,
+            [category]: updated,
         });
     };
 
@@ -101,7 +105,9 @@ const RequestedServices = () => {
                     <div
                         key={category.label}
                         className="relative space-y-2"
-                        ref={(el) => { dropdownRefs.current[index] = el; }}
+                        ref={(el) => {
+                            dropdownRefs.current[index] = el;
+                        }}
                     >
                         <div>
                             <p className="text-sm font-medium text-gray-800 uppercase">
@@ -117,8 +123,8 @@ const RequestedServices = () => {
                             onClick={() => toggleDropdown(index)}
                             className="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left shadow-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
-                            {selectedServices[category.label]?.length
-                                ? selectedServices[category.label].join(", ")
+                            {value[category.label]?.length
+                                ? value[category.label].join(", ")
                                 : "Select Services"}
                         </button>
 
@@ -132,9 +138,9 @@ const RequestedServices = () => {
                                         <input
                                             type="checkbox"
                                             checked={
-                                                selectedServices[
-                                                    category.label
-                                                ]?.includes(service) || false
+                                                value[category.label]?.includes(
+                                                    service
+                                                ) || false
                                             }
                                             onChange={() =>
                                                 handleCheckboxChange(
@@ -158,18 +164,17 @@ const RequestedServices = () => {
             <div className="mt-6 text-sm text-gray-600">
                 <strong>Selected Services:</strong>
                 <ul className="list-disc list-inside mt-2">
-                    {Object.entries(selectedServices).map(
-                        ([category, services]) =>
-                            services.length ? (
-                                <li key={category}>
-                                    <strong>{category}:</strong>{" "}
-                                    {services.join(", ")}
-                                </li>
-                            ) : null
+                    {Object.entries(value).map(([category, services]) =>
+                        services.length ? (
+                            <li key={category}>
+                                <strong>{category}:</strong>{" "}
+                                {services.join(", ")}
+                            </li>
+                        ) : null
                     )}
-                    {Object.values(selectedServices).every(
-                        (s) => s.length === 0
-                    ) && <li>None</li>}
+                    {Object.values(value).every((s) => s.length === 0) && (
+                        <li>None</li>
+                    )}
                 </ul>
             </div>
         </div>

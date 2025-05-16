@@ -7,6 +7,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import BookingList from "./booking-list";
 import { usePage } from "@inertiajs/react";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
+import { router } from "@inertiajs/react";
 
 // Helper to get month name and days in month
 const MONTHS = [
@@ -213,11 +214,19 @@ export default function EventCalendar() {
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                                <button className="bg-blue-900 hover:bg-blue-950 text-white rounded-md px-4 py-2 flex items-center gap-2 w-full sm:w-auto">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        router.visit(
+                                            route("event-services.request") ||
+                                                ""
+                                        )
+                                    }
+                                    className="bg-blue-900 hover:bg-blue-950 text-white rounded-md px-4 py-2 flex items-center gap-2 w-full sm:w-auto"
+                                >
                                     <Plus size={18} />
                                     Event Services Request
                                 </button>
-
                                 <div className="flex items-center gap-2">
                                     <button
                                         className="p-1 rounded-md hover:bg-gray-100"
