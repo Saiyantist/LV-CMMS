@@ -61,7 +61,7 @@ interface WorkOrders {
         id: number;
         name: string;
     };
-};
+}
 
 export default function IndexLayout({
     user,
@@ -79,7 +79,6 @@ export default function IndexLayout({
     scrollToTop,
     handleDelete,
 }: Props) {
-
     // Define columns for the data table
     let columns: ColumnDef<WorkOrders>[];
 
@@ -109,7 +108,9 @@ export default function IndexLayout({
             {
                 accessorKey: "report_description",
                 header: "Description",
-                cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
+                cell: ({ row }) => (
+                    <div>{row.getValue("report_description")}</div>
+                ),
                 enableSorting: false,
                 meta: {
                     headerClassName: "w-1/2",
@@ -178,7 +179,9 @@ export default function IndexLayout({
             {
                 accessorKey: "report_description",
                 header: "Description",
-                cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
+                cell: ({ row }) => (
+                    <div>{row.getValue("report_description")}</div>
+                ),
                 enableSorting: false,
                 meta: {
                     headerClassName: "w-[23%]",
@@ -218,7 +221,9 @@ export default function IndexLayout({
             {
                 accessorKey: "assigned_to.name",
                 header: "Assigned to",
-                cell: ({ row }) => <div>{row.original.assigned_to?.name || "Unassigned"}</div>,
+                cell: ({ row }) => (
+                    <div>{row.original.assigned_to?.name || "Unassigned"}</div>
+                ),
                 meta: {
                     headerClassName: "max-w-32",
                     cellClassName: "text-center",
@@ -228,25 +233,25 @@ export default function IndexLayout({
             },
             ...(activeTab !== "Pending"
                 ? [
-                    {
-                        accessorKey: "status",
-                        header: "Status",
-                        cell: ({ row }) => (
-                            <StatusCell
-                                value={row.getValue("status")}
-                                user={user}
-                                row={row}
-                            />
-                        ),
-                        enableSorting: false,
-                        meta: {
-                            headerClassName: "max-w-10",
-                            cellClassName: "text-center",
-                            filterable: true,
-                        },
-                    },
-                ]
-                : []), /** Hide status if activeTab is "Pending" */
+                      {
+                          accessorKey: "status",
+                          header: "Status",
+                          cell: ({ row }) => (
+                              <StatusCell
+                                  value={row.getValue("status")}
+                                  user={user}
+                                  row={row}
+                              />
+                          ),
+                          enableSorting: false,
+                          meta: {
+                              headerClassName: "max-w-10",
+                              cellClassName: "text-center",
+                              filterable: true,
+                          },
+                      },
+                  ]
+                : []) /** Hide status if activeTab is "Pending" */,
             {
                 id: "actions",
                 header: "Action",
@@ -323,7 +328,9 @@ export default function IndexLayout({
                         <TabsList className="bg-gray-200 text-black rounded-md mb-6">
                             <TabsTrigger value="Pending">Pending</TabsTrigger>
                             <TabsTrigger value="Accepted">Accepted</TabsTrigger>
-                            <TabsTrigger value="For Budget Request">For Budget Request</TabsTrigger>
+                            <TabsTrigger value="For Budget Request">
+                                For Budget Request
+                            </TabsTrigger>
                             <TabsTrigger value="Declined">Declined</TabsTrigger>
                         </TabsList>
                     </Tabs>
@@ -350,86 +357,16 @@ export default function IndexLayout({
             {/* Desktop Table View */}
             <div
                 className={`hidden md:block overflow-x-auto rounded-md -mt-[4.1rem] ${
-                    !user.permissions.includes("manage work orders") ? "!-mt-[0.7rem]" : ""
+                    !user.permissions.includes("manage work orders")
+                        ? "!-mt-[0.7rem]"
+                        : ""
                 }`}
             >
-                <Datatable columns={columns} data={filteredWorkOrders} placeholder="Search here" />
-
-                {/* <table className="w-full table-auto border-collapse text-sm text-gray-700">
-                    <thead>
-                        <tr className="bg-secondary text-white">
-                            <th className="border px-6 py-3 text-auto">ID</th>
-                            <th className="border px-6 py-3 text-auto">
-                                Description
-                            </th>
-                            <th className="border px-6 py-3 text-auto">
-                                Location
-                            </th>
-                            <th className="border px-6 py-3 text-auto">
-                                Status
-                            </th>
-                            <th className="border px-6 py-3 text-auto">
-                                Priority
-                            </th>
-                            <th className="border px-6 py-3 text-auto">
-                                Requested At
-                            </th>
-                            <th className="border px-6 py-3 text-auto">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredWorkOrders.map((workOrder) => (
-                            <tr key={workOrder.id} className="hover:bg-gray-50">
-                                <td className="border px-6 py-4 text-center">
-                                    {workOrder.id}
-                                </td>
-                                <td className="border px-6 py-4">
-                                    {workOrder.report_description}
-                                </td>
-                                <td className="border px-6 py-4">
-                                    {workOrder.location?.name || "N/A"}
-                                </td>
-                                <td
-                                    className={`border px-6 py-4 ${getStatusColor(
-                                        workOrder.status
-                                    )}`}
-                                >
-                                    {workOrder.status}
-                                </td>
-                                <td
-                                    className={`border px-6 py-4 ${getPriorityColor(
-                                        workOrder.priority
-                                    )}`}
-                                >
-                                    {workOrder.priority}
-                                </td>
-                                <td className="border px-6 py-4">
-                                    {new Date(
-                                        workOrder.requested_at
-                                    ).toLocaleDateString()}
-                                </td>
-                                <td className="border px-6 py-4 gap-2 flex justify-center">
-                                    <PrimaryButton
-                                        className="bg-secondary"
-                                        onClick={() =>
-                                            setEditingWorkOrder(workOrder)
-                                        }
-                                    >
-                                        Edit
-                                    </PrimaryButton>
-                                    <PrimaryButton
-                                        className="bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700 transition"
-                                        onClick={() => handleDelete(workOrder.id)}
-                                    >
-                                        Delete
-                                    </PrimaryButton>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table> */}
+                <Datatable
+                    columns={columns}
+                    data={filteredWorkOrders}
+                    placeholder="Search here"
+                />
             </div>
 
             {/* Mobile Card View */}
