@@ -148,7 +148,55 @@ class WorkOrderController extends Controller
      */
     public function show(WorkOrder $workOrder)
     {
-        //
+        $user = auth()->user();
+
+        $workOrder->load(['location', 'asset', 'requestedBy', 'assignedTo', 'images']);
+
+        $formattedWorkOrder = [
+            'id' => $workOrder->id,
+            'report_description' => $workOrder->report_description,
+            'status' => $workOrder->status,
+            'work_order_type' => $workOrder->work_order_type,
+            'label' => $workOrder->label,
+            'priority' => $workOrder->priority ?: "No Priority",
+            'remarks' => $workOrder->remarks,
+            'requested_by' => [
+                'id' => $workOrder->requestedBy->id,
+                'name' => $workOrder->requestedBy->first_name . ' ' . $workOrder->requestedBy->last_name,
+            ],
+            'requested_at' => \Carbon\Carbon::parse($workOrder->requested_at)->format('m/d/Y'),
+            'assigned_to' => $workOrder->assignedTo ? [
+                'id' => $workOrder->assignedTo->id,
+                'name' => $workOrder->assignedTo->first_name . ' ' . $workOrder->assignedTo->last_name,
+            ] : null,
+            'assigned_at' => $workOrder->assigned_at ? \Carbon\Carbon::parse($workOrder->assigned_at)->format('m/d/Y') : null,
+            'scheduled_at' => $workOrder->scheduled_at ? \Carbon\Carbon::parse($workOrder->scheduled_at)->format('m/d/Y') : null,
+            'completed_at' => $workOrder->completed_at ? \Carbon\Carbon::parse($workOrder->completed_at)->format('m/d/Y') : null,
+            'location' => [
+                'id' => $workOrder->location_id,
+                'name' => $workOrder->location ? $workOrder->location->name : null,
+            ],
+            'images' => $workOrder->images->pluck('url')->toArray(),
+            'asset' => $workOrder->asset ? [
+                'id' => $workOrder->asset->id,
+                'name' => $workOrder->asset->name,
+                'specification_details' => $workOrder->asset->specification_details,
+                'status' => $workOrder->asset->status,
+                'location_id' => $workOrder->asset->location_id,
+            ] : null,
+        ];
+
+        return Inertia::render('WorkOrders/Show', [
+            'workOrder' => $formattedWorkOrder,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'roles' => $user->roles->map(function ($role) {
+                    return ['name' => $role->name];
+                }),
+                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+            ],
+        ]);
     }
 
     /**

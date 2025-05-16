@@ -104,7 +104,10 @@ Route::middleware(['auth', 'restrict_external', 'verified', 'hasRole'])->group(f
     Route::post('/locations', [LocationController::class, 'store']);
 });
 
-
+// API route for work order statuses (for chart)
+Route::get('/api/work-orders/statuses', function () {
+    return \App\Models\WorkOrder::select('status')->get();
+})->middleware(['auth', 'verified'])->name('api.work-orders.statuses');
 
 // Event Services Routes
 Route::get('/booking-calendar', [EventServicesController::class, 'index'])->name('booking-calendar');
