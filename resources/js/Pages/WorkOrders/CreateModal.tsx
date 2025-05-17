@@ -133,39 +133,29 @@ export default function CreateWorkOrderModal({
 
     return (
         <div
-            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-gray-800 bg-opacity-25 backdrop-blur-[1px] flex items-center justify-center z-50"
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-lg shadow-lg w-full xl:max-w-3xl lg:max-w-2xl max-h-auto"
+                className="bg-white rounded-lg shadow-lg w-full max-w-3xl md:max-w-xl lg:max-w-2xl p-6 overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
             >
                 <form
                     onSubmit={submit}
-                    className="p-4 bg-white shadow-md rounded-lg"
+                    className="space-y-4"
                 >
-                    <div className="flex justify-between items-center p- rounded-t-lg">
-                        <h2 className="px-6 text-xl font-bold text-gray-800">
-                            Create Work Order
-                        </h2>
-
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="bg-white rounded-3xl px-2 py-0 border-2 hover:bg-red-400 hover:text-white"
-                        >
-                            <span className="text-md ">x</span>
-                        </button>
-                    </div>
+                    <h2 className="px-6 text-xl font-bold text-gray-800">
+                        Create Work Order
+                    </h2>
 
                     <hr className="my-4" />
 
-                    <div className="max-h-[70vh] overflow-y-auto px-6">
+                    <div className="max-h-[75vh] text-sm font-thin overflow-y-auto px-6 space-y-2">
                         {/* Location Search Input */}
-                        <label className="block font-semibold text-gray-700">
-                            Location
-                        </label>
                         <div ref={dropdownRef} className="mb-4 relative">
+                            <label className="block font-medium text-gray-700">
+                                Location
+                            </label>
                             <input
                                 type="text"
                                 value={typedLocation}
@@ -206,9 +196,22 @@ export default function CreateWorkOrderModal({
                             )}
                         </div>
 
+                        {/* Checker if typed location is custom */}
+                        {typedLocation &&
+                            !locations.some(
+                                (loc) =>
+                                    loc.name.toLowerCase() ===
+                                    typedLocation.toLowerCase()
+                            ) && (
+                                <p className="text-yellow-500 text-sm">
+                                    Location does not exist. If this is correct,
+                                    proceed with the custom location.
+                                </p>
+                        )}
+
                         {/* Report Description */}
-                        <div className="mb-4">
-                            <label className="block font-semibold text-gray-700">
+                        <div className="">
+                            <label className="block font-medium text-gray-700">
                                 Description
                             </label>
                             <textarea
@@ -234,7 +237,7 @@ export default function CreateWorkOrderModal({
                                 <div className="flex flex-wrap gap-4 mb-4">
                                     {/* Work Order Type */}
                                     <div className="flex-1">
-                                        <label className="block font-semibold text-gray-700">
+                                        <label className="block font-medium text-gray-700">
                                             Work Order Type
                                         </label>
                                         <select
@@ -261,7 +264,7 @@ export default function CreateWorkOrderModal({
 
                                     {/* Label */}
                                     <div className="flex-1">
-                                        <label className="block font-semibold text-gray-700">
+                                        <label className="block font-medium text-gray-700">
                                             Label
                                         </label>
                                         <select
@@ -300,7 +303,7 @@ export default function CreateWorkOrderModal({
 
                                     {/* Status */}
                                     <div className="flex-1">
-                                        <label className="block font-semibold text-gray-700">
+                                        <label className="block font-medium text-gray-700">
                                             Status
                                         </label>
                                         <select
@@ -328,7 +331,7 @@ export default function CreateWorkOrderModal({
                                 <div className="flex flex-wrap gap-4 mb-4">
                                     {/* Priority */}
                                     <div className="flex-1 mb-4">
-                                        <label className="block font-semibold text-gray-700">
+                                        <label className="block font-medium text-gray-700">
                                             Priority
                                         </label>
                                         <select
@@ -350,7 +353,7 @@ export default function CreateWorkOrderModal({
                                     </div>
                                     {/* Assigned to */}
                                     <div className="flex-1 mb-4">
-                                        <label className="block font-semibold text-gray-700">
+                                        <label className="block font-medium text-gray-700">
                                             Assign to
                                         </label>
                                         <select
@@ -375,7 +378,7 @@ export default function CreateWorkOrderModal({
 
                                 {/* Remarks */}
                                 <div className="mb-4">
-                                    <label className="block font-semibold text-gray-700">
+                                    <label className="block font-medium text-gray-700">
                                         Remarks
                                     </label>
                                     <textarea
@@ -391,7 +394,7 @@ export default function CreateWorkOrderModal({
 
                         {/* Image Upload */}
                         <div className="mb-4">
-                            <label className="block font-semibold text-gray-700">
+                            <label className="block font-medium text-gray-700">
                                 Upload Images
                             </label>
                             <input

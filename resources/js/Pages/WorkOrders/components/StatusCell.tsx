@@ -72,7 +72,6 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
         "For Budget Request",
         "Cancelled",
         "Declined",
-        "Deleted",
     ];
 
     // Filter statuses based on user role
@@ -94,7 +93,7 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
 
     return (
         <DropdownMenu>
-            {disableStatus.includes(value) ? (
+            {disableStatus.includes(value) && !user.permissions.includes("manage work orders") ? (
             <span
                 className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(
                 value
@@ -102,9 +101,9 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
             >
                 {value}
             </span>
-            ) : (user.roles[0].name === "maintenance_personnel" &&
+            ) : ((user.roles[0].name === "maintenance_personnel" || user.permissions.includes("manage work orders")) &&
               window.route &&
-              window.route().current("work-orders.assigned-tasks")) ? (
+              (window.route().current("work-orders.assigned-tasks") || window.route().current("work-orders.index"))) ? (
             <DropdownMenuTrigger asChild>
                 <Button
                 variant={"link"}

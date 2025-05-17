@@ -18,7 +18,7 @@ export default function AuthenticatedLayout({
             {/* Wrapper for main content */}
             <div className="flex flex-col md:ml-56 pt-[104px] md:pt-0">
                 {/* Top Navbar (Desktop Only) */}
-                <nav className="hidden md:flex justify-end space-x-1 border-b border-gray-100 h-12 px-4 bg-white shadow-sm sticky top-0 z-10">
+                <nav className="hidden md:flex justify-end space-x-1 h-12 px-4 bg-white shadow-sm sticky top-0 z-10">
                     {/* Josh: Make this into a component if you keep seeing it. 👀 */}
                     <Button
                         variant={"ghost"}

@@ -62,7 +62,7 @@ export default function WorkOrders({
         ) {
             if (activeTab === "Pending") return wo.status === "Pending";
             if (activeTab === "Accepted")
-                return ["Assigned", "Ongoing", "Overdue", "Completed"].includes(
+                return ["Assigned", "Scheduled", "Ongoing", "Overdue", "Completed"].includes(
                     wo.status
                 );
             if (activeTab === "For Budget Request")
@@ -76,16 +76,7 @@ export default function WorkOrders({
     const handleDelete = (id: number) => {
         const confirmDelete = confirm("Are you sure you want to delete this work order?");
         if (confirmDelete) {
-            router.delete(`/work-orders/${id}`, {
-
-                // For testing purposes, replace with actual delete flash messages
-                onSuccess: () => {
-                    alert("Work order deleted successfully.");
-                },
-                onError: () => {
-                    alert("Failed to delete the work order. Please try again.");
-                },
-            });
+            router.delete(`/work-orders/${id}`);
         }
     }
     const handleScroll = () => {
