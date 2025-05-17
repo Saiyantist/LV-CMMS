@@ -16,8 +16,13 @@ import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
 
 interface Props {
-    user: any;
-    locations: any[];
+    user: { id: number; name: string; roles: {name: string;}[]; permissions: string[] };
+    locations: { id: number; name: string }[];
+    assets: { 
+        id: number;
+        name: string;
+        location: { id: number; name: string};
+    }[];
     maintenancePersonnel: {
         id: number;
         first_name: string;
@@ -67,6 +72,7 @@ interface WorkOrders {
 export default function IndexLayout({
     user,
     locations,
+    assets,
     maintenancePersonnel,
     filteredWorkOrders,
     tabs,
@@ -287,6 +293,7 @@ export default function IndexLayout({
             {isCreating && (
                 <CreateWorkOrderModal
                     locations={locations}
+                    assets={assets}
                     user={user}
                     maintenancePersonnel={maintenancePersonnel}
                     onClose={() => setIsCreating(false)}

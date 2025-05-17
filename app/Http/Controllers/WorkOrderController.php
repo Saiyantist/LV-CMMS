@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkOrderRequest;
+use App\Models\Asset;
 use App\Models\Image;
 use App\Models\Location;
 use App\Models\User;
@@ -81,6 +82,7 @@ class WorkOrderController extends Controller
         [
             'workOrders' => $formattedWorkOrders,
             'locations' => Location::select('id', 'name')->get(),
+            'assets' => Asset::with(['location:id,name', 'maintenanceHistories'])->get(),
             'maintenancePersonnel' => User::role('maintenance_personnel')->with('roles')->get(),
             'user' => [
                 'id' => $user->id,
@@ -123,6 +125,10 @@ class WorkOrderController extends Controller
             'work_order_type' => $isWorkOrderManager ? $request->work_order_type ?? 'Work Order' : 'Work Order',
             'label' => $isWorkOrderManager ? $request->label ?? 'No Label' : 'No Label',
             'priority' => $isWorkOrderManager ? $request->priority : null,
+            'assigned_to' => $isWorkOrderManager ? $request->assigned_to : null,
+            'assigned_at' => $isWorkOrderManager ? now() : null,
+            'scheduled_at' => $isWorkOrderManager ? $request->scheduled_at : null,
+            'asset_id' => $isWorkOrderManager ? $request->asset_id : null,
             'remarks' => $isWorkOrderManager ? $request->remarks : null,
         ]);
 
@@ -138,7 +144,7 @@ class WorkOrderController extends Controller
                 ]);
             }
         }
-    
+        
         return redirect()->route('work-orders.index')->with('success', 'Work order created successfully.');
     }
 

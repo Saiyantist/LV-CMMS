@@ -30,15 +30,10 @@ class StoreWorkOrderRequest extends FormRequest
         $user = auth()->user();
         $requestData = $this->all();
 
-        
         // Validation from dropDown updates
         if (count($requestData) === 1 && array_key_exists('status', $requestData)) {
             return $rules = [ 'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])]];
         } 
-        
-        // elseif (count($requestData) > 1 && array_key_exists('deleted_images', $requestData)) {
-        //     dd("pasok", $requestData);
-        // }
         
         else {
             // Default Work Order Request Validation
@@ -52,11 +47,14 @@ class StoreWorkOrderRequest extends FormRequest
             // Work Order Manager Validation add-ons
             if ($user->hasPermissionTo('manage work orders')) {
                 $rules = array_merge($rules, [
-                'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
-                'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
-                'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
-                'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // AI-generated in the future
-                'remarks' => 'nullable|string|max:1000',
+                    'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
+                    'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
+                    'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // Maybe AI-generated in the future
+                    'scheduled_at' => 'required|date',
+                    'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
+                    'assigned_to' => 'required',
+                    'asset_id' => 'nullable',
+                    'remarks' => 'nullable|string|max:1000',
                 ]);
             } 
 
