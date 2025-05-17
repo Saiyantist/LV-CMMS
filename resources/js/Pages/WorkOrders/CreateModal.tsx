@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
-import { Head, router, useForm } from "@inertiajs/react";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/Components/shadcnui/dropdown-menu";
-import { Button } from "@/Components/shadcnui/button";
+import { useEffect, useState, useRef } from "react";
+import { router, useForm } from "@inertiajs/react";
 import axios from "axios";
-import { useRef } from "react";
+import { format, parseISO, isValid } from "date-fns"; // make sure this is imported
+import { cn } from "@/lib/utils"
+import { CalendarIcon, X } from "lucide-react";
+import { Button } from "@/Components/shadcnui/button"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/Components/shadcnui/dialog"
+import { Label } from "@/Components/shadcnui/label"
+import { Textarea } from "@/Components/shadcnui/textarea"
+import { Calendar } from "@/Components/shadcnui/calendar"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
+import SmartDropdown from "@/Components/SmartDropdown";
+
+
 interface Location {
     id: number;
     name: string;
@@ -18,434 +20,494 @@ interface Location {
 
 interface CreateWorkOrderProps {
     locations: Location[];
+    assets: { 
+        id: number;
+        name: string;
+        location: { id: number; name: string};
+    }[];
     maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
     user: {
         id: number;
         name: string;
-        roles: string[];
+        roles: {name: string;}[];
         permissions: string[];
     };
     onClose: () => void;
 }
 
-export default function CreateWorkOrderModal({
-    locations,
-    maintenancePersonnel,
-    user,
-    onClose, // for modal, remove all instances if not modal ang paggagamitan along
-}: CreateWorkOrderProps) {
-    const [previewImages, setPreviewImages] = useState<string[]>([]);
-    const [typedLocation, setTypedLocation] = useState("");
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+export default function CreateWorkOrderModal({locations, assets, maintenancePersonnel, user, onClose }: CreateWorkOrderProps) {
+    const [previewImages, setPreviewImages] = useState<string[]>([])
+    const [typedLocation, setTypedLocation] = useState("")
+    const [date, setDate] = useState<Date>()
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    const [localErrors, setLocalErrors] = useState<Record<string, string>>({})
+    const [showCalendar, setShowCalendar] = useState(false)
 
-    const isWorkOrderManager = user.permissions.includes("manage work orders");
+
+
+    const isWorkOrderManager = user.permissions.includes("manage work orders")
 
     const { data, setData, post, errors } = useForm({
         location_id: "",
         report_description: "",
-        images: [] as File[], // Store images as an array
+        images: [] as File[],
         ...(isWorkOrderManager && {
-            status: "Pending",
-            work_order_type: "Work Order",
-            label: "No Label",
+            status: "",
+            work_order_type: "",
+            label: "",
             priority: "",
             assigned_to: "",
             remarks: "",
+            scheduled_at: "",
+            asset_id: ""
         }),
-    });
+    })
 
-    /** Handle Form Submission */
-    const submit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const validateForm = () => {
 
-        let locationId = data.location_id;
+        // fix the location and asset errors
+        const newErrors: Record<string, string> = {}
 
-        // Check the typed location against existing locations
-        const existing = locations.find(loc => loc.name.toLowerCase() === typedLocation.toLowerCase());
-
-        if (existing) {
-            locationId = existing.id.toString();
-        } else {
-            
-            const response = await axios.post("/locations", { // Create the new location before creating the work order.
-                name: typedLocation.trim(),
-            });
-            locationId = response.data.id;
-        }
-
-        const formData = new FormData();
-        formData.append("location_id", locationId);
-        formData.append("report_description", data.report_description);
-        data.images.forEach((image) => formData.append("images[]", image));
+        if (!typedLocation.trim()) newErrors["location_id"] = "Location is required."
+        if (!data.report_description.trim()) newErrors["report_description"] = "Description is required."
 
         if (isWorkOrderManager) {
-            formData.append("status", data.status || "");
-            formData.append("work_order_type", data.work_order_type || "");
-            formData.append("label", data.label || "");
-            formData.append("priority", data.priority || "");
-            formData.append("assigned_to", data.assigned_to || "");
-            formData.append("remarks", data.remarks || "");
+            if (!data.work_order_type) newErrors["work_order_type"] = "Work order type is required."
+            if (!data.label) newErrors["label"] = "Label is required."
+            if (!data.scheduled_at) newErrors["scheduled_at"] = "Target date is required."
+            if (!data.priority) newErrors["priority"] = "Priority is required."
+            if (!data.assigned_to) newErrors["assigned_to"] = "Assigned personnel is required."
+            if (!data.status) newErrors["status"] = "Status is required."
         }
 
-        router.post("/work-orders", formData, {
-            forceFormData: true,
-        });
-        onClose();
-    };
+        setLocalErrors(newErrors)
+        return Object.keys(newErrors).length === 0
+    }
 
-    /** Handle Image Previews */
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            const files = Array.from(e.target.files);
-            setData("images", files);
+  /** Handle Form Submission */
+  const submit = async (e: React.FormEvent) => {
 
-            const previews = files.map((file) => URL.createObjectURL(file));
-            setPreviewImages((prev) => [...prev, ...previews]);
-        }
-    };
+    e.preventDefault()
 
-    useEffect(() => {
-        /** Handle dropdown filtering */
-        const search = typedLocation.toLowerCase();
-        const matches = locations.filter((loc) =>
-            loc.name.toLowerCase().includes(search)
-        );
-        setFilteredLocations(matches);
+    if (!validateForm()) return
 
-        /** Handle click outside dropdown */
-        function handleClickOutside(e: MouseEvent) {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-                setShowDropdown(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside); // Add event listener to detect clicks outside the dropdown
+    let locationId = data.location_id
 
-        /** Cleanup for dropdown and image previews */
+    // Check the typed location against existing locations
+    const existing = locations.find((loc) => loc.name.toLowerCase() === typedLocation.toLowerCase())
 
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
+    if (existing) {
+      locationId = existing.id.toString()
+    } else if (existing !== undefined) {
+      const response = await axios.post("/locations", {
+        name: typedLocation.trim(),
+      })
+      
+      locationId = response.data.id
+    }
 
-            previewImages.forEach((src) => URL.revokeObjectURL(src)); // Revoke object URLs for image previews
-        };
-    }, [previewImages, typedLocation, locations]);
+    const formData = new FormData()
+    formData.append("location_id", locationId)
+    formData.append("report_description", data.report_description)
+    data.images.forEach((image) => formData.append("images[]", image))
 
-    return (
-        <div
-            className="fixed inset-0 bg-gray-800 bg-opacity-25 backdrop-blur-[1px] flex items-center justify-center z-50"
-            onClick={onClose}
-        >
-            <div
-                className="bg-white rounded-lg shadow-lg w-full max-w-3xl md:max-w-xl lg:max-w-2xl p-6 overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <form
-                    onSubmit={submit}
-                    className="space-y-4"
-                >
-                    <h2 className="px-6 text-xl font-bold text-gray-800">
-                        Create Work Order
-                    </h2>
+    if (isWorkOrderManager) {
+        formData.append("work_order_type", data.work_order_type || "")
+        formData.append("label", data.label || "")
+        if (date) formData.append("scheduled_at", format(date, "yyyy-MM-dd"))
+        formData.append("priority", data.priority || "")
+        formData.append("status", data.status || "")
+        formData.append("assigned_to", data.assigned_to || "")
+        formData.append("asset_id", data.asset_id || "")
+        formData.append("remarks", data.remarks || "")
+    }
 
-                    <hr className="my-4" />
+    // // For Debugging
+    // console.log("=== Form Data ===:")
+    // for (const [key, value] of formData.entries()) {
+    //     console.log(`${key}:`, value);
+    // }
 
-                    <div className="max-h-[75vh] text-sm font-thin overflow-y-auto px-6 space-y-2">
-                        {/* Location Search Input */}
-                        <div ref={dropdownRef} className="mb-4 relative">
-                            <label className="block font-medium text-gray-700">
-                                Location
-                            </label>
-                            <input
-                                type="text"
-                                value={typedLocation}
-                                onChange={(e) => {
-                                    setTypedLocation(e.target.value);
-                                    setShowDropdown(true);
-                                }}
-                                onFocus={() => setShowDropdown(true)}
-                                placeholder="Search or type a new location"
-                                className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                            />
-                            {showDropdown && (
-                                <ul className="absolute z-10 bg-white border w-full rounded shadow max-h-60 overflow-y-auto mt-1">
-                                    {filteredLocations.length > 0 ? (
-                                        filteredLocations.map((loc) => (
-                                            <li
-                                                key={loc.id}
-                                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                onClick={() => {
-                                                    setData("location_id", loc.id.toString());
-                                                    setTypedLocation(loc.name);
-                                                    setShowDropdown(false);
-                                                }}
-                                            >
-                                                {loc.name}
-                                            </li>
-                                        ))
-                                    ) : (
-                                        <li className="px-4 py-2 text-gray-500 italic">New location will be created</li>
-                                    )}
-                                </ul>
-                            )}
+    router.post("/work-orders", formData, {
+      forceFormData: true,
+    })
+    onClose()
+  }
 
-                            {errors.location_id && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.location_id}
-                                </p>
-                            )}
-                        </div>
+  /** Handle Image Previews */
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files)
+      setData("images", files)
 
-                        {/* Checker if typed location is custom */}
-                        {typedLocation &&
-                            !locations.some(
-                                (loc) =>
-                                    loc.name.toLowerCase() ===
-                                    typedLocation.toLowerCase()
-                            ) && (
-                                <p className="text-yellow-500 text-sm">
-                                    Location does not exist. If this is correct,
-                                    proceed with the custom location.
-                                </p>
-                        )}
+      const previews = files.map((file) => URL.createObjectURL(file))
+      setPreviewImages((prev) => [...prev, ...previews])
+    }
+  }
 
-                        {/* Report Description */}
-                        <div className="">
-                            <label className="block font-medium text-gray-700">
-                                Description
-                            </label>
-                            <textarea
-                                value={data.report_description}
-                                onChange={(e) =>
-                                    setData(
-                                        "report_description",
-                                        e.target.value
-                                    )
-                                }
-                                className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                                required
-                            />
-                            {errors.report_description && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.report_description}
-                                </p>
-                            )}
-                        </div>
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
 
-                        {isWorkOrderManager && (
-                            <>
-                                <div className="flex flex-wrap gap-4 mb-4">
-                                    {/* Work Order Type */}
-                                    <div className="flex-1">
-                                        <label className="block font-medium text-gray-700">
-                                            Work Order Type
-                                        </label>
-                                        <select
-                                            value={data.work_order_type}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "work_order_type",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="Work Order">
-                                                Work Order
-                                            </option>
-                                            <option value="Preventive Maintenance">
-                                                Preventive Maintenance
-                                            </option>
-                                            <option value="Compliance">
-                                                Compliance
-                                            </option>
-                                        </select>
-                                    </div>
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
 
-                                    {/* Label */}
-                                    <div className="flex-1">
-                                        <label className="block font-medium text-gray-700">
-                                            Label
-                                        </label>
-                                        <select
-                                            value={data.label}
-                                            onChange={(e) =>
-                                                setData("label", e.target.value)
-                                            }
-                                            className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="HVAC">
-                                                HVAC
-                                            </option>
-                                            <option value="Electrical">
-                                                Electrical
-                                            </option>
-                                            <option value="Plumbing">
-                                                Plumbing
-                                            </option>
-                                            <option value="Painting">
-                                                Painting
-                                            </option>
-                                            <option value="Carpentry">
-                                                Carpentry
-                                            </option>
-                                            <option value="Repairing">
-                                                Repairing
-                                            </option>
-                                            <option value="Welding">
-                                                Welding
-                                            </option>
-                                            <option value="No Label">
-                                                No Label
-                                            </option>
-                                        </select>
-                                    </div>
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const files = Array.from(e.dataTransfer.files)
+      setData("images", [...data.images, ...files])
 
-                                    {/* Status */}
-                                    <div className="flex-1">
-                                        <label className="block font-medium text-gray-700">
-                                            Status
-                                        </label>
-                                        <select
-                                            value={data.status}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "status",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="Pending">Pending</option>
-                                            <option value="Assigned">Assigned</option>
-                                            <option value="Ongoing">Ongoing</option>
-                                            <option value="Overdue">Overdue</option>
-                                            <option value="Completed">Completed</option>
-                                            <option value="For Budget Request">For Budget Request</option>
-                                            <option value="Cancelled">Cancelled</option>
-                                            <option value="Declined">Declined</option>
-                                        </select>
-                                    </div>
-                                </div>
+      const previews = files.map((file) => URL.createObjectURL(file))
+      setPreviewImages((prev) => [...prev, ...previews])
+    }
+  }
 
-                                <div className="flex flex-wrap gap-4 mb-4">
-                                    {/* Priority */}
-                                    <div className="flex-1 mb-4">
-                                        <label className="block font-medium text-gray-700">
-                                            Priority
-                                        </label>
-                                        <select
-                                            value={data.priority}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "priority",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="">Select Priority</option>
-                                            <option value="Low">Low</option>
-                                            <option value="Medium">Medium</option>
-                                            <option value="High">High</option>
-                                            <option value="Critical">Critical</option>
-                                        </select>
-                                    </div>
-                                    {/* Assigned to */}
-                                    <div className="flex-1 mb-4">
-                                        <label className="block font-medium text-gray-700">
-                                            Assign to
-                                        </label>
-                                        <select
-                                            value={data.assigned_to}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "assigned_to",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="">Select Personnel</option>
-                                            {maintenancePersonnel.map((person) => (
-                                                <option key={person.id} value={person.id}>
-                                                    {person.first_name} {person.last_name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click()
+  }
 
-                                {/* Remarks */}
-                                <div className="mb-4">
-                                    <label className="block font-medium text-gray-700">
-                                        Remarks
-                                    </label>
-                                    <textarea
-                                        value={data.remarks}
-                                        onChange={(e) =>
-                                            setData("remarks", e.target.value)
-                                        }
-                                        className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                            </>
-                        )}
+  useEffect(() => {
+    /** Cleanup for dropdown and image previews */
+    return () => {
+      previewImages.forEach((src) => URL.revokeObjectURL(src))
+    }
+  }, [previewImages])
 
-                        {/* Image Upload */}
-                        <div className="mb-4">
-                            <label className="block font-medium text-gray-700">
-                                Upload Images
-                            </label>
-                            <input
-                                type="file"
-                                multiple
-                                accept="image/*"
-                                onChange={handleImageChange}
-                                className="border p-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                            />
-                            {errors.images && (
-                                <p className="text-red-500 text-sm">
-                                    {errors.images}
-                                </p>
-                            )}
+  return (
+    <Dialog open={true} onOpenChange={() => onClose()}>
+      <DialogContent className="w-full md:max-w-xl lg:max-w-3xl max-h-[110vh] p-0 overflow-visible">
+        <DialogHeader className="px-6 py-4 border-b">
+          <DialogTitle className="text-xl font-semibold">Create Work Order</DialogTitle>
+          <Button variant="ghost" size="icon" className="absolute right-4 top-4 rounded-full h-6 w-6" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </DialogHeader>
 
-                            {/* Image Previews */}
-                            <div className="flex mt-4 flex-wrap gap-2">
-                                {previewImages.map((src, index) => (
-                                    <div
-                                        key={index}
-                                        className="relative w-24 h-24 border rounded-md overflow-hidden"
-                                    >
-                                        <img
-                                            src={src}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+        <form onSubmit={submit} className="space-y-6 px-6 py-2 max-h-[65vh] overflow-y-auto">
+          <div className="px-2 -mt-2 space-y-4">
+            
+            {/* Location */}
+            <SmartDropdown
+            label="Location"
+            placeholder="Search or type a new location"
+            items={locations}
+            getLabel={(loc) => loc.name}
+            getValue={(loc) => loc.id.toString()}
+            selectedId={data.location_id}
+            onChange={(id) => {
+                const selectedLocation = locations.find((loc) => loc.id.toString() === id)
+                setTypedLocation(selectedLocation?.name || "") // Show readable name in input
+                setData("location_id", id) // Submit actual ID
+            }}
+            error={localErrors.location_id}
+            />
 
-                        {/* Buttons */}
-                        <div className="flex justify-end space-x-2">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="bg-white text-black px-12 py-2 rounded-3xl border-2 hover:bg-red-400 hover:text-white"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                className="bg-secondary text-white px-12 py-2 rounded-3xl hover:bg-primary"
-                            >
-                                Create
-                            </button>
-                        </div>
-                    </div>
-                </form>
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description" className="flex items-center">
+                Description <span className="text-red-500 ml-1">*</span>
+              </Label>
+              <Textarea
+                id="description"
+                value={data.report_description}
+                onChange={(e) => setData("report_description", e.target.value)}
+                placeholder="Describe your report here..."
+                required
+              />
+            {localErrors.report_description && (
+                <p className="text-red-500 text-sm">{localErrors.report_description}</p>
+            )}
             </div>
-        </div>
-    );
+
+            {isWorkOrderManager && (
+              <>
+                <div className="flex flex-row justify-between gap-4 !mt-8">
+                    {/* Work Order Type */}
+                    <div className="flex-1 space-y-2">
+                        <Label htmlFor="work_order_type" className="flex items-center">
+                            Work Order Type <span className="text-red-500 ml-1">*</span>
+                        </Label>
+                        <Select
+                            value={data.work_order_type}
+                            onValueChange={(value) => setData("work_order_type", value)}
+                            required
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Work Order Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Work Order">Work Order</SelectItem>
+                                <SelectItem value="Preventive Maintenance">Preventive Maintenance</SelectItem>
+                                <SelectItem value="Compliance">Compliance</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        
+                    {localErrors.work_order_type && (
+                        <p className="text-red-500 text-sm">{localErrors.work_order_type}</p>
+                    )}
+                    </div>
+
+                    {/* Label */}
+                    <div className="flex-1 space-y-2">
+                        <Label htmlFor="label" className="flex items-center">
+                            Label <span className="text-red-500 ml-1">*</span>
+                        </Label>
+                        <Select
+                            value={data.label}
+                            onValueChange={(value) => setData("label", value)}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Label" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="No Label">No Label</SelectItem>
+                                <SelectItem value="HVAC">HVAC</SelectItem>
+                                <SelectItem value="Electrical">Electrical</SelectItem>
+                                <SelectItem value="Plumbing">Plumbing</SelectItem>
+                                <SelectItem value="Painting">Painting</SelectItem>
+                                <SelectItem value="Carpentry">Carpentry</SelectItem>
+                                <SelectItem value="Repairing">Repairing</SelectItem>
+                                <SelectItem value="Welding">Welding</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    {localErrors.label && (
+                        <p className="text-red-500 text-sm">{localErrors.label}</p>
+                    )}
+                    </div>
+
+                    {/* Target Date */}
+                    <div className="flex-2 space-y-2">
+                        <Label htmlFor="targetDate" className="flex items-center">
+                        Target Date <span className="text-red-500 ml-1">*</span>
+                        </Label>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowCalendar(!showCalendar)}
+                            className={cn(
+                                "w-full flex justify-between items-center",
+                                "text-left font-normal",
+                                !data.scheduled_at && "text-muted-foreground"
+                            )}
+                        >
+                            {data.scheduled_at
+                                ? format(parseISO(data.scheduled_at), "MM/dd/yyyy")
+                                : "MM/DD/YYYY"}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                        {showCalendar && (
+                            <div
+                                className="absolute z-50 bg-white shadow-md border mt-2 -ml-[10rem] md:-ml-[11vw] lg:-ml-[7.5vw] rounded-md"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <Calendar
+                                    mode="single"
+                                    selected={
+                                    data.scheduled_at && isValid(parseISO(data.scheduled_at))
+                                        ? parseISO(data.scheduled_at)
+                                        : undefined
+                                    }
+                                    onSelect={(date) => {
+                                    if (date) {
+                                        setData("scheduled_at", format(date, "yyyy-MM-dd"))
+                                        setDate(date)
+                                        setLocalErrors((prev) => ({ ...prev, scheduled_at: "" }))
+                                        setShowCalendar(false)
+                                    }
+                                    }}
+                                    disabled={(date) => date < new Date()} // Disable past dates
+                                    initialFocus
+                                />
+                            </div>
+                        )}
+                        {showCalendar && (
+                            <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setShowCalendar(false)} // Close calendar on outside click
+                            />
+                        )}
+                        {localErrors.scheduled_at && (
+                            <p className="text-red-500 text-sm">{localErrors.scheduled_at}</p>
+                        )}
+                    </div>
+
+                </div>
+
+                <div className="flex flex-row justify-between gap-4 !mt-4">
+                    {/* Priority */}
+                    <div className="flex-3 space-y-2">
+                        <Label htmlFor="priority" className="flex items-center">
+                            Priority <span className="text-red-500 ml-1">*</span>
+                        </Label>
+                        <Select
+                            value={data.priority}
+                            onValueChange={(value) => setData("priority", value)}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Priority" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Low">Low</SelectItem>
+                                <SelectItem value="Medium">Medium</SelectItem>
+                                <SelectItem value="High">High</SelectItem>
+                                <SelectItem value="Critical">Critical</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    {localErrors.priority && (
+                        <p className="text-red-500 text-sm">{localErrors.priority}</p>
+                    )}
+                    </div>
+
+                    {/* Assigned To */}
+                    <div className="flex-1 space-y-2">
+                        <Label htmlFor="assigned_to" className="flex items-center">
+                            Assign To <span className="text-red-500 ml-1">*</span>
+                        </Label>
+                        <Select
+                            value={data.assigned_to}
+                            onValueChange={(value) => setData("assigned_to", value)}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Personnel" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {maintenancePersonnel.map((person) => (
+                                    <SelectItem key={person.id} value={person.id.toString()}>
+                                        {person.first_name} {person.last_name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    {localErrors.assigned_to && (
+                        <p className="text-red-500 text-sm">{localErrors.assigned_to}</p>
+                    )}
+                    </div>
+
+                    {/* Status */}
+                    <div className="flex-1 space-y-2">
+                        <Label htmlFor="status" className="flex items-center">
+                            Status <span className="text-red-500 ml-1">*</span>
+                        </Label>
+                        <Select
+                            value={data.status}
+                            onValueChange={(value) => setData("status", value)}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Pending">Pending</SelectItem>
+                                <SelectItem value="Assigned">Assigned</SelectItem>
+                                <SelectItem value="Ongoing">Ongoing</SelectItem>
+                                <SelectItem value="Overdue">Overdue</SelectItem>
+                                <SelectItem value="Completed">Completed</SelectItem>
+                                <SelectItem value="For Budget Request">For Budget Request</SelectItem>
+                                <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                <SelectItem value="Declined">Declined</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    {localErrors.status && (
+                        <p className="text-red-500 text-sm">{localErrors.status}</p>
+                    )}
+                    </div>
+                    
+                </div>
+
+                {/* Asset */}
+                <SmartDropdown
+                    label="Asset"
+                    placeholder="Search or select an asset"
+                    items={assets}
+                    getLabel={(a) => `${a.name} – ${a.location.name}`}
+                    getValue={(a) => a.id.toString()}
+                    selectedId={data.asset_id || ""}
+                    onChange={(id) => setData("asset_id", id)}
+                    error={localErrors.asset_id}
+                />
+              </>
+            )}
+
+                {/* Remarks */}
+                <div className="space-y-2">
+                  <Label htmlFor="remarks">Remarks</Label>
+                    <Textarea
+                        id="remarks"
+                        value={data.remarks}
+                        onChange={(e) => setData("remarks", e.target.value)}
+                        placeholder="Additional notes or comments"
+                    />
+                    {localErrors.remarks && (
+                        <p className="text-red-500 text-sm">{localErrors.remarks}</p>
+                    )}
+                </div>
+
+                {/* Upload Photos */}
+                <div className="space-y-2">
+                    <Label>Upload Photos</Label>
+                    <div
+                        className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer"
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                        onClick={(e) => {
+                            e.stopPropagation(); // Prevent modal from closing
+                            handleBrowseClick();
+                        }}
+                    >
+                        <div className="text-center">
+                        <p className="text-sm text-gray-600 mb-1">Choose a file or drag & drop it here</p>
+                        <p className="text-xs text-gray-400">JPEG, JPG, and PNG formats, up to 1MB</p>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            type="button"
+                            className="mt-4"
+                            onClick={(e) => {
+                                e.stopPropagation(); // Prevent modal from closing
+                                handleBrowseClick();
+                            }}
+                        >
+                        Browse File
+                        </Button>
+                            <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageChange}
+                            className="hidden"
+                            accept="image/jpeg, image/png"
+                            multiple
+                        />
+                    </div>
+
+                    {/* Image Previews */}
+                    {previewImages.length > 0 && (
+                        <div className="grid grid-cols-3 gap-3 mt-4 rounded bg-muted p-2">
+                        {previewImages.map((src, index) => (
+                            <div key={index} className="aspect-square bg-gray-100 rounded-md overflow-hidden relative">
+                            <img
+                                src={src || "/placeholder.svg"}
+                                alt={`Preview ${index + 1}`}
+                                className="w-full h-full object-cover"
+                            />
+                            </div>
+                        ))}
+                        </div>
+                    )}
+                    {localErrors.images && <p className="text-red-500 text-sm">{localErrors.images}</p>}
+                </div>
+            </div>  
+        </form>
+
+        <DialogFooter className="px-6 py-4 border-t">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" onClick={submit} className="bg-primary hover:bg-primary/90 text-white">
+            Create
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
 }

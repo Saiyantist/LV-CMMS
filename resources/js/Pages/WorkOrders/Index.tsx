@@ -9,6 +9,7 @@ import { getPriorityColor } from "@/utils/getPriorityColor";
 export default function WorkOrders({
     workOrders,
     locations,
+    assets,
     maintenancePersonnel,
     user,
 }: PageProps<{
@@ -35,17 +36,19 @@ export default function WorkOrders({
         }[];
     }[];
     locations: { id: number; name: string }[];
+    assets: { 
+        id: number;
+        name: string;
+        location: { id: number; name: string};
+    }[];
     maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
-    user: { id: number; name: string; roles: string[]; permissions: string[] };
+    user: { id: number; name: string; roles: {name: string;}[]; permissions: string[] };
 }>) {
 
     const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState("Pending");
     const [editingWorkOrder, setEditingWorkOrder] = useState(null);
-    const [showScrollUpButton, setShowScrollUpButton] = useState(false);
-
-    const pageUser = usePage().props.auth.user;
-    const userName = `${pageUser.first_name} ${pageUser.last_name}`;
+    const [showScrollUpButton, setShowScrollUpButton] = useState(false)
 
     const tabs =
         user.permissions.includes("manage work orders")
@@ -96,6 +99,7 @@ export default function WorkOrders({
         <IndexLayout
             user={user}
             locations={locations}
+            assets={assets}
             maintenancePersonnel={maintenancePersonnel}
             filteredWorkOrders={filteredWorkOrders}
             tabs={tabs}
