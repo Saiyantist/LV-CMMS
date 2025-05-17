@@ -13,6 +13,7 @@ import { Datatable } from "./components/Datatable";
 import { getPriorityColor } from "@/utils/getPriorityColor";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { prioritySorting } from "@/utils/prioritySorting";
+import FlashToast from "@/Components/FlashToast";
 
 interface Props {
     user: any;
@@ -85,7 +86,7 @@ export default function IndexLayout({
     const isRequesterOrPersonnel =
         user.roles[0].name === "internal_requester" ||
         user.roles[0].name === "maintenance_personnel";
-    const canManage = user.permissions.includes("manage work orders");
+    const isWorkOrderManager = user.permissions.includes("manage work orders");
 
     if (isRequesterOrPersonnel) {
         columns = [
@@ -149,7 +150,7 @@ export default function IndexLayout({
                 enableSorting: false,
             },
         ];
-    } else if (canManage) {
+    } else if (isWorkOrderManager) {
         columns = [
             {
                 accessorKey: "id",
@@ -300,6 +301,8 @@ export default function IndexLayout({
                 />
             )}
 
+            <FlashToast/>
+
             {/* Header */}
             <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                 <div className="bg-white shadow-sm sm:rounded-lg">
@@ -310,8 +313,7 @@ export default function IndexLayout({
                         <div className="w-full sm:w-auto flex justify-center sm:justify-start">
                             <PrimaryButton
                                 onClick={() => setIsCreating(true)}
-                                className="bg-secondary text-white hover:bg-primary transition-all duration-300 
-                            text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
+                                className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
                             >
                                 + Add Work Order
                             </PrimaryButton>
