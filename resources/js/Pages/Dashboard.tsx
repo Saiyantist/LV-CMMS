@@ -5,6 +5,11 @@ import Chart from "./Admin/Chart";
 export default function Dashboard() {
     const user = usePage().props.auth.user;
 
+    // Hide chart for external_requester
+    const isExternalRequester = user.roles?.some?.(
+        (role: { name: string }) => role.name === "external_requester"
+    );
+
     return (
         <AuthenticatedLayout>
             <Head title="Dashboard" />
@@ -17,9 +22,11 @@ export default function Dashboard() {
                 </div>
 
                 {/* Chart Section */}
-                <div className="flex justify-center overflow-hidden bg-white shadow-sm rounded-lg p-6">
-                    <Chart />
-                </div>
+                {!isExternalRequester && (
+                    <div className="flex justify-center overflow-hidden bg-white shadow-sm rounded-lg p-6">
+                        <Chart />
+                    </div>
+                )}
             </div>
         </AuthenticatedLayout>
     );
