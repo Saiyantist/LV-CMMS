@@ -134,15 +134,7 @@ class WorkOrderController extends Controller
 
         // Handle image uploads (if any)
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $filename = uniqid('wo_') . '.' . $image->extension();
-                $path = $image->storeAs('work_orders', $filename, 'public');
-                Image::create([
-                    'imageable_id' => $workOrder->id,
-                    'imageable_type' => WorkOrder::class,
-                    'path' => $path,
-                ]);
-            }
+            $this->handleImageUploads($request->file('images'), $workOrder->id);
         }
         
         return redirect()->route('work-orders.index')->with('success', 'Work order created successfully.');

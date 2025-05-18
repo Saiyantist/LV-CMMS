@@ -30,219 +30,214 @@ export default function ExternalRegistration() {
         <RegisterLayout>
             <Head title="Registration for External" />
 
-            <form onSubmit={submit}>
-                {/* Name */}
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-center text-black dark:text-white">
-                        Registration Form
-                    </h1>
-                    <h2 className="font-bold text-secondary text-center">
-                        for External User
-                    </h2>
-                </div>
+            <div>
+                <h1 className="text-2xl font-bold text-center text-black dark:text-white">
+                    Registration Form
+                </h1>
+                <h2 className="font-bold text-secondary text-center">
+                    for External User
+                </h2>
+            </div>
 
-                <div className="flex justify-stretch mt-2">
-                    {/* First Name */}
-                    <div className="w-full mr-2">
-                        <InputLabel htmlFor="first_name" value="First Name" />
+            <form onSubmit={submit} className="px-2">
+
+                <div className="max-h-[50vh] overflow-auto py-4 px-2">
+                    {/* Name */}
+                    <div className="flex justify-stretch mt-2">
+                        {/* First Name */}
+                        <div className="w-full mr-2">
+                            <InputLabel htmlFor="first_name" value="First Name" />
+
+                            <TextInput
+                                id="first_name"
+                                name="first_name"
+                                value={data.first_name}
+                                className="mt-1 block w-full"
+                                autoComplete="first_name"
+                                isFocused={true}
+                                onChange={(e) =>
+                                    setData("first_name", e.target.value)
+                                }
+                                required
+                            />
+
+                            <InputError
+                                message={errors.first_name}
+                                className="mt-2"
+                            />
+                        </div>
+
+                        {/* Last Name */}
+                        <div className="w-full ml-2">
+                            <InputLabel htmlFor="last_name" value="Last Name" />
+
+                            <TextInput
+                                id="last_name"
+                                name="last_name"
+                                value={data.last_name}
+                                className="mt-1 block w-full"
+                                autoComplete="last_name"
+                                isFocused={true}
+                                onChange={(e) =>
+                                    setData("last_name", e.target.value)
+                                }
+                                required
+                            />
+
+                            <InputError
+                                message={errors.last_name}
+                                className="mt-2"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Gender and Contact Number */}
+                    <div className="flex justify-between mt-4 space-x-4">
+                        {/* Gender */}
+                        <div className="w-1/2">
+                            <InputLabel htmlFor="gender" value="Gender" />
+
+                            <select
+                                id="gender"
+                                name="gender"
+                                value={data.gender}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                                onChange={(e) => setData("gender", e.target.value)}
+                                required
+                            >
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="rather not say">
+                                    Rather not say
+                                </option>
+                            </select>
+
+                            <InputError message={errors.gender} className="mt-2" />
+                        </div>
+
+                        {/* Contact Number */}
+                        <div className="w-1/2">
+                            <InputLabel
+                                htmlFor="contact_number"
+                                value="Contact Number"
+                            />
+
+                            <TextInput
+                                id="contact_number"
+                                type="tel"
+                                name="contact_number"
+                                value={data.contact_number}
+                                className="mt-1 block w-full"
+                                placeholder="9XXXXXXXXX"
+                                maxLength={10}
+                                onChange={(e) =>
+                                    setData("contact_number", e.target.value)
+                                }
+                                required
+                            />
+                            <InputError
+                                message={errors.contact_number}
+                                className="mt-2"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="mt-4">
+                        <InputLabel htmlFor="email" value="Email" />
 
                         <TextInput
-                            id="first_name"
-                            name="first_name"
-                            value={data.first_name}
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={data.email}
                             className="mt-1 block w-full"
-                            autoComplete="first_name"
-                            isFocused={true}
-                            onChange={(e) =>
-                                setData("first_name", e.target.value)
-                            }
+                            autoComplete="username"
+                            onChange={(e) => setData("email", e.target.value)}
                             required
                         />
 
-                        <InputError
-                            message={errors.first_name}
-                            className="mt-2"
-                        />
+                        <InputError message={errors.email} className="mt-2" />
                     </div>
 
-                    {/* Last Name */}
-                    <div className="w-full ml-2">
-                        <InputLabel htmlFor="last_name" value="Last Name" />
+                    {/* Password and Confirm Password */}
+                    <div className="flex justify-stretch mt-4">
+                        {/* Password */}
+                        <div className="w-full mr-2">
+                            <InputLabel htmlFor="password" value="Password" />
 
-                        <TextInput
-                            id="last_name"
-                            name="last_name"
-                            value={data.last_name}
-                            className="mt-1 block w-full"
-                            autoComplete="last_name"
-                            isFocused={true}
-                            onChange={(e) =>
-                                setData("last_name", e.target.value)
-                            }
-                            required
-                        />
+                            <TextInput
+                                id="password"
+                                type="password"
+                                name="password"
+                                value={data.password}
+                                className="mt-1 block w-full"
+                                autoComplete="new-password"
+                                onChange={(e) =>
+                                    setData("password", e.target.value)
+                                }
+                                required
+                            />
 
-                        <InputError
-                            message={errors.last_name}
-                            className="mt-2"
-                        />
+                            <InputError
+                                message={errors.password}
+                                className="mt-2"
+                            />
+                        </div>
+
+                        {/* Confirm Password */}
+                        <div className="w-full ml-2">
+                            <InputLabel
+                                htmlFor="password_confirmation"
+                                value="Confirm Password"
+                            />
+
+                            <TextInput
+                                id="password_confirmation"
+                                type="password"
+                                name="password_confirmation"
+                                value={data.password_confirmation}
+                                className="mt-1 block w-full"
+                                autoComplete="new-password"
+                                onChange={(e) =>
+                                    setData("password_confirmation", e.target.value)
+                                }
+                                required
+                            />
+
+                            <InputError
+                                message={errors.password_confirmation}
+                                className="mt-2"
+                            />
+                        </div>
                     </div>
                 </div>
 
-                {/* Gender and Contact Number */}
-                <div className="flex justify-between mt-4 space-x-4">
-                    {/* Gender */}
-                    <div className="w-1/2">
-                        <InputLabel htmlFor="gender" value="Gender" />
-
-                        <select
-                            id="gender"
-                            name="gender"
-                            value={data.gender}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-                            onChange={(e) => setData("gender", e.target.value)}
-                            required
-                        >
-                            <option value="">Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="rather not say">
-                                Rather not say
-                            </option>
-                        </select>
-
-                        <InputError message={errors.gender} className="mt-2" />
-                    </div>
-
-                    {/* Contact Number */}
-                    <div className="w-1/2">
-                        <InputLabel
-                            htmlFor="contact_number"
-                            value="Contact Number"
-                        />
-
-                        <TextInput
-                            id="contact_number"
-                            type="tel"
-                            name="contact_number"
-                            value={data.contact_number}
-                            className="mt-1 block w-full"
-                            placeholder="9XXXXXXXXX"
-                            maxLength={10}
-                            onChange={(e) =>
-                                setData("contact_number", e.target.value)
-                            }
-                            required
-                        />
-                        <InputError
-                            message={errors.contact_number}
-                            className="mt-2"
-                        />
-                    </div>
-                </div>
-
-                {/* Email */}
-                <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        onChange={(e) => setData("email", e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
-
-                {/* Password and Confirm Password */}
-                <div className="flex justify-stretch mt-4">
-                    {/* Password */}
-                    <div className="w-full mr-2">
-                        <InputLabel htmlFor="password" value="Password" />
-
-                        <TextInput
-                            id="password"
-                            type="password"
-                            name="password"
-                            value={data.password}
-                            className="mt-1 block w-full"
-                            autoComplete="new-password"
-                            onChange={(e) =>
-                                setData("password", e.target.value)
-                            }
-                            required
-                        />
-
-                        <InputError
-                            message={errors.password}
-                            className="mt-2"
-                        />
-                    </div>
-
-                    {/* Confirm Password */}
-                    <div className="w-full ml-2">
-                        <InputLabel
-                            htmlFor="password_confirmation"
-                            value="Confirm Password"
-                        />
-
-                        <TextInput
-                            id="password_confirmation"
-                            type="password"
-                            name="password_confirmation"
-                            value={data.password_confirmation}
-                            className="mt-1 block w-full"
-                            autoComplete="new-password"
-                            onChange={(e) =>
-                                setData("password_confirmation", e.target.value)
-                            }
-                            required
-                        />
-
-                        <InputError
-                            message={errors.password_confirmation}
-                            className="mt-2"
-                        />
-                    </div>
-                </div>
-
-                <br />
-
-                <div>
-                    <label
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                        }}
-                    >
+                <div className="flex justify-between mt-4 py-2">
+                    <label className="flex items-center gap-2">
                         <input type="checkbox" name="privacy_policy" />
-                        <span>
+                        <span className="text-sm">
                             I understand, and I will agree with the privacy
                             policy
                         </span>
                     </label>
-                </div>
+                    <div className="flex items-center justify-end">
+                        <Link
+                            href={route("login")}
+                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                        >
+                            Already registered?
+                        </Link>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route("login")}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
-                    >
-                        Already registered?
-                    </Link>
-
-                    <PrimaryButton
-                        className="ms-4 bg-secondary hover:bg-primary"
-                        disabled={processing}
-                    >
-                        Register
-                    </PrimaryButton>
+                        <PrimaryButton
+                            type="submit"
+                            className="ms-4 bg-secondary hover:bg-primary"
+                            disabled={processing}
+                        >
+                            Register
+                        </PrimaryButton>
+                    </div>
                 </div>
             </form>
         </RegisterLayout>
