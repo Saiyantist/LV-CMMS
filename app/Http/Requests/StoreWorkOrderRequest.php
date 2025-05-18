@@ -28,36 +28,36 @@ class StoreWorkOrderRequest extends FormRequest
     public function rules(): array
     {
         $user = auth()->user();
+        $requestData = $this->all();
 
-        // dd($this->route()->getName());
-
-        if ($this->route()->getName() === 'work-orders.update') {
-            if ($user->hasRole('maintenance_personnel')){
-                return $rules =  [ 'status' => ['required', Rule::in(['Ongoing', 'Completed'])]];
-            }
-            elseif ($user->can('manage work orders')){
-                return $rules =  [ 'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])]];
-            }
-        }
-        
+        // Validation from dropDown updates
+        if (count($requestData) === 1 && array_key_exists('status', $requestData)) {
+            return $rules = [ 'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])]];
+        } 
         
         else {
+            // Default Work Order Request Validation
             $rules = [
                 'report_description' => 'required|string|max:1000',
                 'location_id' => 'required|exists:locations,id',
                 'images' => 'nullable|array', // Accept multiple images
                 'images.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:1024',
             ];
-    
+
+            // Work Order Manager Validation add-ons
             if ($user->hasPermissionTo('manage work orders')) {
                 $rules = array_merge($rules, [
-                'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
-                'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
-                'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
-                'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // AI-generated in the future
-                'remarks' => 'nullable|string|max:1000',
+                    'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
+                    'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
+                    'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // Maybe AI-generated in the future
+                    'scheduled_at' => 'required|date',
+                    'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
+                    'assigned_to' => 'required',
+                    'asset_id' => 'nullable',
+                    'remarks' => 'nullable|string|max:1000',
                 ]);
             } 
+
             return $rules;
         } 
 

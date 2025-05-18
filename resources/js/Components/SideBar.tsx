@@ -10,13 +10,12 @@ import {
     User,
     LogOut,
     Menu,
-    ChevronDown,
-    ChevronUp,
     UserCircle,
     Settings,
     BriefcaseBusiness,
     Calendar,
     Book,
+    CalendarCog,
 } from "lucide-react";
 
 interface Role {
@@ -35,7 +34,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ user }) => {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { post } = useForm();
     const currentRoute = route().current();
@@ -45,63 +43,20 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         post(route("logout"));
     };
 
-    const isWorkOrderManager = user.permissions.some(
-        (permission) => permission === "manage work orders"
-    );
+    const isWorkOrderRequester = user.permissions.some((permission) =>
+        ["request work orders", "view own work orders", "cancel own work orders",]
+        .includes(permission));
+    const isEventServiceRequester = user.permissions.some((permission) => 
+        ['request event services', 'view own event services', 'cancel own event services']
+        .includes(permission));
+    const isMaintenancePersonnel = user.roles.some((role) => role.name === "maintenance_personnel");
+    const isWorkOrderManager = user.permissions.some((permission) => permission === "manage work orders");
+    const isEventServicesManager = user.permissions.some((permission) => permission === "manage event services");
     const isSuperAdmin = user.roles.some((role) => role.name === "super_admin");
-    const isGasdCoordinator = user.roles.some(
-        (role) => role.name === "gasd_coordinator"
-    );
 
-    const menuItems = [
-        // Check if the user is not an external_requester before rendering "Work Order"
-        ...(user.roles.some(
-            (role) =>
-                role.name !== "external_requester" &&
-                role.name !== "maintenance_personnel" &&
-                role.name !== "communications_officer"
-        ) // REFACTOR these sheez
-            ? [
-                  {
-                      text: "Work Order",
-                      isDropdown: true,
-                      icon: <ClipboardList size={16} className="mr-2" />,
-                      children: [
-                          {
-                              routeName: "work-orders.index",
-                              href: route("work-orders.index") || "",
-                              text: isWorkOrderManager
-                                  ? "Work Order Requests"
-                                  : "Work Order List",
-                              icon: (
-                                  <ClipboardList size={16} className="mr-2" />
-                              ),
-                          },
-                          // Hide "Submit a Request" for WorkOrderManager, super_admin, and gasd_coordinator
-                          ...(isWorkOrderManager ||
-                          isSuperAdmin ||
-                          isGasdCoordinator
-                              ? []
-                              : [
-                                    {
-                                        routeName: "work-orders.submit-request",
-                                        href:
-                                            route(
-                                                "work-orders.submit-request"
-                                            ) || "",
-                                        text: "Submit a Request",
-                                        icon: (
-                                            <Send size={14} className="mr-2" />
-                                        ),
-                                    },
-                                ]),
-                      ],
-                  },
-              ]
-            : []),
-
-        // Check if the user is a maintenance personnel to render "Assigned Tasks" page
-        ...(user.roles.some((role) => role.name === "maintenance_personnel")
+    const menuItems = !isSuperAdmin
+        ? [
+        ...(isMaintenancePersonnel
             ? [
                   {
                       routeName: "work-orders.assigned-tasks",
@@ -109,94 +64,110 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                       text: "Assigned Tasks",
                       icon: <BriefcaseBusiness size={16} className="mr-2" />,
                   },
-                  {
-                      routeName: "work-orders.index",
-                      href: route("work-orders.index") || "",
-                      text: "Work Order List",
-                      icon: <ClipboardList size={16} className="mr-2" />,
-                  },
               ]
             : []),
-        // Place Event Services tab under Compliance and Safety (handled in adminItems)
-    ];
+
+        ...( isWorkOrderRequester && !isWorkOrderManager
+            ? [
+                {
+                    routeName: "work-orders.index",
+                    href: route("work-orders.index") || "",
+                    text: "My Work Orders",
+                    icon: <ClipboardList size={16} className="mr-2" />,
+                },
+              ]
+            : []),
+
+        ... ( isEventServiceRequester || isEventServicesManager
+            ? [
+                {
+                    routeName: "booking-calendar",
+                    href: route("booking-calendar") || "",
+                    text: "Booking Calendar",
+                    icon: <Calendar size={16} className="mr-2" />,
+                },
+                {   // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
+                    routeName: "event-services.request",
+                    href: route("event-services.request") || "",
+                    text: "Event Services Request (temp)",
+                    icon: <FileText size={16} className="mr-2" />,
+                },
+                {
+                    routeName: "event-services.my-bookings",
+                    href: route("event-services.my-bookings") || "",
+                    text: "My Bookings",
+                    icon: <Book size={16} className="mr-2" />,
+                },
+              ]
+            : []),
+        ]
+        : [];
 
     const hasRoute = (name: string) => {
         return typeof route().has === "function" ? route().has(name) : false;
     };
 
-    const adminItems =
-        isSuperAdmin || isWorkOrderManager
-            ? [
-                  hasRoute("assets.index") && {
-                      routeName: "assets.index",
-                      href: route("assets.index") || "",
-                      text: "Asset Management",
-                      icon: <Wrench size={14} className="mr-2" />,
-                  },
-                  hasRoute("work-orders.preventive-maintenance") && {
-                      routeName: "work-orders.preventive-maintenance",
-                      href: route("work-orders.preventive-maintenance") || "",
-                      text: "Preventive Maintenance",
-                      icon: <ShieldCheck size={14} className="mr-2" />,
-                  },
-                  hasRoute("work-orders.compliance-and-safety") && {
-                      routeName: "work-orders.compliance-and-safety",
-                      href: route("work-orders.compliance-and-safety") || "",
-                      text: "Compliance and Safety",
-                      icon: <FileText size={14} className="mr-2" />,
-                  },
-                  // Event Services tab
-                  {
-                      routeName: "booking-calendar",
-                      href: route("booking-calendar") || "",
-                      text: "Event Services",
-                      icon: <Calendar size={16} className="mr-2" />,
-                  },
-                  // Event Services Request tab (placed under Event Services)
-                  {
-                      routeName: "event-services.request",
-                      href: route("event-services.request") || "",
-                      text: "Event Services Request",
-                      icon: <FileText size={16} className="mr-2" />,
-                  },
-                  {
-                      routeName: "event-services.my-bookings",
-                      href: route("event-services.my-bookings") || "",
-                      text: "My Bookings",
-                      icon: <Book size={16} className="mr-2" />,
-                  },
-                  isSuperAdmin &&
-                      hasRoute("admin.manage-roles") && {
-                          routeName: "admin.manage-roles",
-                          href: route("admin.manage-roles") || "",
-                          icon: <User size={16} className="mr-2" />,
-                          text: "User Management",
-                      },
-              ].filter(Boolean)
-            : [
-                  {
-                      routeName: "booking-calendar",
-                      href: route("booking-calendar") || "",
-                      text: "Event Services",
-                      icon: <Calendar size={16} className="mr-2" />,
-                  },
-                  {
-                      routeName: "event-services.request",
-                      href: route("event-services.request") || "",
-                      text: "Event Services Request",
-                      icon: <FileText size={16} className="mr-2" />,
-                  },
-                  {
-                      routeName: "event-services.my-bookings",
-                      href: route("event-services.my-bookings") || "",
-                      text: "My Bookings",
-                      icon: <Book size={16} className="mr-2" />,
-                  },
-              ];
+    const workOrderAdminItems = [
+        hasRoute("assets.index") && {
+            routeName: "work-orders.index",
+            href: route("work-orders.index") || "",
+            text: "Work Order Requests",
+            icon: <ClipboardList size={16} className="mr-2" />,
+        },
+        hasRoute("assets.index") && {
+            routeName: "assets.index",
+            href: route("assets.index") || "",
+            text: "Asset Management",
+            icon: <Wrench size={14} className="mr-2" />,
+        },
+        hasRoute("work-orders.preventive-maintenance") && {
+            routeName: "work-orders.preventive-maintenance",
+            href: route("work-orders.preventive-maintenance") || "",
+            text: "Preventive Maintenance",
+            icon: <ShieldCheck size={14} className="mr-2" />,
+        },
+        hasRoute("work-orders.compliance-and-safety") && {
+            routeName: "work-orders.compliance-and-safety",
+            href: route("work-orders.compliance-and-safety") || "",
+            text: "Compliance and Safety",
+            icon: <FileText size={14} className="mr-2" />,
+        },
+    ].filter(Boolean);
 
-    // Menu item rendering logic remains the same
+    // Insert the following routes if there are pages na.
+    const eventServicesAdminItems = [
+        {
+            routeName: "",
+            href: "",
+            text: "Requests Management",
+            icon: <CalendarCog size={16} className="mr-2" />,
+        },
+        {
+            routeName: "",
+            href: "",
+            text: "Venue Management",
+            icon: <FileText size={16} className="mr-2" />,
+        },
+    ];
+
+    const superAdminItems = 
+    [
+        hasRoute("admin.manage-roles") && {
+            routeName: "admin.manage-roles",
+            href: route("admin.manage-roles") || "",
+            icon: <User size={16} className="mr-2" />,
+            text: "User Management",
+        },
+    ]
+    
+    const adminItems = isSuperAdmin ? [...workOrderAdminItems, ...eventServicesAdminItems, ...superAdminItems]
+            : isWorkOrderManager
+                ? workOrderAdminItems : isEventServicesManager
+                ? eventServicesAdminItems : [];
+            
     const isActive = (routeName: string) => currentRoute === routeName;
 
+    
     const renderMenuItem = (item: any) => (
         <li key={item.text}>
             <Link
@@ -205,39 +176,11 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     isActive(item.routeName)
                         ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-4 mr-1 ml-3 rounded-full"
                         : "text-white"
-                } ${item.isChild ? "pl-8" : "pl-4"}`}
-            >
+                    } ${item.isChild ? "pl-8" : "pl-4"}`}
+                    >
                 {item.icon}
                 {item.text}
             </Link>
-        </li>
-    );
-
-    const renderDropdownMenu = (item: any) => (
-        <li key={item.text}>
-            <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center w-full h-12 pl-4 pr-2 text-white hover:text-opacity-80"
-            >
-                <span className="text-sm font-medium flex items-center">
-                    {item.icon}
-                    {item.text}
-                    <span className="ml-1">
-                        {isDropdownOpen ? (
-                            <ChevronUp size={14} />
-                        ) : (
-                            <ChevronDown size={14} />
-                        )}
-                    </span>
-                </span>
-            </button>
-            {isDropdownOpen && (
-                <ul>
-                    {item.children?.map((child: any) =>
-                        renderMenuItem({ ...child, isChild: true })
-                    )}
-                </ul>
-            )}
         </li>
     );
 
@@ -268,11 +211,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             Dashboard
                         </Link>
                     </li>
-                    {menuItems.map((item) =>
-                        item.isDropdown
-                            ? renderDropdownMenu(item)
-                            : renderMenuItem(item)
-                    )}
+                    {menuItems.map(renderMenuItem)}
                     {adminItems.map(renderMenuItem)}
                 </ul>
 
@@ -299,7 +238,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 </ul>
             </div>
 
-            {/* --- Mobile Navbar (Updated Layout with Active Tab Styling) --- */}
+            {/* --- Mobile Navbar --- */}
             <div className="md:hidden fixed top-0 left-0 w-full bg-primary text-white shadow-md z-50">
                 <div className="flex items-center justify-between px-4 py-3 h-14">
                     <Link
@@ -341,13 +280,11 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             {/* --- Mobile Burger Full Page Overlay --- */}
             {mobileMenuOpen && (
                 <div className="md:hidden fixed top-0 left-0 w-full h-full bg-primary text-white z-50 p-5 pt-6 overflow-y-auto">
-                    {/* Top Row: Back Button + Centered Logo */}
                     <div className="relative mb-6">
                         <button
                             onClick={() => setMobileMenuOpen(false)}
                             className="absolute left-0 top-1 text-sm flex items-center text-white hover:text-opacity-80"
                         >
-                            <ChevronDown size={20} className="mr-1 rotate-90" />
                             Back
                         </button>
                         <div className="flex justify-center">
@@ -359,64 +296,16 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         </div>
                     </div>
 
-                    {/* Work Order Dropdown */}
                     <div className="space-y-1 border-t border-white border-opacity-20 pt-4">
-                        <button
-                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            className="w-full text-left flex items-center justify-between px-4 py-3 text-sm font-medium hover:bg-white hover:text-primary rounded-lg transition"
-                        >
-                            <span className="flex items-center">
-                                <ClipboardList size={18} className="mr-2" />
-                                Work Order
-                            </span>
-                            {isDropdownOpen ? (
-                                <ChevronUp size={16} />
-                            ) : (
-                                <ChevronDown size={16} />
-                            )}
-                        </button>
-                        {isDropdownOpen && (
-                            <ul className="space-y-1 mt-1">
-                                {menuItems[0].children?.map((child) => (
-                                    <li key={child.text}>
-                                        <Link
-                                            href={child.href}
-                                            className={`flex items-center px-4 py-2 text-sm rounded-lg transition ${
-                                                isActive(child.routeName)
-                                                    ? "bg-white text-primary"
-                                                    : "hover:bg-white hover:text-primary"
-                                            }`}
-                                        >
-                                            {child.icon}
-                                            {child.text}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
+                        {menuItems.map(renderMenuItem)}
                     </div>
 
-                    {/* Admin Items (if any) */}
                     {adminItems.length > 0 && (
                         <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
-                            {adminItems.map((item) => (
-                                <Link
-                                    key={item.text}
-                                    href={item.href}
-                                    className={`flex items-center px-4 py-3 text-sm rounded-lg transition ${
-                                        isActive(item.routeName)
-                                            ? "bg-white text-primary"
-                                            : "hover:bg-white hover:text-primary"
-                                    }`}
-                                >
-                                    {item.icon}
-                                    {item.text}
-                                </Link>
-                            ))}
+                            {adminItems.map(renderMenuItem)}
                         </div>
                     )}
 
-                    {/* Settings and Logout */}
                     <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
                         <Link
                             href="#"

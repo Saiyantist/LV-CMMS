@@ -7,6 +7,7 @@ import IndexLayout from "./IndexLayout";
 export default function WorkOrders({
     workOrders,
     locations,
+    assets,
     maintenancePersonnel,
     user,
 }: PageProps<{
@@ -33,17 +34,19 @@ export default function WorkOrders({
         }[];
     }[];
     locations: { id: number; name: string }[];
+    assets: { 
+        id: number;
+        name: string;
+        location: { id: number; name: string};
+    }[];
     maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
-    user: { id: number; name: string; roles: string[]; permissions: string[] };
+    user: { id: number; name: string; roles: {name: string;}[]; permissions: string[] };
 }>) {
 
     const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState("Pending");
     const [editingWorkOrder, setEditingWorkOrder] = useState(null);
-    const [showScrollUpButton, setShowScrollUpButton] = useState(false);
-
-    const pageUser = usePage().props.auth.user;
-    const userName = `${pageUser.first_name} ${pageUser.last_name}`;
+    const [showScrollUpButton, setShowScrollUpButton] = useState(false)
 
     const tabs =
         user.permissions.includes("manage work orders")
@@ -60,7 +63,7 @@ export default function WorkOrders({
         ) {
             if (activeTab === "Pending") return wo.status === "Pending";
             if (activeTab === "Accepted")
-                return ["Assigned", "Ongoing", "Overdue", "Completed"].includes(
+                return ["Assigned", "Scheduled", "Ongoing", "Overdue", "Completed"].includes(
                     wo.status
                 );
             if (activeTab === "For Budget Request")
@@ -74,16 +77,7 @@ export default function WorkOrders({
     const handleDelete = (id: number) => {
         const confirmDelete = confirm("Are you sure you want to delete this work order?");
         if (confirmDelete) {
-            router.delete(`/work-orders/${id}`, {
-
-                // For testing purposes, replace with actual delete flash messages
-                onSuccess: () => {
-                    alert("Work order deleted successfully.");
-                },
-                onError: () => {
-                    alert("Failed to delete the work order. Please try again.");
-                },
-            });
+            router.delete(`/work-orders/${id}`);
         }
     }
     const handleScroll = () => {
@@ -103,6 +97,7 @@ export default function WorkOrders({
         <IndexLayout
             user={user}
             locations={locations}
+            assets={assets}
             maintenancePersonnel={maintenancePersonnel}
             filteredWorkOrders={filteredWorkOrders}
             tabs={tabs}

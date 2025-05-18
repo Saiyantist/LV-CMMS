@@ -56,7 +56,7 @@ class RolePermissionSeeder extends Seeder
                 'manage work orders', 'request work orders',
             ], 
             'maintenance_personnel' => [
-                'view own work orders', 'cancel own work orders',
+                'request work orders', 'view own work orders', 'cancel own work orders',
                 'view work orders assigned to them', 'update assigned work order status'
             ],
             'communications_officer' => [

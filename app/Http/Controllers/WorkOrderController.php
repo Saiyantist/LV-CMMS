@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkOrderRequest;
+use App\Models\Asset;
 use App\Models\Image;
 use App\Models\Location;
 use App\Models\User;
@@ -30,7 +31,6 @@ class WorkOrderController extends Controller
             $workOrders->where('requested_by', $user->id);
         }
 
-        
         /**
          * Format work orders to include images
          */
@@ -82,6 +82,7 @@ class WorkOrderController extends Controller
         [
             'workOrders' => $formattedWorkOrders,
             'locations' => Location::select('id', 'name')->get(),
+            'assets' => Asset::with(['location:id,name', 'maintenanceHistories'])->get(),
             'maintenancePersonnel' => User::role('maintenance_personnel')->with('roles')->get(),
             'user' => [
                 'id' => $user->id,
@@ -124,22 +125,18 @@ class WorkOrderController extends Controller
             'work_order_type' => $isWorkOrderManager ? $request->work_order_type ?? 'Work Order' : 'Work Order',
             'label' => $isWorkOrderManager ? $request->label ?? 'No Label' : 'No Label',
             'priority' => $isWorkOrderManager ? $request->priority : null,
+            'assigned_to' => $isWorkOrderManager ? $request->assigned_to : null,
+            'assigned_at' => $isWorkOrderManager ? now() : null,
+            'scheduled_at' => $isWorkOrderManager ? $request->scheduled_at : null,
+            'asset_id' => $isWorkOrderManager ? $request->asset_id : null,
             'remarks' => $isWorkOrderManager ? $request->remarks : null,
         ]);
 
         // Handle image uploads (if any)
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $filename = uniqid('wo_') . '.' . $image->extension();
-                $path = $image->storeAs('work_orders', $filename, 'public');
-                Image::create([
-                    'imageable_id' => $workOrder->id,
-                    'imageable_type' => WorkOrder::class,
-                    'path' => $path,
-                ]);
-            }
+            $this->handleImageUploads($request->file('images'), $workOrder->id);
         }
-    
+        
         return redirect()->route('work-orders.index')->with('success', 'Work order created successfully.');
     }
 
@@ -214,20 +211,45 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
+        // Handle image uploads
+        if ($request->hasFile('images')) {
+            $this->handleImageUploads($request->file('images'), $workOrder->id);
+        }
+        
+        // Handle image deletions
+        if ($request->has('deleted_images')) {
+            $this->handleDeleteImage($request->deleted_images, $workOrder->id);
+        }
+        
         /** Maintenance Personnel */
         if ($user->hasRole('maintenance_personnel')) {
-
-            if ($workOrder->assigned_to !== $user->id) {
-                return response()->json(['error' => 'You are not allowed to update this work order.'], 403);
+            
+            // Request is from "Assigned Tasks" page
+            if ($request->only('status')) {
+                $validTransitions = [
+                    'Assigned' => ['Ongoing', 'Completed'],
+                    'Ongoing' => ['Assigned', 'Completed'],
+                ];
+                
+                if (isset($validTransitions[$workOrder->status]) && in_array($request->status, $validTransitions[$workOrder->status])) {
+                    $workOrder->update(['status' => $request->status]);
+                    return redirect()->route('work-orders.assigned-tasks')->with(['success' => 'Work Order updated successfully']);
+                }
             }
-
-            $workOrder->update(['status' => $request->status]);
-
-            return redirect()->route('work-orders.assigned-tasks')->with('success', 'Work Order updated successfully.');
+            
+            // Request is from "My Work Orders" page
+            else {
+                $workOrder->update([
+                    'report_description' => $request->report_description,
+                    'location_id' => $request->location_id,
+                ]);
+                return redirect()->route('work-orders.index')->with(['success' => 'Work Order updated successfully']);
+            }
+            return redirect()->route('work-orders.assigned-tasks')->with(['error' => 'Cannot update.']);
         }
 
         /** Internal Requester */
-        if(!$user->hasPermissionTo('manage work orders')) {
+        if($user->hasRole('internal_requester')) {
             if ($workOrder->requested_by != $user->id) {
                 return redirect()->route('work-orders.index')->with('error', 'You are not allowed to update this work order.');
             }
@@ -239,19 +261,19 @@ class WorkOrderController extends Controller
                     'report_description' => $request->report_description,
                     'location_id' => $request->location_id,
                 ]);
+                return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
             }
+            return redirect()->route('work-orders.index')->with('error', 'Something went wrong while updating.');
         }
-
-        /** Work Order Manager */
         
+        /** Work Order Manager */
         else {
-            
-            // Update Status only (from status dropdown)
-            if ($request->route()->getName() === 'work-orders.update'){
-                $workOrder->update(['status' => $request->status,]);
+
+            // Updating via the dropdown
+            if ($request->only('status')) {
+                $workOrder->update(['status' => $request->status]);
                 return redirect()->route('work-orders.index')->with('success', 'Work Order status updated successfully.');
             }
-
             // Update Work Order (expected from edit work order modal)
             $workOrder->update([
                 'report_description' => $request->report_description,
@@ -262,36 +284,12 @@ class WorkOrderController extends Controller
                 'priority' => $request->priority,
                 'remarks' => $request->remarks,
             ]);
+            return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
         }
 
-        // Handle image uploads
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $filename = 'wo_' . $workOrder->id . '_' . uniqid() . '.' . $image->extension(); // prefix to be added to the image name 
-                $path = $image->storeAs('work_orders', $filename, 'public'); // To save under storage/app/public/work_orders folder
-                Image::create([
-                    'imageable_id' => $workOrder->id,
-                    'imageable_type' => WorkOrder::class,
-                    'path' => $path,
-                ]);
-            }
-        }
-        
-        // Handle image deletions
-        if ($request->has('deleted_images')) {
-            foreach ($request->deleted_images as $imagePath) {
-                $removeFromUrl = config('app.url') . 'storage/'; // Remove app URL and 'storage/' prefix
-                $imagePath = str_replace($removeFromUrl, '', $imagePath); 
-                $image = Image::where('path', $imagePath)->where('imageable_id', $workOrder->id)->first();
-                if ($image) {
-                    $image->delete(); // Delete the image record from the database
-                    \Storage::disk('public')->delete($imagePath); // Delete the file from storage
-                }
-            }
-        }
-        return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
+        return redirect()->route('work-orders.index')->with('error', 'Something went wrong while updating.');
     }
-
+    
     /**
      * Remove the specified resource from storage.
      */
@@ -301,23 +299,47 @@ class WorkOrderController extends Controller
         $user = auth()->user();
         
         if (!$user->hasPermissionTo('manage work orders')) {
-            // return back()->with('error', 'You do not have permission to delete this work order.');
-            return response()->json(['error' => 'You do not have permission to delete this work order.'], 403);
+            return redirect()->route('work-orders.index')->with('error', 'You do not have permission to delete work orders.');
         }
         
-        if ($workOrder-> status !== "Cancelled") {
-            // return back()->with('error', 'Only CANCELLED workk orders can be deleted.');
-            return response()->json(['error' => 'Only CANCELLED work orders can be deleted.'], 403);
+        if ($workOrder-> status !== "Cancelled" &&  $workOrder->status !== "Declined") {
+            dd($workOrder->status);
+            return redirect()->route('work-orders.index')->with('error', 'Only "Cancelled" and "Declined" work orders can be deleted.');
         }
         
         $workOrder->update(['status' => 'Deleted']);
         $workOrder->delete();
-
-        // return redirect()->route('work-orders.index')->with('success', 'Work order deleted successfully.');
-        return response()->json(['success' => 'Work order deleted successfully.'], 200);
+        
+        return redirect()->route('work-orders.index')->with('success', 'Work order deleted successfully.');
     }
 
     // --------------- Custom Methods ---------------
+
+    private function handleImageUploads($images, $workOrderId)
+    {
+        foreach ($images as $image) {
+            $filename = 'wo_' . $workOrderId . '_' . uniqid() . '.' . $image->extension(); // Prefix to be added to the image name
+            $path = $image->storeAs('work_orders', $filename, 'public'); // Save under storage/app/public/work_orders folder
+            Image::create([
+                'imageable_id' => $workOrderId,
+                'imageable_type' => WorkOrder::class,
+                'path' => $path,
+            ]);
+        }
+    }
+
+    private function handleDeleteImage($deleteImages, $workOrderId)
+    {
+            foreach ($deleteImages as $image) {
+                $removeFromUrl = config('app.url') . 'storage/'; // Remove app URL and 'storage/' prefix
+                $imagePath = str_replace($removeFromUrl, '', $image); 
+                $deleteImage = Image::where('path', $imagePath)->where('imageable_id', $workOrderId)->first();
+                if ($deleteImage) {
+                    $deleteImage->delete(); // Delete the image record from the database
+                    \Storage::disk('public')->delete($imagePath); // Delete the file from storage
+                }
+            }
+    }
 
     public function assignedWorkOrders()
     {
@@ -377,11 +399,6 @@ class WorkOrderController extends Controller
         ]);
     }
 
-    public function updateWorkOrderStatus(WorkOrder $workOrder, Request $request)
-    {
-        // Hmm
-    }
-    
     /**
      *  Storing preventive maintenance work orders:
      *      - This method handles specific logic for preventive maintenance work orders

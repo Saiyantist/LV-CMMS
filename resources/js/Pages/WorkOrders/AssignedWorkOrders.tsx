@@ -13,15 +13,16 @@ import { Datatable } from "./components/Datatable";
 import { StatusCell } from "./components/StatusCell";
 import { getPriorityColor } from "@/utils/getPriorityColor";
 import { prioritySorting } from "@/utils/prioritySorting";
+import FlashToast from "@/Components/FlashToast";
+import { statusSorting } from "@/utils/statusSorting";
 
 // import FullCalendar from "@fullcalendar/react"; // FullCalendar library
 // import dayGridPlugin from "@fullcalendar/daygrid"; // Month view
 // import timeGridPlugin from "@fullcalendar/timegrid"; // Week view
 
-export default function AssignedTask({ user, workOrders }: { user: {id: number; roles: { id: number; name: string; }[]; permissions: string[]; }; workOrders: any }) {
+export default function AssignedTask({ user, workOrders }: { user: {id: number; roles: { id: number; name: string; }[]; permissions: string[]; }; workOrders: any; }) {
     const [activeTab, setActiveTab] = useState("list");
 
-    
     // Define columns for the data table
     const columns: ColumnDef<{ id: number; location?: { name?: string }; }>[] = [
         {
@@ -105,7 +106,7 @@ export default function AssignedTask({ user, workOrders }: { user: {id: number; 
             accessorKey: "status",
             header: "Status",
             cell: ({ row }) => <StatusCell value={row.getValue("status")} user={user} row={row}/>,
-            enableSorting: false,
+            sortingFn: statusSorting,
             meta: {
                 filterable: true,
             }
@@ -126,6 +127,8 @@ export default function AssignedTask({ user, workOrders }: { user: {id: number; 
     return (
         <AuthenticatedLayout>
             <Head title="Assigned Work Orders" />
+
+            <FlashToast />
 
             <div className="container mx-auto py-4">
                 <header>

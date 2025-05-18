@@ -27,7 +27,6 @@ interface StatusCellProps {
 
         };
     };
-    // row: any;
 }; 
 
 export function StatusCell({ value, user, row }: StatusCellProps) {
@@ -59,18 +58,7 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
     };
     
     const handleUpdate = (status: string, rowId: number,) => {
-
-        if (row.original.status == "Ongoing" || row.original.status == "Assigned"){
-            router.put(`/work-orders/${rowId}`, { status }, {
-            onError: (errors) => {
-                console.error('Failed to update status', errors);
-            },
-            });
-        }
-        else {
-            console.log("bawal i-update")
-            // FE show toast message to the page.
-        }
+            router.put(`/work-orders/${rowId}`, { status });
     };
 
     // Define all statuses
@@ -84,22 +72,42 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
         "For Budget Request",
         "Cancelled",
         "Declined",
-        "Deleted",
     ];
 
     // Filter statuses based on user role
-    const statuses =
+    const dropDownStatuses =
         user.roles[0].name === "maintenance_personnel"
             ? ["Ongoing", "Completed"] // Restricted statuses for maintenance personnel
             : allStatuses; // All statuses for other roles
 
+    const disableStatus = [
+        "Pending",
+        "Scheduled",
+        "Overdue",
+        "Completed",
+        "For Budget Request",
+        "Cancelled",
+        "Declined",
+        "Deleted",
+    ]
+
     return (
         <DropdownMenu>
-            {(user.roles[0].name === "maintenance_personnel" && (window.route && window.route().current("work-orders.assigned-tasks"))) ? (
+            {disableStatus.includes(value) && !user.permissions.includes("manage work orders") ? (
+            <span
+                className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(
+                value
+                )}`}
+            >
+                {value}
+            </span>
+            ) : ((user.roles[0].name === "maintenance_personnel" || user.permissions.includes("manage work orders")) &&
+              window.route &&
+              (window.route().current("work-orders.assigned-tasks") || window.route().current("work-orders.index"))) ? (
             <DropdownMenuTrigger asChild>
                 <Button
                 variant={"link"}
-                className={`px-5 py-1 !h-6 border rounded flex items-center justify-between gap-1 text-xs hover:no-underline ${getStatusColor(
+                className={`px-2 py-1 !h-6 border rounded flex items-center justify-between gap-1 text-xs hover:no-underline ${getStatusColor(
                     value
                 )}`}
                 >
@@ -109,7 +117,7 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
             </DropdownMenuTrigger>
             ) : (
             <span
-                className={`px-5 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(
+                className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(
                 value
                 )}`}
             >
@@ -117,10 +125,12 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
             </span>
             )}
             <DropdownMenuContent align="center">
-            {statuses.map((status) => (
+            {dropDownStatuses.map((status) => (
                 <DropdownMenuItem
                 key={status}
-                onClick={() => {handleUpdate(status, row.original.id)}}
+                onClick={() => {
+                    handleUpdate(status, row.original.id);
+                }}
                 >
                 {status}
                 </DropdownMenuItem>
