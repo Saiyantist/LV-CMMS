@@ -63,9 +63,7 @@ export default function EditWorkOrderModal({
 
     const [typedLocation, setTypedLocation] = useState<string>(initialLocationName);
     const [newLocation, setNewLocation] = useState<string>("");
-    const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
     const [deletedImages, setDeletedImages] = useState<string[]>([]);
-    const [showDropdown, setShowDropdown] = useState<boolean>(false);
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
     const [date, setDate] = useState<Date>()
     const [showCalendar, setShowCalendar] = useState(false)
@@ -176,44 +174,6 @@ export default function EditWorkOrderModal({
     const removeImage = (imageUrl: string) => {
         setDeletedImages((prev) => [...prev, imageUrl]);
     };
-
-    const handleLocationInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setTypedLocation(value);
-
-        const matchedLocation = locations.find(
-            (loc) => loc.name.toLowerCase() === value.toLowerCase()
-        );
-
-        // ✅ Submit ID if it's a known location, else submit raw string
-        if (matchedLocation) {
-            setData("location_id", (matchedLocation.id));
-        } else {
-            setNewLocation(value);
-        }
-
-        const filtered = locations.filter((loc) =>
-            loc.name.toLowerCase().includes(value.toLowerCase())
-        );
-        setFilteredLocations(filtered);
-    };
-
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(e.target as Node)
-            ) {
-                setShowDropdown(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
 
     const getAssetDetails = (workOrder: any) => {
         if (workOrder.asset) {

@@ -101,9 +101,10 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
             >
                 {value}
             </span>
-            ) : ((user.roles[0].name === "maintenance_personnel" || user.permissions.includes("manage work orders")) &&
-              window.route &&
-              (window.route().current("work-orders.assigned-tasks") || window.route().current("work-orders.index"))) ? (
+            ) : ( window.route && (
+                    (user.roles[0].name === "maintenance_personnel" && window.route().current("work-orders.assigned-tasks")) || 
+                    (user.permissions.includes("manage work orders") && window.route().current("work-orders.index")) 
+                )) ? (
             <DropdownMenuTrigger asChild>
                 <Button
                 variant={"link"}

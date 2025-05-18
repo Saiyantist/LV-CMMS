@@ -225,15 +225,28 @@ class WorkOrderController extends Controller
         if ($user->hasRole('maintenance_personnel')) {
             
             // Request is from "Assigned Tasks" page
-            if ($request->only('status')) {
+            // Updating via the dropdown
+            if (count($request->all()) === 1 && array_key_exists('status', $request->all())) {
                 $validTransitions = [
                     'Assigned' => ['Ongoing', 'Completed'],
                     'Ongoing' => ['Assigned', 'Completed'],
                 ];
-                
                 if (isset($validTransitions[$workOrder->status]) && in_array($request->status, $validTransitions[$workOrder->status])) {
-                    $workOrder->update(['status' => $request->status]);
+                    if($request->status === "Completed") {
+                        dd("completed");
+                        $workOrder->update([
+                            'status' => $request->status,
+                            'completed_at' => now(),
+                        ]);
+                    }
+                    else {
+                        dd("assigned or ongoing");
+                        $workOrder->update(['status' => $request->status]);
+                    }
                     return redirect()->route('work-orders.assigned-tasks')->with(['success' => 'Work Order updated successfully']);
+                }
+                else {
+                    return redirect()->route('work-orders.assigned-tasks')->with(['error' => 'Something went wrong while updating :/']);
                 }
             }
             
