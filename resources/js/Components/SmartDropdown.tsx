@@ -70,7 +70,7 @@ useEffect(() => {
           placeholder={placeholder}
         />
         {isOpen && (
-          <div className="absolute z-10 bg-white border w-full rounded shadow max-h-60 overflow-y-auto mt-1">
+          <div className="text-xs absolute z-10 bg-white border w-full rounded shadow max-h-60 overflow-y-auto mt-1">
             {filteredItems.length > 0 ? (
               filteredItems.map((item) => (
                 <div
@@ -95,7 +95,7 @@ useEffect(() => {
           </div>
         )}
       </div>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="text-red-500 text-xs">{error}</p>}
     </div>
   )
 }

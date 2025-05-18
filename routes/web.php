@@ -106,10 +106,12 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::post('/locations', [LocationController::class, 'store']);
     });
     
-// API route for work order statuses (for chart)
-Route::get('/api/work-orders/statuses', function () {
-    return \App\Models\WorkOrder::select('status')->get();
-})->middleware(['auth', 'verified'])->name('api.work-orders.statuses');    /**
+    // API route for work order statuses (for chart)
+    Route::get('/api/work-orders/statuses', function () {
+        return \App\Models\WorkOrder::select('status')->get();
+    })->middleware(['auth', 'verified'])->name('api.work-orders.statuses');
+
+    /**
      * Event Services Routes
      */
     Route::middleware(['restrict_internal', 'restrict_work_order_manager'])->group(function () {
