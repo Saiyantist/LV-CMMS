@@ -6,8 +6,8 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 import { Button } from "@/Components/shadcnui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import CreateWorkOrderModal from "./CreateModal";
-import EditWorkOrderModal from "./EditModal";
+import CreateWorkOrderModal from "./components/CreateModal";
+import EditWorkOrderModal from "./components/EditModal";
 import { StatusCell } from "./components/StatusCell";
 import { Datatable } from "./components/Datatable";
 import { getPriorityColor } from "@/utils/getPriorityColor";
@@ -304,6 +304,7 @@ export default function IndexLayout({
                     workOrder={editingWorkOrder}
                     locations={locations}
                     user={user}
+                    maintenancePersonnel={maintenancePersonnel}
                     onClose={() => setEditingWorkOrder(null)}
                 />
             )}
@@ -364,18 +365,11 @@ export default function IndexLayout({
             )}
 
             {/* Desktop Table View */}
-            <div
-                className={`hidden md:block overflow-x-auto rounded-md -mt-[4.1rem] ${
-                    !user.permissions.includes("manage work orders")
-                        ? "!-mt-[0.7rem]"
-                        : ""
+            <div className={`hidden md:block overflow-x-auto rounded-md -mt-[4.1rem] ${
+                    !user.permissions.includes("manage work orders") ? "!-mt-[0.7rem]" : ""
                 }`}
             >
-                <Datatable
-                    columns={columns}
-                    data={filteredWorkOrders}
-                    placeholder="Search here"
-                />
+                <Datatable columns={columns} data={filteredWorkOrders} placeholder="Search here" />
             </div>
 
             {/* Mobile Card View */}

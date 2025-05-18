@@ -249,7 +249,7 @@ class WorkOrderController extends Controller
         }
 
         /** Internal Requester */
-        if($user->hasRole('internal_requester')) {
+        else if ($user->hasRole('internal_requester')) {
             if ($workOrder->requested_by != $user->id) {
                 return redirect()->route('work-orders.index')->with('error', 'You are not allowed to update this work order.');
             }
@@ -267,27 +267,42 @@ class WorkOrderController extends Controller
         }
         
         /** Work Order Manager */
-        else {
+        else if ($user->hasPermissionTo('manage work orders')) {
 
+            
             // Updating via the dropdown
-            if ($request->only('status')) {
-                $workOrder->update(['status' => $request->status]);
+            if (count($request->all()) === 1 && array_key_exists('status', $request->all())) {
+                if($request->status === "Completed") {
+                    $workOrder->update([
+                        'status' => $request->status,
+                        'completed_at' => now(),
+                    ]);
+                }
+                else {
+                    $workOrder->update(['status' => $request->status]);
+                }
                 return redirect()->route('work-orders.index')->with('success', 'Work Order status updated successfully.');
             }
-            // Update Work Order (expected from edit work order modal)
+
+            // Remove description and location from here and in StoreWorkOrderRequest
             $workOrder->update([
-                'report_description' => $request->report_description,
-                'location_id' => $request->location_id,
-                'status' => $request->status,
                 'work_order_type' => $request->work_order_type,
                 'label' => $request->label,
+                'scheduled_at' => $request->scheduled_at,
                 'priority' => $request->priority,
-                'remarks' => $request->remarks,
+                'assigned_to' => $request->assigned_to,
+                'status' => $request->status,
+                'approved_at' => $request->approved_at,
+                'approved_by' => $request->approved_by,
             ]);
+
             return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
         }
 
-        return redirect()->route('work-orders.index')->with('error', 'Something went wrong while updating.');
+        else {
+            return redirect()->route('work-orders.index')->with('error', 'Something went wrong while updating.');
+        }
+
     }
     
     /**

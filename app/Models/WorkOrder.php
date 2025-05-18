@@ -23,6 +23,8 @@ class WorkOrder extends Model
         'assigned_to',
         'assigned_at',
         'scheduled_at',
+        'approved_at',
+        'approved_by',
         'completed_at',
         'remarks',
         'asset_id',
