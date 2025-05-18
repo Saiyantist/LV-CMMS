@@ -30,10 +30,28 @@ class StoreWorkOrderRequest extends FormRequest
         $user = auth()->user();
         $requestData = $this->all();
 
+        // Re-shape the logic for work Order Manager
+
         // Validation from dropDown updates
         if (count($requestData) === 1 && array_key_exists('status', $requestData)) {
             return $rules = [ 'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])]];
         } 
+        
+        if ($user->hasPermissionTo('manage work orders')) {
+
+            if ($this->route()->getName() === 'work-orders.update') {
+                return $rules = [
+                    'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
+                    'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
+                    'scheduled_at' => 'required|date',
+                    'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // Maybe AI-generated in the future
+                    'assigned_to' => 'required',
+                    'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
+                    'approved_at' => 'required|date',
+                    'assigned_to' => 'required|string|max:255',
+                ];
+            }
+        }
         
         else {
             // Default Work Order Request Validation

@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Initial setup of table pa lang.
-
+        // Add approved_at timestamp and approved_by string
         Schema::create('work_orders', function (Blueprint $table) {
             $table->id();
-            $table->string('report_description')->nullable();
+            $table->text('report_description')->nullable();
             $table->foreignId('location_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('status', ['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined', 'Deleted'])->default('Pending');
             $table->enum('work_order_type', ['Work Order', 'Preventive Maintenance', 'Compliance'])->default('Work Order');
@@ -26,6 +25,8 @@ return new class extends Migration
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('assigned_at')->nullable();
             $table->timestamp('scheduled_at')->nullable();
+            $table->timestamp('approved_at')->nullable();
+            $table->string('approved_by')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->text('remarks')->nullable();
             $table->foreignId('asset_id')->nullable()->constrained()->nullOnDelete();
