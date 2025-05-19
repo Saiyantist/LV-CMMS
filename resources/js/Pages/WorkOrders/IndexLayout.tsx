@@ -51,6 +51,8 @@ interface WorkOrders {
     remarks: string;
     requested_at: string;
     scheduled_at: string;
+    approved_at: string;
+    approved_by: string;
     location: {
         id: number;
         name: string;

@@ -37,9 +37,9 @@ class StoreWorkOrderRequest extends FormRequest
             return $rules = [ 'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])]];
         } 
         
-        if ($user->hasPermissionTo('manage work orders')) {
-
-            if ($this->route()->getName() === 'work-orders.update') {
+        if ($this->route()->getName() === 'work-orders.update') {
+            
+            if ($user->hasPermissionTo('manage work orders')) {
                 return $rules = [
                     'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
                     'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
@@ -75,7 +75,7 @@ class StoreWorkOrderRequest extends FormRequest
                     'remarks' => 'nullable|string|max:1000',
                 ]);
             } 
-
+            
             return $rules;
         } 
 

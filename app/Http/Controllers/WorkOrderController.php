@@ -52,9 +52,11 @@ class WorkOrderController extends Controller
                     'id' => $wo->assignedTo->id,
                     'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
                 ] : null,
-                'assigned_at' => \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y'),
-                'scheduled_at' => \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y'),
-                'completed_at' => \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y'),
+                'assigned_at' => $wo->assigned_at ? \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y') : null,
+                'scheduled_at' => $wo->scheduled_at ? \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y') : null,
+                'completed_at' => $wo->completed_at ? \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y') : null,
+                'approved_at' => $wo->approved_at ? \Carbon\Carbon::parse($wo->approved_at)->format('m/d/Y') : null,
+                'approved_by' => $wo->approved_by,
                 'location' => [
                     'id' => $wo->location_id,
                     'name' => $wo->location->name,
@@ -67,16 +69,9 @@ class WorkOrderController extends Controller
                     'status' => $wo->asset->status,
                     'location_id' => $wo->asset->location_id,
                 ] : null,
-                'requested_by' => [
-                    'id' => $wo->requestedBy->id,
-                    'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
-                ],
-                'assigned_to' => $wo->assignedTo ? [
-                    'id' => $wo->assignedTo->id,
-                    'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
-                ] : null,
             ];
         });
+
 
         return Inertia::render('WorkOrders/Index',
         [
@@ -233,14 +228,12 @@ class WorkOrderController extends Controller
                 ];
                 if (isset($validTransitions[$workOrder->status]) && in_array($request->status, $validTransitions[$workOrder->status])) {
                     if($request->status === "Completed") {
-                        dd("completed");
                         $workOrder->update([
                             'status' => $request->status,
                             'completed_at' => now(),
                         ]);
                     }
                     else {
-                        dd("assigned or ongoing");
                         $workOrder->update(['status' => $request->status]);
                     }
                     return redirect()->route('work-orders.assigned-tasks')->with(['success' => 'Work Order updated successfully']);
@@ -331,7 +324,6 @@ class WorkOrderController extends Controller
         }
         
         if ($workOrder-> status !== "Cancelled" &&  $workOrder->status !== "Declined") {
-            dd($workOrder->status);
             return redirect()->route('work-orders.index')->with('error', 'Only "Cancelled" and "Declined" work orders can be deleted.');
         }
         

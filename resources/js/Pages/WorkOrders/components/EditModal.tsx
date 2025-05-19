@@ -36,6 +36,10 @@ interface EditWorkOrderProps {
         work_order_type: string;
         label: string;
         priority: string;
+        scheduled_at: string;
+        assigned_to: { id: number; name: string; };
+        approved_at: string;
+        approved_by: string;
         remarks: string;
         images: string[];
     };
@@ -82,12 +86,12 @@ export default function EditWorkOrderModal({
         status: workOrder.status,
         work_order_type: workOrder.work_order_type,
         label: workOrder.label,
-        assigned_to: "",
+        assigned_to: workOrder.assigned_to ?? "",
         priority: workOrder.priority,
         remarks: workOrder.remarks ?? "",
-        scheduled_at: "",
-        approved_at: "",
-        approved_by: "",
+        scheduled_at: workOrder.scheduled_at ?? "",
+        approved_at: workOrder.approved_at ?? "",
+        approved_by: workOrder.approved_by ?? "",
     });
 
     const validateForm = () => {
@@ -146,7 +150,7 @@ export default function EditWorkOrderModal({
             formData.append("work_order_type", data.work_order_type || "");
             formData.append("label", data.label || "");
             if (date) formData.append("scheduled_at", format(date, "yyyy-MM-dd"))
-            formData.append("assigned_to", data.assigned_to || "")
+            formData.append("assigned_to", data.assigned_to?.id?.toString() || "")
             formData.append("priority", data.priority || "");
             formData.append("status", data.status || "");
             if (approvedDate) formData.append("approved_at", format(approvedDate, "yyyy-MM-dd"))
@@ -352,7 +356,7 @@ export default function EditWorkOrderModal({
                                             )}
                                         >
                                             {data.scheduled_at
-                                                ? format(parseISO(data.scheduled_at), "MM/dd/yyyy")
+                                                ? format(data.scheduled_at, "MM/dd/yyyy")
                                                 : "MM/DD/YYYY"}
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>
@@ -426,8 +430,8 @@ export default function EditWorkOrderModal({
                                             Assign to <span className="text-red-500 ml-1">*</span>
                                         </Label>
                                         <Select
-                                            value={data.assigned_to}
-                                            onValueChange={(value) => setData("assigned_to", value)}
+                                            value={data.assigned_to?.id?.toString()}
+                                            onValueChange={(value) => setData("assigned_to", { id: parseInt(value), name: "" })}
                                         >
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Select Personnel" />
@@ -475,6 +479,8 @@ export default function EditWorkOrderModal({
                                     
                                 </div>
 
+                                {/* Only SHOW this row if the work order status is "FOR BUDGET REQUEST" */}
+
                                 {/* Row 3 */}
                                 <div className="flex flex-row justify-between gap-4 !mt-4">
                                     {/* Approval Date */}
@@ -493,7 +499,7 @@ export default function EditWorkOrderModal({
                                             )}
                                         >
                                             {data.approved_at
-                                            ? format(parseISO(data.approved_at), "MM/dd/yyyy")
+                                            ? format(data.approved_at, "MM/dd/yyyy")
                                             : "MM/DD/YYYY"}
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>

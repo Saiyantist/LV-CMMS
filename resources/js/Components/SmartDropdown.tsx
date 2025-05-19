@@ -9,6 +9,7 @@ interface SmartDropdownProps<T> {
   getValue: (item: T) => string
   selectedId: string
   onChange: (id: string) => void
+  onTextChange?: (text: string) => void
   error?: string
 }
 
@@ -20,6 +21,7 @@ export default function SmartDropdown<T>({
   getValue,
   selectedId,
   onChange,
+  onTextChange,
   error,
 }: SmartDropdownProps<T>) {
   const [typedText, setTypedText] = useState("")
@@ -64,6 +66,7 @@ useEffect(() => {
           value={typedText}
           onChange={(e) => {
             setTypedText(e.target.value)
+            onTextChange?.(e.target.value)
             setIsOpen(true)
           }}
           onFocus={() => setIsOpen(true)}

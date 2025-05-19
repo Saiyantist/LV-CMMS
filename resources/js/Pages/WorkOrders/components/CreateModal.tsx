@@ -38,6 +38,7 @@ interface CreateWorkOrderProps {
 export default function CreateWorkOrderModal({locations, assets, maintenancePersonnel, user, onClose }: CreateWorkOrderProps) {
     const [previewImages, setPreviewImages] = useState<string[]>([])
     const [typedLocation, setTypedLocation] = useState("")
+    const [locationId, setLocationId] = useState("")
     const [date, setDate] = useState<Date>()
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [isDraggingOver, setIsDraggingOver] = useState(false)
@@ -66,7 +67,7 @@ export default function CreateWorkOrderModal({locations, assets, maintenancePers
 
         // fix the location and asset errors
         const newErrors: Record<string, string> = {}
-
+        
         if (!typedLocation.trim()) newErrors["location_id"] = "Location is required."
         if (!data.report_description.trim()) newErrors["report_description"] = "Description is required."
 
@@ -91,20 +92,21 @@ export default function CreateWorkOrderModal({locations, assets, maintenancePers
     if (!validateForm()) return
 
     let locationId = data.location_id
-
+    
     // Check the typed location against existing locations
     const existing = locations.find((loc) => loc.name.toLowerCase() === typedLocation.toLowerCase())
-
+    
+    
     if (existing) {
-      locationId = existing.id.toString()
-    } else if (existing !== undefined) {
-      const response = await axios.post("/locations", {
-        name: typedLocation.trim(),
-      })
-      
-      locationId = response.data.id
+        locationId = existing.id.toString()
+    } else if (existing === undefined) {
+        const response = await axios.post("/locations", {
+            name: typedLocation.trim(),
+        })
+        
+        locationId = response.data.id
     }
-
+        
     const formData = new FormData()
     formData.append("location_id", locationId)
     formData.append("report_description", data.report_description)
@@ -121,11 +123,11 @@ export default function CreateWorkOrderModal({locations, assets, maintenancePers
         formData.append("remarks", data.remarks || "")
     }
 
-    // // For Debugging
-    // console.log("=== Form Data ===:")
-    // for (const [key, value] of formData.entries()) {
-    //     console.log(`${key}:`, value);
-    // }
+    // For Debugging
+    console.log("=== Form Data ===:")
+    for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+    }
 
     router.post("/work-orders", formData, {
       forceFormData: true,
@@ -215,6 +217,7 @@ export default function CreateWorkOrderModal({locations, assets, maintenancePers
                         setTypedLocation(selectedLocation?.name || "") // Show readable name in input
                         setData("location_id", id) // Submit actual ID
                     }}
+                    onTextChange={(text) => setTypedLocation(text)}
                     error={localErrors.location_id}
                 />
 
