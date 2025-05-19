@@ -28,6 +28,7 @@ import {
     DialogHeader,
 } from "@/Components/shadcnui/dialog";
 import { createPortal } from "react-dom";
+import { Head } from "@inertiajs/react";
 
 // Define the booking type
 interface Booking {
@@ -425,14 +426,16 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
     return (
         <AuthenticatedLayout>
             <div className="container mx-auto py-6">
-                <div className="bg-white p-4 rounded mb-6">
-                    <h1 className="text-2xl font-bold text-center md:text-left">
-                        My Bookings
-                    </h1>
-                </div>
+                <Head title="My Bookings" />
 
-                <div className="flex justify-between mb-6">
-                    <div className="relative w-80">
+                <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
+                        <h1 className="text-2xl font-semibold">My Bookings</h1>
+                    </div>
+                </header>
+
+                <div className="flex justify-end mb-6">
+                    <div className="relative w-80 mr-5">
                         <Search
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                             size={18}
@@ -444,6 +447,7 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
+
                     <Button
                         variant="outline"
                         className="flex items-center gap-2"

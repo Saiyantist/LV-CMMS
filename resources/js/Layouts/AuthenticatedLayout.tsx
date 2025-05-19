@@ -12,7 +12,7 @@ export default function AuthenticatedLayout({
     const user = usePage().props.auth.user;
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen">
             <Sidebar user={{ ...user, permissions: user.permissions ?? [] }} />
 
             {/* Wrapper for main content */}

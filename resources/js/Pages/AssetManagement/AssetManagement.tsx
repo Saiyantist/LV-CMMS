@@ -1,10 +1,16 @@
-import React, { useState } from "react";
+"use client";
+
+import type React from "react";
+import { useState } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
 import CreateAssetModal from "./CreateAssetModal";
 import ViewAssetModal from "./ViewAssetModal";
+import { Datatable } from "../WorkOrders/components/Datatable";
+import type { ColumnDef } from "@tanstack/react-table";
 // import { toast } from "sonner"; I will user this for delete action later.
+
 interface Asset {
     id: number;
     name: string;
@@ -58,139 +64,157 @@ const AssetManagement: React.FC = () => {
         }
     };
 
+    // Define columns for the data table
+    const columns: ColumnDef<Asset>[] = [
+        {
+            accessorKey: "id",
+            header: "ID",
+            cell: ({ row }) => <div>{row.getValue("id")}</div>,
+            meta: {
+                headerClassName: "w-12",
+                searchable: true,
+            },
+        },
+        {
+            accessorKey: "name",
+            header: "Asset Name",
+            cell: ({ row }) => <div>{row.getValue("name")}</div>,
+            meta: {
+                headerClassName: "w-[15%]",
+                searchable: true,
+            },
+        },
+        {
+            accessorKey: "specification_details",
+            header: "Specification",
+            cell: ({ row }) => (
+                <div>{row.getValue("specification_details")}</div>
+            ),
+            meta: {
+                headerClassName: "w-[20%]",
+                searchable: true,
+            },
+        },
+        {
+            accessorKey: "location.name",
+            header: "Location",
+            cell: ({ row }) => <div>{row.original.location.name}</div>,
+            meta: {
+                headerClassName: "w-[15%]",
+                searchable: true,
+                filterable: true,
+            },
+        },
+        {
+            accessorKey: "status",
+            header: "Condition",
+            cell: ({ row }) => (
+                <div
+                    className={`px-2 py-1 rounded text-center ${getStatusColor(
+                        row.getValue("status")
+                    )}`}
+                >
+                    {row.getValue("status")}
+                </div>
+            ),
+            meta: {
+                headerClassName: "w-[10%]",
+                cellClassName: "text-center",
+                filterable: true,
+            },
+        },
+        {
+            accessorKey: "date_acquired",
+            header: "Date Acquired",
+            cell: ({ row }) => <div>{row.getValue("date_acquired")}</div>,
+            meta: {
+                headerClassName: "w-[12%]",
+                cellClassName: "text-center",
+            },
+        },
+        {
+            accessorKey: "last_maintained_at",
+            header: "Last Maintenance",
+            cell: ({ row }) => <div>{row.getValue("last_maintained_at")}</div>,
+            meta: {
+                headerClassName: "w-[12%]",
+                cellClassName: "text-center",
+            },
+        },
+        {
+            id: "actions",
+            header: "Action",
+            cell: ({ row }) => (
+                <div className="flex justify-center gap-2">
+                    <button
+                        onClick={() => setViewingAsset(row.original)}
+                        className="bg-secondary text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-700 transition"
+                    >
+                        View
+                    </button>
+                    <button
+                        onClick={() => {
+                            const confirmed = window.confirm(
+                                "Are you sure you want to delete this asset? This action is irreversible and cannot be undone."
+                            );
+                            if (confirmed) {
+                                // Call your delete function here
+                            }
+                        }}
+                        className="bg-destructive text-white px-3 py-1.5 text-sm rounded-md hover:bg-red-700 transition"
+                    >
+                        Delete
+                    </button>
+                </div>
+            ),
+            enableSorting: false,
+        },
+    ];
+
+    // Helper function to get status color
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "Excellent":
+                return "bg-green-100 text-green-800";
+            case "Good":
+                return "bg-blue-100 text-blue-800";
+            case "Fair":
+                return "bg-yellow-100 text-yellow-800";
+            case "Poor":
+                return "bg-red-100 text-red-800";
+            default:
+                return "bg-gray-100 text-gray-800";
+        }
+    };
+
     return (
         <Authenticated>
             <Head title="Asset Management" />
 
-            <header className="mb-6">
-                <div className="bg-white shadow-sm sm:rounded-lg">
-                    <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 text-black">
-                        <h1 className="text-2xl font-semibold text-center sm:text-left">
-                            Asset Management
-                        </h1>
-                        <div className="w-full sm:w-auto flex sm:ml-4 justify-center sm:justify-start">
-                            <PrimaryButton
-                                onClick={() => setIsCreating(true)}
-                                className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md"
-                            >
-                                Add an Asset
-                            </PrimaryButton>
-                        </div>
-                    </div>
+            <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
+                    <h1 className="text-2xl font-semibold sm:mb-0">
+                        Asset Management
+                    </h1>
+                    <PrimaryButton
+                        onClick={() => setIsCreating(true)}
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md w-full sm:w-auto text-center justify-center"
+                    >
+                        Add an Asset
+                    </PrimaryButton>
                 </div>
             </header>
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
                 {/* Desktop Table View */}
-                <div className="hidden sm:block overflow-x-auto">
-                    <table className="min-w-full table-auto border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                        <thead className="bg-secondary text-white">
-                            <tr className="border border-white">
-                                <th className="p-3 text-center border border-white">
-                                    <input
-                                        type="checkbox"
-                                        onChange={handleSelectAll}
-                                        checked={
-                                            selectedAssets.length ===
-                                            assets.length
-                                        }
-                                        className="accent-primary"
-                                    />
-                                </th>
-                                <th className="p-3 text-sm font-semibold border border-white">
-                                    ID
-                                </th>
-                                <th className="p-3 text-sm font-semibold border border-white">
-                                    Asset Name
-                                </th>
-                                <th className="p-3 text-sm font-semibold border border-white">
-                                    Specification
-                                </th>
-                                <th className="p-3 text-sm font-semibold border border-white">
-                                    Location
-                                </th>
-                                <th className="p-3 text-sm font-semibold border border-white">
-                                    Condition
-                                </th>
-                                <th className="p-3 text-sm font-semibold border border-white">
-                                    Date Acquired
-                                </th>
-                                <th className="p-3 text-sm font-semibold border border-white">
-                                    Last Maintenance
-                                </th>
-                                <th className="p-3 text-sm font-semibold border border-white">
-                                    Action
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {assets.map((asset: Asset) => (
-                                <tr
-                                    key={asset.id}
-                                    className="border-b hover:bg-gray-50 transition-colors"
-                                >
-                                    <td className="p-3 text-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedAssets.includes(
-                                                asset.id
-                                            )}
-                                            onChange={() =>
-                                                handleCheckboxChange(asset.id)
-                                            }
-                                            className="accent-primary"
-                                        />
-                                    </td>
-                                    <td className="p-3 text-center">
-                                        {asset.id}
-                                    </td>
-                                    <td className="p-3">{asset.name}</td>
-                                    <td className="p-3 text-center">
-                                        {asset.specification_details}
-                                    </td>
-                                    <td className="p-3 text-center">
-                                        {asset.location.name}
-                                    </td>
 
-                                    <td className="p-3 text-center">
-                                        {asset.status}
-                                    </td>
-                                    <td className="p-3 text-center">
-                                        {asset.date_acquired}
-                                    </td>
-                                    <td className="p-3 text-center">
-                                        {asset.last_maintained_at}
-                                    </td>
-                                    <td className="p-3 text-center">
-                                        <div className="flex justify-center gap-2">
-                                            <button
-                                                onClick={() =>
-                                                    setViewingAsset(asset)
-                                                }
-                                                className="bg-secondary text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-700 transition"
-                                            >
-                                                View
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    const confirmed =
-                                                        window.confirm(
-                                                            "Are you sure you want to delete this asset? This action is irreversible and cannot be undone."
-                                                        );
-                                                    if (confirmed) {
-                                                        // Call your delete function here
-                                                    }
-                                                }}
-                                                className="bg-destructive text-white px-3 py-1.5 text-sm rounded-md hover:bg-red-700 transition"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="hidden md:block overflow-x-auto rounded-md -mt-[4.1rem]">
+                    {" "}
+                    <Datatable
+                        columns={columns}
+                        data={assets}
+                        placeholder="Search assets"
+                    />
                 </div>
 
                 {/* Mobile Card View */}
@@ -233,7 +257,13 @@ const AssetManagement: React.FC = () => {
                                     <span className="font-medium">
                                         Condition:
                                     </span>{" "}
-                                    {asset.status}
+                                    <span
+                                        className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(
+                                            asset.status
+                                        )}`}
+                                    >
+                                        {asset.status}
+                                    </span>
                                 </p>
                                 <p>
                                     <span className="font-medium">

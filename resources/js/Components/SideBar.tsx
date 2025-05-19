@@ -6,7 +6,7 @@ import {
     Wrench,
     ShieldCheck,
     FileText,
-    Send,
+    // Send,
     User,
     LogOut,
     Menu,
@@ -16,6 +16,9 @@ import {
     Calendar,
     Book,
     CalendarCog,
+    ChevronDown,
+    ChevronUp,
+    ArrowLeft,
 } from "lucide-react";
 
 interface Role {
@@ -35,6 +38,10 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    // Dropdown state for super admin
+    const [workOrdersDropdownOpen, setWorkOrdersDropdownOpen] = useState(false);
+    const [eventServicesDropdownOpen, setEventServicesDropdownOpen] =
+        useState(false);
     const { post } = useForm();
     const currentRoute = route().current();
 
@@ -44,63 +51,80 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     };
 
     const isWorkOrderRequester = user.permissions.some((permission) =>
-        ["request work orders", "view own work orders", "cancel own work orders",]
-        .includes(permission));
-    const isEventServiceRequester = user.permissions.some((permission) => 
-        ['request event services', 'view own event services', 'cancel own event services']
-        .includes(permission));
-    const isMaintenancePersonnel = user.roles.some((role) => role.name === "maintenance_personnel");
-    const isWorkOrderManager = user.permissions.some((permission) => permission === "manage work orders");
-    const isEventServicesManager = user.permissions.some((permission) => permission === "manage event services");
+        [
+            "request work orders",
+            "view own work orders",
+            "cancel own work orders",
+        ].includes(permission)
+    );
+    const isEventServiceRequester = user.permissions.some((permission) =>
+        [
+            "request event services",
+            "view own event services",
+            "cancel own event services",
+        ].includes(permission)
+    );
+    const isMaintenancePersonnel = user.roles.some(
+        (role) => role.name === "maintenance_personnel"
+    );
+    const isWorkOrderManager = user.permissions.some(
+        (permission) => permission === "manage work orders"
+    );
+    const isEventServicesManager = user.permissions.some(
+        (permission) => permission === "manage event services"
+    );
     const isSuperAdmin = user.roles.some((role) => role.name === "super_admin");
 
     const menuItems = !isSuperAdmin
         ? [
-        ...(isMaintenancePersonnel
-            ? [
-                  {
-                      routeName: "work-orders.assigned-tasks",
-                      href: route("work-orders.assigned-tasks") || "",
-                      text: "Assigned Tasks",
-                      icon: <BriefcaseBusiness size={16} className="mr-2" />,
-                  },
-              ]
-            : []),
+              ...(isMaintenancePersonnel
+                  ? [
+                        {
+                            routeName: "work-orders.assigned-tasks",
+                            href: route("work-orders.assigned-tasks") || "",
+                            text: "Assigned Tasks",
+                            icon: (
+                                <BriefcaseBusiness size={16} className="mr-2" />
+                            ),
+                        },
+                    ]
+                  : []),
 
-        ...( isWorkOrderRequester && !isWorkOrderManager
-            ? [
-                {
-                    routeName: "work-orders.index",
-                    href: route("work-orders.index") || "",
-                    text: "My Work Orders",
-                    icon: <ClipboardList size={16} className="mr-2" />,
-                },
-              ]
-            : []),
+              ...(isWorkOrderRequester && !isWorkOrderManager
+                  ? [
+                        {
+                            routeName: "work-orders.index",
+                            href: route("work-orders.index") || "",
+                            text: "My Work Orders",
+                            icon: <ClipboardList size={16} className="mr-2" />,
+                        },
+                    ]
+                  : []),
 
-        ... ( isEventServiceRequester
-            ? [
-                {
-                    routeName: "booking-calendar",
-                    href: route("booking-calendar") || "",
-                    text: "Booking Calendar",
-                    icon: <Calendar size={16} className="mr-2" />,
-                },
-                {   // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
-                    routeName: "event-services.request",
-                    href: route("event-services.request") || "",
-                    text: "Event Services Request (temp)",
-                    icon: <FileText size={16} className="mr-2" />,
-                },
-                {
-                    routeName: "event-services.my-bookings",
-                    href: route("event-services.my-bookings") || "",
-                    text: "My Bookings",
-                    icon: <Book size={16} className="mr-2" />,
-                },
-              ]
-            : []),
-        ]
+              ...(isEventServiceRequester
+                  ? [
+                        {
+                            routeName: "booking-calendar",
+                            href: route("booking-calendar") || "",
+                            text: "Booking Calendar",
+                            icon: <Calendar size={16} className="mr-2" />,
+                        },
+                        {
+                            // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
+                            routeName: "event-services.request",
+                            href: route("event-services.request") || "",
+                            text: "Event Services Request",
+                            icon: <FileText size={16} className="mr-2" />,
+                        },
+                        {
+                            routeName: "event-services.my-bookings",
+                            href: route("event-services.my-bookings") || "",
+                            text: "My Bookings",
+                            icon: <Book size={16} className="mr-2" />,
+                        },
+                    ]
+                  : []),
+          ]
         : [];
 
     const hasRoute = (name: string) => {
@@ -142,10 +166,11 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             text: "Booking Calendar",
             icon: <Calendar size={16} className="mr-2" />,
         },
-        {   // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
+        {
+            // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
             routeName: "event-services.request",
             href: route("event-services.request") || "",
-            text: "Event Services Request (temp)",
+            text: "Event Services Request",
             icon: <FileText size={16} className="mr-2" />,
         },
         {
@@ -168,24 +193,102 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         },
     ];
 
-    const superAdminItems = 
-    [
+    const superAdminItems = [
         hasRoute("admin.manage-roles") && {
             routeName: "admin.manage-roles",
             href: route("admin.manage-roles") || "",
             icon: <User size={16} className="mr-2" />,
             text: "User Management",
         },
-    ]
-    
-    const adminItems = isSuperAdmin ? [...workOrderAdminItems, ...eventServicesAdminItems, ...superAdminItems]
-            : isWorkOrderManager
-                ? workOrderAdminItems : isEventServicesManager
-                ? eventServicesAdminItems : [];
-            
+    ];
+
+    const adminItems = isSuperAdmin
+        ? [
+              ...workOrderAdminItems,
+              ...eventServicesAdminItems,
+              ...superAdminItems,
+          ]
+        : isWorkOrderManager
+        ? workOrderAdminItems
+        : isEventServicesManager
+        ? eventServicesAdminItems
+        : [];
+
+    // Work Orders dropdown items for super admin
+    const workOrdersDropdownItems = [
+        {
+            routeName: "work-orders.index",
+            href: route("work-orders.index") || "",
+            text: "Work Order Requests",
+            icon: <ClipboardList size={16} className="mr-2" />,
+        },
+        {
+            routeName: "assets.index",
+            href: route("assets.index") || "",
+            text: "Asset Management",
+            icon: <Wrench size={14} className="mr-2" />,
+        },
+        {
+            routeName: "work-orders.preventive-maintenance",
+            href: route("work-orders.preventive-maintenance") || "",
+            text: "Preventive Maintenance",
+            icon: <ShieldCheck size={14} className="mr-2" />,
+        },
+        {
+            routeName: "work-orders.compliance-and-safety",
+            href: route("work-orders.compliance-and-safety") || "",
+            text: "Compliance and Safety",
+            icon: <FileText size={14} className="mr-2" />,
+        },
+    ].filter((item) => item.href);
+
+    // Event Services dropdown items for super admin
+    const eventServicesDropdownItems = [
+        {
+            routeName: "booking-calendar",
+            href: route("booking-calendar") || "",
+            text: "Booking Calendar",
+            icon: <Calendar size={16} className="mr-2" />,
+        },
+        {
+            routeName: "event-services.request",
+            href: route("event-services.request") || "",
+            text: "Event Services Request",
+            icon: <FileText size={16} className="mr-2" />,
+        },
+        {
+            routeName: "event-services.my-bookings",
+            href: route("event-services.my-bookings") || "",
+            text: "My Bookings",
+            icon: <Book size={16} className="mr-2" />,
+        },
+        {
+            routeName: "",
+            href: "",
+            text: "Requests Management",
+            icon: <CalendarCog size={16} className="mr-2" />,
+        },
+        {
+            routeName: "",
+            href: "",
+            text: "Venue Management",
+            icon: <FileText size={16} className="mr-2" />,
+        },
+    ];
+
+    // User Management tab for super admin
+    const userManagementItem =
+        isSuperAdmin && hasRoute("admin.manage-roles")
+            ? {
+                  routeName: "admin.manage-roles",
+                  href: route("admin.manage-roles") || "",
+                  icon: <User size={16} className="mr-2" />,
+                  text: "User Management",
+              }
+            : null;
+
     const isActive = (routeName: string) => currentRoute === routeName;
 
-    
     const renderMenuItem = (item: any) => (
         <li key={item.text}>
             <Link
@@ -194,8 +297,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     isActive(item.routeName)
                         ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-4 mr-1 ml-3 rounded-full"
                         : "text-white"
-                    } ${item.isChild ? "pl-8" : "pl-4"}`}
-                    >
+                } pl-4`}
+            >
                 {item.icon}
                 {item.text}
             </Link>
@@ -229,15 +332,96 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             Dashboard
                         </Link>
                     </li>
-                    {menuItems.map(renderMenuItem)}
-                    {adminItems.map(renderMenuItem)}
+                    {/* Super Admin Dropdowns */}
+                    {isSuperAdmin ? (
+                        <>
+                            {/* Work Orders Dropdown */}
+                            <li>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setWorkOrdersDropdownOpen(
+                                            (open) => !open
+                                        )
+                                    }
+                                    className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
+                                >
+                                    <ClipboardList size={16} className="mr-2" />
+                                    Work Orders
+                                    <span className="ml-auto">
+                                        {workOrdersDropdownOpen ? (
+                                            <ChevronUp size={16} />
+                                        ) : (
+                                            <ChevronDown size={16} />
+                                        )}
+                                    </span>
+                                </button>
+                                {workOrdersDropdownOpen && (
+                                    <ul className="ml-4">
+                                        {workOrdersDropdownItems.map((item) =>
+                                            renderMenuItem(item)
+                                        )}
+                                    </ul>
+                                )}
+                            </li>
+                            {/* Event Services Dropdown */}
+                            <li>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setEventServicesDropdownOpen(
+                                            (open) => !open
+                                        )
+                                    }
+                                    className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
+                                >
+                                    <Calendar size={16} className="mr-2" />
+                                    Event Services
+                                    <span className="ml-auto">
+                                        {workOrdersDropdownOpen ? (
+                                            <ChevronUp size={16} />
+                                        ) : (
+                                            <ChevronDown size={16} />
+                                        )}
+                                    </span>
+                                </button>
+                                {eventServicesDropdownOpen && (
+                                    <ul className="ml-4">
+                                        {eventServicesDropdownItems.map(
+                                            (item) => renderMenuItem(item)
+                                        )}
+                                    </ul>
+                                )}
+                            </li>
+                        </>
+                    ) : (
+                        <>
+                            {menuItems.map(renderMenuItem)}
+                            {adminItems.map(renderMenuItem)}
+                        </>
+                    )}
                 </ul>
 
                 {/* Bottom Links */}
                 <ul className="py-4">
+                    {isSuperAdmin && userManagementItem && (
+                        <li>
+                            <Link
+                                href={userManagementItem.href}
+                                className={`flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 ${
+                                    isActive(userManagementItem.routeName)
+                                        ? "bg-white text-primary border-r-4 border-primary rounded-l-lg ml-2"
+                                        : ""
+                                }`}
+                            >
+                                {userManagementItem.icon}
+                                <span>{userManagementItem.text}</span>
+                            </Link>
+                        </li>
+                    )}
                     <li>
                         <Link
-                            href="#"
+                            href="admin.manage-roles"
                             className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80"
                         >
                             <Settings size={16} className="mr-2" />
@@ -297,34 +481,122 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
             {/* --- Mobile Burger Full Page Overlay --- */}
             {mobileMenuOpen && (
-                <div className="md:hidden fixed top-0 left-0 w-full h-full bg-primary text-white z-50 p-5 pt-6 overflow-y-auto">
-                    <div className="relative mb-6">
-                        <button
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="absolute left-0 top-1 text-sm flex items-center text-white hover:text-opacity-80"
-                        >
-                            Back
-                        </button>
-                        <div className="flex justify-center">
-                            <img
-                                src="/images/Lvlogo.jpg"
-                                alt="Logo"
-                                className="h-20 w-20 rounded-full object-cover"
-                            />
+                <div className="md:hidden fixed top-0 left-0 w-full h-full bg-primary text-white z-50 p-5 pt-6 overflow-y-auto flex flex-col justify-between">
+                    {/* Top content */}
+                    <div>
+                        <div className="relative mb-6">
+                            <button
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="absolute left-0 top-1 text-sm flex items-center text-white hover:text-opacity-80"
+                            >
+                                <ArrowLeft size={16} className="mr-1" />
+                                Back
+                            </button>
+
+                            <div className="flex justify-center">
+                                <img
+                                    src="/images/Lvlogo.jpg"
+                                    alt="Logo"
+                                    className="h-20 w-20 rounded-full object-cover"
+                                />
+                            </div>
                         </div>
+
+                        {/* Super Admin Dropdowns */}
+                        {isSuperAdmin ? (
+                            <>
+                                {/* Work Orders Dropdown */}
+                                <div>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setWorkOrdersDropdownOpen(
+                                                (open) => !open
+                                            )
+                                        }
+                                        className="flex items-center w-full px-4 py-3 text-white text-sm hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
+                                    >
+                                        <ClipboardList
+                                            size={16}
+                                            className="mr-2"
+                                        />
+                                        Work Orders
+                                        <span className="ml-auto">
+                                            {workOrdersDropdownOpen ? (
+                                                <ChevronUp size={16} />
+                                            ) : (
+                                                <ChevronDown size={16} />
+                                            )}
+                                        </span>
+                                    </button>
+                                    {workOrdersDropdownOpen && (
+                                        <ul className="ml-4">
+                                            {workOrdersDropdownItems.map(
+                                                (item) => renderMenuItem(item)
+                                            )}
+                                        </ul>
+                                    )}
+                                </div>
+
+                                {/* Event Services Dropdown */}
+                                <div>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setEventServicesDropdownOpen(
+                                                (open) => !open
+                                            )
+                                        }
+                                        className="flex items-center w-full px-4 py-3 text-white text-sm hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
+                                    >
+                                        <Calendar size={16} className="mr-2" />
+                                        Event Services
+                                        <span className="ml-auto">
+                                            {workOrdersDropdownOpen ? (
+                                                <ChevronUp size={16} />
+                                            ) : (
+                                                <ChevronDown size={16} />
+                                            )}
+                                        </span>
+                                    </button>
+                                    {eventServicesDropdownOpen && (
+                                        <ul className="ml-4">
+                                            {eventServicesDropdownItems.map(
+                                                (item) => renderMenuItem(item)
+                                            )}
+                                        </ul>
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="space-y-1 border-t pt-4 list-none">
+                                    {menuItems.map(renderMenuItem)}
+                                </div>
+                                {adminItems.length > 0 && (
+                                    <div className="border-t pt-4 mt-4 space-y-1 list-none">
+                                        {adminItems.map(renderMenuItem)}
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
 
-                    <div className="space-y-1 border-t border-white border-opacity-20 pt-4">
-                        {menuItems.map(renderMenuItem)}
-                    </div>
-
-                    {adminItems.length > 0 && (
-                        <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
-                            {adminItems.map(renderMenuItem)}
-                        </div>
-                    )}
-
-                    <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
+                    {/* Bottom content */}
+                    <div className="border-t pt-4 mt-4 space-y-1 list-none">
+                        {isSuperAdmin && userManagementItem && (
+                            <Link
+                                href={userManagementItem.href}
+                                className={`flex items-center px-4 py-3 text-sm hover:bg-white hover:text-primary rounded-lg transition ${
+                                    isActive(userManagementItem.routeName)
+                                        ? "bg-white text-primary"
+                                        : ""
+                                }`}
+                            >
+                                {userManagementItem.icon}
+                                {userManagementItem.text}
+                            </Link>
+                        )}
                         <Link
                             href="#"
                             className="flex items-center px-4 py-3 text-sm hover:bg-white hover:text-primary rounded-lg transition"

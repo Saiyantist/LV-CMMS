@@ -11,26 +11,20 @@ const ComplianceAndSafety: React.FC = () => {
             <Head title="Compliance and Safety" />
 
             <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
-                    <div className="bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 sm:gap-6 text-black">
-                            <h1 className="text-2xl font-semibold text-center sm:text-left">
-                                Compliance and Safety
-                            </h1>
-
-                            <div className="w-full sm:w-auto flex sm:ml-4 justify-center sm:justify-start">
-                                <PrimaryButton
-                                    onClick={() => setIsCreating(true)}
-                                    className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md"
-                                >
-                                    + Add
-                                </PrimaryButton>
-                            </div>
-                        </div>
-                    </div>
-                </header>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
+                    <h1 className="text-2xl font-semibold">
+                        Compliance and Safety
+                    </h1>
+                    <PrimaryButton
+                        onClick={() => setIsCreating(true)}
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
+                    >
+                        + Add
+                    </PrimaryButton>
+                </div>
+            </header>
 
             <div className="p-4">
-
                 {/* Desktop Table */}
                 <div className="hidden sm:block overflow-x-auto">
                     <table className="min-w-full table-auto border border-gray-200">

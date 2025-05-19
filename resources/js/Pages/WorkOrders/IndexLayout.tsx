@@ -16,12 +16,17 @@ import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
 
 interface Props {
-    user: { id: number; name: string; roles: {name: string;}[]; permissions: string[] };
-    locations: { id: number; name: string }[];
-    assets: { 
+    user: {
         id: number;
         name: string;
-        location: { id: number; name: string};
+        roles: { name: string }[];
+        permissions: string[];
+    };
+    locations: { id: number; name: string }[];
+    assets: {
+        id: number;
+        name: string;
+        location: { id: number; name: string };
     }[];
     maintenancePersonnel: {
         id: number;
@@ -311,25 +316,20 @@ export default function IndexLayout({
                 />
             )}
 
-            <FlashToast/>
+            <FlashToast />
 
             {/* Header */}
             <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
-                <div className="bg-white shadow-sm sm:rounded-lg">
-                    <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4 sm:gap-6 text-black">
-                        <h1 className="text-2xl font-semibold text-center sm:text-left">
-                            Work Orders
-                        </h1>
-                        <div className="w-full sm:w-auto flex justify-center sm:justify-start">
-                            <PrimaryButton
-                                onClick={() => setIsCreating(true)}
-                                className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
-                            >
-                                + Add Work Order
-                            </PrimaryButton>
-                        </div>
-                        {/* )} */}
-                    </div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
+                    <h1 className="text-2xl font-semibold sm:mb-0">
+                        Work Orders
+                    </h1>
+                    <PrimaryButton
+                        onClick={() => setIsCreating(true)}
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md w-full sm:w-auto text-center justify-center"
+                    >
+                        + Add Work Order
+                    </PrimaryButton>
                 </div>
             </header>
 
@@ -367,11 +367,18 @@ export default function IndexLayout({
             )}
 
             {/* Desktop Table View */}
-            <div className={`hidden md:block overflow-x-auto rounded-md -mt-[4.1rem] ${
-                    !user.permissions.includes("manage work orders") ? "!-mt-[0.7rem]" : ""
+            <div
+                className={`hidden md:block overflow-x-auto rounded-md -mt-[4.1rem] ${
+                    !user.permissions.includes("manage work orders")
+                        ? "!-mt-[0.7rem]"
+                        : ""
                 }`}
             >
-                <Datatable columns={columns} data={filteredWorkOrders} placeholder="Search here" />
+                <Datatable
+                    columns={columns}
+                    data={filteredWorkOrders}
+                    placeholder="Search here"
+                />
             </div>
 
             {/* Mobile Card View */}

@@ -62,13 +62,11 @@ export default function UserManagement({ users, roles, auth }: UserRoleProps) {
         <AuthenticatedLayout>
             <Head title="User Management" />
 
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-                <div className="overflow-hidden bg-white shadow-sm rounded-lg">
-                    <div className="p-6 text-black text-lg sm:text-xl text-center sm:text-left">
-                        User Management
-                    </div>
+              <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
+                    <h1 className="text-2xl font-semibold">User Management</h1>
                 </div>
-            </div>
+            </header>
 
             <UserManagementLayout
                 users={users}
