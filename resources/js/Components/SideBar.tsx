@@ -184,6 +184,34 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         </li>
     );
 
+    const renderDropdownMenu = (item: any) => (
+        <li key={item.text}>
+            <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center w-full h-12 pl-4 pr-2 text-white hover:text-opacity-80"
+            >
+                <span className="text-sm font-medium flex items-center">
+                    {item.icon}
+                    {item.text}
+                    <span className="ml-1">
+                        {isDropdownOpen ? (
+                            <ChevronUp size={14} />
+                        ) : (
+                            <ChevronDown size={14} />
+                        )}
+                    </span>
+                </span>
+            </button>
+            {isDropdownOpen && (
+                <ul>
+                    {item.children?.map((child: any) =>
+                        renderMenuItem({ ...child, isChild: true })
+                    )}
+                </ul>
+            )}
+        </li>
+    );
+
     return (
         <>
             {/* --- Desktop Sidebar --- */}
