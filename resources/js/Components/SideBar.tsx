@@ -78,7 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
               ]
             : []),
 
-        ... ( isEventServiceRequester || isEventServicesManager
+        ... ( isEventServiceRequester
             ? [
                 {
                     routeName: "booking-calendar",
@@ -136,6 +136,24 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
     // Insert the following routes if there are pages na.
     const eventServicesAdminItems = [
+        {
+            routeName: "booking-calendar",
+            href: route("booking-calendar") || "",
+            text: "Booking Calendar",
+            icon: <Calendar size={16} className="mr-2" />,
+        },
+        {   // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
+            routeName: "event-services.request",
+            href: route("event-services.request") || "",
+            text: "Event Services Request (temp)",
+            icon: <FileText size={16} className="mr-2" />,
+        },
+        {
+            routeName: "event-services.my-bookings",
+            href: route("event-services.my-bookings") || "",
+            text: "My Bookings",
+            icon: <Book size={16} className="mr-2" />,
+        },
         {
             routeName: "",
             href: "",
