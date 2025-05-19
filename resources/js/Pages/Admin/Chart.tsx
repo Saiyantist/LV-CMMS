@@ -165,14 +165,18 @@ const Chart: React.FC = () => {
                 />
 
                 {/* Custom Legend */}
-                <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
                     {allStatuses.map((status) => (
                         <div key={status} className="flex items-center gap-2">
                             <span
                                 className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: statusColors[status] }}
+                                style={{
+                                    backgroundColor: statusColors[status],
+                                }}
                             />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">{status}</span>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                                {status}
+                            </span>
                         </div>
                     ))}
                 </div>
