@@ -10,6 +10,10 @@ export default function Dashboard() {
         (role: { name: string }) => role.name === "external_requester"
     );
 
+      const isInternalRequester = user.roles?.some?.(
+        (role: { name: string }) => role.name === "internal_requester"
+    );
+
     return (
         <AuthenticatedLayout>
             <Head title="Dashboard" />
@@ -22,7 +26,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Chart Section */}
-                {!isExternalRequester && (
+                {!isExternalRequester && !isInternalRequester &&(
                     <div className="flex justify-center overflow-hidden bg-white shadow-sm rounded-lg p-6">
                         <Chart />
                     </div>
