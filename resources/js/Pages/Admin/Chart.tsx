@@ -66,7 +66,10 @@ const getChartOptions = (labels: string[], data: number[]) => ({
                         label: "Total Work Orders",
                         fontFamily: "Inter, sans-serif",
                         formatter: function (w: any) {
-                            const sum = w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0);
+                            const sum = w.globals.seriesTotals.reduce(
+                                (a: number, b: number) => a + b,
+                                0
+                            );
                             return `${sum}`;
                         },
                     },
@@ -112,10 +115,17 @@ const Chart: React.FC = () => {
 
         if (chartRef.current) {
             if (chartInstance.current) {
-                chartInstance.current.updateOptions(getChartOptions(allStatuses, data), true, true);
+                chartInstance.current.updateOptions(
+                    getChartOptions(allStatuses, data),
+                    true,
+                    true
+                );
                 chartInstance.current.updateSeries(data);
             } else {
-                chartInstance.current = new ApexCharts(chartRef.current, getChartOptions(allStatuses, data));
+                chartInstance.current = new ApexCharts(
+                    chartRef.current,
+                    getChartOptions(allStatuses, data)
+                );
                 chartInstance.current.render();
             }
         }
@@ -137,9 +147,12 @@ const Chart: React.FC = () => {
                 </h6>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
                     {allStatuses.map((status) => (
-                        <div key={status} className="flex flex-col items-center">
+                        <div
+                            key={status}
+                            className="flex flex-col items-center"
+                        >
                             <div
-                                className="w-24 h-14 sm:w-28 sm:h-16 flex items-center justify-center rounded-lg font-bold text-base shadow"
+                                className="w-24 h-14 sm:wf-28 sm:h-16 flex items-center justify-center rounded-lg font-bold text-base shadow"
                                 style={{
                                     background: statusColors[status],
                                     color: "#fff",
@@ -165,14 +178,18 @@ const Chart: React.FC = () => {
                 />
 
                 {/* Custom Legend */}
-                <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
                     {allStatuses.map((status) => (
                         <div key={status} className="flex items-center gap-2">
                             <span
                                 className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: statusColors[status] }}
+                                style={{
+                                    backgroundColor: statusColors[status],
+                                }}
                             />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">{status}</span>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                                {status}
+                            </span>
                         </div>
                     ))}
                 </div>
