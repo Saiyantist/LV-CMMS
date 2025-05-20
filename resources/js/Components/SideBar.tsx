@@ -6,7 +6,6 @@ import {
     Wrench,
     ShieldCheck,
     FileText,
-    // Send,
     User,
     LogOut,
     Menu,
@@ -287,6 +286,25 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
               }
             : null;
 
+    // Keep dropdowns open if any child is active
+    React.useEffect(() => {
+        if (isSuperAdmin) {
+            // Work Orders dropdown: open if any child is active
+            setWorkOrdersDropdownOpen(
+                workOrdersDropdownItems.some(
+                    (item) => item.routeName && currentRoute === item.routeName
+                )
+            );
+            // Event Services dropdown: open if any child is active
+            setEventServicesDropdownOpen(
+                eventServicesDropdownItems.some(
+                    (item) => item.routeName && currentRoute === item.routeName
+                )
+            );
+        }
+        // eslint-disable-next-line
+    }, [currentRoute]);
+
     const isActive = (routeName: string) => currentRoute === routeName;
 
     const renderMenuItem = (item: any) => (
@@ -378,7 +396,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     <Calendar size={16} className="mr-2" />
                                     Event Services
                                     <span className="ml-auto">
-                                        {workOrdersDropdownOpen ? (
+                                        {eventServicesDropdownOpen ? (
                                             <ChevronUp size={16} />
                                         ) : (
                                             <ChevronDown size={16} />
@@ -408,10 +426,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         <li>
                             <Link
                                 href={userManagementItem.href}
-                                className={`flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 ${
+                                className={`flex items-center w-full h-12 pl-4 pr-2 text-sm hover:text-opacity-80 ${
                                     isActive(userManagementItem.routeName)
-                                        ? "bg-white text-primary border-r-4 border-primary rounded-l-lg ml-2"
-                                        : ""
+                                        ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-4 mr-1 ml-3 rounded-full"
+                                        : "text-white"
                                 }`}
                             >
                                 {userManagementItem.icon}
@@ -552,7 +570,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                         <Calendar size={16} className="mr-2" />
                                         Event Services
                                         <span className="ml-auto">
-                                            {workOrdersDropdownOpen ? (
+                                            {eventServicesDropdownOpen ? (
                                                 <ChevronUp size={16} />
                                             ) : (
                                                 <ChevronDown size={16} />
