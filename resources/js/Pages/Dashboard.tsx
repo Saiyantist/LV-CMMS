@@ -10,9 +10,8 @@ export default function Dashboard() {
         user.roles?.map((role: { name: string }) => role.name)
     );
 
-    const isExternalRequester = roleNames.has("external_requester");
-    const isInternalRequester = roleNames.has("internal_requester");
-    const isMaintenancePersonnel = roleNames.has("maintenance_personnel");
+    const isSuperAdmin = roleNames.has("super_admin");
+    const isGasdCoordinator = roleNames.has("gasd_coordinator");
 
     return (
         <AuthenticatedLayout>
@@ -26,13 +25,11 @@ export default function Dashboard() {
                 </div>
 
                 {/* Chart Section */}
-                {!isExternalRequester &&
-                    !isInternalRequester &&
-                    !isMaintenancePersonnel && (
-                        <div className="flex justify-center overflow-hidden bg-white shadow-xl rounded-lg p-6">
-                            <Chart />
-                        </div>
-                    )}
+                {(isSuperAdmin || isGasdCoordinator) && (
+                    <div className="flex justify-center overflow-hidden bg-white shadow-xl rounded-lg p-6">
+                        <Chart />
+                    </div>
+                )}
             </div>
         </AuthenticatedLayout>
     );

@@ -191,32 +191,33 @@ const AssetManagement: React.FC = () => {
         <Authenticated>
             <Head title="Asset Management" />
 
-            <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
-                    <h1 className="text-2xl font-semibold sm:mb-0">
-                        Asset Management
-                    </h1>
-                    <PrimaryButton
-                        onClick={() => setIsCreating(true)}
-                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md w-full sm:w-auto text-center justify-center"
-                    >
-                        Add an Asset
-                    </PrimaryButton>
-                </div>
-            </header>
+            {/* Header section*/}
+            <div>
+                <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4 py-4">
+                        <h1 className="text-2xl font-semibold sm:mb-0 text-black">
+                            Asset Management
+                        </h1>
+                        <PrimaryButton
+                            onClick={() => setIsCreating(true)}
+                            className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md w-full sm:w-auto text-center justify-center"
+                        >
+                            Add an Asset
+                        </PrimaryButton>
+                    </div>
+                </header>
+            </div>
 
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+            {/* Main content below header */}
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 mx-auto">
                 {/* Desktop Table View */}
-
-                <div className="hidden md:block overflow-x-auto rounded-md -mt-[4.1rem]">
-                    {" "}
+                <div className="hidden md:block w-full overflow-x-auto rounded-md">
                     <Datatable
                         columns={columns}
                         data={assets}
                         placeholder="Search assets"
                     />
                 </div>
-
                 {/* Mobile Card View */}
                 <div className="sm:hidden flex flex-col gap-4 mt-4">
                     {assets.map((asset) => (
