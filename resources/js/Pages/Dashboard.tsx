@@ -26,7 +26,7 @@ export default function Dashboard() {
 
                 {/* Chart Section */}
                 {(isSuperAdmin || isGasdCoordinator) && (
-                    <div className="flex justify-center overflow-hidden bg-white shadow-xl rounded-lg p-6">
+                    <div className="flex justify-center overflow-hidden bg-green shadow-md rounded-lg p-6">
                         <Chart />
                     </div>
                 )}

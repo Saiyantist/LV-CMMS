@@ -37,10 +37,10 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    // Dropdown state for super admin
-    const [workOrdersDropdownOpen, setWorkOrdersDropdownOpen] = useState(false);
-    const [eventServicesDropdownOpen, setEventServicesDropdownOpen] =
-        useState(false);
+    // Only one dropdown open at a time
+    const [openDropdown, setOpenDropdown] = useState<
+        "workOrders" | "eventServices" | null
+    >(null);
     const { post } = useForm();
     const currentRoute = route().current();
 
@@ -286,21 +286,22 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
               }
             : null;
 
-    // Keep dropdowns open if any child is active
+    // Keep only one dropdown open at a time, and auto-open if a child is active
     React.useEffect(() => {
         if (isSuperAdmin) {
-            // Work Orders dropdown: open if any child is active
-            setWorkOrdersDropdownOpen(
+            if (
                 workOrdersDropdownItems.some(
                     (item) => item.routeName && currentRoute === item.routeName
                 )
-            );
-            // Event Services dropdown: open if any child is active
-            setEventServicesDropdownOpen(
+            ) {
+                setOpenDropdown("workOrders");
+            } else if (
                 eventServicesDropdownItems.some(
                     (item) => item.routeName && currentRoute === item.routeName
                 )
-            );
+            ) {
+                setOpenDropdown("eventServices");
+            }
         }
         // eslint-disable-next-line
     }, [currentRoute]);
@@ -321,6 +322,24 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 {item.text}
             </Link>
         </li>
+    );
+
+    // Helper for dropdown animation
+    const Dropdown = ({
+        open,
+        children,
+    }: {
+        open: boolean;
+        children: React.ReactNode;
+    }) => (
+        <ul
+            className={`ml-4 transition-all duration-300 ease-in-out overflow-hidden ${
+                open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            }`}
+            style={{ transitionProperty: "max-height, opacity" }}
+        >
+            {children}
+        </ul>
     );
 
     return (
@@ -358,8 +377,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 <button
                                     type="button"
                                     onClick={() =>
-                                        setWorkOrdersDropdownOpen(
-                                            (open) => !open
+                                        setOpenDropdown(
+                                            openDropdown === "workOrders"
+                                                ? null
+                                                : "workOrders"
                                         )
                                     }
                                     className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
@@ -367,28 +388,28 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     <ClipboardList size={16} className="mr-2" />
                                     Work Orders
                                     <span className="ml-auto">
-                                        {workOrdersDropdownOpen ? (
+                                        {openDropdown === "workOrders" ? (
                                             <ChevronUp size={16} />
                                         ) : (
                                             <ChevronDown size={16} />
                                         )}
                                     </span>
                                 </button>
-                                {workOrdersDropdownOpen && (
-                                    <ul className="ml-4">
-                                        {workOrdersDropdownItems.map((item) =>
-                                            renderMenuItem(item)
-                                        )}
-                                    </ul>
-                                )}
+                                <Dropdown open={openDropdown === "workOrders"}>
+                                    {workOrdersDropdownItems.map((item) =>
+                                        renderMenuItem(item)
+                                    )}
+                                </Dropdown>
                             </li>
                             {/* Event Services Dropdown */}
                             <li>
                                 <button
                                     type="button"
                                     onClick={() =>
-                                        setEventServicesDropdownOpen(
-                                            (open) => !open
+                                        setOpenDropdown(
+                                            openDropdown === "eventServices"
+                                                ? null
+                                                : "eventServices"
                                         )
                                     }
                                     className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
@@ -396,20 +417,20 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     <Calendar size={16} className="mr-2" />
                                     Event Services
                                     <span className="ml-auto">
-                                        {eventServicesDropdownOpen ? (
+                                        {openDropdown === "eventServices" ? (
                                             <ChevronUp size={16} />
                                         ) : (
                                             <ChevronDown size={16} />
                                         )}
                                     </span>
                                 </button>
-                                {eventServicesDropdownOpen && (
-                                    <ul className="ml-4">
-                                        {eventServicesDropdownItems.map(
-                                            (item) => renderMenuItem(item)
-                                        )}
-                                    </ul>
-                                )}
+                                <Dropdown
+                                    open={openDropdown === "eventServices"}
+                                >
+                                    {eventServicesDropdownItems.map((item) =>
+                                        renderMenuItem(item)
+                                    )}
+                                </Dropdown>
                             </li>
                         </>
                     ) : (
@@ -431,6 +452,14 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                         ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-4 mr-1 ml-3 rounded-full"
                                         : "text-white"
                                 }`}
+                                style={
+                                    isActive(userManagementItem.routeName)
+                                        ? {
+                                              boxShadow:
+                                                  "0 0 0 1px #fff, 0 0 0 4px #fff",
+                                          }
+                                        : undefined
+                                }
                             >
                                 {userManagementItem.icon}
                                 <span>{userManagementItem.text}</span>
@@ -439,7 +468,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     )}
                     <li>
                         <Link
-                            href="admin.manage-roles"
+                            href="#"
                             className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80"
                         >
                             <Settings size={16} className="mr-2" />
@@ -528,8 +557,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            setWorkOrdersDropdownOpen(
-                                                (open) => !open
+                                            setOpenDropdown(
+                                                openDropdown === "workOrders"
+                                                    ? null
+                                                    : "workOrders"
                                             )
                                         }
                                         className="flex items-center w-full px-4 py-3 text-white text-sm hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
@@ -540,20 +571,20 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                         />
                                         Work Orders
                                         <span className="ml-auto">
-                                            {workOrdersDropdownOpen ? (
+                                            {openDropdown === "workOrders" ? (
                                                 <ChevronUp size={16} />
                                             ) : (
                                                 <ChevronDown size={16} />
                                             )}
                                         </span>
                                     </button>
-                                    {workOrdersDropdownOpen && (
-                                        <ul className="ml-4">
-                                            {workOrdersDropdownItems.map(
-                                                (item) => renderMenuItem(item)
-                                            )}
-                                        </ul>
-                                    )}
+                                    <Dropdown
+                                        open={openDropdown === "workOrders"}
+                                    >
+                                        {workOrdersDropdownItems.map((item) =>
+                                            renderMenuItem(item)
+                                        )}
+                                    </Dropdown>
                                 </div>
 
                                 {/* Event Services Dropdown */}
@@ -561,8 +592,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            setEventServicesDropdownOpen(
-                                                (open) => !open
+                                            setOpenDropdown(
+                                                openDropdown === "eventServices"
+                                                    ? null
+                                                    : "eventServices"
                                             )
                                         }
                                         className="flex items-center w-full px-4 py-3 text-white text-sm hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
@@ -570,20 +603,21 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                         <Calendar size={16} className="mr-2" />
                                         Event Services
                                         <span className="ml-auto">
-                                            {eventServicesDropdownOpen ? (
+                                            {openDropdown ===
+                                            "eventServices" ? (
                                                 <ChevronUp size={16} />
                                             ) : (
                                                 <ChevronDown size={16} />
                                             )}
                                         </span>
                                     </button>
-                                    {eventServicesDropdownOpen && (
-                                        <ul className="ml-4">
-                                            {eventServicesDropdownItems.map(
-                                                (item) => renderMenuItem(item)
-                                            )}
-                                        </ul>
-                                    )}
+                                    <Dropdown
+                                        open={openDropdown === "eventServices"}
+                                    >
+                                        {eventServicesDropdownItems.map(
+                                            (item) => renderMenuItem(item)
+                                        )}
+                                    </Dropdown>
                                 </div>
                             </>
                         ) : (

@@ -14,6 +14,7 @@ import { getPriorityColor } from "@/utils/getPriorityColor";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
+import React, { useState } from "react";
 
 interface Props {
     user: {
@@ -100,6 +101,18 @@ export default function IndexLayout({
         user.roles[0].name === "internal_requester" ||
         user.roles[0].name === "maintenance_personnel";
     const isWorkOrderManager = user.permissions.includes("manage work orders");
+
+    const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>(
+        []
+    );
+
+    const toggleDescription = (id: number) => {
+        setExpandedDescriptions((prev) =>
+            prev.includes(id)
+                ? prev.filter((item) => item !== id)
+                : [...prev, id]
+        );
+    };
 
     if (isRequesterOrPersonnel) {
         columns = [
@@ -383,74 +396,137 @@ export default function IndexLayout({
 
             {/* Mobile Card View */}
             <div className="md:hidden flex flex-col gap-4 mt-4 px-4">
-                {filteredWorkOrders.map((workOrder) => (
-                    <div
-                        key={workOrder.id}
-                        className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
-                    >
-                        {/* Info Section */}
-                        <div className="space-y-1 pr-8 text-sm text-gray-800">
-                            <p>
-                                <span className="font-medium">ID:</span>{" "}
-                                {workOrder.id}
-                            </p>
-                            <p>
-                                <span className="font-medium">
-                                    Description:
-                                </span>{" "}
-                                {workOrder.report_description}
-                            </p>
-                            <p>
-                                <span className="font-medium">Location:</span>{" "}
-                                {workOrder.location?.name || "N/A"}
-                            </p>
-                            <p>
-                                <span className="font-medium">Status:</span>{" "}
+                {filteredWorkOrders.map((workOrder) => {
+                    const description = workOrder.report_description || "";
+                    const shouldTruncate = description.length > 25;
+                    const priorities = ["Low", "Medium", "High", "Critical"];
+                    const shortLabels = {
+                        Low: "L",
+                        Medium: "M",
+                        High: "H",
+                        Critical: "C",
+                    };
+
+                    return (
+                        <div
+                            key={workOrder.id}
+                            className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
+                        >
+                            {/* Top row: ID and Status aligned horizontally */}
+                            <div className="flex justify-between items-start text-sm text-gray-800 mb-1">
+                                <p>
+                                    <span className="font-medium">ID:</span>{" "}
+                                    {workOrder.id}
+                                </p>
                                 <span
-                                    className={`${getStatusColor(
+                                    className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusColor(
                                         workOrder.status
                                     )}`}
                                 >
                                     {workOrder.status}
                                 </span>
-                            </p>
-                            <p>
-                                <span className="font-medium">Priority:</span>{" "}
-                                <span
-                                    className={`${getPriorityColor(
-                                        workOrder.priority
-                                    )}`}
-                                >
-                                    {workOrder.priority}
-                                </span>
-                            </p>
-                            <p>
-                                <span className="font-medium">
-                                    Requested At:
-                                </span>{" "}
-                                {new Date(
-                                    workOrder.requested_at
-                                ).toLocaleDateString()}
-                            </p>
-                        </div>
+                            </div>
 
-                        {/* Action Button */}
-                        <div className="mt-4 flex justify-end gap-2">
-                            <PrimaryButton
-                                className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:bg-blue-700 transition"
-                                onClick={() => setEditingWorkOrder(workOrder)}
-                            >
-                                Edit
-                            </PrimaryButton>
-                            <PrimaryButton
-                                className="bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700 transition"
-                                onClick={() => handleDelete(workOrder.id)}
-                            >
-                                Delete
-                            </PrimaryButton>
+                            {/* Info Section */}
+                            <div className="space-y-1 pr-8 text-sm text-gray-800">
+                                <p>
+                                    <span className="font-medium">
+                                        Description:
+                                    </span>{" "}
+                                    {shouldTruncate
+                                        ? `${description.slice(0, 25)}...`
+                                        : description}
+                                </p>
+                                <p>
+                                    <span className="font-medium">
+                                        Location:
+                                    </span>{" "}
+                                    {workOrder.location?.name || "N/A"}
+                                </p>
+                                <p className="flex items-center text-sm">
+                                    <span className="font-medium mr-1">
+                                        Priority:
+                                    </span>
+                                    <span className="flex gap-1">
+                                        {["low", "med", "high", "crit"].map(
+                                            (level) => {
+                                                const normalizedPriority =
+                                                    workOrder.priority
+                                                        ?.toLowerCase()
+                                                        .trim();
+
+                                                // Mapping for alternate values like "medium" -> "med"
+                                                const priorityAliases: Record<
+                                                    string,
+                                                    string
+                                                > = {
+                                                    low: "low",
+                                                    medium: "med",
+                                                    med: "med",
+                                                    high: "high",
+                                                    critical: "crit",
+                                                    crit: "crit",
+                                                };
+
+                                                const current =
+                                                    priorityAliases[
+                                                        normalizedPriority || ""
+                                                    ] || "";
+
+                                                const isActive =
+                                                    current === level;
+
+                                                const bgColorMap: Record<
+                                                    string,
+                                                    string
+                                                > = {
+                                                    low: "bg-green-100 text-green-800",
+                                                    med: "bg-yellow-100 text-yellow-800",
+                                                    high: "bg-orange-100 text-orange-800",
+                                                    crit: "bg-red-100 text-red-800",
+                                                };
+
+                                                return (
+                                                    <span
+                                                        key={level}
+                                                        className={`px-2 py-1 text-xs font-semibold border ${
+                                                            isActive
+                                                                ? `${bgColorMap[level]} border-transparent`
+                                                                : "bg-gray-100 text-gray-400 border-gray-300"
+                                                        }`}
+                                                    >
+                                                        {level}
+                                                    </span>
+                                                );
+                                            }
+                                        )}
+                                    </span>
+                                </p>
+
+                                <p>
+                                    <span className="font-medium">
+                                        Requested At:
+                                    </span>{" "}
+                                    {new Date(
+                                        workOrder.requested_at
+                                    ).toLocaleDateString()}
+                                </p>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="mt-4 flex justify-end gap-2">
+                                <PrimaryButton
+                                    className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:bg-blue-700 transition"
+                                    onClick={() =>
+                                        setEditingWorkOrder(workOrder)
+                                    }
+                                >
+                                    View
+                                </PrimaryButton>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Scroll to Top Button */}

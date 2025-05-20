@@ -218,6 +218,7 @@ const AssetManagement: React.FC = () => {
                         placeholder="Search assets"
                     />
                 </div>
+
                 {/* Mobile Card View */}
                 <div className="sm:hidden flex flex-col gap-4 mt-4">
                     {assets.map((asset) => (
@@ -226,14 +227,15 @@ const AssetManagement: React.FC = () => {
                             className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
                         >
                             <div className="absolute top-3 right-3">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedAssets.includes(asset.id)}
-                                    onChange={() =>
-                                        handleCheckboxChange(asset.id)
-                                    }
-                                    className="accent-primary"
-                                />
+                                <p>
+                                    <span
+                                        className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(
+                                            asset.status
+                                        )}`}
+                                    >
+                                        {asset.status}
+                                    </span>
+                                </p>
                             </div>
                             <div className="space-y-1 pr-8 text-sm text-gray-800">
                                 <p>
@@ -254,18 +256,7 @@ const AssetManagement: React.FC = () => {
                                     </span>{" "}
                                     {asset.location.name}
                                 </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Condition:
-                                    </span>{" "}
-                                    <span
-                                        className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(
-                                            asset.status
-                                        )}`}
-                                    >
-                                        {asset.status}
-                                    </span>
-                                </p>
+
                                 <p>
                                     <span className="font-medium">
                                         Acquired:
@@ -303,6 +294,7 @@ const AssetManagement: React.FC = () => {
                         </div>
                     ))}
                 </div>
+                
             </div>
 
             {isCreating && (

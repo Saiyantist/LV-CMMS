@@ -139,31 +139,31 @@ const Chart: React.FC = () => {
     const statusTotals = getStatusCounts(workOrders);
 
     return (
-        <div className="w-full flex flex-col md:flex-row gap-6 md:gap-8 bg-white rounded-2xl dark:bg-gray-800 p-4 md:p-8 items-stretch justify-between transition-all duration-300">
+        <div className="w-full flex flex-col md:flex-row gap-6 md:gap-8 bg-transparent rounded-2xl dark:bg-gray-800 p-4 md:p-8 items-stretch justify-between transition-all duration-300">
             {/* Status Totals */}
             <div className="flex flex-col items-center flex-1">
-                <h6 className="font-semibold text-sm mb-4 text-gray-700 dark:text-gray-200 tracking-wide">
+                {/* <h6 className="font-semibold text-sm mb-4 text-gray-700 dark:text-gray-200 tracking-wide">
                     Status Totals
-                </h6>
+                </h6> */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
                     {allStatuses.map((status) => (
-                        <div
-                            key={status}
-                            className="flex flex-col items-center"
-                        >
+                        <div key={status} className="flex justify-center">
                             <div
-                                className="w-24 h-14 sm:wf-28 sm:h-16 flex items-center justify-center rounded-lg font-bold text-base shadow"
+                                className="w-28 h-16 sm:w-32 sm:h-20 flex flex-col items-center justify-center rounded-lg font-bold text-xs sm:text-sm shadow text-black text-center px-2 border"
                                 style={{
-                                    background: statusColors[status],
-                                    color: "#fff",
+                                    backgroundColor: "#ffffff",
+                                    borderColor: "transparent",
+                                    // borderWidth: "1px",
                                 }}
                                 title={status}
                             >
-                                <span>{statusTotals[status]}</span>
+                                <span className="text-[0.65rem] sm:text-xs font-medium">
+                                    {status}
+                                </span>
+                                <span className="text-lg sm:text-xl">
+                                    {statusTotals[status]}
+                                </span>
                             </div>
-                            <span className="text-xs text-gray-700 dark:text-gray-300 mt-1 text-center w-24 break-words font-medium">
-                                {status}
-                            </span>
                         </div>
                     ))}
                 </div>
