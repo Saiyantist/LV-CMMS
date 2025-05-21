@@ -5,6 +5,7 @@ import { Label } from "@/Components/shadcnui/label";
 import TextInput from "@/Components/TextInput";
 import RegisterLayout from "@/Layouts/RegisterLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
+import { ChevronLeft } from "lucide-react";
 import { FormEventHandler } from "react";
 
 const getDateLimits = () => {
@@ -65,18 +66,25 @@ export default function InternalRegistration({
     return (
         <RegisterLayout width="w-1/2">
             <Head title="Registration for Internal" />
-            <div>
+
+            <div className="p-2">
+                <button
+                    onClick={() => window.history.back()}
+                    className="absolute left-6 top-8 text-primary hover:text-secondary hover:outline-none hover:ring-2 hover:ring-secondary rounded-full"
+                >
+                    <ChevronLeft size={30}/>
+                </button>
                 <h1 className="text-2xl font-bold text-center text-black dark:text-white">
                     Registration Form
                 </h1>
-                <h2 className="font-bold text-secondary text-center">
+                <h2 className="font-bold text-primary text-center">
                     for Internal User
                 </h2>
             </div>
 
             <form onSubmit={submit} className="px-2">
 
-                <div className="max-h-[48vh] overflow-auto p-4">
+                <div className="max-h-[48vh] overflow-auto p-3">
                     {/* Name */}
                     <div className="flex justify-stretch mt-2 space-x-2">
                         {/* First Name */}
@@ -144,16 +152,13 @@ export default function InternalRegistration({
                                 id="gender"
                                 name="gender"
                                 value={data.gender}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
                                 onChange={(e) => setData("gender", e.target.value)}
                                 required
                             >
                                 <option value="">Select Gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
-                                <option value="rather not say">
-                                    Rather not say
-                                </option>
                             </select>
 
                             <InputError message={errors.gender} className="mt-2" />
@@ -174,7 +179,13 @@ export default function InternalRegistration({
                                 className="mt-1 block w-full"
                                 placeholder="9XXXXXXXXX"
                                 maxLength={10}
-                                onChange={(e) =>
+                                pattern="[0-9]*"
+                                onKeyDown={(e) => {
+                                    if (!/[0-9]/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onChange={(e) => 
                                     setData("contact_number", e.target.value)
                                 }
                                 required
@@ -200,7 +211,7 @@ export default function InternalRegistration({
                                 id="staff_type"
                                 name="staff_type"
                                 value={data.staff_type}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
                                 onChange={(e) =>
                                     setData("staff_type", e.target.value)
                                 }
@@ -232,7 +243,7 @@ export default function InternalRegistration({
                                     id="department_id"
                                     name="department_id"
                                     value={data.department_id}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
                                     onChange={(e) =>
                                         setData("department_id", e.target.value)
                                     }
@@ -358,11 +369,12 @@ export default function InternalRegistration({
                 </div>
 
                 <div className="flex flex-col items-center pt-4 pb-4 space-y-4 text-sm">
-                    <Label className="flex self-start gap-2 ms-1">
+                    <Label className="flex self-start gap-2 ms-3">
                         <input type="checkbox" name="privacy_policy" required/>
-                        <span className="text-sm">
+                        <span className="text-sm font-normal">
                             I have read and understand the privacy policy
                         </span>
+                        <span className="text-red-500 -ms-1">*</span>
                     </Label>
 
                     <div className="flex flex-col items-center space-y-4 w-full">
@@ -379,7 +391,7 @@ export default function InternalRegistration({
                             <span>Already have an account?</span>
                             <Link
                                 href={route("login")}
-                                className="ml-1 rounded-md text-secondary font-bold underline hover:text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                                className="ml-1 rounded-md text-secondary font-bold underline hover:text-primary focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
                             >
                                 Login
                             </Link>

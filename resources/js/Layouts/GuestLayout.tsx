@@ -15,6 +15,7 @@ export default function Guest({ children }: PropsWithChildren) {
                     relative
                     bg-[url('/images/lvbuilding.jpg')] bg-cover bg-center
                     md:bg-none
+                    mt-16
                 "
             >
                 {/* Optional overlay for readability on mobile */}
@@ -23,19 +24,18 @@ export default function Guest({ children }: PropsWithChildren) {
                     aria-hidden="true"
                 />
 
-                {/* Log in Header */}
-                <div className="relative text-center space-y-2 sm:space-y-4 px-6 sm:px-8 py-2 sm:py-4">
-                    <h1 className="text-3xl sm:text-5xl font-bold text-white sm:text-primary">
-                        CMMS
-                    </h1>
-                    <h2 className="text-sm sm:text-base text-white sm:text-gray-700 dark:sm:text-gray-300">
-                        Log in to continue with us.
-                    </h2>
-                </div>
+                <div className="flex flex-col items-center w-full">
+                    {/* Log in Header */}
+                    <div className="relative text-center px-6 sm:px-8 sm:py-2">
+                        <h1 className="text-3xl sm:text-5xl font-bold text-white sm:text-primary">
+                            CMMS
+                        </h1>
+                    </div>
 
-                {/* Form content with rounded corners only for small screens */}
-                <div className="relative z-10 mt-4 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl px-4 py-8 sm:rounded-sm md:rounded-none bg-white dark:bg-gray-800">
-                    {children}
+                    {/* Form content with rounded corners only for small screens */}
+                    <div className="relative z-10 mt-4 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl px-4 sm:rounded-sm md:rounded-none">
+                        {children}
+                    </div>
                 </div>
             </main>
 

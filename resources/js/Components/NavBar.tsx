@@ -7,7 +7,7 @@ export default function NavBar() {
     return (
         <>
             {/* NavBar */}
-            <header className="fixed top-0 left-0 w-full py-3 z-50 bg-white">
+            <header className="fixed top-0 left-0 w-full py-3 z-50 bg-white shadow">
                 <div className="px-10 mx-auto w-full flex items-center justify-between">
                     {/* Logo */}
                     <div className="flex items-center space-x-2">
@@ -59,7 +59,7 @@ export default function NavBar() {
                             </Link>
                         <Link
                             href="/login"
-                            className="hidden lg:inline-flex px-6 py-2 text-sm sm:text-base text-white transition-all duration-300 bg-secondary rounded-md hover:bg-opacity-90 hover:scale-105"
+                            className="hidden lg:inline-flex px-4 py-2 font-bold text-sm text-white transition-all duration-300 uppercase tracking-widest bg-secondary rounded-md hover:bg-opacity-90 hover:scale-105"
                         >
                             Log In
                         </Link>

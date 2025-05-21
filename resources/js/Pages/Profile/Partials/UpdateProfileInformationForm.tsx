@@ -132,7 +132,7 @@ export default function UpdateProfileInformation({
                     <InputLabel htmlFor="gender" value="Gender" />
                     <select
                         id="gender"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
                         value={data.gender}
                         onChange={(e) => setData('gender', e.target.value)}
                         required
@@ -140,7 +140,6 @@ export default function UpdateProfileInformation({
                         <option value="">Select Gender</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
-                        <option value="rather not say">Rather Not Say</option>
                     </select>
                     <InputError className="mt-2" message={errors.gender} />
                 </div>
@@ -150,7 +149,7 @@ export default function UpdateProfileInformation({
                     <InputLabel htmlFor="staff_type" value="Staff Type" />
                     <select
                         id="staff_type"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
                         value={data.staff_type}
                         onChange={(e) => setData('staff_type', e.target.value)}
                         required
@@ -167,7 +166,7 @@ export default function UpdateProfileInformation({
                     <InputLabel htmlFor="department_id" value="Department" />
                     <select
                         id="department_id"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
                         value={data.department_id}
                         onChange={(e) => setData('department_id', e.target.value)}
                         required
@@ -208,7 +207,7 @@ export default function UpdateProfileInformation({
                                 href={route('verification.send')}
                                 method="post"
                                 as="button"
-                                className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                                className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
                             >
                                 Click here to re-send the verification email.
                             </Link>

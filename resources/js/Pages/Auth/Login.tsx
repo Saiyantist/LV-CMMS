@@ -40,13 +40,19 @@ export default function Login({
         <GuestLayout>
             <Head title="Log in" />
 
+            <div className="text-center">
+                <h2 className="text-sm sm:text-base text-white sm:text-gray-700 dark:sm:text-gray-300">
+                    Log in to continue with us.
+                </h2>
+            </div>
+
             {status && (
                 <div className="mb-4 text-sm font-medium text-green-600">
                     {status}
                 </div>
             )}
 
-            <form onSubmit={submit}>
+            <form onSubmit={submit} className="py-8">
                 <div>
                     <div className="flex">
                         <InputLabel htmlFor="email" value="Email" />
@@ -114,7 +120,7 @@ export default function Login({
                     {canResetPassword && (
                         <Link
                             href={route("password.request")}
-                            className="rounded-md text-sm text-secondary underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                            className="rounded-md text-sm text-secondary underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
                         >
                             Forgot your password?
                         </Link>

@@ -128,7 +128,7 @@ const RequestedServices: React.FC<RequestedServicesProps> = ({
                         <button
                             type="button"
                             onClick={() => toggleDropdown(index)}
-                            className="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left shadow-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left shadow-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary"
                         >
                             {value[category.label]?.length
                                 ? value[category.label].join(", ")

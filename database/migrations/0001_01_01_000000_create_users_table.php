@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->text('birth_date')->nullable();
-            $table->enum('gender', ['male', 'female', 'rather not say']);
+            $table->enum('gender', ['male', 'female']);
             $table->text('contact_number');
             $table->text('job_position')->nullable();
             $table->enum('staff_type', ['teaching', 'non-teaching', 'maintenance personnel'])->nullable();

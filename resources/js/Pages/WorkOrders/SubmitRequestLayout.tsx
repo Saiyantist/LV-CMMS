@@ -150,7 +150,7 @@ const SubmitRequestLayout: React.FC<Props> = ({
                                                 e.target.value
                                             )
                                         }
-                                        className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"
+                                        className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-secondary focus:bg-white focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"
                                     />
                                     {errors.description && (
                                         <p className="text-red-500 text-sm mt-1">
@@ -173,7 +173,7 @@ const SubmitRequestLayout: React.FC<Props> = ({
                                         multiple
                                         accept="image/*"
                                         onChange={handleFileChange}
-                                        className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                                        className="w-full bg-gray-100 bg-opacity-50 border border-gray-300 focus:border-secondary focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
                                     />
                                 </div>
 

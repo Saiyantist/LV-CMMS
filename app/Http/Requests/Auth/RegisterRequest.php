@@ -3,7 +3,9 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use App\Rules\StrongPassword;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
 class RegisterRequest extends FormRequest
@@ -21,7 +23,7 @@ class RegisterRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    
+
     
     public function rules(): array
     {
@@ -32,6 +34,13 @@ class RegisterRequest extends FormRequest
             'email',
             'max:255',
             'unique:users,email',
+        ];
+
+        $passwordRules = [
+            'required',
+            'confirmed',
+            'min:8',
+            new StrongPassword(),
         ];
     
         /** For internal registration */
@@ -47,7 +56,7 @@ class RegisterRequest extends FormRequest
                 'staff_type' => ['required', 'in:teaching,non-teaching'],
                 'department_id' => ['required', 'exists:departments,id'],
                 'email' => $emailRules,
-                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'password' => $passwordRules,
             ];
         }
 
@@ -59,7 +68,7 @@ class RegisterRequest extends FormRequest
                 'gender' => 'required|string|max:255',
                 'contact_number' => 'required|integer|digits:10',
                 'email' => $emailRules,
-                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'password' => $passwordRules,
             ];
         }
         
@@ -73,7 +82,7 @@ class RegisterRequest extends FormRequest
             'staff_type' => ['required', 'in:teaching,non-teaching'],
             'department_id' => ['required', 'exists:departments,id'],
             'email' => $emailRules,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => $passwordRules,
         ];
     }
 
@@ -84,6 +93,10 @@ class RegisterRequest extends FormRequest
             // 'birth_date.required' => 'The birth date is required for internal registration.',
             'staff_type.required' => 'The staff type is required for internal registration.',
             'department_id.required' => 'The department is required for internal registration.',
+            'contact_number.integer' => 'The contact number is should start with 9.',
+            'password.upper_lower' => 'The password must contain at least one uppercase and one lowercase letter.',
+            'password.special_char' => 'The password must contain at least one special character (-+_?@#%.,~).',
+            'password.number' => 'The password must contain at least one number.',
         ];
     }
 }

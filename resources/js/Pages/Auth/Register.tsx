@@ -15,15 +15,15 @@ export default function AccessRegistration() {
             </div>
 
             {/* Main Content */}
-            <main className="relative z-10 flex items-center justify-center min-h-screen pt-32 px-4">
-                <div className="bg-transparent p-6 rounded-lg shadow-lg w-full max-w-3xl text-center">
-                    <h1 className="text-3xl font-bold mb-8 text-white dark:text-white">
+            <main className="relative z-10 flex items-center justify-center min-h-screen">
+                <div className="bg-secondary/40 py-12 px-10 rounded shadow shadow-primary w-full max-w-4xl mt-20 text-center">
+                    <h1 className="text-3xl font-bold mb-16 text-white dark:text-white">
                         Access Registration
                     </h1>
 
-                    <div className="flex flex-col md:flex-row justify-center items-center gap-6">
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-10">
                         {/* External User Card */}
-                        <div className="w-full md:w-1/2 bg-form dark:bg-gray-700 p-6 rounded-lg shadow-md shadow-slate-500 min-h-[14rem] flex flex-col items-center justify-between text-center">
+                        <div className="w-full md:w-1/2 bg-form dark:bg-gray-700 p-6 rounded shadow-lg shadow-primary flex flex-col items-center justify-between text-center">
                             <div>
                                 <h2 className="text-xl font-bold text-secondary dark:text-white">
                                     Guest
@@ -32,25 +32,25 @@ export default function AccessRegistration() {
                                     (External User)
                                 </p>
                                 <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 leading-6">
-                                    If you are
-                                    <span className="font-semibold text-secondary">
-                                        {" "}not{" "}
+                                    If you are{" "}
+                                    <span className="font-semibold text-secondary relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bottom-0 after:left-0 after:bg-secondary after:transition-all after:duration-300 hover:after:w-full">
+                                        not
                                     </span>
-                                    from La Verdad Christian College
+                                    {" "}from La Verdad Christian College
                                 </p>
                             </div>
                             <Link
                                 href={route(
                                     "access.registration-external-user-registration"
                                 )}
-                                className="mt-4 mx-auto w-56 bg-secondary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-lg shadow hover:bg-secondary transition"
+                                className="mt-4 mx-auto w-56 bg-secondary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-lg shadow hover:bg-primary transition"
                             >
                                 Register here
                             </Link>
                         </div>
 
                         {/* Internal User Card */}
-                        <div className="w-full md:w-1/2 bg-form dark:bg-gray-700 p-6 rounded-lg shadow-md shadow-slate-500 min-h-[14rem] flex flex-col items-center justify-between text-center">
+                        <div className="w-full md:w-1/2 bg-form dark:bg-gray-700 p-6 rounded shadow-lg shadow-primary flex flex-col items-center justify-between text-center">
                             <div>
                                 <h2 className="text-xl font-bold text-secondary dark:text-white">
                                     LVCC Employee
@@ -59,18 +59,18 @@ export default function AccessRegistration() {
                                     (Internal User)
                                 </p>
                                 <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 leading-6">
-                                    If you are an
-                                    <span className="font-semibold text-secondary">
-                                        {" "}employee{" "}
+                                    If you are an {" "}
+                                    <span className="font-semibold text-secondary relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bottom-0 after:left-0 after:bg-secondary after:transition-all after:duration-300 hover:after:w-full">
+                                        employee
                                     </span>
-                                    of La Verdad Christian College
+                                    {" "}of La Verdad Christian College
                                 </p>
                             </div>
                             <Link
                                 href={route(
                                     "access.registration-internal-user-registration"
                                 )}
-                                className="mt-4 mx-auto w-56 bg-secondary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-lg shadow hover:bg-secondary transition"
+                                className="mt-4 mx-auto w-56 bg-secondary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-lg shadow hover:bg-primary transition"
                             >
                                 Register here
                             </Link>

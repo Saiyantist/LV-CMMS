@@ -26,7 +26,7 @@ export default function Register({ children, width = "" }: RegisterLayoutProps) 
                 />
 
                 {/* Centered form content with top margin */}
-                <div className={`relative z-10 mt-16 bg-form p-4 shadow-md rounded dark:bg-gray-800 max-h-[85vh] ${width}`}>
+                <div className={`relative z-10 mt-16 bg-white p-4 shadow-md rounded dark:bg-gray-800 max-h-[85vh] ${width}`}>
                     {children}
                 </div>
             </main>

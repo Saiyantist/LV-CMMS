@@ -33,7 +33,7 @@ class UserFactory extends Factory
             'first_name' => $firstName,
             'last_name' => $lastName,
             'birth_date' => fake()->date('Y-m-d','-21 years'),
-            'gender' => fake()->randomElement(['male', 'female', 'rather not say']),
+            'gender' => fake()->randomElement(['male', 'female']),
             'contact_number' => '09' . fake()->randomNumber(9, true),
             'email' => Str::lower($firstName) . '.' . Str::lower($lastName) . '@laverdad.edu.ph',
             'email_verified_at' => now(),
