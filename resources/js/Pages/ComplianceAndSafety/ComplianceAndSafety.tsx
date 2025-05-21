@@ -3,8 +3,85 @@ import { Head } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
 import AddComplianceAndSafetyModal from "./AddComplianceAndSafetyModal";
+import { Datatable } from "../WorkOrders/components/Datatable";
+import { ColumnDef } from "@tanstack/react-table";
+
 const ComplianceAndSafety: React.FC = () => {
     const [isCreating, setIsCreating] = useState(false);
+
+    // Sample data for the table
+    const complianceData = [
+        {
+            id: 1,
+            dateSubmitted: "2023-01-01",
+            complianceArea: "Fire Safety Inspection",
+            location: "Location 1",
+            assignedTo: "Joshua",
+            targetDate: "TBD",
+            status: "On Going",
+        },
+    ];
+
+    // Datatable columns (UI only)
+    const columns: ColumnDef<(typeof complianceData)[0]>[] = [
+        {
+            accessorKey: "id",
+            header: "ID",
+            cell: ({ row }) => <div>{row.getValue("id")}</div>,
+            meta: { headerClassName: "w-12" },
+        },
+        {
+            accessorKey: "dateSubmitted",
+            header: "Date Submitted",
+            cell: ({ row }) => <div>{row.getValue("dateSubmitted")}</div>,
+            meta: { headerClassName: "w-[8rem]" },
+        },
+        {
+            accessorKey: "complianceArea",
+            header: "Compliance Area",
+            cell: ({ row }) => <div>{row.getValue("complianceArea")}</div>,
+            meta: { headerClassName: "w-[12rem]" },
+        },
+        {
+            accessorKey: "location",
+            header: "Location",
+            cell: ({ row }) => <div>{row.getValue("location")}</div>,
+            meta: { headerClassName: "w-[10rem]" },
+        },
+        {
+            accessorKey: "assignedTo",
+            header: "Assigned To",
+            cell: ({ row }) => <div>{row.getValue("assignedTo")}</div>,
+            meta: { headerClassName: "w-[10rem]" },
+        },
+        {
+            accessorKey: "targetDate",
+            header: "Target Date",
+            cell: ({ row }) => <div>{row.getValue("targetDate")}</div>,
+            meta: { headerClassName: "w-[8rem]" },
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => <div>{row.getValue("status")}</div>,
+            meta: { headerClassName: "w-[8rem]" },
+        },
+        {
+            id: "actions",
+            header: "Action",
+            cell: () => (
+                <div className="flex justify-center items-center gap-2">
+                    <button className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
+                        Edit
+                    </button>
+                    <button className="bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
+                        Delete
+                    </button>
+                </div>
+            ),
+            enableSorting: false,
+        },
+    ];
 
     return (
         <Authenticated>
@@ -25,98 +102,80 @@ const ComplianceAndSafety: React.FC = () => {
             </header>
 
             <div className="p-4">
-                {/* Desktop Table */}
+                {/* Desktop Table (Datatable UI) */}
                 <div className="hidden sm:block overflow-x-auto">
-                    <table className="min-w-full table-auto border border-gray-200">
-                        <thead className="bg-secondary dark:bg-gray-800">
-                            <tr>
-                                <th className="bg-secondary text-white border p-3 text-sm font-semibold">
-                                    ID
-                                </th>
-                                <th className="bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Date Submitted
-                                </th>
-                                <th className="bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Compliance Area
-                                </th>
-                                <th className="bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Location
-                                </th>
-                                <th className="bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Assigned Toa
-                                </th>
-                                <th className="bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Target Date
-                                </th>
-                                <th className="bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Status
-                                </th>
-                                <th className="bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Action
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {/* Replace with your data */}
-                            <tr className="border-b text-center align-middle">
-                                <td className="p-2">1</td>
-                                <td className="p-2">2023-01-01</td>
-                                <td className="p-2">Fire Safety Inspection</td>
-                                <td className="p-2">Location 1</td>
-                                <td className="p-2">Joshua</td>
-                                <td className="p-2">TBD</td>
-                                <td className="p-2">On Going</td>
-                                <td className="p-2">
-                                    <div className="flex justify-center items-center gap-2">
-                                        <button className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
-                                            Edit
-                                        </button>
-                                        <button className="bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
-                                            Delete
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <Datatable
+                        columns={columns}
+                        data={complianceData}
+                        placeholder="Search here"
+                    />
                 </div>
 
                 {/* Mobile Cards */}
                 <div className="sm:hidden flex flex-col gap-4 mt-4">
-                    {/* Replace with your data */}
-                    <div className="border rounded-2xl p-4 shadow-md bg-white">
-                        <div className="text-sm text-gray-800 space-y-1 pr-8">
-                            <p>
-                                <strong>ID:</strong> 1
-                            </p>
-                            <p>
-                                <strong>Date Submitted:</strong> 2023-01-01
-                            </p>
-                            <p>
-                                <strong>Name:</strong> Fire Safety Inspection
-                            </p>
-                            <p>
-                                <strong>Description:</strong> Location 1
-                            </p>
-                            <p>
-                                <strong>Assign To:</strong> Assigned
-                            </p>
-                            <p>
-                                <strong>Status:</strong> On Going
-                            </p>
-                            <p>
-                                <strong>Next Schedule:</strong> TBD
-                            </p>
+                    {complianceData.map((item) => (
+                        <div
+                            key={item.id}
+                            className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
+                        >
+                            {/* Top row: ID and Status aligned horizontally */}
+                            <div className="flex justify-between items-start text-sm text-gray-800 mb-1">
+                                <p>
+                                    <span className="font-medium">ID:</span>{" "}
+                                    {item.id}
+                                </p>
+                                <span
+                                    className={`text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-800`}
+                                >
+                                    {item.status}
+                                </span>
+                            </div>
+
+                            {/* Info Section */}
+                            <div className="space-y-1 pr-8 text-sm text-gray-800">
+                                <p>
+                                    <span className="font-medium">
+                                        Compliance Area:
+                                    </span>{" "}
+                                    {item.complianceArea}
+                                </p>
+                                <p>
+                                    <span className="font-medium">
+                                        Location:
+                                    </span>{" "}
+                                    {item.location}
+                                </p>
+                                <p>
+                                    <span className="font-medium">
+                                        Assigned To:
+                                    </span>{" "}
+                                    {item.assignedTo}
+                                </p>
+                                <p>
+                                    <span className="font-medium">
+                                        Date Submitted:
+                                    </span>{" "}
+                                    {item.dateSubmitted}
+                                </p>
+                                <p>
+                                    <span className="font-medium">
+                                        Target Date:
+                                    </span>{" "}
+                                    {item.targetDate}
+                                </p>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="mt-4 flex justify-end gap-2">
+                                <button className="w-1/2 bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
+                                    Edit
+                                </button>
+                                <button className="w-1/2 bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
+                                    Delete
+                                </button>
+                            </div>
                         </div>
-                        <div className="mt-4 flex justify-between gap-2">
-                            <button className="flex-1 bg-secondary text-white px-3 py-2 text-sm rounded-md hover:opacity-90 transition">
-                                Edit
-                            </button>
-                            <button className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:opacity-90 transition">
-                                Delete
-                            </button>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             </div>
 

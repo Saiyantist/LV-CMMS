@@ -4,23 +4,11 @@ import { useState, useEffect } from "react";
 import { Search, Filter, ArrowLeft, FileText } from "lucide-react";
 import { Button } from "@/Components/shadcnui/button";
 import { Input } from "@/Components/shadcnui/input";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/Components/shadcnui/table";
-import { Badge } from "@/Components/shadcnui/badge";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/Components/shadcnui/select";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { Head } from "@inertiajs/react";
+import { Datatable } from "@/Pages/WorkOrders/components/Datatable";
+import { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@/Components/shadcnui/badge";
 import {
     Dialog,
     DialogTitle,
@@ -28,7 +16,6 @@ import {
     DialogHeader,
 } from "@/Components/shadcnui/dialog";
 import { createPortal } from "react-dom";
-import { Head } from "@inertiajs/react";
 
 // Define the booking type
 interface Booking {
@@ -192,236 +179,67 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                                   {selectedBooking?.name}
                               </DialogTitle>
                           </DialogHeader>
-                          <div className="grid grid-cols-2 gap-6 mt-4">
-                              <div>
-                                  <div className="mb-4">
-                                      <p className="font-semibold">Name:</p>
-                                      <p>
-                                          {selectedBooking.name ||
-                                              "Not specified"}
-                                      </p>
-                                  </div>
-                                  <div className="mb-4">
-                                      <p className="font-semibold">Email:</p>
-                                      <p>
-                                          {selectedBooking.email ||
-                                              "Not specified"}
-                                      </p>
-                                  </div>
-                                  <div className="mb-4">
-                                      <p className="font-semibold">Type:</p>
-                                      <p>
-                                          {selectedBooking.type ||
-                                              "Not specified"}
-                                      </p>
-                                  </div>
-                              </div>
-                              <div>
-                                  <div className="mb-4">
-                                      <p className="font-semibold">Date:</p>
-                                      <p>
-                                          {selectedBooking.eventDate.replace(
-                                              " - ",
-                                              " - "
-                                          )}
-                                      </p>
-                                  </div>
-                                  <div className="mb-4">
-                                      <p className="font-semibold">Day:</p>
-                                      <p>
-                                          {selectedBooking.day ||
-                                              "Not specified"}
-                                      </p>
-                                  </div>
-                                  <div className="mb-4">
-                                      <p className="font-semibold">Time:</p>
-                                      <p>{selectedBooking.time}</p>
-                                  </div>
-                                  <div className="mb-4">
-                                      <p className="font-semibold">Status:</p>
-                                      <div>
-                                          {getStatusBadge(
-                                              selectedBooking.status
-                                          )}
-                                      </div>
-                                  </div>
-                              </div>
-                              <div className="col-span-2">
-                                  <h3 className="font-semibold text-lg mb-2">
-                                      Proof of Approval
-                                  </h3>
-                                  {selectedBooking.proofOfApproval ? (
-                                      <div className="border rounded-md p-3 flex items-center gap-2 mb-4 max-w-md">
-                                          <FileText size={18} />
-                                          <div className="flex-1">
-                                              <p className="text-sm">
-                                                  {
-                                                      selectedBooking
-                                                          .proofOfApproval
-                                                          .fileName
-                                                  }
-                                              </p>
-                                              <p className="text-xs text-gray-500">
-                                                  {
-                                                      selectedBooking
-                                                          .proofOfApproval
-                                                          .fileSize
-                                                  }
-                                              </p>
-                                          </div>
-                                      </div>
-                                  ) : (
-                                      <p className="text-gray-500">
-                                          No proof of approval provided
-                                      </p>
-                                  )}
-                              </div>
-                              <div className="col-span-2">
-                                  <h3 className="font-semibold text-lg mb-2">
-                                      Requested Venue
-                                  </h3>
-                                  <p className="mb-4">
-                                      {selectedBooking.venue}
-                                  </p>
-                              </div>
-                              <div className="col-span-2">
-                                  <h3 className="font-semibold text-lg mb-2">
-                                      Event Details
-                                  </h3>
-                                  <div className="space-y-2 mb-4">
-                                      <div>
-                                          <p className="font-semibold">
-                                              Event Name:
-                                          </p>
-                                          <p>{selectedBooking.name}</p>
-                                      </div>
-                                      <div>
-                                          <p className="font-semibold">
-                                              Department:
-                                          </p>
-                                          <p>
-                                              {selectedBooking.department ||
-                                                  "Not specified"}
-                                          </p>
-                                      </div>
-                                      <div>
-                                          <p className="font-semibold">
-                                              Event Purpose:
-                                          </p>
-                                          <p>
-                                              {selectedBooking.eventPurpose ||
-                                                  "Not specified"}
-                                          </p>
-                                      </div>
-                                      <div>
-                                          <p className="font-semibold">
-                                              Participants:
-                                          </p>
-                                          <p>
-                                              {selectedBooking.participants ||
-                                                  "Not specified"}
-                                          </p>
-                                      </div>
-                                      <div>
-                                          <p className="font-semibold">
-                                              Number of Participants:
-                                          </p>
-                                          <p>
-                                              {selectedBooking.numberOfParticipants ||
-                                                  "Not specified"}
-                                          </p>
-                                      </div>
-                                  </div>
-                              </div>
-                              {selectedBooking.requestedServices && (
-                                  <div className="col-span-2">
-                                      <h3 className="font-semibold text-lg mb-2">
-                                          Requested Services
-                                      </h3>
-                                      <div className="space-y-2 mb-4">
-                                          <div>
-                                              <p className="font-semibold">
-                                                  General Administrative
-                                                  Services:
-                                              </p>
-                                              <p>
-                                                  {selectedBooking
-                                                      .requestedServices
-                                                      .generalAdministrative ||
-                                                      "None"}
-                                              </p>
-                                          </div>
-                                          <div>
-                                              <p className="font-semibold">
-                                                  Communication Office:
-                                              </p>
-                                              <p>
-                                                  {selectedBooking
-                                                      .requestedServices
-                                                      .communicationOffice ||
-                                                      "None"}
-                                              </p>
-                                          </div>
-                                          <div>
-                                              <p className="font-semibold">
-                                                  Management Information
-                                                  Systems:
-                                              </p>
-                                              <p>
-                                                  {selectedBooking
-                                                      .requestedServices
-                                                      .managementInformationSystems ||
-                                                      "None"}
-                                              </p>
-                                          </div>
-                                          <div>
-                                              <p className="font-semibold">
-                                                  Campus Safety and Security:
-                                              </p>
-                                              <p>
-                                                  {selectedBooking
-                                                      .requestedServices
-                                                      .campusSafety || "None"}
-                                              </p>
-                                          </div>
-                                      </div>
-                                  </div>
-                              )}
-                              {selectedBooking.compliance && (
-                                  <div className="col-span-2">
-                                      <h3 className="font-semibold text-lg mb-2">
-                                          Compliance and Consent
-                                      </h3>
-                                      <div className="space-y-2 mb-4">
-                                          <div>
-                                              <p className="font-semibold">
-                                                  Data Privacy Notice:
-                                              </p>
-                                              <p>
-                                                  {selectedBooking.compliance
-                                                      .dataPrivacy ||
-                                                      "Not specified"}
-                                              </p>
-                                          </div>
-                                          <div>
-                                              <p className="font-semibold">
-                                                  Compliance and Consent:
-                                              </p>
-                                              <p>
-                                                  {selectedBooking.compliance
-                                                      .complianceAndConsent ||
-                                                      "Not specified"}
-                                              </p>
-                                          </div>
-                                      </div>
-                                  </div>
-                              )}
-                          </div>
+                          {/* ...modal content... */}
                       </div>
                   </div>,
                   document.body
               )
             : null;
+
+    // Datatable columns (UI only)
+    const columns: ColumnDef<Booking>[] = [
+        {
+            accessorKey: "id",
+            header: "ID",
+            cell: ({ row }) => <div>{row.getValue("id")}</div>,
+            meta: { headerClassName: "w-[80px]" },
+        },
+        {
+            accessorKey: "date",
+            header: "Date Requested",
+            cell: ({ row }) => <div>{row.getValue("date")}</div>,
+        },
+        {
+            accessorKey: "venue",
+            header: "Requested Venue",
+            cell: ({ row }) => <div>{row.getValue("venue")}</div>,
+        },
+        {
+            accessorKey: "name",
+            header: "Event Name",
+            cell: ({ row }) => <div>{row.getValue("name")}</div>,
+        },
+        {
+            accessorKey: "eventDate",
+            header: "Event Date",
+            cell: ({ row }) => <div>{row.getValue("eventDate")}</div>,
+        },
+        {
+            accessorKey: "time",
+            header: "Event Time",
+            cell: ({ row }) => <div>{row.getValue("time")}</div>,
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => getStatusBadge(row.getValue("status")),
+        },
+        {
+            id: "actions",
+            header: "Action",
+            cell: ({ row }) => (
+                <div className="flex justify-center">
+                    <Button
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={() => handleViewBooking(row.original)}
+                    >
+                        View
+                    </Button>
+                </div>
+            ),
+            enableSorting: false,
+        },
+    ];
 
     return (
         <AuthenticatedLayout>
@@ -434,30 +252,6 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                     </div>
                 </header>
 
-                <div className="flex justify-end mb-6">
-                    <div className="relative w-80 mr-5">
-                        <Search
-                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                            size={18}
-                        />
-                        <Input
-                            className="pl-10 pr-4 py-2 border rounded-full"
-                            placeholder="Search Description"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-
-                    <Button
-                        variant="outline"
-                        className="flex items-center gap-2"
-                        onClick={() => setIsFilterOpen(!isFilterOpen)}
-                    >
-                        <Filter size={18} />
-                        Filter
-                    </Button>
-                </div>
-
                 {/* Filter Dropdown */}
                 {isFilterOpen && (
                     <div className="border rounded-md p-4 mb-6 shadow-md w-full max-w-md ml-auto">
@@ -465,46 +259,36 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
 
                         <div className="mb-4">
                             <p className="mb-2">Requested Venue</p>
-                            <Select
+                            <select
+                                className="w-full border rounded-md px-3 py-2"
                                 value={filterVenue}
-                                onValueChange={setFilterVenue}
+                                onChange={(e) => setFilterVenue(e.target.value)}
                             >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select venue" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">
-                                        All Venues
-                                    </SelectItem>
-                                    {uniqueVenues.map((venue) => (
-                                        <SelectItem key={venue} value={venue}>
-                                            {venue}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                <option value="">All Venues</option>
+                                {uniqueVenues.map((venue) => (
+                                    <option key={venue} value={venue}>
+                                        {venue}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div className="mb-4">
                             <p className="mb-2">Status</p>
-                            <Select
+                            <select
+                                className="w-full border rounded-md px-3 py-2"
                                 value={filterStatus}
-                                onValueChange={setFilterStatus}
+                                onChange={(e) =>
+                                    setFilterStatus(e.target.value)
+                                }
                             >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">
-                                        All Statuses
-                                    </SelectItem>
-                                    {uniqueStatuses.map((status) => (
-                                        <SelectItem key={status} value={status}>
-                                            {status}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                <option value="">All Statuses</option>
+                                {uniqueStatuses.map((status) => (
+                                    <option key={status} value={status}>
+                                        {status}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div className="flex gap-2 mt-6">
@@ -525,49 +309,13 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                     </div>
                 )}
 
-                {/* Desktop Table View */}
+                {/* Desktop Table View (Datatable) */}
                 <div className="hidden md:block border rounded-md overflow-hidden">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[80px]">ID</TableHead>
-                                <TableHead>Date Requested</TableHead>
-                                <TableHead>Requested Venue</TableHead>
-                                <TableHead>Event Name</TableHead>
-                                <TableHead>Event Date</TableHead>
-                                <TableHead>Event Time</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-center">
-                                    Action
-                                </TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {getCurrentPageItems().map((booking, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{booking.id}</TableCell>
-                                    <TableCell>{booking.date}</TableCell>
-                                    <TableCell>{booking.venue}</TableCell>
-                                    <TableCell>{booking.name}</TableCell>
-                                    <TableCell>{booking.eventDate}</TableCell>
-                                    <TableCell>{booking.time}</TableCell>
-                                    <TableCell>
-                                        {getStatusBadge(booking.status)}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <Button
-                                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                                            onClick={() =>
-                                                handleViewBooking(booking)
-                                            }
-                                        >
-                                            View
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                    <Datatable
+                        columns={columns}
+                        data={filteredBookings}
+                        placeholder="Search Bookings"
+                    />
                 </div>
 
                 {/* Mobile Card View */}
@@ -578,9 +326,15 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                             className="border rounded-lg p-4 bg-white shadow"
                         >
                             <div className="text-sm space-y-2">
-                                <div>
-                                    <strong>ID:</strong> {booking.id}
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <strong>ID:</strong> {booking.id}
+                                    </div>
+                                    <div className="rounded-full">
+                                        {getStatusBadge(booking.status)}
+                                    </div>
                                 </div>
+
                                 <div>
                                     <strong>Date Requested:</strong>{" "}
                                     {booking.date}
@@ -599,25 +353,25 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                                 <div>
                                     <strong>Event Time:</strong> {booking.time}
                                 </div>
-                                <div>
-                                    <strong>Status:</strong>{" "}
-                                    {getStatusBadge(booking.status)}
-                                </div>
-                                <div className="flex justify-end mt-2">
-                                    <Button
-                                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                                        onClick={() =>
-                                            handleViewBooking(booking)
-                                        }
-                                    >
-                                        View
-                                    </Button>
+
+                                <div className="flex justify-end mt-2 w-full">
+                                    <div className="w-1/3">
+                                        <Button
+                                            className="w-full bg-secondary hover:bg-blue-700 text-white"
+                                            onClick={() =>
+                                                handleViewBooking(booking)
+                                            }
+                                        >
+                                            View
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
+                {/* Pagination */}
                 <div className="mt-6">
                     <div className="flex items-center gap-2">
                         <Button

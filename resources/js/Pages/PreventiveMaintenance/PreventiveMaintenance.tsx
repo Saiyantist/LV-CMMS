@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Head } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
+import { Datatable } from "@/Pages/WorkOrders/components/Datatable";
+import { ColumnDef } from "@tanstack/react-table";
 
 const PreventiveMaintenance: React.FC = () => {
     const assets = [
@@ -25,6 +27,7 @@ const PreventiveMaintenance: React.FC = () => {
     ];
 
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const handleCheckboxChange = (assetId: number) => {
         setSelectedAssets((prevSelected) =>
@@ -42,6 +45,81 @@ const PreventiveMaintenance: React.FC = () => {
         }
     };
 
+    const filteredAssets = assets.filter(
+        (asset) =>
+            asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            asset.specification
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            asset.location.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const columns: ColumnDef<(typeof assets)[0]>[] = [
+        {
+            accessorKey: "id",
+            header: "ID",
+            cell: ({ row }) => <div>{row.getValue("id")}</div>,
+            meta: { headerClassName: "w-12" },
+        },
+        {
+            accessorKey: "dateAcquired",
+            header: "Date Submitted",
+            cell: ({ row }) => <div>{row.getValue("dateAcquired")}</div>,
+            meta: { headerClassName: "w-[8rem]" },
+        },
+        {
+            accessorKey: "name",
+            header: "Asset Name",
+            cell: ({ row }) => <div>{row.getValue("name")}</div>,
+            meta: { headerClassName: "w-[10rem]" },
+        },
+        {
+            accessorKey: "specification",
+            header: "Description",
+            cell: ({ row }) => <div>{row.getValue("specification")}</div>,
+            meta: { headerClassName: "w-[23%]" },
+        },
+        {
+            accessorKey: "location",
+            header: "Assign To",
+            cell: ({ row }) => <div>{row.getValue("location")}</div>,
+            meta: { headerClassName: "w-[10rem]" },
+        },
+        {
+            accessorKey: "condition",
+            header: "Status",
+            cell: ({ row }) => <div>{row.getValue("condition")}</div>,
+            meta: { headerClassName: "w-[10rem]" },
+        },
+        {
+            accessorKey: "nextSchedule",
+            header: "Next Schedule",
+            cell: () => <div>TBD</div>,
+            meta: { headerClassName: "w-[10rem]" },
+        },
+        {
+            accessorKey: "lastMaintenance",
+            header: "Last Maintenance",
+            cell: ({ row }) => <div>{row.getValue("lastMaintenance")}</div>,
+            meta: { headerClassName: "w-[10rem]" },
+        },
+        {
+            id: "actions",
+            header: "Action",
+            cell: () => (
+                <div className="flex gap-2 justify-center">
+                    <button className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
+                        Edit
+                    </button>
+                    <button className="bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
+                        Delete
+                    </button>
+                </div>
+            ),
+            enableSorting: false,
+        },
+    ];
+
     return (
         <Authenticated>
             <Head title="Preventive Maintenance" />
@@ -57,153 +135,94 @@ const PreventiveMaintenance: React.FC = () => {
             <div className="p-4">
                 {/* Desktop Table */}
                 <div className="hidden sm:block overflow-x-auto">
-                    <table className="min-w-full table-auto border border-gray-200">
-                        <thead className="bg-secondary dark:bg-gray-800">
-                            <tr>
-                                <th className="p-2 text-center">
-                                    <input
-                                        type="checkbox"
-                                        onChange={handleSelectAll}
-                                        checked={
-                                            selectedAssets.length ===
-                                            assets.length
-                                        }
-                                    />
-                                </th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
-                                    ID
-                                </th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Date Submitted
-                                </th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Asset Name
-                                </th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Description
-                                </th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Assign To
-                                </th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Status
-                                </th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Next Schedule
-                                </th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Last Maintenance
-                                </th>
-                                <th className="text-auto bg-secondary text-white border p-3 text-sm font-semibold">
-                                    Action
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {assets.map((asset) => (
-                                <tr
-                                    key={asset.id}
-                                    className="border-b text-center"
-                                >
-                                    <td className="p-2">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedAssets.includes(
-                                                asset.id
-                                            )}
-                                            onChange={() =>
-                                                handleCheckboxChange(asset.id)
-                                            }
-                                        />
-                                    </td>
-                                    <td className="p-2">{asset.id}</td>
-                                    <td className="p-2">
-                                        {asset.dateAcquired}
-                                    </td>
-                                    <td className="p-2">{asset.name}</td>
-                                    <td className="p-2">
-                                        {asset.specification}
-                                    </td>
-                                    <td className="p-2">{asset.location}</td>
-                                    <td className="p-2">{asset.condition}</td>
-                                    <td className="p-2">TBD</td>
-                                    <td className="p-2">
-                                        {asset.lastMaintenance}
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex justify-center items-center gap-2">
-                                            <button className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
-                                                Edit
-                                            </button>
-                                            <button className="bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <Datatable
+                        columns={columns}
+                        data={filteredAssets}
+                        placeholder="Search here"
+                    />
+                </div>
+
+                {/* Mobile Search Input */}
+                <div className="sm:hidden mb-4">
+                    <input
+                        type="text"
+                        placeholder="Search here"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
                 </div>
 
                 {/* Mobile Cards */}
                 <div className="sm:hidden flex flex-col gap-4 mt-4">
-                    {assets.map((asset) => (
+                    {filteredAssets.map((asset) => (
                         <div
                             key={asset.id}
-                            className="border rounded-2xl p-4 shadow-md bg-white relative"
+                            className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
                         >
-                            {/* Checkbox in top-right */}
-                            <div className="absolute top-3 right-3">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedAssets.includes(asset.id)}
-                                    onChange={() =>
-                                        handleCheckboxChange(asset.id)
-                                    }
-                                    className="accent-primary"
-                                />
+                            {/* Top row: ID and Status aligned horizontally */}
+                            <div className="flex justify-between items-start text-sm text-gray-800 mb-1">
+                                <p>
+                                    <span className="font-medium">ID:</span>{" "}
+                                    {asset.id}
+                                </p>
+                                <span
+                                    className={`text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-800`}
+                                >
+                                    {asset.condition}
+                                </span>
                             </div>
 
-                            {/* Details */}
-                            <div className="text-sm text-gray-800 space-y-1 pr-8">
+                            {/* Info Section */}
+                            <div className="space-y-1 pr-8 text-sm text-gray-800">
                                 <p>
-                                    <strong>ID:</strong> {asset.id}
+                                    <span className="font-medium">
+                                        Asset Name:
+                                    </span>{" "}
+                                    {asset.name}
                                 </p>
                                 <p>
-                                    <strong>Date Submitted:</strong>{" "}
-                                    {asset.dateAcquired}
-                                </p>
-                                <p>
-                                    <strong>Name:</strong> {asset.name}
-                                </p>
-                                <p>
-                                    <strong>Description:</strong>{" "}
+                                    <span className="font-medium">
+                                        Description:
+                                    </span>{" "}
                                     {asset.specification}
                                 </p>
                                 <p>
-                                    <strong>Assign To:</strong> {asset.location}
+                                    <span className="font-medium">
+                                        Assign To:
+                                    </span>{" "}
+                                    {asset.location}
                                 </p>
                                 <p>
-                                    <strong>Status:</strong> {asset.condition}
+                                    <span className="font-medium">
+                                        Date Submitted:
+                                    </span>{" "}
+                                    {asset.dateAcquired}
                                 </p>
                                 <p>
-                                    <strong>Next Schedule:</strong> TBD
+                                    <span className="font-medium">
+                                        Next Schedule:
+                                    </span>{" "}
+                                    TBD
                                 </p>
                                 <p>
-                                    <strong>Last Maintenance:</strong>{" "}
+                                    <span className="font-medium">
+                                        Last Maintenance:
+                                    </span>{" "}
                                     {asset.lastMaintenance}
                                 </p>
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="mt-4 flex justify-between gap-2">
-                                <button className="flex-1 bg-secondary text-white px-3 py-2 text-sm rounded-md hover:opacity-90 transition">
-                                    Edit
-                                </button>
-                                <button className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:opacity-90 transition">
-                                    Delete
-                                </button>
+                            <div className="mt-4 w-full">
+                                <div className="flex gap-2">
+                                    <button className="w-1/2 bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
+                                        Edit
+                                    </button>
+                                    <button className="w-1/2 bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}

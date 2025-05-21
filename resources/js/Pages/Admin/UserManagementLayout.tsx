@@ -87,7 +87,20 @@ export default function UserManagementLayout({
                                                 key={role.id}
                                                 value={role.name}
                                             >
-                                                {role.name}
+                                                {role.name
+                                                    .replace(/_/g, " ") // Replace underscores with spaces
+                                                    .split(" ") // Split into words
+                                                    .map(
+                                                        (word) =>
+                                                            word
+                                                                .charAt(0)
+                                                                .toUpperCase() +
+                                                            word
+                                                                .slice(1)
+                                                                .toLowerCase()
+                                                    ) // Capitalize each word
+                                                    .join(" ")}{" "}
+                                                {/* Join them back */}
                                             </option>
                                         ))}
                                     </select>
