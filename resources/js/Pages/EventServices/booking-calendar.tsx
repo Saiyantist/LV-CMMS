@@ -191,7 +191,7 @@ export default function EventCalendar() {
                     <div className="container mx-auto px-4 py-2">
                         <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
                             <div className="flex space-x-2">
-                                <button
+                                {/* <button
                                     className={`px-4 py-2 rounded-md ${
                                         view === "calendar"
                                             ? "bg-blue-600 hover:bg-blue-700 text-white"
@@ -200,8 +200,9 @@ export default function EventCalendar() {
                                     onClick={() => setView("calendar")}
                                 >
                                     Calendar
-                                </button>
-                                <button
+                                </button> */}
+                                {/* Hide the "View" button */}
+                                {/* <button
                                     className={`px-4 py-2 rounded-md ${
                                         view === "list"
                                             ? "bg-blue-600 hover:bg-blue-700 text-white"
@@ -210,7 +211,7 @@ export default function EventCalendar() {
                                     onClick={() => setView("list")}
                                 >
                                     List
-                                </button>
+                                </button> */}
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">

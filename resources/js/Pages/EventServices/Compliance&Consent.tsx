@@ -24,7 +24,7 @@ const ComplianceAndConsent = ({
                 <h2 className="text-lg font-semibold mb-2 text-gray-900">
                     Data Privacy Notice <span className="text-red-500">*</span>
                 </h2>
-                <p className="text-sm text-gray-700 mb-4">
+                <p className="text-md text-gray-700 mb-4 italic">
                     In compliance with data privacy laws, such as, but not
                     limited to, Republic Act No. 10173 (Philippine Data Privacy
                     Act of 2012) and implementing rules and regulations, we
@@ -42,7 +42,7 @@ const ComplianceAndConsent = ({
                     file a complaint and be entitled to damages for violation of
                     your rights under this data privacy.
                 </p>
-                <p className="text-sm text-gray-700 mb-4">
+                <p className="text-md text-gray-700 mb-4 italic">
                     For your data privacy inquiries, you may reach our Data
                     Protection Officer through:{" "}
                     <a
@@ -74,7 +74,7 @@ const ComplianceAndConsent = ({
                 <h3 className="font-medium text-gray-800 mb-1">
                     Equipment Return Policy
                 </h3>
-                <p className="text-sm text-gray-700 mb-4">
+                <p className="text-md text-gray-700 mb-4 italic">
                     The borrower acknowledges full responsibility for the use,
                     maintenance, and timely return of all borrowed equipment and
                     facilities, ensuring they are returned in the same condition
@@ -93,7 +93,7 @@ const ComplianceAndConsent = ({
                     </span>
                 </label>
 
-                <p className="text-sm text-gray-700 mb-2">
+                <p className="text-md text-gray-700 mb-2 italic">
                     I voluntarily give my consent in collecting, processing,
                     recording, using, and retaining my personal information for
                     the above-mentioned purpose in accordance with this Privacy

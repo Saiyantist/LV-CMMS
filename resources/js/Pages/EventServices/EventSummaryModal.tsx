@@ -17,7 +17,7 @@ interface EventSummaryModalProps {
             participants: string;
             participantCount: string;
         };
-        requestedServices?: string[];
+        requestedServices: Record<string, string[]>;
         dataPrivacyAgreed?: boolean;
         equipmentPolicyAgreed?: boolean;
         consentChoice?: string;
@@ -136,7 +136,7 @@ const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
                             </span>
                             Event Details
                         </div>
-                        <div className="ml-8 mt-1 space-y-1 text-sm">
+                        <div className="ml-8 mt-1 space-y-1 text-md">
                             <div>
                                 <span className="font-semibold">
                                     Event Name:
@@ -177,13 +177,20 @@ const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
                             </span>
                             Requested Services
                         </div>
-                        <div className="ml-8 mt-1 text-sm">
+                        <div className="ml-8 mt-1 text-md">
                             {data.requestedServices &&
-                            data.requestedServices.length > 0
-                                ? data.requestedServices
-                                      .filter(Boolean)
-                                      .join(", ")
-                                : "None"}
+                            Object.keys(data.requestedServices).length > 0 ? (
+                                Object.entries(data.requestedServices).map(
+                                    ([service, items]) => (
+                                        <div key={service}>
+                                            <strong>{service}:</strong>{" "}
+                                            {items.join(", ")}
+                                        </div>
+                                    )
+                                )
+                            ) : (
+                                <div>None</div>
+                            )}
                         </div>
                     </div>
                     {/* 6. Compliance and Consent */}
@@ -194,7 +201,7 @@ const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
                             </span>
                             Compliance and Consent
                         </div>
-                        <div className="ml-8 mt-1 text-sm">
+                        <div className="ml-8 mt-1 text-md">
                             <div>
                                 <span className="font-semibold">
                                     Data Privacy Notice:
@@ -224,7 +231,7 @@ const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
                         Back
                     </button>
                     <button
-                        className="px-8 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md"
+                        className="px-8 py-2 bg-secondary hover:bg-primary text-white rounded-md"
                         onClick={onSubmit}
                     >
                         Submit

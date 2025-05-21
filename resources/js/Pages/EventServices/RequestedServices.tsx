@@ -93,6 +93,13 @@ const RequestedServices: React.FC<RequestedServicesProps> = ({
 
     return (
         <div className="w-[99%] mx-auto p-6 bg-white rounded">
+            <div className="text-center text-blue-600 bg-blue-50 p-4 rounded-md">
+                <h1 className="text-lg font-medium text-secondary">
+                    Selecting a Services is optional. You may proceed without
+                    choosing one.
+                </h1>
+            </div>
+            <br />
             <h2 className="text-gray-900 text-2xl mb-2 font-semibold">
                 Select Services
             </h2>

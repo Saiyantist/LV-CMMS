@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState } from "react";
-import { Upload, X, FileText } from "lucide-react";
+import { Upload, X, FileText, Check } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Gallery from "./Gallery";
 import DateTimeSelection from "./Date&Time";
@@ -103,10 +103,7 @@ export default function EventServicesRequest() {
             }
             setCurrentStep(2);
         } else if (currentStep === 2) {
-            if (!selectedGalleryItem) {
-                setError("Please select a venue to continue.");
-                return;
-            }
+            // Make venue selection optional
             setCurrentStep(3);
         } else if (currentStep === 3) {
             if (!dateRange || !timeRange) {
@@ -164,6 +161,7 @@ export default function EventServicesRequest() {
                     </p>
                     <br />
                 </div>
+
                 <div className="mb-8">
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         {steps.map((step, index) => (
@@ -173,21 +171,26 @@ export default function EventServicesRequest() {
                             >
                                 <div className="relative flex items-center w-full justify-center">
                                     <div
-                                        className={`z-10 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                                            ${
-                                                currentStep === step.id
-                                                    ? "bg-blue-600 text-white"
-                                                    : currentStep > step.id
-                                                    ? "bg-black text-white"
-                                                    : "bg-white text-gray-400 border border-gray-300"
-                                            }`}
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+        ${
+            currentStep === step.id
+                ? "bg-secondary text-white"
+                : currentStep > step.id
+                ? "bg-green-500 text-white"
+                : "bg-white text-gray-400 border border-gray-300"
+        }`}
                                     >
-                                        {step.id}
+                                        {currentStep > step.id ? (
+                                            <Check size={16} />
+                                        ) : (
+                                            step.id
+                                        )}
                                     </div>
-                                    {index < steps.length - 1 && (
-                                        <div className="flex-1 h-px bg-gray-300 mx-2"></div>
-                                    )}
+                                    {/* {index < steps.length - 1 && (
+                                        <div className="absolute top-1/2 left-full w-full h-0 border-t border-dashed border-gray-400 ml-2 z-0"></div>
+                                    )} */}
                                 </div>
+
                                 <span
                                     className={`text-xs mt-2 text-center w-full ${
                                         currentStep === step.id
