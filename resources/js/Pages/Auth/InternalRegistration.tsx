@@ -1,6 +1,7 @@
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import PrimaryButton from "@/Components/PrimaryButton";
+import { Label } from "@/Components/shadcnui/label";
 import TextInput from "@/Components/TextInput";
 import RegisterLayout from "@/Layouts/RegisterLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
@@ -62,7 +63,7 @@ export default function InternalRegistration({
     const { minDate, maxDate } = getDateLimits();
 
     return (
-        <RegisterLayout>
+        <RegisterLayout width="w-1/2">
             <Head title="Registration for Internal" />
             <div>
                 <h1 className="text-2xl font-bold text-center text-black dark:text-white">
@@ -75,12 +76,15 @@ export default function InternalRegistration({
 
             <form onSubmit={submit} className="px-2">
 
-                <div className="max-h-[50vh] overflow-auto py-4 px-2">
+                <div className="max-h-[48vh] overflow-auto p-4">
                     {/* Name */}
-                    <div className="flex justify-stretch mt-2">
+                    <div className="flex justify-stretch mt-2 space-x-2">
                         {/* First Name */}
-                        <div className="w-full mr-2">
-                            <InputLabel htmlFor="first_name" value="First Name *" />
+                        <div className="w-full">
+                            <div className="flex">
+                                <InputLabel htmlFor="first_name" value="First Name" />
+                                <span className="text-red-500 ml-1">*</span>
+                            </div>
 
                             <TextInput
                                 id="first_name"
@@ -102,8 +106,11 @@ export default function InternalRegistration({
                         </div>
 
                         {/* Last Name */}
-                        <div className="w-full ml-2">
-                            <InputLabel htmlFor="last_name" value="Last Name *" />
+                        <div className="w-full">
+                            <div className="flex">
+                                <InputLabel htmlFor="last_name" value="Last Name" />
+                                <span className="text-red-500 ml-1">*</span>
+                            </div>
 
                             <TextInput
                                 id="last_name"
@@ -126,9 +133,12 @@ export default function InternalRegistration({
                     </div>
 
                     {/* Gender */}
-                    <div className="flex justify-stretch mt-4">
+                    <div className="flex justify-stretch mt-2 space-x-2">
                         <div className="w-full">
-                            <InputLabel htmlFor="gender" value="Gender *" />
+                            <div className="flex">
+                                <InputLabel htmlFor="gender" value="Gender" />
+                                <span className="text-red-500 ml-1">*</span>
+                            </div>
 
                             <select
                                 id="gender"
@@ -148,41 +158,43 @@ export default function InternalRegistration({
 
                             <InputError message={errors.gender} className="mt-2" />
                         </div>
+
+                        {/* Contact Number */}
+                        <div className="w-full">
+                            <div className="flex">
+                                <InputLabel htmlFor="contact_number" value="Contact Number" />
+                                <span className="text-red-500 ml-1">*</span>
+                            </div>
+
+                            <TextInput
+                                id="contact_number"
+                                type="tel"
+                                name="contact_number"
+                                value={data.contact_number}
+                                className="mt-1 block w-full"
+                                placeholder="9XXXXXXXXX"
+                                maxLength={10}
+                                onChange={(e) =>
+                                    setData("contact_number", e.target.value)
+                                }
+                                required
+                            />
+                            <InputError
+                                message={errors.contact_number}
+                                className="mt-2"
+                            />
+                        </div>
                     </div>
 
-                    {/* Contact Number */}
-                    <div className="mt-4">
-                        <InputLabel
-                            htmlFor="contact_number"
-                            value="Contact Number *"
-                        />
-                        <TextInput
-                            id="contact_number"
-                            type="tel"
-                            name="contact_number"
-                            value={data.contact_number}
-                            className="mt-1 block w-full"
-                            placeholder="9XXXXXXXXX"
-                            maxLength={10}
-                            onChange={(e) =>
-                                setData("contact_number", e.target.value)
-                            }
-                            required
-                        />
-                        <InputError
-                            message={errors.contact_number}
-                            className="mt-2"
-                        />
-                    </div>
 
                     {/* Staff type and Department/Work Group */}
                     <div className="flex justify-stretch mt-4">
                         {/* Staff type */}
                         <div className="w-full">
-                            <InputLabel
-                                htmlFor="staff_type"
-                                value="Type of Staff *"
-                            />
+                            <div className="flex">
+                                <InputLabel htmlFor="staff_type" value="Type of Staff" />
+                                <span className="text-red-500 ml-1">*</span>
+                            </div>
 
                             <select
                                 id="staff_type"
@@ -211,10 +223,10 @@ export default function InternalRegistration({
                         {/* Department */}
                         {["teaching", "non-teaching"].includes(data.staff_type) && (
                             <div className="w-full ml-2">
-                                <InputLabel
-                                    htmlFor="department"
-                                    value="Department *"
-                                />
+                                <div className="flex">
+                                    <InputLabel htmlFor="department" value="Department" />
+                                    <span className="text-red-500 ml-1">*</span>
+                                </div>
 
                                 <select
                                     id="department_id"
@@ -244,10 +256,10 @@ export default function InternalRegistration({
                         {/* Work Group */}
                         {data.staff_type === "maintenance" && (
                             <div className="w-full ml-2">
-                                <InputLabel
-                                    htmlFor="work_group"
-                                    value="Work Group *"
-                                />
+                                <div className="flex">
+                                    <InputLabel htmlFor="work_group" value="Work Group" />
+                                    <span className="text-red-500 ml-1">*</span>
+                                </div>
 
                                 <TextInput
                                     id="work_group"
@@ -270,7 +282,10 @@ export default function InternalRegistration({
 
                     {/* Email */}
                     <div className="mt-4">
-                        <InputLabel htmlFor="email" value="Email *" />
+                        <div className="flex">
+                            <InputLabel htmlFor="email" value="Email" />
+                            <span className="text-red-500 ml-1">*</span>
+                        </div>
 
                         <TextInput
                             id="email"
@@ -287,10 +302,13 @@ export default function InternalRegistration({
                     </div>
 
                     {/* Password and Confirm Password */}
-                    <div className="flex justify-stretch mt-4">
+                    <div className="flex justify-stretch mt-4 space-x-2">
                         {/* Password */}
-                        <div className="w-full mr-2">
-                            <InputLabel htmlFor="password" value="Password *" />
+                        <div className="w-full">
+                            <div className="flex">
+                                <InputLabel htmlFor="password" value="Password" />
+                                <span className="text-red-500 ml-1">*</span>
+                            </div>
 
                             <TextInput
                                 id="password"
@@ -312,11 +330,11 @@ export default function InternalRegistration({
                         </div>
 
                         {/* Confirm Password */}
-                        <div className="w-full ml-2">
-                            <InputLabel
-                                htmlFor="password_confirmation"
-                                value="Confirm Password *"
-                            />
+                        <div className="w-full">
+                            <div className="flex">
+                                <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
+                                <span className="text-red-500 ml-1">*</span>
+                            </div>
 
                             <TextInput
                                 id="password_confirmation"
@@ -339,33 +357,36 @@ export default function InternalRegistration({
                     </div>
                 </div>
 
-                <div className="flex justify-between mt-4 py-2">
-                    <label className="flex items-center gap-2">
-                        <input type="checkbox" name="privacy_policy" />
+                <div className="flex flex-col items-center pt-4 pb-4 space-y-4 text-sm">
+                    <Label className="flex self-start gap-2 ms-1">
+                        <input type="checkbox" name="privacy_policy" required/>
                         <span className="text-sm">
-                            I understand, and I will agree with the privacy
-                            policy
+                            I have read and understand the privacy policy
                         </span>
-                    </label>
-                    <div className="flex items-center justify-end">
-                        <Link
-                            href={route("login")}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
-                        >
-                            Already registered?
-                        </Link>
+                    </Label>
 
+                    <div className="flex flex-col items-center space-y-4 w-full">
                         <PrimaryButton
-                            className="ms-4 bg-secondary hover:bg-primary"
+                            type="submit"
+                            className="bg-secondary hover:bg-primary w-full"
                             disabled={processing}
                         >
-                            Register
+                            <span className="text-sm self-center w-full">
+                                Register
+                            </span>
                         </PrimaryButton>
+                        <div className="flex items-center">
+                            <span>Already have an account?</span>
+                            <Link
+                                href={route("login")}
+                                className="ml-1 rounded-md text-secondary font-bold underline hover:text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                            >
+                                Login
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </form>
-
-
         </RegisterLayout>
     );
 }

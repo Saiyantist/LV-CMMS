@@ -41,7 +41,7 @@ class RegisterRequest extends FormRequest
             return [
                 'first_name' => 'required|string|max:20',
                 'last_name' => 'required|string|max:40',
-                'birth_date' => 'required|date|max:255',
+                // 'birth_date' => 'required|date|max:255',
                 'gender' => 'required|string|max:255',
                 'contact_number' => 'required|integer|digits:10',
                 'staff_type' => ['required', 'in:teaching,non-teaching'],
@@ -67,7 +67,7 @@ class RegisterRequest extends FormRequest
         return [
             'first_name' => 'required|string|max:20',
             'last_name' => 'required|string|max:40',
-            'birth_date' => 'required|date|max:255',
+            // 'birth_date' => 'required|date|max:255',
             'gender' => 'required|string|max:255',
             'contact_number' => 'required|integer|digits:10',
             'staff_type' => ['required', 'in:teaching,non-teaching'],
@@ -81,7 +81,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'email.regex' => 'The provided email address is not a valid La Verdad email address.',
-            'birth_date.required' => 'The birth date is required for internal registration.',
+            // 'birth_date.required' => 'The birth date is required for internal registration.',
             'staff_type.required' => 'The staff type is required for internal registration.',
             'department_id.required' => 'The department is required for internal registration.',
         ];

@@ -29,7 +29,7 @@ export default function AccessRegistration() {
                                     Guest
                                 </h2>
                                 <p className="font-semibold text-sm italic text-gray-600 dark:text-gray-300 mb-2">
-                                    (External Users)
+                                    (External User)
                                 </p>
                                 <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 leading-6">
                                     If you are
@@ -43,7 +43,7 @@ export default function AccessRegistration() {
                                 href={route(
                                     "access.registration-external-user-registration"
                                 )}
-                                className="mt-4 mx-auto w-40 bg-primary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-full shadow hover:bg-secondary transition"
+                                className="mt-4 mx-auto w-56 bg-secondary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-lg shadow hover:bg-secondary transition"
                             >
                                 Register here
                             </Link>
@@ -53,10 +53,10 @@ export default function AccessRegistration() {
                         <div className="w-full md:w-1/2 bg-form dark:bg-gray-700 p-6 rounded-lg shadow-md shadow-slate-500 min-h-[14rem] flex flex-col items-center justify-between text-center">
                             <div>
                                 <h2 className="text-xl font-bold text-secondary dark:text-white">
-                                    LVCC Employees
+                                    LVCC Employee
                                 </h2>
                                 <p className="font-bold text-sm italic text-gray-600 dark:text-gray-300 mb-2">
-                                    (Internal Users)
+                                    (Internal User)
                                 </p>
                                 <p className="mt-4 text-sm text-gray-600 dark:text-gray-300 leading-6">
                                     If you are an
@@ -70,7 +70,7 @@ export default function AccessRegistration() {
                                 href={route(
                                     "access.registration-internal-user-registration"
                                 )}
-                                className="mt-4 mx-auto w-40 bg-primary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-full shadow hover:bg-secondary transition"
+                                className="mt-4 mx-auto w-56 bg-secondary text-white text-xs font-semibold uppercase tracking-widest py-3 rounded-lg shadow hover:bg-secondary transition"
                             >
                                 Register here
                             </Link>

@@ -114,7 +114,7 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     /**
      * Event Services Routes
      */
-    Route::middleware(['restrict_internal', 'restrict_work_order_manager'])->group(function () {
+    Route::middleware([])->group(function () {
         Route::get('/booking-calendar', [EventServicesController::class, 'index'])->name('booking-calendar');
         
         // My Bookings Route (use controller method)

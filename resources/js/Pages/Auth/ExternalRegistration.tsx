@@ -1,6 +1,7 @@
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import PrimaryButton from "@/Components/PrimaryButton";
+import { Label } from "@/Components/shadcnui/label";
 import TextInput from "@/Components/TextInput";
 import RegisterLayout from "@/Layouts/RegisterLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
@@ -27,10 +28,10 @@ export default function ExternalRegistration() {
     };
 
     return (
-        <RegisterLayout>
+        <RegisterLayout width="w-1/3">
             <Head title="Registration for External" />
 
-            <div>
+            <div className="p-2">
                 <h1 className="text-2xl font-bold text-center text-black dark:text-white">
                     Registration Form
                 </h1>
@@ -39,11 +40,11 @@ export default function ExternalRegistration() {
                 </h2>
             </div>
 
-            <form onSubmit={submit} className="px-2">
+            <form onSubmit={submit} className="p-4">
 
-                <div className="max-h-[50vh] overflow-auto py-4 px-2">
+                <div className="max-h-[50vh] overflow-auto space-y-2">
                     {/* Name */}
-                    <div className="flex justify-stretch mt-2">
+                    <div className="flex justify-stretch">
                         {/* First Name */}
                         <div className="w-full mr-2">
                             <InputLabel htmlFor="first_name" value="First Name" />
@@ -92,7 +93,7 @@ export default function ExternalRegistration() {
                     </div>
 
                     {/* Gender and Contact Number */}
-                    <div className="flex justify-between mt-4 space-x-4">
+                    <div className="flex justify-between space-x-4">
                         {/* Gender */}
                         <div className="w-1/2">
                             <InputLabel htmlFor="gender" value="Gender" />
@@ -144,7 +145,7 @@ export default function ExternalRegistration() {
                     </div>
 
                     {/* Email */}
-                    <div className="mt-4">
+                    <div className="">
                         <InputLabel htmlFor="email" value="Email" />
 
                         <TextInput
@@ -162,7 +163,7 @@ export default function ExternalRegistration() {
                     </div>
 
                     {/* Password and Confirm Password */}
-                    <div className="flex justify-stretch mt-4">
+                    <div className="flex">
                         {/* Password */}
                         <div className="w-full mr-2">
                             <InputLabel htmlFor="password" value="Password" />
@@ -214,29 +215,33 @@ export default function ExternalRegistration() {
                     </div>
                 </div>
 
-                <div className="flex justify-between mt-4 py-2">
-                    <label className="flex items-center gap-2">
+                <div className="flex flex-col items-center pt-12 pb-4 space-y-4 text-sm">
+                    <Label className="flex self-start gap-2 ms-1">
                         <input type="checkbox" name="privacy_policy" />
                         <span className="text-sm">
-                            I understand, and I will agree with the privacy
-                            policy
+                            I have read and understand the privacy policy
                         </span>
-                    </label>
-                    <div className="flex items-center justify-end">
-                        <Link
-                            href={route("login")}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
-                        >
-                            Already registered?
-                        </Link>
+                    </Label>
 
+                    <div className="flex flex-col items-center space-y-4 w-full">
                         <PrimaryButton
                             type="submit"
-                            className="ms-4 bg-secondary hover:bg-primary"
+                            className="bg-secondary hover:bg-primary w-full"
                             disabled={processing}
                         >
-                            Register
+                            <span className="text-sm self-center w-full">
+                                Register
+                            </span>
                         </PrimaryButton>
+                        <div className="flex items-center">
+                            <span>Already have an account?</span>
+                            <Link
+                                href={route("login")}
+                                className="ml-1 rounded-md text-secondary font-bold underline hover:text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                            >
+                                Login
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </form>
