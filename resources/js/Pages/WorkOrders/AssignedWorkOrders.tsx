@@ -15,6 +15,7 @@ import { getPriorityColor } from "@/utils/getPriorityColor";
 import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
 import { statusSorting } from "@/utils/statusSorting";
+import ViewWorkOrderModal from "./ViewWorkOrderModal";
 
 // import FullCalendar from "@fullcalendar/react"; // FullCalendar library
 // import dayGridPlugin from "@fullcalendar/daygrid"; // Month view
@@ -155,12 +156,6 @@ export default function AssignedTask({
                 {/* Tabs */}
                 <div className="relative mt-8">
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="bg-gray-200 text-black rounded-md absolute top-0 left-0 z-10 mb-4">
-                            <TabsTrigger value="list">List</TabsTrigger>
-                            <TabsTrigger value="month">Month</TabsTrigger>
-                            <TabsTrigger value="week">Week</TabsTrigger>
-                        </TabsList>
-
                         {/* Desktop Table View */}
                         <div className="hidden sm:block">
                             <Datatable
@@ -289,79 +284,6 @@ export default function AssignedTask({
                                 );
                             })}
                         </div>
-
-                        {/* Month View */}
-                        <TabsContent value="month" className="mt-8">
-                            <div className="bg-white p-4 rounded-lg shadow-md">
-                                <h2 className="text-lg font-semibold mb-4">
-                                    Month View
-                                </h2>
-                                {/* FullCalendar component for month view */}
-                                {/* <FullCalendar
-                                    plugins={[dayGridPlugin]}
-                                    initialView="dayGridMonth"
-                                    events={workOrders.map((wo) => ({
-                                        title: wo.description,
-                                        start: wo.dateAssigned,
-                                        end: wo.targetDate,
-                                    }))}
-                                    eventColor="#378006"
-                                    headerToolbar={{
-                                        left: "prev,next today",
-                                        center: "title",
-                                        right: "dayGridMonth,timeGridWeek,timeGridDay",
-                                    }}
-                                    buttonText={{
-                                        today: "Today",
-                                        month: "Month",
-                                        week: "Week",
-                                        day: "Day",
-                                    }}
-                                    height="auto"
-                                    eventClick={(info) => {
-                                        alert(
-                                            `Event: ${info.event.title}\nStart: ${info.event.start}\nEnd: ${info.event.end}`
-                                        );
-                                    }}
-                                /> */}
-                            </div>
-                        </TabsContent>
-
-                        {/* Week View */}
-                        <TabsContent value="week" className="mt-8">
-                            <div className="bg-white p-4 rounded-lg shadow-md">
-                                <h2 className="text-lg font-semibold mb-4">
-                                    Week View
-                                </h2>
-                                {/* FullCalendar component for week view */}
-                                {/* <FullCalendar
-                                    plugins={[timeGridPlugin]}
-                                    initialView="timeGridWeek"
-                                    events={workOrders.map((wo) => ({
-                                        title: wo.description,
-                                        start: wo.dateAssigned,
-                                        end: wo.targetDate,
-                                    }))}
-                                    eventColor="#378006"
-                                    headerToolbar={{
-                                        left: "prev,next today",
-                                        center: "title",
-                                        right: "timeGridWeek,timeGridDay",
-                                    }}
-                                    buttonText={{
-                                        today: "Today",
-                                        week: "Week",
-                                        day: "Day",
-                                    }}
-                                    height="auto"
-                                    eventClick={(info) => {
-                                        alert(
-                                            `Event: ${info.event.title}\nStart: ${info.event.start}\nEnd: ${info.event.end}`
-                                        );
-                                    }}
-                                /> */}
-                            </div>
-                        </TabsContent>
                     </Tabs>
                 </div>
             </div>

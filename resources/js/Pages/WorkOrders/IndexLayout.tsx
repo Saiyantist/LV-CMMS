@@ -288,13 +288,13 @@ export default function IndexLayout({
                             className="bg-primary h-6 text-xs rounded-sm"
                             onClick={() => setEditingWorkOrder(row.original)}
                         >
-                            Edit
+                            Accept
                         </Button>
                         <Button
-                            className="bg-red-600 h-6 text-white text-xs rounded-sm hover:bg-red-800 transition"
+                            className="bg-destructive h-6 text-white text-xs rounded-sm hover:bg-red-800 transition"
                             onClick={() => handleDelete(row.original.id)}
                         >
-                            Delete
+                            Decline
                         </Button>
                     </div>
                 ),

@@ -111,6 +111,8 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         return \App\Models\WorkOrder::select('status')->get();
     })->middleware(['auth', 'verified'])->name('api.work-orders.statuses');
 
+
+    
     /**
      * Event Services Routes
      */

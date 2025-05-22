@@ -44,6 +44,7 @@ class AssetController extends Controller
         return redirect()->back()->with('success', 'Asset created successfully.');
     }
 
+
     /**
      * Show the form for editing the specified resource.
      */

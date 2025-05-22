@@ -92,6 +92,7 @@ export default function AddAssetModal({
             formData.append("image", image);
         }
         if (isPreventiveMaintenance) {
+            formData.append("has_preventive_maintenance", "1");
             formData.append(
                 "preventiveMaintenance",
                 JSON.stringify({

@@ -1,30 +1,24 @@
 import React, { useState } from "react";
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Datatable } from "@/Pages/WorkOrders/components/Datatable";
 import { ColumnDef } from "@tanstack/react-table";
 
+interface Asset {
+    id: number;
+    name: string;
+    specification_details: string;
+    location: { id: number; name: string };
+    status: string;
+    date_acquired: string;
+    last_maintained_at: string;
+    has_preventive_maintenance: boolean;
+}
+
 const PreventiveMaintenance: React.FC = () => {
-    const assets = [
-        {
-            id: 1,
-            name: "Asset 1",
-            specification: "Spec 1",
-            location: "Location 1",
-            condition: "Good",
-            dateAcquired: "2023-01-01",
-            lastMaintenance: "2023-04-10",
-        },
-        {
-            id: 2,
-            name: "Asset 2",
-            specification: "Spec 2",
-            location: "Location 2",
-            condition: "Fair",
-            dateAcquired: "2022-06-15",
-            lastMaintenance: "2023-02-20",
-        },
-    ];
+    // Get assets from Inertia props (provided by backend/controller)
+    const { props } = usePage();
+    const assets = (props.assets as Asset[]) || [];
 
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -45,16 +39,18 @@ const PreventiveMaintenance: React.FC = () => {
         }
     };
 
-    const filteredAssets = assets.filter(
-        (asset) =>
-            asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            asset.specification
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-            asset.location.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredAssets = assets
+        .filter(asset => asset.has_preventive_maintenance) // Only those with PMS
+        .filter(
+            (asset) =>
+                asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                asset.specification_details
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                asset.location.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
-    const columns: ColumnDef<(typeof assets)[0]>[] = [
+    const columns: ColumnDef<Asset>[] = [
         {
             accessorKey: "id",
             header: "ID",
@@ -62,9 +58,9 @@ const PreventiveMaintenance: React.FC = () => {
             meta: { headerClassName: "w-12" },
         },
         {
-            accessorKey: "dateAcquired",
-            header: "Date Submitted",
-            cell: ({ row }) => <div>{row.getValue("dateAcquired")}</div>,
+            accessorKey: "date_acquired",
+            header: "Date Acquired",
+            cell: ({ row }) => <div>{row.getValue("date_acquired")}</div>,
             meta: { headerClassName: "w-[8rem]" },
         },
         {
@@ -74,21 +70,21 @@ const PreventiveMaintenance: React.FC = () => {
             meta: { headerClassName: "w-[10rem]" },
         },
         {
-            accessorKey: "specification",
-            header: "Description",
-            cell: ({ row }) => <div>{row.getValue("specification")}</div>,
+            accessorKey: "specification_details",
+            header: "Specification",
+            cell: ({ row }) => <div>{row.getValue("specification_details")}</div>,
             meta: { headerClassName: "w-[23%]" },
         },
         {
-            accessorKey: "location",
-            header: "Assign To",
-            cell: ({ row }) => <div>{row.getValue("location")}</div>,
+            accessorKey: "location.name",
+            header: "Location",
+            cell: ({ row }) => <div>{row.original.location.name}</div>,
             meta: { headerClassName: "w-[10rem]" },
         },
         {
-            accessorKey: "condition",
-            header: "Status",
-            cell: ({ row }) => <div>{row.getValue("condition")}</div>,
+            accessorKey: "status",
+            header: "Condition",
+            cell: ({ row }) => <div>{row.getValue("status")}</div>,
             meta: { headerClassName: "w-[10rem]" },
         },
         {
@@ -98,9 +94,9 @@ const PreventiveMaintenance: React.FC = () => {
             meta: { headerClassName: "w-[10rem]" },
         },
         {
-            accessorKey: "lastMaintenance",
+            accessorKey: "last_maintained_at",
             header: "Last Maintenance",
-            cell: ({ row }) => <div>{row.getValue("lastMaintenance")}</div>,
+            cell: ({ row }) => <div>{row.getValue("last_maintained_at")}</div>,
             meta: { headerClassName: "w-[10rem]" },
         },
         {
@@ -169,7 +165,7 @@ const PreventiveMaintenance: React.FC = () => {
                                 <span
                                     className={`text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-800`}
                                 >
-                                    {asset.condition}
+                                    {asset.status}
                                 </span>
                             </div>
 
@@ -183,21 +179,21 @@ const PreventiveMaintenance: React.FC = () => {
                                 </p>
                                 <p>
                                     <span className="font-medium">
-                                        Description:
+                                        Specification:
                                     </span>{" "}
-                                    {asset.specification}
+                                    {asset.specification_details}
                                 </p>
                                 <p>
                                     <span className="font-medium">
-                                        Assign To:
+                                        Location:
                                     </span>{" "}
-                                    {asset.location}
+                                    {asset.location.name}
                                 </p>
                                 <p>
                                     <span className="font-medium">
-                                        Date Submitted:
+                                        Date Acquired:
                                     </span>{" "}
-                                    {asset.dateAcquired}
+                                    {asset.date_acquired}
                                 </p>
                                 <p>
                                     <span className="font-medium">
@@ -209,7 +205,7 @@ const PreventiveMaintenance: React.FC = () => {
                                     <span className="font-medium">
                                         Last Maintenance:
                                     </span>{" "}
-                                    {asset.lastMaintenance}
+                                    {asset.last_maintained_at}
                                 </p>
                             </div>
 
