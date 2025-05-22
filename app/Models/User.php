@@ -32,6 +32,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'contact_number',
         'staff_type',
         'department_id',
+        'work_group_id',
         'email',
         'password',
         'staff_type',
@@ -81,6 +82,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function workGroup(): BelongsTo
+    {
+        return $this->belongsTo(WorkGroup::class);
     }
 
         /**
