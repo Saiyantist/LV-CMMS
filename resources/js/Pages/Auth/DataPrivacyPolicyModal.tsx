@@ -100,7 +100,7 @@ export default function DataPrivacyPolicyModal({ isOpen, onClose, onAccept }: Pr
                         <Checkbox 
                             id="privacy-checkbox" 
                             checked={isChecked}
-                            onCheckedChange={(checked) => setIsChecked(checked)}
+                            onCheckedChange={(checked) => setIsChecked(checked === true)}
                             disabled={!hasScrolledToBottom}
                         />
                         <Label htmlFor="privacy-checkbox">
