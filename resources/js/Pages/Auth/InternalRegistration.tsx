@@ -31,14 +31,21 @@ const getDateLimits = () => {
 interface Department {
     id: number;
     name: string;
+    type: string;
+}
+
+interface WorkGroup {
+    id: number;
+    name: string;
 }
 
 interface InternalRegistrationProps {
     departments?: Department[];
+    work_groups?: WorkGroup[];
 }
 
 export default function InternalRegistration({
-    departments,
+    departments, work_groups
 }: InternalRegistrationProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         first_name: "",
@@ -47,7 +54,7 @@ export default function InternalRegistration({
         contact_number: "",
         staff_type: "",
         department_id: "",
-        work_group: "",
+        work_group_id: "",
         email: "",
         password: "",
         password_confirmation: "",
@@ -61,7 +68,6 @@ export default function InternalRegistration({
         });
     };
 
-    const { minDate, maxDate } = getDateLimits();
 
     return (
         <RegisterLayout width="w-1/2">
@@ -219,10 +225,8 @@ export default function InternalRegistration({
                             >
                                 <option value="">Select Type</option>
                                 <option value="teaching">Teaching</option>
-                                <option value="maintenance">
-                                    Maintenance Personnel
-                                </option>
                                 <option value="non-teaching">Non-teaching</option>
+                                <option value="maintenance_personnel">Maintenance Personnel</option>
                             </select>
 
                             <InputError
@@ -250,7 +254,7 @@ export default function InternalRegistration({
                                     required
                                 >
                                     <option value="">Select Department</option>
-                                    {departments?.map((dept) => (
+                                    {departments?.map((dept) => dept.type === data.staff_type && (
                                         <option key={dept.id} value={dept.id}>
                                             {dept.name}
                                         </option>
@@ -265,26 +269,34 @@ export default function InternalRegistration({
                         )}
 
                         {/* Work Group */}
-                        {data.staff_type === "maintenance" && (
+                        {data.staff_type === "maintenance_personnel" && (
                             <div className="w-full ml-2">
                                 <div className="flex">
-                                    <InputLabel htmlFor="work_group" value="Work Group" />
+                                    <InputLabel htmlFor="work_group_id" value="Work Group" />
                                     <span className="text-red-500 ml-1">*</span>
                                 </div>
 
-                                <TextInput
-                                    id="work_group"
-                                    name="work_group"
-                                    value={data.work_group}
-                                    className="mt-1 block w-full"
-                                    onChange={(e) =>
-                                        setData("work_group", e.target.value)
+                                <select
+                                    id="work_group_id"
+                                    name="work_group_id"
+                                    value={data.work_group_id}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                                    onChange={(e) => {
+                                        setData("work_group_id", e.target.value)
+                                        }
                                     }
                                     required
-                                />
+                                >
+                                    <option value="">Select Work Group</option>
+                                    {work_groups?.map((group) => (
+                                        <option key={group.id} value={group.id}>
+                                            {group.name}
+                                        </option>
+                                    ))}
+                                </select>
 
                                 <InputError
-                                    message={errors.work_group}
+                                    message={errors.work_group_id}
                                     className="mt-2"
                                 />
                             </div>
@@ -334,10 +346,26 @@ export default function InternalRegistration({
                                 required
                             />
 
-                            <InputError
-                                message={errors.password}
-                                className="mt-2"
-                            />
+                            {/* Password Requirements */}
+                            { errors.password && (
+                                <div className="mt-2 space-y-1">
+                                    <div className="text-sm text-red-600 dark:text-red-400">
+                                        <p className="font-bold italic mb-1">Password Requirements:</p>
+                                        <ul className="">
+                                            {typeof errors.password === 'string' && errors.password.split('. ').map((error, index) => (
+                                                error.trim() && (
+                                                    <li key={index}>
+                                                        - <InputError
+                                                            message={error.trim()}
+                                                            className="inline"
+                                                        />
+                                                    </li>
+                                                )
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Confirm Password */}

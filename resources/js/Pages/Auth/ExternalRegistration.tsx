@@ -212,26 +212,24 @@ export default function ExternalRegistration() {
                                 required
                             />
 
-
-
                             {/* Password Requirements */}
-                            <div className="mt-2 space-y-1">
-                                <div className="text-xs text-gray-600 dark:text-gray-400">
-                                    <p className="font-medium mb-1">Password Requirements:</p>
-                                    <ul className="">
-                                        {typeof errors.password === 'string' && errors.password.split('. ').map((error, index) => (
-                                            error.trim() && (
-                                                <li key={index}>
-                                                    - <InputError
-                                                        message={error.trim()}
-                                                        className="inline"
-                                                    />
-                                                </li>
-                                            )
-                                        ))}
-                                    </ul>
+                            {typeof errors.password === 'string' && errors.password.split('. ').map((error, index) => (
+                                error.trim() && (
+                                <div className="mt-2 space-y-1">
+                                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                                        <p className="font-medium mb-1">Password Requirements:</p>
+                                        <ul className="">
+                                            <li key={index}>
+                                                - <InputError
+                                                    message={error.trim()}
+                                                    className="inline"
+                                                />
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
-                            </div>
+                                )
+                            ))}
                             
                         </div>
 
