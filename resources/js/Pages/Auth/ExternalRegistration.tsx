@@ -1,4 +1,4 @@
-import Checkbox from "@/Components/Checkbox";
+import { Checkbox } from "@/Components/shadcnui/checkbox";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import PrimaryButton from "@/Components/PrimaryButton";
@@ -7,7 +7,8 @@ import TextInput from "@/Components/TextInput";
 import RegisterLayout from "@/Layouts/RegisterLayout";
 import { Head, Link, router, useForm } from "@inertiajs/react";
 import { ChevronLeft } from "lucide-react";
-import { FormEventHandler } from "react";
+import { FormEventHandler, useState } from "react";
+import DataPrivacyPolicyModal from "./DataPrivacyPolicyModal";
 
 export default function ExternalRegistration() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -21,12 +22,19 @@ export default function ExternalRegistration() {
         password_confirmation: "",
     });
 
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+    const [privacyAccepted, setPrivacyAccepted] = useState(false);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
         post(route("register.external"), {
             onFinish: () => reset("password", "password_confirmation"),
         });
+    };
+
+    const handlePrivacyAccept = () => {
+        setPrivacyAccepted(true);
     };
 
     return (
@@ -263,12 +271,36 @@ export default function ExternalRegistration() {
 
                 <div className="flex flex-col items-center pt-8 pb-4 space-y-4 text-sm">
                     <Label className="flex self-start gap-2 ms-3">
-                        <Checkbox name="privacy_policy" required/>
+                        <Checkbox 
+                            name="privacy_policy" 
+                            checked={privacyAccepted}
+                            onCheckedChange={(checked) => {
+                                if (checked) {
+                                    setShowPrivacyModal(true);
+                                } else {
+                                    setPrivacyAccepted(false);
+                                }
+                            }}
+                            required
+                        />
                         <span className="text-sm font-normal">
-                            I have read and understand the privacy policy
+                            I have read and understand the{" "}
+                            <button
+                                type="button"
+                                onClick={() => setShowPrivacyModal(true)}
+                                className="text-secondary hover:text-primary underline font-bold"
+                            >
+                                privacy policy
+                            </button>
                         </span>
                         <span className="text-red-500 -ms-1">*</span>
                     </Label>
+
+                    <DataPrivacyPolicyModal
+                        isOpen={showPrivacyModal}
+                        onClose={() => setShowPrivacyModal(false)}
+                        onAccept={handlePrivacyAccept}
+                    />
 
                     <div className="flex flex-col items-center space-y-4 w-full">
                         <PrimaryButton
