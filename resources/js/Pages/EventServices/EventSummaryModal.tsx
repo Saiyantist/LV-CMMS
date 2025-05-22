@@ -45,7 +45,7 @@ const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
                 <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative flex flex-col items-center justify-center min-h-[350px] md:min-h-[300px]">
                     <CheckCircle2 className="text-green-600" size={80} />
                     <h2 className="text-2xl font-bold mt-4 mb-2 text-center text-gray-900">
-                        Facility booked successfully!
+                         Booked successfully!
                     </h2>
                     <p className="text-gray-500 text-center mb-8">
                         Event Service Request submitted successfully. You can
@@ -80,10 +80,10 @@ const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
                     ×
                 </button>
                 <h2 className="text-2xl font-bold mb-2 text-center">
-                    Facility Scheduling Summary
+                    Event Services Summary
                 </h2>
                 <p className="text-gray-600 text-center mb-6">
-                    Please make sure all facility scheduling details are correct
+                    Please make sure all  Event Services details are correct
                     before submitting.
                 </p>
                 <div className="space-y-6">
