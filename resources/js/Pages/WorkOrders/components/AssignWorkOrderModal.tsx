@@ -63,7 +63,6 @@ export default function AssignWorkOrderModal({
     const initialLocationId = locations.find((loc) =>
         loc.id === Number(workOrder.location.id))?.id || "";
 
-    const [deletedImages, setDeletedImages] = useState<string[]>([]);
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
     const [date, setDate] = useState<Date>()
     const [showCalendar, setShowCalendar] = useState(false)
@@ -95,10 +94,12 @@ export default function AssignWorkOrderModal({
             // if (!data.work_order_type) newErrors["work_order_type"] = "Work order type is required."
             if (!data.label) newErrors["label"] = "Label is required."
             if (!data.scheduled_at) newErrors["scheduled_at"] = "Target date is required."
-            if (!data.approved_at) newErrors["approved_at"] = "Approval date is required."
             if (!data.priority) newErrors["priority"] = "Priority is required."
             if (!data.assigned_to) newErrors["assigned_to"] = "Assigned personnel is required."
-            if (!data.approved_by) newErrors["approved_by"] = "Approver's name is required."
+            if(workOrder.status === "For Budget Request"){
+                if (!data.approved_at) newErrors["approved_at"] = "Approval date is required."
+                if (!data.approved_by) newErrors["approved_by"] = "Approver's name is required."
+            }
         }
 
         setLocalErrors(newErrors)
@@ -106,6 +107,7 @@ export default function AssignWorkOrderModal({
     }
 
     const submit = async (e: React.FormEvent) => {
+
         e.preventDefault();
 
         if (!validateForm()) return
@@ -113,22 +115,23 @@ export default function AssignWorkOrderModal({
         try {
             const formData = new FormData();
             formData.append("_method", "PUT");
-    
             if (isWorkOrderManager) {
                 formData.append("label", data.label || "");
-                if (date) formData.append("scheduled_at", format(date, "yyyy-MM-dd"))
+                formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
                 formData.append("assigned_to", data.assigned_to?.id?.toString() || "")
                 formData.append("priority", data.priority || "");
                 formData.append("status", data.status || "Assigned");
-                if (approvedDate) formData.append("approved_at", format(approvedDate, "yyyy-MM-dd"))
+                formData.append("approved_at", approvedDate ? format(approvedDate, "yyyy-MM-dd") : data.approved_at ? format(data.approved_at, "yyyy-MM-dd") : "")
                 formData.append("approved_by", data.approved_by || "");
                 formData.append("remarks", data.remarks || "");
             }
-    
-            await router.post(`/work-orders/${workOrder.id}`, formData, {
+            
+            router.post(`/work-orders/${workOrder.id}`, formData, {
                 forceFormData: true,
                 preserveScroll: true,
             });
+
+            
             setTimeout(() => {
                 onClose();
             }, 600);
