@@ -245,6 +245,7 @@ class WorkOrderController extends Controller
             
             // Request is from "My Work Orders" page
             else {
+
                 $workOrder->update([
                     'report_description' => $request->report_description,
                     'location_id' => $request->location_id,
@@ -290,9 +291,8 @@ class WorkOrderController extends Controller
                 return redirect()->route('work-orders.index')->with('success', 'Work Order status updated successfully.');
             }
 
-            // Remove description and location from here and in StoreWorkOrderRequest
             $workOrder->update([
-                'work_order_type' => $request->work_order_type,
+                // 'work_order_type' => $request->work_order_type,
                 'label' => $request->label,
                 'scheduled_at' => $request->scheduled_at,
                 'priority' => $request->priority,
