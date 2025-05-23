@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Upload, X, FileText, Check } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Gallery from "./Gallery";
-import DateTimeSelection from "./Date&Time";
+// import DateTimeSelection from "./Date&Time";
 import EventDetails from "./EventDetails";
 import RequestedServices from "./RequestedServices";
 import ComplianceAndConsent from "./Compliance&Consent";
@@ -17,6 +17,7 @@ export default function EventServicesRequest() {
     const [error, setError] = useState<string | null>(null);
     const [showSummary, setShowSummary] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [showConsentModal, setShowConsentModal] = useState(false);
 
     // Step 1: File
     const [file, setFile] = useState<File | null>(null);
@@ -59,10 +60,9 @@ export default function EventServicesRequest() {
     const steps = [
         { id: 1, name: "Proof of Approval" },
         { id: 2, name: "Requested Venue" },
-        { id: 3, name: "Date & Time" },
-        { id: 4, name: "Event Details" },
-        { id: 5, name: "Requested Services" },
-        { id: 6, name: "Compliance and Consent" },
+        { id: 3, name: "Event Details" },
+        { id: 4, name: "Requested Services" },
+        { id: 5, name: "Summary" }, // Step 5 is now the summary page
     ];
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,38 +103,28 @@ export default function EventServicesRequest() {
             }
             setCurrentStep(2);
         } else if (currentStep === 2) {
-            // Make venue selection optional
             setCurrentStep(3);
         } else if (currentStep === 3) {
-            if (!dateRange || !timeRange) {
-                setError("Please select both date and time.");
-                return;
-            }
-            setCurrentStep(4);
-        } else if (currentStep === 4) {
             if (
                 !eventDetails.eventName ||
                 !eventDetails.department ||
                 !eventDetails.eventPurpose ||
                 !eventDetails.participants ||
-                !eventDetails.participantCount
+                !eventDetails.participantCount ||
+                !dateRange ||
+                !timeRange
             ) {
-                setError("Please fill out all event details.");
+                setError(
+                    "Please fill out all event details and select date & time."
+                );
                 return;
             }
+            setCurrentStep(4);
+        } else if (currentStep === 4) {
             setCurrentStep(5);
         } else if (currentStep === 5) {
-            setCurrentStep(6);
-        } else if (currentStep === 6) {
-            if (
-                !dataPrivacyAgreed ||
-                !equipmentPolicyAgreed ||
-                consentChoice !== "agree"
-            ) {
-                setError("You must agree to all terms and consent to proceed.");
-                return;
-            }
-            setShowSummary(true);
+            // Just open the modal, do not validate here
+            setShowConsentModal(true);
         }
     };
 
@@ -160,11 +150,11 @@ export default function EventServicesRequest() {
                         next event.
                     </p>
                     <p className="text-gray-400 text-m font-medium">
-                       NOTE: Please accomplish this form at least two (2) working days before the date of use.
+                        NOTE: Please accomplish this form at least two (2)
+                        working days before the date of use.
                     </p>
                     <br />
                 </div>
-
                 <div className="mb-8">
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         {steps.map((step, index) => (
@@ -175,28 +165,26 @@ export default function EventServicesRequest() {
                                 <div className="relative flex items-center w-full justify-center">
                                     <div
                                         className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-        ${
-            currentStep === step.id
-                ? "bg-secondary text-white"
-                : currentStep > step.id
-                ? "bg-green-500 text-white"
-                : "bg-white text-gray-400 border border-gray-300"
-        }`}
+                    ${
+                        currentStep === step.id && !showSuccess
+                            ? "bg-secondary text-white"
+                            : currentStep > step.id ||
+                              (step.id === 5 && showSuccess)
+                            ? "bg-green-500 text-white"
+                            : "bg-white text-gray-400 border border-gray-300"
+                    }`}
                                     >
-                                        {currentStep > step.id ? (
+                                        {currentStep > step.id ||
+                                        (step.id === 5 && showSuccess) ? (
                                             <Check size={16} />
                                         ) : (
                                             step.id
                                         )}
                                     </div>
-                                    {/* {index < steps.length - 1 && (
-                                        <div className="absolute top-1/2 left-full w-full h-0 border-t border-dashed border-gray-400 ml-2 z-0"></div>
-                                    )} */}
                                 </div>
-
                                 <span
                                     className={`text-xs mt-2 text-center w-full ${
-                                        currentStep === step.id
+                                        currentStep === step.id && !showSuccess
                                             ? "text-blue-600 font-semibold"
                                             : ""
                                     }`}
@@ -305,41 +293,47 @@ export default function EventServicesRequest() {
                         }}
                     />
                 )}
-                {/* Step 3: Date & Time */}
+                {/* Step 3: Event Details */}
                 {currentStep === 3 && (
-                    <DateTimeSelection
-                        value={{
-                            dateRange,
-                            timeRange,
-                        }}
-                        onChange={({
-                            dateRange,
-                            timeRange,
-                        }: {
-                            dateRange: string;
-                            timeRange: string;
-                        }) => {
+                    <EventDetails
+                        value={eventDetails}
+                        onChange={setEventDetails}
+                        dateTimeValue={{ dateRange, timeRange }}
+                        onDateTimeChange={({ dateRange, timeRange }) => {
                             setDateRange(dateRange);
                             setTimeRange(timeRange);
                         }}
                     />
                 )}
-                {/* Step 4: Event Details */}
+                {/* Step 4: Requested Services */}
                 {currentStep === 4 && (
-                    <EventDetails
-                        value={eventDetails}
-                        onChange={setEventDetails}
-                    />
-                )}
-                {/* Step 5: Requested Services */}
-                {currentStep === 5 && (
                     <RequestedServices
                         value={requestedServices}
                         onChange={setRequestedServices}
                     />
                 )}
-                {/* Step 6: Compliance and Consent */}
-                {currentStep === 6 && (
+                {/* Step 5: Summary */}
+                {currentStep === 5 && (
+                    <EventSummaryModal
+                        // open={true}
+                        onClose={handleBack}
+                        onSubmit={() => setShowConsentModal(true)}
+                        data={{
+                            file,
+                            venue: selectedGalleryItem ? "Auditorium" : "",
+                            dateRange,
+                            timeRange,
+                            eventDetails,
+                            requestedServices,
+                            dataPrivacyAgreed,
+                            equipmentPolicyAgreed,
+                            consentChoice,
+                            showSuccess,
+                        }}
+                    />
+                )}
+
+                {showConsentModal && (
                     <ComplianceAndConsent
                         dataPrivacyAgreed={dataPrivacyAgreed}
                         onChangeDataPrivacy={(e) =>
@@ -353,64 +347,49 @@ export default function EventServicesRequest() {
                         onConsentChange={(e) =>
                             setConsentChoice(e.target.value)
                         }
+                        onClose={() => setShowConsentModal(false)}
+                        onSubmit={() => {
+                            if (
+                                !dataPrivacyAgreed ||
+                                !equipmentPolicyAgreed ||
+                                consentChoice !== "agree"
+                            ) {
+                                setError(
+                                    "You must agree to all terms and consent to proceed."
+                                );
+                                return;
+                            }
+                            setShowConsentModal(false);
+                            setShowSuccess(true); // or your actual submit logic
+                        }}
+                        isModal
                     />
-                    )}
-
+                )}
                 {error && (
                     <div className="text-red-500 text-sm mt-2 text-center">
                         {error}
                     </div>
                 )}
-
                 {/* Navigation Buttons */}
-                <div className="flex justify-between mt-16 max-w-2xl mx-auto">
-                    <button
-                        className="px-8 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md py-2"
-                        onClick={handleBack}
-                        disabled={currentStep === 1 && !showSummary}
-                    >
-                        Back
-                    </button>
-                    <button
-                        className="px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-md py-2"
-                        onClick={handleContinue}
-                    >
-                        {currentStep === 6 && !showSummary
-                            ? "Review"
-                            : "Continue"}
-                    </button>
-                </div>
-
-                {/* Summary Modal */}
-                <EventSummaryModal
-                    open={showSummary || showSuccess}
-                    onClose={() => {
-                        if (showSuccess) {
-                            setShowSummary(false);
-                            setShowSuccess(false);
-                            setCurrentStep(1);
-                            // Optionally reset all form data here
-                        } else {
-                            setShowSummary(false);
-                        }
-                    }}
-                    onSubmit={() => {
-                        // On submit, show the success step
-                        setShowSuccess(true);
-                    }}
-                    data={{
-                        file,
-                        venue: selectedGalleryItem ? "Auditorium" : "",
-                        dateRange,
-                        timeRange,
-                        eventDetails,
-                        requestedServices,
-                        dataPrivacyAgreed,
-                        equipmentPolicyAgreed,
-                        consentChoice,
-                        showSuccess,
-                    }}
-                />
+                {!showSuccess && (
+                    <div className="flex justify-between mt-16 max-w-2xl mx-auto">
+                        <button
+                            className="px-8 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md py-2"
+                            onClick={handleBack}
+                            disabled={currentStep === 1 && !showSummary}
+                        >
+                            Back
+                        </button>
+                        <button
+                            className="px-8 bg-secondary hover:bg-primary text-white rounded-md py-2"
+                            onClick={handleContinue}
+                        >
+                            {currentStep === 5 && !showSummary
+                                ? "Continue"
+                                : "Continue"}
+                        </button>
+                    </div>
+                )}
             </div>
         </AuthenticatedLayout>
     );

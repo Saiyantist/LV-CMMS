@@ -10,6 +10,8 @@ interface EventDetailsProps {
         participantCount: string;
     };
     onChange: (val: EventDetailsProps["value"]) => void;
+    dateTimeValue: { dateRange: string; timeRange: string };
+    onDateTimeChange: (val: { dateRange: string; timeRange: string }) => void;
 }
 
 const eventPlaceholders = [
@@ -23,22 +25,33 @@ const eventPlaceholders = [
 const participantPlaceholders = [
     "ICT Majors",
     "BAB Students",
-    "All Senior High",
-    "3rd Year BSBA",
+    "Senior Highschool",
+    "BaBAB",
     "Student Council Officers",
 ];
 
-const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
+const EventDetails: React.FC<EventDetailsProps> = ({
+    value,
+    onChange,
+    dateTimeValue,
+    onDateTimeChange,
+}) => {
     const [eventPHIndex, setEventPHIndex] = useState(0);
     const [participantPHIndex, setParticipantPHIndex] = useState(0);
 
-    const [eventPlaceholder, setEventPlaceholder] = useState(eventPlaceholders[0]);
-    const [participantPlaceholder, setParticipantPlaceholder] = useState(participantPlaceholders[0]);
+    const [eventPlaceholder, setEventPlaceholder] = useState(
+        eventPlaceholders[0]
+    );
+    const [participantPlaceholder, setParticipantPlaceholder] = useState(
+        participantPlaceholders[0]
+    );
 
     useEffect(() => {
         const interval = setInterval(() => {
             setEventPHIndex((prev) => (prev + 1) % eventPlaceholders.length);
-            setParticipantPHIndex((prev) => (prev + 1) % participantPlaceholders.length);
+            setParticipantPHIndex(
+                (prev) => (prev + 1) % participantPlaceholders.length
+            );
         }, 3000);
 
         return () => clearInterval(interval);
@@ -59,13 +72,17 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
                     Complete Your Booking
                 </h2>
                 <p className="leading-relaxed mb-6 text-gray-600">
-                    Please fill out the event details below to proceed with your booking.
+                    Please fill out the event details below to proceed with your
+                    booking.
                 </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="relative">
-                    <label htmlFor="eventName" className="leading-7 text-sm text-black font-bold">
+                    <label
+                        htmlFor="eventName"
+                        className="leading-7 text-sm text-black font-bold"
+                    >
                         Event Name
                     </label>
                     <input
@@ -75,7 +92,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
                         placeholder={eventPlaceholder}
                         onFocus={() => setEventPlaceholder("")}
                         onBlur={() => {
-                            if (!value.eventName) setEventPlaceholder(eventPlaceholders[eventPHIndex]);
+                            if (!value.eventName)
+                                setEventPlaceholder(
+                                    eventPlaceholders[eventPHIndex]
+                                );
                         }}
                         value={value.eventName}
                         onChange={(e) =>
@@ -86,7 +106,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
                 </div>
 
                 <div className="relative">
-                    <label htmlFor="department" className="leading-7 text-sm text-black font-bold">
+                    <label
+                        htmlFor="department"
+                        className="leading-7 text-sm text-black font-bold"
+                    >
                         Department
                     </label>
                     <select
@@ -108,7 +131,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
             </div>
 
             <div className="relative mb-4">
-                <label htmlFor="eventPurpose" className="leading-7 text-sm text-black font-bold">
+                <label
+                    htmlFor="eventPurpose"
+                    className="leading-7 text-sm text-black font-bold"
+                >
                     Event Purpose
                 </label>
                 <textarea
@@ -125,7 +151,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="relative">
-                    <label htmlFor="participants" className="leading-7 text-sm text-black font-bold">
+                    <label
+                        htmlFor="participants"
+                        className="leading-7 text-sm text-black font-bold"
+                    >
                         Participants
                     </label>
                     <input
@@ -135,7 +164,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
                         placeholder={participantPlaceholder}
                         onFocus={() => setParticipantPlaceholder("")}
                         onBlur={() => {
-                            if (!value.participants) setParticipantPlaceholder(participantPlaceholders[participantPHIndex]);
+                            if (!value.participants)
+                                setParticipantPlaceholder(
+                                    participantPlaceholders[participantPHIndex]
+                                );
                         }}
                         value={value.participants}
                         onChange={(e) =>
@@ -146,7 +178,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
                 </div>
 
                 <div className="relative">
-                    <label htmlFor="participantCount" className="leading-7 text-sm text-black font-bold">
+                    <label
+                        htmlFor="participantCount"
+                        className="leading-7 text-sm text-black font-bold"
+                    >
                         Number of Participants
                     </label>
                     <input
@@ -159,9 +194,15 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
                             if (/^\d*$/.test(raw)) {
                                 const num = Number(raw);
                                 if (raw === "") {
-                                    onChange({ ...value, participantCount: "" });
+                                    onChange({
+                                        ...value,
+                                        participantCount: "",
+                                    });
                                 } else if (num >= 1 && num <= 9999) {
-                                    onChange({ ...value, participantCount: raw });
+                                    onChange({
+                                        ...value,
+                                        participantCount: raw,
+                                    });
                                 }
                             }
                         }}
@@ -170,6 +211,18 @@ const EventDetails: React.FC<EventDetailsProps> = ({ value, onChange }) => {
                         className="w-full bg-white rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-6 transition-colors duration-200 ease-in-out"
                     />
                 </div>
+            </div>
+
+            <br />
+            <br />
+            <hr />
+
+            <div>
+                <br />
+                <DateTimeSelection
+                    value={dateTimeValue}
+                    onChange={onDateTimeChange}
+                />
             </div>
         </div>
     );

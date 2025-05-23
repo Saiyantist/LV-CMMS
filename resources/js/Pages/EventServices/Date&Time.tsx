@@ -238,12 +238,12 @@ export default function DateTimeSelection({
     timeOptions.push("12:00 AM");
 
     return (
-        <div className="max-w-5xl mx-auto p-2 sm:p-4 md:p-6">
+        // <div className="max-w-5xl mx-auto p-2 sm:p-4 md:p-6">
+        <div className="w-full">
             <div className="mb-8">
-                <h2 className="text-2xl font-medium mb-2">Select Dates</h2>
-                <p className="text-gray-600">
-                    Choose when you would like to book [Auditorium Lobby]
-                </p>
+                <h2 className="text-2xl font-medium mb-2 text-center md:text-left">
+                    Select Dates
+                </h2>
             </div>
 
             {/* Date Selection */}
