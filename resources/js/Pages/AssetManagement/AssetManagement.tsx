@@ -174,7 +174,7 @@ const AssetManagement: React.FC = () => {
                         View
                     </button>
                     <button
-                        onClick={() => handleDelete(assets.id)}
+                        onClick={() => handleDelete(row.original.id)}
                         className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
                     >
                         Delete
