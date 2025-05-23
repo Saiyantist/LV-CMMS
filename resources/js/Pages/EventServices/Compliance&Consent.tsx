@@ -49,7 +49,7 @@ const ComplianceAndConsent = ({
             <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto min-h-[300px] mx-auto">
                 {isModal && (
                     <button
-                        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-3xl p-1"
                         onClick={onClose}
                     >
                         ×
@@ -173,15 +173,15 @@ const ComplianceAndConsent = ({
                     </div>
                 )}
                 {isModal && (
-                    <div className="flex justify-between mt-8">
+                    <div className="mt-8 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                         <button
-                            className="px-8 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
+                            className="w-full sm:w-auto px-8 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
                             onClick={onClose}
                         >
-                            Back
+                            Cancel
                         </button>
                         <button
-                            className="px-8 py-2 bg-secondary hover:bg-primary text-white rounded-md"
+                            className="w-full sm:w-auto px-8 py-2 bg-secondary hover:bg-primary text-white rounded-md"
                             onClick={handleConfirm}
                         >
                             Confirm & Submit

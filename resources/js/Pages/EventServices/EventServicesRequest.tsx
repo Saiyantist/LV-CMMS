@@ -372,16 +372,16 @@ export default function EventServicesRequest() {
                 )}
                 {/* Navigation Buttons */}
                 {!showSuccess && (
-                    <div className="flex justify-between mt-16 max-w-2xl mx-auto">
+                    <div className="mt-16 max-w-2xl mx-auto flex flex-row justify-between gap-4">
                         <button
-                            className="px-8 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md py-2"
+                            className="w-1/2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
                             onClick={handleBack}
                             disabled={currentStep === 1 && !showSummary}
                         >
                             Back
                         </button>
                         <button
-                            className="px-8 bg-secondary hover:bg-primary text-white rounded-md py-2"
+                            className="w-1/2 px-4 py-2 bg-secondary hover:bg-primary text-white rounded-md"
                             onClick={handleContinue}
                         >
                             {currentStep === 5 && !showSummary
