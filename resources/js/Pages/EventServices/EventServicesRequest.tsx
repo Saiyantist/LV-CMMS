@@ -159,6 +159,9 @@ export default function EventServicesRequest() {
                         Book meeting rooms, event spaces, and equipment for your
                         next event.
                     </p>
+                    <p className="text-gray-400 text-m font-medium">
+                       NOTE: Please accomplish this form at least two (2) working days before the date of use.
+                    </p>
                     <br />
                 </div>
 
