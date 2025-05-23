@@ -11,7 +11,7 @@ const features = [
         name: "Asset Management",
         image: "/images/report.png",
         description:
-            "Maintain complete control over all assets by keeping detailed records, tracking lifecycle performance, and scheduling regular inspections.",
+            "Maintain complete control over all assets by keeping detailed records, tracking lifecycle performance, scheduling regular inspections, and viewing asset history to analyze past usage, maintenance, and performance trends.",
     },
     {
         name: "Preventive Maintenance",
@@ -29,7 +29,7 @@ const features = [
         name: "Event Services",
         image: "/images/calendar.png",
         description:
-            "Optimize the use of facilities by managing reservations, avoiding conflicts, and ensuring smooth operations with real-time updates.",
+            "Optimize the use of facilities and equipment by managing reservations, avoiding conflicts, and ensuring smooth operations with real-time updates.",
     },
 ];
 

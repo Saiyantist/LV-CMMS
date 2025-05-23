@@ -48,7 +48,7 @@ export default function DataPrivacyPolicyModal({ isOpen, onClose, onAccept }: Pr
                         We collect information that you provide directly to us, including but not limited to:
                     </p>
                     <ul className="list-disc pl-6 space-y-2">
-                        <li>Personal identification information (Name, email address, phone number)</li>
+                        <li>Personal identification information (Name, gender, email address, phone number)</li>
                         <li>Professional information (Department, staff type, work group)</li>
                         <li>Account credentials</li>
                     </ul>
@@ -87,9 +87,9 @@ export default function DataPrivacyPolicyModal({ isOpen, onClose, onAccept }: Pr
 
                     <h3 className="text-lg font-semibold">5. Contact Us</h3>
                     <p>
-                        If you have any questions about this Privacy Policy, please contact us at:
+                        For your data privacy inquiries, you may reach our Data Protection Officer through the following means
                         <br />
-                        Email: privacy@laverdad.edu.ph
+                        Email: dpo@laverdad.edu.ph
                         <br />
                         Phone: (123) 456-7890
                     </p>
