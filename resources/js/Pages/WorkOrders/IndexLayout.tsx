@@ -16,6 +16,8 @@ import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
 import React, { useState } from "react";
 import AssignWorkOrderModal from "./components/AssignWorkOrderModal";
+import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
+import { SquarePen } from "lucide-react";
 
 interface Props {
     user: {
@@ -103,6 +105,7 @@ export default function IndexLayout({
         user.roles[0].name === "maintenance_personnel";
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
+    const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
     const [acceptingWorkOrder, setAcceptingWorkOrder] = useState<any>(null);
     const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>(
         []
@@ -169,10 +172,19 @@ export default function IndexLayout({
                     <div className="flex gap-2">
                         <Button
                             className="bg-primary h-6 text-xs rounded-sm"
-                            onClick={() => setEditingWorkOrder(row.original)}
+                            onClick={() => setIsViewingWorkOrder(row.original)}
                         >
                             View
                         </Button>
+                        { row.getValue('status') === "Pending" && (
+                        <Button
+                            variant={"outline"}
+                            size={"icon"}
+                            className="h-6 text-xs rounded-sm"
+                            onClick={() => setEditingWorkOrder(row.original)}
+                        ><SquarePen />
+                        </Button>
+                        )}
                     </div>
                 ),
                 enableSorting: false,
@@ -221,6 +233,16 @@ export default function IndexLayout({
             },
             ...(activeTab !== "Pending" && activeTab !== "For Budget Request"
                 ? [
+                    {
+                        accessorKey: "label",
+                        header: "Label",
+                        cell: ({ row }) => <div>{row.getValue("label")}</div>,
+                        enableSorting: false,
+                        meta: {
+                            cellClassName: "text-center",
+                            searchable: true,
+                        }
+                    },
                     {
                         accessorKey: "scheduled_at",
                         header: "Target Date",
@@ -368,6 +390,15 @@ export default function IndexLayout({
                     user={user}
                     maintenancePersonnel={maintenancePersonnel}
                     onClose={() => setAcceptingWorkOrder(null)}
+                />
+            )}
+
+            {isViewingWorkOrder && (
+                <ViewWorkOrderModal
+                    workOrder={isViewingWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setIsViewingWorkOrder(null)}
                 />
             )}
 

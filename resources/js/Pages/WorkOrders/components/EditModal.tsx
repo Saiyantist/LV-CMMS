@@ -17,6 +17,8 @@ import { Label } from "@/Components/shadcnui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
 import { Calendar } from "@/Components/shadcnui/calendar";
 import { Input } from "@/Components/shadcnui/input";
+import { Textarea } from "@/Components/shadcnui/textarea";
+import SmartDropdown from "@/Components/SmartDropdown";
 
 
 interface Location {
@@ -196,18 +198,18 @@ export default function EditWorkOrderModal({
     const assetDetails = getAssetDetails(workOrder);
 
     return (
-            <Dialog
-                open={true}
-                onOpenChange={(isOpen) => {
-                    // Only allow dialog to close if preview is not active
-                    if (!activeImageIndex && !isOpen) {
-                    onClose()
-                    }
-                }}
-            >
+        <Dialog
+            open={true}
+            onOpenChange={(isOpen) => {
+                // Only allow dialog to close if preview is not active
+                if (!activeImageIndex && !isOpen) {
+                onClose()
+                }
+            }}
+        >
             <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
-                    <DialogTitle className="text-xl font-semibold">Work Order</DialogTitle>
+                    <DialogTitle className="text-xl font-semibold">Editing Work Order - {workOrder.id}</DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -215,103 +217,87 @@ export default function EditWorkOrderModal({
 
                 <div className="space-y-4 px-6 max-h-[70vh] overflow-y-auto">
 
-                    <Table className="w-full rounded-md">
-                        <TableBody>
-                            <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
-                                    <Label>Date Requested:</Label>
-                                </TableHead>
-                                <TableCell className="">{workOrder.requested_at}</TableCell>
-                            </TableRow>
+                    <form onSubmit={submit}>
+                        <div className="py-1 flex flex-col space-y-4">
 
-                            <TableRow className="border-none">
-                                <TableHead className="">
-                                    <Label>Requested by:</Label>
-                                </TableHead>
-                                <TableCell className="">{workOrder.requested_by.name}</TableCell>
-                            </TableRow>
+                            {/* Location */}
+                            <SmartDropdown
+                                label="Location"
+                                placeholder={workOrder.location.name}
+                                items={locations}
+                                getLabel={(loc) => loc.name}
+                                getValue={(loc) => loc.id.toString()}
+                                selectedId={data.location_id}
+                                onChange={(id) => {
+                                    const selectedLocation = locations.find(
+                                        (loc) => loc.id.toString() === id
+                                    );
+                                    setTypedLocation(selectedLocation?.name || ""); // Show readable name in input
+                                    setData("location_id", id); // Submit actual ID
+                                }}
+                                onTextChange={(text) => setTypedLocation(text)}
+                                error={localErrors.location_id}
+                            />
 
-                            <TableRow className="border-none">
-                                <TableHead className="">
-                                    <Label>Description:</Label>
-                                </TableHead>
-                                <TableCell className="">{workOrder.report_description}</TableCell>
-                            </TableRow>
+                            {/* Description */}
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="description"
+                                    className="flex items-center"
+                                >
+                                    Description{" "}
+                                    <span className="text-red-500 ml-1">*</span>
+                                </Label>
+                                <Textarea
+                                    id="description"
+                                    value={data.report_description}
+                                    onChange={(e) =>
+                                        setData(
+                                            "report_description",
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="Describe your report here..."
+                                    required
+                                />
+                                {localErrors.report_description && (
+                                    <p className="text-red-500 text-xs">
+                                        {localErrors.report_description}
+                                    </p>
+                                )}
+                            </div>
 
-                            {/* Asset */}
-                            {assetDetails && (
-                            <TableRow className="border-none">
-                                <TableHead>
-                                <Label>Asset</Label>
-                                </TableHead>
-                                <TableCell>{assetDetails.name} - {assetDetails.location_name}</TableCell>
-                            </TableRow>
+                            { workOrder.images?.length > 0 && (
+                            <div>
+                                <strong>Images:</strong>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                    {workOrder.images?.length > 0 ? (
+                                        workOrder.images.map((url, index) => (
+                                            <img
+                                                key={index}
+                                                src={url}
+                                                alt={`Work order image ${index + 1}`}
+                                                className="h-40 object-cover rounded border"
+                                            />
+                                        ))
+                                    ) : (
+                                        <span>No images</span>
+                                    )}
+                                </div>
+                            </div>
                             )}
 
-                            {/* Attachment/Images */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
-                                    <Label>Attachment:</Label>
-                                </TableHead>
-                                <TableCell className="">
-                                    {workOrder.images.length > 0 ? (
-                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                            {workOrder.images.map((src, index) => (
-                                            <div
-                                                key={index}
-                                                className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
-                                                onClick={() => setActiveImageIndex(index)}
-                                            >
-                                                <img
-                                                src={src}
-                                                alt={`Attachment ${index + 1}`}
-                                                className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                            ))}
-                                        </div>
-                                        ) : (
-                                        <span className="text-gray-500 italic">No attachments</span>
-                                        )}
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-
-                    <hr />
+                        </div>
+                    </form>
 
                     {isWorkOrderManager && (
                         <form onSubmit={submit}>
+                            <hr className="pb-4"/>
                             <div className="py-2">
 
                                 {/* Row 1 */}
                                 <div className="flex flex-row justify-between gap-4 ">
                                     
-                                    {/* Work Order Type */}
-                                    <div className="flex-[2] space-y-2">
-                                        <Label htmlFor="work_order_type" className="flex items-center">
-                                            Work Order Type <span className="text-red-500 ml-1">*</span>
-                                        </Label>
-                                        <Select
-                                            value={data.work_order_type}
-                                            onValueChange={(value) => setData("work_order_type", value)}
-                                            required
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select Work Order Type" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Work Order">Work Order</SelectItem>
-                                                <SelectItem value="Preventive Maintenance">Preventive Maintenance</SelectItem>
-                                                <SelectItem value="Compliance">Compliance</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        
-                                    {localErrors.work_order_type && (
-                                        <p className="text-red-500 text-xs">{localErrors.work_order_type}</p>
-                                    )}
-                                    </div>
-
                                     {/* Label */}
                                     <div className="flex-[2] space-y-2">
                                         <Label htmlFor="label" className="flex items-center">
@@ -341,7 +327,7 @@ export default function EditWorkOrderModal({
                                     </div>
 
                                     {/* Target Date */}
-                                    <div className="flex-[1] space-y-2">
+                                    <div className="flex-[2] space-y-2">
                                         <Label htmlFor="scheduled_at" className="flex items-center">
                                         Target Date <span className="text-red-500 ml-1">*</span>
                                         </Label>

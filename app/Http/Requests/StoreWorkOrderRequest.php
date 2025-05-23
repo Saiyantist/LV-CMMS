@@ -30,8 +30,6 @@ class StoreWorkOrderRequest extends FormRequest
         $user = auth()->user();
         $requestData = $this->all();
 
-        // Re-shape the logic for work Order Manager
-
         // Validation from dropDown updates
         if (count($requestData) === 1 && array_key_exists('status', $requestData)) {
             return $rules = [ 'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])]];

@@ -111,13 +111,8 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         return \App\Models\WorkOrder::select('status')->get();
     })->middleware(['auth', 'verified'])->name('api.work-orders.statuses');
 
-
-    Route::delete('/assets/{asset}', [AssetController::class, 'destroy'])->name('assets.destroy');
-
-    Route::put('/assets/{asset}', [AssetController::class, 'update'])->name('assets.update');
-
     // asset history fetching
-Route::get('/asset-maintenance-history/{assetId}', [AssetMaintenanceHistoryController::class, 'show']);
+    Route::get('/asset-maintenance-history/{assetId}', [AssetMaintenanceHistoryController::class, 'show']);
 
 
     /**
