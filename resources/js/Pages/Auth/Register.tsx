@@ -16,7 +16,7 @@ export default function AccessRegistration() {
 
             {/* Main Content */}
             <main className="relative z-10 flex items-center justify-center min-h-screen">
-                <div className="bg-secondary/40 py-12 px-10 rounded shadow shadow-primary w-full max-w-4xl mt-20 text-center">
+                <div className="bg-transparent py-12 px-10 w-full max-w-4xl mt-20 text-center">
                     <h1 className="text-3xl font-bold mb-16 text-white dark:text-white">
                         Access Registration
                     </h1>

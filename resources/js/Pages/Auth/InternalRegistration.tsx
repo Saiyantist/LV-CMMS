@@ -9,6 +9,7 @@ import { Head, Link, useForm } from "@inertiajs/react";
 import { ChevronLeft } from "lucide-react";
 import { FormEventHandler, useState } from "react";
 import DataPrivacyPolicyModal from "./DataPrivacyPolicyModal";
+
 const getDateLimits = () => {
     const today = new Date();
     const minDate = new Date(
@@ -46,7 +47,8 @@ interface InternalRegistrationProps {
 }
 
 export default function InternalRegistration({
-    departments, work_groups
+    departments,
+    work_groups,
 }: InternalRegistrationProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         first_name: "",
@@ -76,9 +78,8 @@ export default function InternalRegistration({
         setPrivacyAccepted(true);
     };
 
-
     return (
-        <RegisterLayout width="w-1/2">
+        <RegisterLayout width="w-full md:w-3/5 lg:w-2/5">
             <Head title="Registration for Internal" />
 
             <div className="p-2">
@@ -86,7 +87,7 @@ export default function InternalRegistration({
                     onClick={() => window.history.back()}
                     className="absolute left-6 top-8 text-primary hover:text-secondary hover:outline-none hover:ring-2 hover:ring-secondary rounded-full"
                 >
-                    <ChevronLeft size={30}/>
+                    <ChevronLeft size={30} />
                 </button>
                 <h1 className="text-2xl font-bold text-center text-black dark:text-white">
                     Registration Form
@@ -96,18 +97,19 @@ export default function InternalRegistration({
                 </h2>
             </div>
 
-            <form onSubmit={submit} className="px-2">
-
-                <div className="max-h-[48vh] overflow-auto p-3">
+            <form onSubmit={submit} className="p-4">
+                <div className="max-h-[50vh] overflow-auto space-y-2 p-1">
                     {/* Name */}
-                    <div className="flex justify-stretch mt-2 space-x-2">
+                    <div className="flex flex-col md:flex-row md:space-x-4">
                         {/* First Name */}
                         <div className="w-full">
                             <div className="flex">
-                                <InputLabel htmlFor="first_name" value="First Name" />
+                                <InputLabel
+                                    htmlFor="first_name"
+                                    value="First Name"
+                                />
                                 <span className="text-red-500 ml-1">*</span>
                             </div>
-
                             <TextInput
                                 id="first_name"
                                 name="first_name"
@@ -120,20 +122,20 @@ export default function InternalRegistration({
                                 }
                                 required
                             />
-
                             <InputError
                                 message={errors.first_name}
                                 className="mt-2"
                             />
                         </div>
-
                         {/* Last Name */}
-                        <div className="w-full">
+                        <div className="w-full mt-4 md:mt-0">
                             <div className="flex">
-                                <InputLabel htmlFor="last_name" value="Last Name" />
+                                <InputLabel
+                                    htmlFor="last_name"
+                                    value="Last Name"
+                                />
                                 <span className="text-red-500 ml-1">*</span>
                             </div>
-
                             <TextInput
                                 id="last_name"
                                 name="last_name"
@@ -146,7 +148,6 @@ export default function InternalRegistration({
                                 }
                                 required
                             />
-
                             <InputError
                                 message={errors.last_name}
                                 className="mt-2"
@@ -154,37 +155,40 @@ export default function InternalRegistration({
                         </div>
                     </div>
 
-                    {/* Gender */}
-                    <div className="flex justify-stretch mt-2 space-x-2">
+                    {/* Gender & Contact Number */}
+                    <div className="flex flex-col md:flex-row md:space-x-4">
                         <div className="w-full">
                             <div className="flex">
                                 <InputLabel htmlFor="gender" value="Gender" />
                                 <span className="text-red-500 ml-1">*</span>
                             </div>
-
                             <select
                                 id="gender"
                                 name="gender"
                                 value={data.gender}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-                                onChange={(e) => setData("gender", e.target.value)}
+                                onChange={(e) =>
+                                    setData("gender", e.target.value)
+                                }
                                 required
                             >
                                 <option value="">Select Gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                             </select>
-
-                            <InputError message={errors.gender} className="mt-2" />
+                            <InputError
+                                message={errors.gender}
+                                className="mt-2"
+                            />
                         </div>
-
-                        {/* Contact Number */}
-                        <div className="w-full">
+                        <div className="w-full mt-4 md:mt-0">
                             <div className="flex">
-                                <InputLabel htmlFor="contact_number" value="Contact Number" />
+                                <InputLabel
+                                    htmlFor="contact_number"
+                                    value="Contact Number"
+                                />
                                 <span className="text-red-500 ml-1">*</span>
                             </div>
-
                             <TextInput
                                 id="contact_number"
                                 type="tel"
@@ -199,7 +203,7 @@ export default function InternalRegistration({
                                         e.preventDefault();
                                     }
                                 }}
-                                onChange={(e) => 
+                                onChange={(e) =>
                                     setData("contact_number", e.target.value)
                                 }
                                 required
@@ -211,16 +215,17 @@ export default function InternalRegistration({
                         </div>
                     </div>
 
-
                     {/* Staff type and Department/Work Group */}
-                    <div className="flex justify-stretch mt-4">
+                    <div className="flex flex-col md:flex-row md:space-x-4 mt-4">
                         {/* Staff type */}
                         <div className="w-full">
                             <div className="flex">
-                                <InputLabel htmlFor="staff_type" value="Type of Staff" />
+                                <InputLabel
+                                    htmlFor="staff_type"
+                                    value="Type of Staff"
+                                />
                                 <span className="text-red-500 ml-1">*</span>
                             </div>
-
                             <select
                                 id="staff_type"
                                 name="staff_type"
@@ -233,24 +238,30 @@ export default function InternalRegistration({
                             >
                                 <option value="">Select Type</option>
                                 <option value="teaching">Teaching</option>
-                                <option value="non-teaching">Non-teaching</option>
-                                <option value="maintenance_personnel">Maintenance Personnel</option>
+                                <option value="non-teaching">
+                                    Non-teaching
+                                </option>
+                                <option value="maintenance_personnel">
+                                    Maintenance Personnel
+                                </option>
                             </select>
-
                             <InputError
                                 message={errors.staff_type}
                                 className="mt-2"
                             />
                         </div>
-
                         {/* Department */}
-                        {["teaching", "non-teaching"].includes(data.staff_type) && (
-                            <div className="w-full ml-2">
+                        {["teaching", "non-teaching"].includes(
+                            data.staff_type
+                        ) && (
+                            <div className="w-full mt-4 md:mt-0">
                                 <div className="flex">
-                                    <InputLabel htmlFor="department" value="Department" />
+                                    <InputLabel
+                                        htmlFor="department"
+                                        value="Department"
+                                    />
                                     <span className="text-red-500 ml-1">*</span>
                                 </div>
-
                                 <select
                                     id="department_id"
                                     name="department_id"
@@ -262,37 +273,45 @@ export default function InternalRegistration({
                                     required
                                 >
                                     <option value="">Select Department</option>
-                                    {departments?.map((dept) => dept.type === data.staff_type && (
-                                        <option key={dept.id} value={dept.id}>
-                                            {dept.name}
-                                        </option>
-                                    ))}
+                                    {departments?.map(
+                                        (dept) =>
+                                            dept.type === data.staff_type && (
+                                                <option
+                                                    key={dept.id}
+                                                    value={dept.id}
+                                                >
+                                                    {dept.name}
+                                                </option>
+                                            )
+                                    )}
                                 </select>
-
                                 <InputError
                                     message={errors.department_id}
                                     className="mt-2"
                                 />
                             </div>
                         )}
-
                         {/* Work Group */}
                         {data.staff_type === "maintenance_personnel" && (
-                            <div className="w-full ml-2">
+                            <div className="w-full mt-4 md:mt-0">
                                 <div className="flex">
-                                    <InputLabel htmlFor="work_group_id" value="Work Group" />
+                                    <InputLabel
+                                        htmlFor="work_group_id"
+                                        value="Work Group"
+                                    />
                                     <span className="text-red-500 ml-1">*</span>
                                 </div>
-
                                 <select
                                     id="work_group_id"
                                     name="work_group_id"
                                     value={data.work_group_id}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
                                     onChange={(e) => {
-                                        setData("work_group_id", e.target.value)
-                                        }
-                                    }
+                                        setData(
+                                            "work_group_id",
+                                            e.target.value
+                                        );
+                                    }}
                                     required
                                 >
                                     <option value="">Select Work Group</option>
@@ -302,7 +321,6 @@ export default function InternalRegistration({
                                         </option>
                                     ))}
                                 </select>
-
                                 <InputError
                                     message={errors.work_group_id}
                                     className="mt-2"
@@ -317,7 +335,6 @@ export default function InternalRegistration({
                             <InputLabel htmlFor="email" value="Email" />
                             <span className="text-red-500 ml-1">*</span>
                         </div>
-
                         <TextInput
                             id="email"
                             type="email"
@@ -328,19 +345,20 @@ export default function InternalRegistration({
                             onChange={(e) => setData("email", e.target.value)}
                             required
                         />
-
                         <InputError message={errors.email} className="mt-2" />
                     </div>
 
                     {/* Password and Confirm Password */}
-                    <div className="flex justify-stretch mt-4 space-x-2">
+                    <div className="flex flex-col md:flex-row md:space-x-4 mt-4">
                         {/* Password */}
                         <div className="w-full">
                             <div className="flex">
-                                <InputLabel htmlFor="password" value="Password" />
+                                <InputLabel
+                                    htmlFor="password"
+                                    value="Password"
+                                />
                                 <span className="text-red-500 ml-1">*</span>
                             </div>
-
                             <TextInput
                                 id="password"
                                 type="password"
@@ -353,36 +371,42 @@ export default function InternalRegistration({
                                 }
                                 required
                             />
-
                             {/* Password Requirements */}
-                            { errors.password && (
+                            {errors.password && (
                                 <div className="mt-2 space-y-1">
                                     <div className="text-sm text-red-600 dark:text-red-400">
-                                        <p className="font-bold italic mb-1">Password Requirements:</p>
+                                        <p className="font-bold italic mb-1">
+                                            Password Requirements:
+                                        </p>
                                         <ul className="">
-                                            {typeof errors.password === 'string' && errors.password.split('. ').map((error, index) => (
-                                                error.trim() && (
-                                                    <li key={index}>
-                                                        - <InputError
-                                                            message={error.trim()}
-                                                            className="inline"
-                                                        />
-                                                    </li>
-                                                )
-                                            ))}
+                                            {typeof errors.password ===
+                                                "string" &&
+                                                errors.password.split(". ").map(
+                                                    (error, index) =>
+                                                        error.trim() && (
+                                                            <li key={index}>
+                                                                -{" "}
+                                                                <InputError
+                                                                    message={error.trim()}
+                                                                    className="inline"
+                                                                />
+                                                            </li>
+                                                        )
+                                                )}
                                         </ul>
                                     </div>
                                 </div>
                             )}
                         </div>
-
                         {/* Confirm Password */}
-                        <div className="w-full">
+                        <div className="w-full mt-4 md:mt-0">
                             <div className="flex">
-                                <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
+                                <InputLabel
+                                    htmlFor="password_confirmation"
+                                    value="Confirm Password"
+                                />
                                 <span className="text-red-500 ml-1">*</span>
                             </div>
-
                             <TextInput
                                 id="password_confirmation"
                                 type="password"
@@ -391,11 +415,13 @@ export default function InternalRegistration({
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
                                 onChange={(e) =>
-                                    setData("password_confirmation", e.target.value)
+                                    setData(
+                                        "password_confirmation",
+                                        e.target.value
+                                    )
                                 }
                                 required
                             />
-
                             <InputError
                                 message={errors.password_confirmation}
                                 className="mt-2"
@@ -404,10 +430,11 @@ export default function InternalRegistration({
                     </div>
                 </div>
 
+                {/* Privacy Policy & Submit */}
                 <div className="flex flex-col items-center pt-8 pb-4 space-y-4 text-sm">
                     <Label className="flex self-start gap-2 ms-3">
-                        <Checkbox 
-                            name="privacy_policy" 
+                        <Checkbox
+                            name="privacy_policy"
                             checked={privacyAccepted}
                             onCheckedChange={(checked) => {
                                 if (checked) {
@@ -436,7 +463,6 @@ export default function InternalRegistration({
                         onClose={() => setShowPrivacyModal(false)}
                         onAccept={handlePrivacyAccept}
                     />
-
 
                     <div className="flex flex-col items-center space-y-4 w-full">
                         <PrimaryButton
