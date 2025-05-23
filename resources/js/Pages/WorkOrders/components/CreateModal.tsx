@@ -75,7 +75,7 @@ export default function CreateWorkOrderModal({
         images: [] as File[],
         ...(isWorkOrderManager && {
             status: "",
-            work_order_type: "",
+            work_order_type: "Work Order",
             label: "",
             priority: "",
             assigned_to: "",
@@ -95,8 +95,6 @@ export default function CreateWorkOrderModal({
             newErrors["report_description"] = "Description is required.";
 
         if (isWorkOrderManager) {
-            if (!data.work_order_type)
-                newErrors["work_order_type"] = "Work order type is required.";
             if (!data.label) newErrors["label"] = "Label is required.";
             if (!data.scheduled_at)
                 newErrors["scheduled_at"] = "Target date is required.";
@@ -139,7 +137,7 @@ export default function CreateWorkOrderModal({
         data.images.forEach((image) => formData.append("images[]", image));
 
         if (isWorkOrderManager) {
-            formData.append("work_order_type", data.work_order_type || "");
+            formData.append("work_order_type", data.work_order_type || "Work Order");
             formData.append("label", data.label || "");
             if (date)
                 formData.append("scheduled_at", format(date, "yyyy-MM-dd"));
@@ -289,52 +287,8 @@ export default function CreateWorkOrderModal({
                         {isWorkOrderManager && (
                             <>
                                 <div className="flex flex-row justify-between gap-4 !mt-8">
-                                    {/* Work Order Type */}
-                                    <div className="flex-1 space-y-2">
-                                        <Label
-                                            htmlFor="work_order_type"
-                                            className="flex items-center"
-                                        >
-                                            Work Order Type{" "}
-                                            <span className="text-red-500 ml-1">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <Select
-                                            value={data.work_order_type}
-                                            onValueChange={(value) =>
-                                                setData(
-                                                    "work_order_type",
-                                                    value
-                                                )
-                                            }
-                                            required
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select Work Order Type" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Work Order">
-                                                    Work Order
-                                                </SelectItem>
-                                                <SelectItem value="Preventive Maintenance">
-                                                    Preventive Maintenance
-                                                </SelectItem>
-                                                <SelectItem value="Compliance">
-                                                    Compliance
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-
-                                        {localErrors.work_order_type && (
-                                            <p className="text-red-500 text-xs">
-                                                {localErrors.work_order_type}
-                                            </p>
-                                        )}
-                                    </div>
-
                                     {/* Label */}
-                                    <div className="flex-1 space-y-2">
+                                    <div className="flex-[1] space-y-2">
                                         <Label
                                             htmlFor="label"
                                             className="flex items-center"
@@ -388,7 +342,7 @@ export default function CreateWorkOrderModal({
                                     </div>
 
                                     {/* Target Date */}
-                                    <div className="flex-2 space-y-2">
+                                    <div className="flex-[1] space-y-2">
                                         <Label
                                             htmlFor="scheduled_at"
                                             className="flex items-center"
@@ -489,7 +443,7 @@ export default function CreateWorkOrderModal({
 
                                 <div className="flex flex-row justify-between gap-4 !mt-4">
                                     {/* Priority */}
-                                    <div className="flex-3 space-y-2">
+                                    <div className="flex-[1] space-y-2">
                                         <Label
                                             htmlFor="priority"
                                             className="flex items-center"
@@ -531,7 +485,7 @@ export default function CreateWorkOrderModal({
                                     </div>
 
                                     {/* Assigned To */}
-                                    <div className="flex-1 space-y-2">
+                                    <div className="flex-[2] space-y-2">
                                         <Label
                                             htmlFor="assigned_to"
                                             className="flex items-center"
@@ -572,7 +526,7 @@ export default function CreateWorkOrderModal({
                                     </div>
 
                                     {/* Status */}
-                                    <div className="flex-1 space-y-2">
+                                    <div className="flex-[2] space-y-2">
                                         <Label
                                             htmlFor="status"
                                             className="flex items-center"
@@ -592,29 +546,14 @@ export default function CreateWorkOrderModal({
                                                 <SelectValue placeholder="Select Status" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="Pending">
-                                                    Pending
-                                                </SelectItem>
                                                 <SelectItem value="Assigned">
                                                     Assigned
                                                 </SelectItem>
                                                 <SelectItem value="Ongoing">
                                                     Ongoing
                                                 </SelectItem>
-                                                <SelectItem value="Overdue">
-                                                    Overdue
-                                                </SelectItem>
-                                                <SelectItem value="Completed">
-                                                    Completed
-                                                </SelectItem>
                                                 <SelectItem value="For Budget Request">
                                                     For Budget Request
-                                                </SelectItem>
-                                                <SelectItem value="Cancelled">
-                                                    Cancelled
-                                                </SelectItem>
-                                                <SelectItem value="Declined">
-                                                    Declined
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>

@@ -199,6 +199,7 @@ export default function IndexLayout({
                 accessorKey: "location.name",
                 header: "Location",
                 cell: ({ row }) => <div>{row.original.location.name}</div>,
+                enableSorting: false,
                 meta: {
                     headerClassName: "w-[10rem]",
                     searchable: true,
@@ -255,6 +256,7 @@ export default function IndexLayout({
                         cell: ({ row }) => (
                             <div>{row.original.assigned_to?.name || "Unassigned"}</div>
                         ),
+                        enableSorting: false,
                         meta: {
                             headerClassName: "max-w-32",
                             cellClassName: "text-center",
