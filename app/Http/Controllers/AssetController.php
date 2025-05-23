@@ -57,15 +57,40 @@ class AssetController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Asset $asset)
-    {
-        //
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'specification_details' => 'nullable|string',
+        'location.name' => 'required|string',
+        'status' => 'required|string',
+        'date_acquired' => 'required|date',
+        'last_maintained_at' => 'nullable|date',
+    ]);
+
+    $asset->update([
+        'name' => $validated['name'],
+        'specification_details' => $validated['specification_details'],
+        'status' => $validated['status'],
+        'date_acquired' => $validated['date_acquired'],
+        'last_maintained_at' => $validated['last_maintained_at'],
+    ]);
+
+    // Optional: update related location
+    if (isset($validated['location']['name'])) {
+        $asset->location->update(['name' => $validated['location']['name']]);
     }
+
+    return back()->with('success', 'Asset updated successfully.');
+}
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Asset $asset)
-    {
-        //
-    }
+{
+    $asset->delete();
+
+    return redirect()->back()->with('success', 'Asset deleted successfully.');
+}
+
 }

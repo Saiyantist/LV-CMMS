@@ -17,7 +17,7 @@ class AssetMaintenanceHistorySeeder extends Seeder
         $assets = Asset::all();
 
         foreach ($assets as $asset) {
-            $count = rand(1, 3); // Each asset gets 1 to 3 maintenance records
+            $count = rand(1, 5); // Each asset gets 1 to 3 maintenance records
 
             for ($i = 0; $i < $count; $i++) {
                 // Try to find a work order that matches this asset

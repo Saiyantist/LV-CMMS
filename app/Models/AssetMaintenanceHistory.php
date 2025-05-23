@@ -17,7 +17,7 @@ class AssetMaintenanceHistory extends Model
         'work_order_id',
         'asset_id',
     ];
-
+    
     public function asset()
     {
         return $this->belongsTo(Asset::class);

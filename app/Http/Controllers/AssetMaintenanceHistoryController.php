@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\AssetMaintenanceHistory;
 use Illuminate\Http\Request;
+use App\Models\Asset;
+use Inertia\Inertia;
+
 
 class AssetMaintenanceHistoryController extends Controller
 {
@@ -34,10 +37,16 @@ class AssetMaintenanceHistoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(AssetMaintenanceHistory $assetMaintenanceHistory)
-    {
-        //
-    }
+    public function show($assetId)
+{
+    $history = AssetMaintenanceHistory::with('workOrder')
+        ->where('asset_id', $assetId)
+        ->orderByDesc('maintained_at')
+        ->get();
+
+    return response()->json($history);
+}
+
 
     /**
      * Show the form for editing the specified resource.

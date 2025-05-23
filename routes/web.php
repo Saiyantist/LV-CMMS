@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\AssetMaintenanceHistoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -11,7 +12,6 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\EventServicesController;
-
 /**
  *  Guest Routes
  */
@@ -112,7 +112,14 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     })->middleware(['auth', 'verified'])->name('api.work-orders.statuses');
 
 
-    
+    Route::delete('/assets/{asset}', [AssetController::class, 'destroy'])->name('assets.destroy');
+
+    Route::put('/assets/{asset}', [AssetController::class, 'update'])->name('assets.update');
+
+    // asset history fetching
+Route::get('/asset-maintenance-history/{assetId}', [AssetMaintenanceHistoryController::class, 'show']);
+
+
     /**
      * Event Services Routes
      */

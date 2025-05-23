@@ -15,7 +15,6 @@ import { getPriorityColor } from "@/utils/getPriorityColor";
 import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
 import { statusSorting } from "@/utils/statusSorting";
-import ViewWorkOrderModal from "./ViewWorkOrderModal";
 
 // import FullCalendar from "@fullcalendar/react"; // FullCalendar library
 // import dayGridPlugin from "@fullcalendar/daygrid"; // Month view

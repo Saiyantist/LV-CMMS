@@ -51,9 +51,12 @@ export default function AddAssetModal({
     const [assignTo, setAssignTo] = useState("");
     const [schedule, setSchedule] = useState("");
     const [dailyFrequency, setDailyFrequency] = useState(1); // Default to 1
-    const [weeklyDays, setWeeklyDays] = useState<string[]>([]); // State for selected weekly days
+    // const [weeklyDays, setWeeklyDays] = useState<string[]>([]); // State for selected weekly days
+    const [weeklyFrequency, setWeeklyFrequency] = useState(1);
     const [monthlyFrequency, setMonthlyFrequency] = useState(1); // Default to 1
     const [yearlyMonth, setYearlyMonth] = useState("January"); // Default to January
+    const [monthlyDay, setMonthlyDay] = useState("Sunday");
+
     const [yearlyDay, setYearlyDay] = useState(1); // Default to 1
 
     const toggleDay = (day: string) => {
@@ -74,54 +77,56 @@ export default function AddAssetModal({
     };
 
     const handleConfirmSubmit = () => {
-    try {
-        // Trigger success toast first
-        toast.success("Saving asset...");
+        try {
+            // Trigger success toast first
+            toast.success("Saving asset...");
 
-        // Prepare the form data
-        const formData = new FormData();
-        formData.append("name", name);
-        formData.append("specification_details", specificationDetails);
-        formData.append("location_id", location);
-        formData.append("status", status);
-        formData.append("date_acquired", dateAcquired);
-        if (lastMaintenance) {
-            formData.append("last_maintained_at", lastMaintenance);
-        }
-        if (image) {
-            formData.append("image", image);
-        }
-        if (isPreventiveMaintenance) {
-            formData.append("has_preventive_maintenance", "1");
-            formData.append(
-                "preventiveMaintenance",
-                JSON.stringify({
-                    description,
-                    assignTo,
-                    schedule,
-                })
-            );
-        }
+            // Prepare the form data
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("specification_details", specificationDetails);
+            formData.append("location_id", location);
+            formData.append("status", status);
+            formData.append("date_acquired", dateAcquired);
+            if (lastMaintenance) {
+                formData.append("last_maintained_at", lastMaintenance);
+            }
+            if (image) {
+                formData.append("image", image);
+            }
+            if (isPreventiveMaintenance) {
+                formData.append("has_preventive_maintenance", "1");
+                formData.append(
+                    "preventiveMaintenance",
+                    JSON.stringify({
+                        description,
+                        assignTo,
+                        schedule,
+                    })
+                );
+            }
 
-        // Use Inertia's post method to send the data
-        router.post("/assets", formData, {
-            onSuccess: () => {
-                toast.success("Asset saved successfully!");
-                setShowConfirmModal(false); // Close confirmation modal
-                onClose(); // Close the main modal
-            },
-            onError: (errors) => {
-                console.error(errors);
-                toast.error("Failed to save asset. Please check the form and try again.");
-            },
-        });
-    } catch (error) {
-        // Handle unexpected errors
-        console.error(error);
-        toast.error("An unexpected error occurred. Please try again.");
-        setShowConfirmModal(false); // Ensure the modal closes on failure as well
-    }
-};
+            // Use Inertia's post method to send the data
+            router.post("/assets", formData, {
+                onSuccess: () => {
+                    toast.success("Asset saved successfully!");
+                    setShowConfirmModal(false); // Close confirmation modal
+                    onClose(); // Close the main modal
+                },
+                onError: (errors) => {
+                    console.error(errors);
+                    toast.error(
+                        "Failed to save asset. Please check the form and try again."
+                    );
+                },
+            });
+        } catch (error) {
+            // Handle unexpected errors
+            console.error(error);
+            toast.error("An unexpected error occurred. Please try again.");
+            setShowConfirmModal(false); // Ensure the modal closes on failure as well
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -136,7 +141,8 @@ export default function AddAssetModal({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Asset Name
+                                Asset Name{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -149,12 +155,15 @@ export default function AddAssetModal({
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Specification
+                                Specification{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
                                 value={specificationDetails}
-                                onChange={(e) => setSpecificationDetails(e.target.value)} // Update the specification state
+                                onChange={(e) =>
+                                    setSpecificationDetails(e.target.value)
+                                } // Update the specification state
                                 className="w-full mt-1 p-2 border border-gray-300 rounded-md"
                                 placeholder="Enter Specification"
                                 required
@@ -166,7 +175,7 @@ export default function AddAssetModal({
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Location
+                                Location <span className="text-red-500">*</span>
                             </label>
                             <select
                                 value={location}
@@ -185,7 +194,8 @@ export default function AddAssetModal({
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Condition
+                                Condition{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <select
                                 value={status}
@@ -196,14 +206,19 @@ export default function AddAssetModal({
                                 <option value="">Select Condition</option>
                                 <option value="Functional">Functional</option>
                                 <option value="Failed">Failed</option>
-                                <option value="Under Maintenance">Under Maintenance</option>
-                                <option value="End of Useful Life">End of Useful Life</option>
+                                <option value="Under Maintenance">
+                                    Under Maintenance
+                                </option>
+                                <option value="End of Useful Life">
+                                    End of Useful Life
+                                </option>
                             </select>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Date Acquired
+                                Date Acquired{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="date"
@@ -284,7 +299,8 @@ export default function AddAssetModal({
 
                                 <label className="block text-sm font-medium text-gray-700">
                                     <br />
-                                    Description
+                                    Description{" "}
+                                    <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
                                     value={description}
@@ -298,7 +314,8 @@ export default function AddAssetModal({
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Assign To
+                                    Assign To{" "}
+                                    <span className="text-red-500">*</span>
                                 </label>
                                 <select
                                     value={assignTo}
@@ -318,7 +335,7 @@ export default function AddAssetModal({
                                 {/* Toggle Group */}
                                 <div className="flex flex-wrap sm:inline-flex w-full sm:w-auto rounded-md overflow-hidden border border-gray-300">
                                     {[
-                                        "Daily",
+                                        // "Daily",
                                         "Weekly",
                                         "Monthly",
                                         "Yearly",
@@ -344,7 +361,7 @@ export default function AddAssetModal({
 
                                 {/* Conditional Fields */}
                                 <div className="mt-4">
-                                    {schedule === "Daily" && (
+                                    {/* {schedule === "Daily" && (
                                         <div className="flex items-center gap-2">
                                             <span>Every</span>
                                             <input
@@ -360,14 +377,88 @@ export default function AddAssetModal({
                                             />
                                             <span>Day(s)</span>
                                         </div>
-                                    )}
+                                    )} */}
 
                                     {schedule === "Weekly" && (
-                                        <div>
-                                            <span className="block mb-2">
-                                                Every
-                                            </span>
-                                            <div className="grid grid-cols-4 gap-2 max-w-md">
+                                        <div className="flex items-center gap-2">
+                                            <span>Every</span>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                max="99"
+                                                className="w-20 px-2 py-1 border rounded-md"
+                                                value={
+                                                    weeklyFrequency === 0
+                                                        ? ""
+                                                        : weeklyFrequency
+                                                }
+                                                onChange={(e) => {
+                                                    const value =
+                                                        e.target.value;
+                                                    if (value === "") {
+                                                        setWeeklyFrequency(0); // or you can set to null depending on your logic
+                                                    } else {
+                                                        const numberValue =
+                                                            Number(value);
+                                                        if (
+                                                            numberValue >= 1 &&
+                                                            numberValue <= 99
+                                                        ) {
+                                                            setWeeklyFrequency(
+                                                                numberValue
+                                                            );
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                            <span>Week(s)</span>
+                                        </div>
+                                    )}
+
+                                    {schedule === "Monthly" && (
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span>On the</span>
+
+                                            {/* Week Number (1st–4th) */}
+                                            <select
+                                                className="w-32 sm:w-40 px-2 py-1 border rounded-md"
+                                                value={monthlyFrequency}
+                                                onChange={(e) =>
+                                                    setMonthlyFrequency(
+                                                        Number(e.target.value)
+                                                    )
+                                                }
+                                            >
+                                                {[1, 2, 3, 4].map((week) => (
+                                                    <option
+                                                        key={week}
+                                                        value={week}
+                                                    >
+                                                        {week}
+                                                        {week === 1
+                                                            ? "st"
+                                                            : week === 2
+                                                            ? "nd"
+                                                            : week === 3
+                                                            ? "rd"
+                                                            : "th"}{" "}
+                                                        week
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            <span>Of</span>
+
+                                            {/* Day of the Week */}
+                                            <select
+                                                className="w-32 sm:w-40 px-2 py-1 border rounded-md"
+                                                value={monthlyDay}
+                                                onChange={(e) =>
+                                                    setMonthlyDay(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            >
                                                 {[
                                                     "Sunday",
                                                     "Monday",
@@ -377,43 +468,14 @@ export default function AddAssetModal({
                                                     "Friday",
                                                     "Saturday",
                                                 ].map((day) => (
-                                                    <label
+                                                    <option
                                                         key={day}
-                                                        className="flex items-center gap-1"
+                                                        value={day}
                                                     >
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={weeklyDays.includes(
-                                                                day
-                                                            )}
-                                                            onChange={() =>
-                                                                toggleDay(day)
-                                                            }
-                                                        />
-                                                        <span className="text-sm">
-                                                            {day}
-                                                        </span>
-                                                    </label>
+                                                        {day}
+                                                    </option>
                                                 ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {schedule === "Monthly" && (
-                                        <div className="flex items-center gap-2">
-                                            <span>Every</span>
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                className="w-20 px-2 py-1 border rounded-md"
-                                                value={monthlyFrequency}
-                                                onChange={(e) =>
-                                                    setMonthlyFrequency(
-                                                        Number(e.target.value)
-                                                    )
-                                                }
-                                            />
-                                            <span>Month(s)</span>
+                                            </select>
                                         </div>
                                     )}
 
@@ -427,7 +489,7 @@ export default function AddAssetModal({
                                                         e.target.value
                                                     )
                                                 }
-                                                className="border rounded-md px-2 py-1"
+                                                className="border rounded-md px-2 py-1 w-32 sm:w-40"
                                             >
                                                 {[
                                                     "January",
@@ -458,11 +520,27 @@ export default function AddAssetModal({
                                                 max="31"
                                                 className="w-20 px-2 py-1 border rounded-md"
                                                 value={yearlyDay}
-                                                onChange={(e) =>
-                                                    setYearlyDay(
-                                                        Number(e.target.value)
-                                                    )
-                                                }
+                                                onChange={(e) => {
+                                                    const value =
+                                                        e.target.value;
+                                                    // Allow empty string for clearing
+                                                    if (value === "") {
+                                                        setYearlyDay("");
+                                                        return;
+                                                    }
+
+                                                    // Parse number and clamp it between 1 and 31
+                                                    const num = Number(value);
+                                                    if (!isNaN(num)) {
+                                                        if (num < 1) {
+                                                            setYearlyDay(1);
+                                                        } else if (num > 31) {
+                                                            setYearlyDay(31);
+                                                        } else {
+                                                            setYearlyDay(num);
+                                                        }
+                                                    }
+                                                }}
                                             />
                                         </div>
                                     )}
@@ -517,4 +595,4 @@ export default function AddAssetModal({
             )}
         </div>
     );
-};
+}

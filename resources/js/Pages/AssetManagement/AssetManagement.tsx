@@ -9,7 +9,8 @@ import CreateAssetModal from "./CreateAssetModal";
 import ViewAssetModal from "./ViewAssetModal";
 import { Datatable } from "../WorkOrders/components/Datatable";
 import type { ColumnDef } from "@tanstack/react-table";
-// import { toast } from "sonner"; I will user this for delete action later.
+import { router } from "@inertiajs/react";
+import { toast } from "sonner";
 
 interface Asset {
     id: number;
@@ -64,6 +65,18 @@ const AssetManagement: React.FC = () => {
         }
     };
 
+    const handleDelete = (assetId: number) => {
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this asset? This action is irreversible and cannot be undone."
+        );
+        if (!confirmed) return;
+
+        router.delete(route("assets.destroy", assetId), {
+            onSuccess: () => toast.success("Asset deleted successfully."),
+            onError: () => toast.error("Failed to delete asset."),
+        });
+    };
+
     // Define columns for the data table
     const columns: ColumnDef<Asset>[] = [
         {
@@ -87,14 +100,22 @@ const AssetManagement: React.FC = () => {
         {
             accessorKey: "specification_details",
             header: "Specification",
-            cell: ({ row }) => (
-                <div>{row.getValue("specification_details")}</div>
-            ),
+            cell: ({ row }) => {
+                const spec = row.getValue("specification_details") as string;
+                return (
+                    <div>
+                        {spec.length > 25
+                            ? `${spec.substring(0, 25)}...`
+                            : spec}
+                    </div>
+                );
+            },
             meta: {
                 headerClassName: "w-[20%]",
                 searchable: true,
             },
         },
+
         {
             accessorKey: "location.name",
             header: "Location",
@@ -153,15 +174,8 @@ const AssetManagement: React.FC = () => {
                         View
                     </button>
                     <button
-                        onClick={() => {
-                            const confirmed = window.confirm(
-                                "Are you sure you want to delete this asset? This action is irreversible and cannot be undone."
-                            );
-                            if (confirmed) {
-                                // Call your delete function here
-                            }
-                        }}
-                        className="bg-destructive text-white px-3 py-1.5 text-sm rounded-md hover:bg-red-700 transition"
+                        onClick={() => handleDelete(assets.id)}
+                        className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
                     >
                         Delete
                     </button>
@@ -174,16 +188,16 @@ const AssetManagement: React.FC = () => {
     // Helper function to get status color
     const getStatusColor = (status: string) => {
         switch (status) {
-            case "Excellent":
-                return "bg-green-100 text-green-800";
-            case "Good":
-                return "bg-blue-100 text-blue-800";
-            case "Fair":
-                return "bg-yellow-100 text-yellow-800";
-            case "Poor":
-                return "bg-red-100 text-red-800";
+            case "Scheduled":
+                return "bg-green-100 text-green-700 border border-green-300";
+            case "Under Maintenance":
+                return "bg-blue-100 text-blue-700 border border-blue-300";
+            case "End of Useful Life":
+                return "bg-yellow-100 text-yellow-700 border border-yellow-300";
+            case "Failed":
+                return "bg-red-100 text-red-700 border border-red-300";
             default:
-                return "bg-gray-100 text-gray-800";
+                return "bg-gray-100 text-gray-700 border border-gray-300";
         }
     };
 
@@ -278,14 +292,7 @@ const AssetManagement: React.FC = () => {
                                     View
                                 </button>
                                 <button
-                                    onClick={() => {
-                                        const confirmed = window.confirm(
-                                            "Are you sure you want to delete this asset? This action is irreversible and cannot be undone."
-                                        );
-                                        if (confirmed) {
-                                            // Call your delete function here
-                                        }
-                                    }}
+                                    onClick={() => handleDelete(asset.id)}
                                     className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
                                 >
                                     Delete
@@ -294,7 +301,6 @@ const AssetManagement: React.FC = () => {
                         </div>
                     ))}
                 </div>
-                
             </div>
 
             {isCreating && (

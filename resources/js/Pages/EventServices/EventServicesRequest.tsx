@@ -354,7 +354,7 @@ export default function EventServicesRequest() {
                             setConsentChoice(e.target.value)
                         }
                     />
-                )}
+                    )}
 
                 {error && (
                     <div className="text-red-500 text-sm mt-2 text-center">
