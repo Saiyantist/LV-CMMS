@@ -15,6 +15,7 @@ import { getStatusColor } from "@/utils/getStatusColor";
 import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
 import React, { useState } from "react";
+import AssignWorkOrderModal from "./components/AssignWorkOrderModal";
 
 interface Props {
     user: {
@@ -102,6 +103,7 @@ export default function IndexLayout({
         user.roles[0].name === "maintenance_personnel";
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
+    const [acceptingWorkOrder, setAcceptingWorkOrder] = useState<any>(null);
     const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>(
         []
     );
@@ -211,95 +213,123 @@ export default function IndexLayout({
                 ),
                 enableSorting: false,
                 meta: {
-                    headerClassName: "w-[23%]",
+                    headerClassName: "min-w-[15rem]",
                     cellClassName: "max-w-16 px-2",
                     searchable: true,
                 },
             },
-            {
-                accessorKey: "scheduled_at",
-                header: "Target Date",
-                cell: ({ row }) => <div>{row.getValue("scheduled_at")}</div>,
-                meta: {
-                    headerClassName: "max-w-[6rem]",
-                    cellClassName: "text-center",
-                    searchable: true,
-                },
-            },
-            {
-                accessorKey: "priority",
-                header: "Priority",
-                cell: ({ row }) => (
-                    <div
-                        className={`px-2 py-1 rounded ${getPriorityColor(
-                            row.getValue("priority")
-                        )}`}
-                    >
-                        {row.getValue("priority")}
-                    </div>
-                ),
-                sortingFn: prioritySorting,
-                meta: {
-                    headerClassName: "max-w-20",
-                    cellClassName: "text-center",
-                    filterable: true,
-                },
-            },
-            {
-                accessorKey: "assigned_to.name",
-                header: "Assigned to",
-                cell: ({ row }) => (
-                    <div>{row.original.assigned_to?.name || "Unassigned"}</div>
-                ),
-                meta: {
-                    headerClassName: "max-w-32",
-                    cellClassName: "text-center",
-                    searchable: true,
-                    filterable: true,
-                },
-            },
-            ...(activeTab !== "Pending"
+            ...(activeTab !== "Pending" && activeTab !== "For Budget Request"
                 ? [
-                      {
-                          accessorKey: "status",
-                          header: "Status",
-                          cell: ({ row }) => (
-                              <StatusCell
-                                  value={row.getValue("status")}
-                                  user={user}
-                                  row={row}
-                              />
-                          ),
-                          enableSorting: false,
-                          meta: {
-                              headerClassName: "max-w-10",
-                              cellClassName: "text-center",
-                              filterable: true,
-                          },
-                      },
+                    {
+                        accessorKey: "scheduled_at",
+                        header: "Target Date",
+                        cell: ({ row }) => <div>{row.getValue("scheduled_at")}</div>,
+                        meta: {
+                            headerClassName: "max-w-[6rem]",
+                            cellClassName: "text-center",
+                            searchable: true,
+                        },
+                    },
+                    {
+                        accessorKey: "priority",
+                        header: "Priority",
+                        cell: ({ row }) => (
+                            <div
+                                className={`px-2 py-1 rounded ${getPriorityColor(
+                                    row.getValue("priority")
+                                )}`}
+                            >
+                                {row.getValue("priority")}
+                            </div>
+                        ),
+                        sortingFn: prioritySorting,
+                        meta: {
+                            headerClassName: "max-w-20",
+                            cellClassName: "text-center",
+                            filterable: true,
+                        },
+                    },
+                    {
+                        accessorKey: "assigned_to.name",
+                        header: "Assigned to",
+                        cell: ({ row }) => (
+                            <div>{row.original.assigned_to?.name || "Unassigned"}</div>
+                        ),
+                        meta: {
+                            headerClassName: "max-w-32",
+                            cellClassName: "text-center",
+                            searchable: true,
+                            filterable: true,
+                        },
+                    },
+                    {
+                        accessorKey: "status",
+                        header: "Status",
+                        cell: ({ row }) => (
+                            <StatusCell
+                                value={row.getValue("status")}
+                                user={user}
+                                row={row}
+                            />
+                        ),
+                        enableSorting: false,
+                        meta: {
+                            headerClassName: "max-w-10",
+                            cellClassName: "text-center",
+                            filterable: true,
+                        },
+                    },
                   ]
                 : []) /** Hide status if activeTab is "Pending" */,
-            {
-                id: "actions",
-                header: "Action",
-                cell: ({ row }) => (
-                    <div className="flex gap-2">
-                        <Button
-                            className="bg-primary h-6 text-xs rounded-sm"
-                            onClick={() => setEditingWorkOrder(row.original)}
-                        >
-                            Accept
-                        </Button>
-                        <Button
-                            className="bg-destructive h-6 text-white text-xs rounded-sm hover:bg-red-800 transition"
-                            onClick={() => handleDelete(row.original.id)}
-                        >
-                            Decline
-                        </Button>
-                    </div>
-                ),
-                enableSorting: false,
-            },
+            
+            ... (activeTab === "Pending" || activeTab === "For Budget Request"
+                ? [
+                    {
+                        id: "actions",
+                        header: "Action",
+                        cell: ({ row }) => (
+                            <div className="flex gap-2">
+                                
+                                <Button
+                                    className="bg-primary h-6 text-xs rounded-sm"
+                                    onClick={() => setAcceptingWorkOrder(row.original)}
+                                >
+                                    Accept
+                                </Button>
+                                <Button
+                                    className="bg-destructive h-6 text-xs rounded-sm"
+                                    onClick={() => setEditingWorkOrder(row.original)}
+                                >
+                                    Decline
+                                </Button>
+                            </div>
+                        ),
+                        enableSorting: false,
+                    }
+                ]
+                : [
+                    {
+                        id: "actions",
+                        header: "Action",
+                        cell: ({ row }) => (
+                            <div className="flex gap-2">
+                                <Button
+                                    className="bg-primary h-6 text-xs rounded-sm"
+                                    onClick={() => setEditingWorkOrder(row.original)}
+                                >
+                                    Edit
+                                </Button>
+                                <Button
+                                    className="bg-red-600 h-6 text-white text-xs rounded-sm hover:bg-red-800 transition"
+                                    onClick={() => handleDelete(row.original.id)}
+                                >
+                                    Delete
+                                </Button>
+                            </div>
+                        ),
+                        enableSorting: false,
+                    }
+                ])
         ];
     } else {
         columns = [];
@@ -326,6 +356,16 @@ export default function IndexLayout({
                     user={user}
                     maintenancePersonnel={maintenancePersonnel}
                     onClose={() => setEditingWorkOrder(null)}
+                />
+            )}
+
+            {acceptingWorkOrder && (
+                <AssignWorkOrderModal
+                    workOrder={acceptingWorkOrder}
+                    locations={locations}
+                    user={user}
+                    maintenancePersonnel={maintenancePersonnel}
+                    onClose={() => setAcceptingWorkOrder(null)}
                 />
             )}
 

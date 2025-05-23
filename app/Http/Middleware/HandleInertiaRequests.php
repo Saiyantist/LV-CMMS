@@ -38,7 +38,7 @@ public function share(Request $request): array
                 'first_name' => $request->user()->first_name,
                 'last_name' => $request->user()->last_name,
                 'contact_number' => $request->user()->contact_number,
-                'birth_date' => $request->user()->birth_date,
+                // 'birth_date' => $request->user()->birth_date,
                 'gender' => $request->user()->gender,
                 'staff_type' => $request->user()->staff_type,
                 'department_id' => $request->user()->department_id,

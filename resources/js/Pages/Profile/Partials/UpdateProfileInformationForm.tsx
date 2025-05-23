@@ -112,7 +112,7 @@ export default function UpdateProfileInformation({
                 </div>
 
                 {/* Birth Date */}
-                <div>
+                {/* <div>
                     <InputLabel htmlFor="birth_date" value="Birth Date" />
                     <TextInput
                         id="birth_date"
@@ -125,7 +125,7 @@ export default function UpdateProfileInformation({
                         required
                     />
                     <InputError className="mt-2" message={errors.birth_date} />
-                </div>
+                </div> */}
 
                 {/* Gender */}
                 <div>

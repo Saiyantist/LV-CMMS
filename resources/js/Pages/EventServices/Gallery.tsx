@@ -9,34 +9,71 @@ type GalleryItem = {
 const galleryItems: GalleryItem[] = [
     {
         id: 1,
-        title: "Auditorium Lobby",
+        title: "Auditorium",
         subtitle: "Capacities: 300",
     },
     {
         id: 2,
-        title: "Main Conference Hall",
+        title: "Auditorium Lobby",
         subtitle: "Capacities: 500",
     },
     {
         id: 3,
-        title: "Outdoor Garden",
-        subtitle: "Capacities: 200",
+        title: "College Library",
+        subtitle: "Capacities: ",
     },
     {
         id: 4,
-        title: "Executive Lounge",
-        subtitle: "Capacities: 50",
+        title: "Meeting Room",
+        subtitle: "Capacities: ",
     },
     {
         id: 5,
         title: "Training Room A",
-        subtitle: "Capacities: 100",
+        subtitle: "Capacities: ",
     },
+
     {
         id: 6,
-        title: "Studio Room",
-        subtitle: "Capacities: 80",
+        title: "Computer Laboratory A",
+        subtitle: "Capacities: ",
     },
+    
+    {
+        id: 7,
+        title: "Computer Laboratory B",
+        subtitle: "Capacities: ",
+    },
+
+    {
+        id: 8,
+        title: "EFS Classroom(s) Room #:",
+        subtitle: "Capacities: ",
+    },
+
+    {
+        id: 9,
+        title: "LVCC Grounds",
+        subtitle: "Capacities: 700 ",
+    },
+
+    {
+        id: 10,
+        title: "LVCC  Main Lobby",
+        subtitle: "Capacities: ",
+    },
+    {
+        id: 11,
+        title: "Elementary & High School Library",
+        subtitle: "Capacities: ",
+    },
+
+    {
+        id: 12,
+        title: "Basketball Court",
+        subtitle: "Capacities: ",
+    },
+
 ];
 
 interface GalleryProps {

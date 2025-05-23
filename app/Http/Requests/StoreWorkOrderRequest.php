@@ -37,19 +37,30 @@ class StoreWorkOrderRequest extends FormRequest
             return $rules = [ 'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])]];
         } 
         
-        if ($this->route()->getName() === 'work-orders.update') {
+        if ($this->routeIs('work-orders.update')) {
             
             if ($user->hasPermissionTo('manage work orders')) {
-                return $rules = [
-                    'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
-                    'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
-                    'scheduled_at' => 'required|date',
-                    'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // Maybe AI-generated in the future
-                    'assigned_to' => 'required',
-                    'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
-                    'approved_at' => 'required|date',
-                    'assigned_to' => 'required|string|max:255',
-                ];
+                if($this->status === "Assigned"){
+                    return $rules = [
+                        'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
+                        'scheduled_at' => 'required|date',
+                        'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // Maybe AI-generated in the future
+                        'assigned_to' => 'required',
+                        'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
+                    ];
+                }
+                else {
+                    return $rules = [
+                        'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
+                        'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
+                        'scheduled_at' => 'required|date',
+                        'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // Maybe AI-generated in the future
+                        'assigned_to' => 'required',
+                        'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
+                        'approved_at' => 'required|date',
+                        'approved_by' => 'required|string|max:255',
+                    ];
+                }
             }
         }
         
