@@ -63,8 +63,12 @@ export default function WorkOrders({
             user.permissions.includes("manage work orders")
         ) {
             if (activeTab === "Pending") return wo.status === "Pending";
-            if (activeTab === "Accepted")
-                return ["Assigned", "Scheduled", "Ongoing", "Overdue", "Completed"].includes(
+            if (activeTab === "Assigned")
+                return ["Assigned", "Ongoing", "Completed", "Overdue"].includes(
+                    wo.status
+                );
+            if (activeTab === "Scheduled")
+                return ["Scheduled",].includes(
                     wo.status
                 );
             if (activeTab === "For Budget Request")

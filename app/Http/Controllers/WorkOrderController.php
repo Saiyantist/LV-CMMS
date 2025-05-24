@@ -299,22 +299,45 @@ class WorkOrderController extends Controller
                         'completed_at' => now(),
                     ]);
                 }
+                else if ($request->status === "For Budget Request") {
+                    $workOrder->update([
+                        'status' => $request->status,
+                        'scheduled_at' => null,
+                    ]);
+                }
                 else {
                     $workOrder->update(['status' => $request->status]);
                 }
                 return redirect()->route('work-orders.index')->with('success', 'Work Order status updated successfully.');
             }
 
-            $workOrder->update([
-                // 'work_order_type' => $request->work_order_type,
-                'label' => $request->label,
-                'scheduled_at' => $request->scheduled_at,
-                'priority' => $request->priority,
-                'assigned_to' => $request->assigned_to,
-                'status' => $request->status,
-                'approved_at' => $request->approved_at,
-                'approved_by' => $request->approved_by,
-            ]);
+            if ($request->routeIs('work-orders.update')) {
+
+                $workOrder->update([
+                    'location_id' => $request->location_id,
+                    'report_description' => $request->report_description,
+                    'label' => $request->label,
+                    'scheduled_at' => $request->scheduled_at,
+                    'priority' => $request->priority,
+                    'assigned_to' => $request->assigned_to,
+                    'status' => $request->status,
+                    'approved_at' => $request->approved_at,
+                    'approved_by' => $request->approved_by,
+                ]);
+                return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
+            }
+
+            else {
+                $workOrder->update([
+                    'label' => $request->label,
+                    'scheduled_at' => $request->scheduled_at,
+                    'priority' => $request->priority,
+                    'assigned_to' => $request->assigned_to,
+                    'status' => $request->status,
+                    'approved_at' => $request->approved_at,
+                    'approved_by' => $request->approved_by,
+                ]);
+            }
 
             return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
         }

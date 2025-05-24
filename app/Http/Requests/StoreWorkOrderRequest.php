@@ -38,25 +38,23 @@ class StoreWorkOrderRequest extends FormRequest
         if ($this->routeIs('work-orders.update')) {
 
             if ($user->hasPermissionTo('manage work orders')) {
-                if($this->status === "Assigned"){
+
+                if($this->status === "For Budget Request"){
                     return $rules = [
                         'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
-                        'scheduled_at' => 'required|date',
                         'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // Maybe AI-generated in the future
-                        'assigned_to' => 'required',
                         'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
                     ];
                 }
                 else {
                     return $rules = [
-                        'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
                         'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
                         'scheduled_at' => 'required|date',
                         'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // Maybe AI-generated in the future
                         'assigned_to' => 'required',
                         'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
-                        'approved_at' => 'required|date',
-                        'approved_by' => 'required|string|max:255',
+                        'approved_at' => 'date',
+                        'approved_by' => 'string|max:255',
                     ];
                 }
             }

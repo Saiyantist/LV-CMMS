@@ -457,19 +457,45 @@ export default function EditWorkOrderModal({
                                                 <SelectValue placeholder="Select Status" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="Pending">Pending</SelectItem>
-                                                <SelectItem value="Assigned">Assigned</SelectItem>
-                                                <SelectItem value="Ongoing">Ongoing</SelectItem>
-                                                <SelectItem value="Overdue">Overdue</SelectItem>
-                                                <SelectItem value="Completed">Completed</SelectItem>
-                                                <SelectItem value="For Budget Request">For Budget Request</SelectItem>
-                                                <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                                <SelectItem value="Declined">Declined</SelectItem>
+                                                {workOrder.status === "Assigned" && (
+                                                    <>
+                                                        <SelectItem value="Assigned">Assigned</SelectItem>
+                                                        <SelectItem value="For Budget Request">For Budget Request</SelectItem>
+                                                        <SelectItem value="Pending">Pending</SelectItem>
+                                                        <SelectItem value="Ongoing">Ongoing</SelectItem>
+                                                        <SelectItem value="Completed">Completed</SelectItem>
+                                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                                    </>
+                                                )}
+                                                {workOrder.status === "Ongoing" && (
+                                                    <>
+                                                        <SelectItem value="Assigned">Assigned</SelectItem>
+                                                        <SelectItem value="For Budget Request">For Budget Request</SelectItem>
+                                                        <SelectItem value="Ongoing">Ongoing</SelectItem>
+                                                        <SelectItem value="Overdue">Overdue</SelectItem>
+                                                        <SelectItem value="Completed">Completed</SelectItem>
+                                                    </>
+                                                )}
+                                                {workOrder.status === "Overdue" && (
+                                                    <>
+                                                        <SelectItem value="Overdue">Overdue</SelectItem>
+                                                        <SelectItem value="Assigned">Assigned</SelectItem>
+                                                        <SelectItem value="For Budget Request">For Budget Request</SelectItem>
+                                                        <SelectItem value="Completed">Completed</SelectItem>
+                                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                                    </>
+                                                )}
+                                                {workOrder.status === "Completed" && (
+                                                    <>
+                                                        <SelectItem value="Ongoing">Ongoing</SelectItem>
+                                                        <SelectItem value="Completed">Completed</SelectItem>
+                                                    </>
+                                                )}
                                             </SelectContent>
                                         </Select>
-                                    {localErrors.status && (
-                                        <p className="text-red-500 text-xs">{localErrors.status}</p>
-                                    )}
+                                        {localErrors.status && (
+                                            <p className="text-red-500 text-xs">{localErrors.status}</p>
+                                        )}
                                     </div>
                                     
                                 </div>

@@ -23,7 +23,7 @@ interface Location {
     name: string;
 }
 
-interface AssignWorkOrderModalProps {
+interface ForBudgetRequestModalProps {
     workOrder: {
         id: number;
         location: { id: number; name: string };
@@ -34,15 +34,10 @@ interface AssignWorkOrderModalProps {
         status: string;
         label: string;
         priority: string;
-        scheduled_at: string;
-        assigned_to: { id: number; name: string; };
-        approved_at: string;
-        approved_by: string;
         remarks: string;
         images: string[];
     };
     locations: Location[];
-    maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
     user: {
         id: number;
         name: string;
@@ -51,23 +46,13 @@ interface AssignWorkOrderModalProps {
     onClose: () => void;
 }
 
-export default function AssignWorkOrderModal({
+export default function ForBudgetRequestModal({
     workOrder,
     locations,
-    maintenancePersonnel,
     user,
     onClose,
-}: AssignWorkOrderModalProps) {
-    const initialLocationName = locations.find((loc) =>
-        loc.id === Number(workOrder.location.id))?.name || "";
-    const initialLocationId = locations.find((loc) =>
-        loc.id === Number(workOrder.location.id))?.id || "";
-
+}: ForBudgetRequestModalProps) {
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
-    const [date, setDate] = useState<Date>()
-    const [showCalendar, setShowCalendar] = useState(false)
-    const [showApprovalCalendar, setShowApprovalCalendar] = useState(false)
-    const [approvedDate, setApprovedDate] = useState<Date>()
     const [localErrors, setLocalErrors] = useState<Record<string, string>>({})
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
@@ -77,14 +62,10 @@ export default function AssignWorkOrderModal({
         report_description: workOrder.report_description,
         asset: workOrder.asset,
         images: [] as File[],
-        status: "Assigned",
+        status: "For Budget Request",
         label: workOrder.label,
-        assigned_to: workOrder.assigned_to ?? "",
         priority: workOrder.priority,
         remarks: workOrder.remarks ?? "",
-        scheduled_at: workOrder.scheduled_at ?? "",
-        approved_at: workOrder.approved_at ?? "",
-        approved_by: workOrder.approved_by ?? "",
     });
 
     const validateForm = () => {
@@ -92,13 +73,7 @@ export default function AssignWorkOrderModal({
 
         if (isWorkOrderManager) {
             if (!data.label) newErrors["label"] = "Label is required."
-            if (!data.scheduled_at) newErrors["scheduled_at"] = "Target date is required."
             if (!data.priority) newErrors["priority"] = "Priority is required."
-            if (!data.assigned_to) newErrors["assigned_to"] = "Assigned personnel is required."
-            if(workOrder.status === "For Budget Request"){
-                if (!data.approved_at) newErrors["approved_at"] = "Approval date is required."
-                if (!data.approved_by) newErrors["approved_by"] = "Approver's name is required."
-            }
         }
 
         setLocalErrors(newErrors)
@@ -118,12 +93,8 @@ export default function AssignWorkOrderModal({
                 formData.append("location_id", data.location_id.toString());
                 formData.append("report_description", data.report_description || "");
                 formData.append("label", data.label || "");
-                formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
-                formData.append("assigned_to", data.assigned_to?.id?.toString() || "")
                 formData.append("priority", data.priority || "");
-                formData.append("status", data.status || "Assigned");
-                formData.append("approved_at", approvedDate ? format(approvedDate, "yyyy-MM-dd") : data.approved_at ? format(data.approved_at, "yyyy-MM-dd") : "")
-                formData.append("approved_by", data.approved_by || "");
+                formData.append("status", data.status || "For Budget Request");
                 formData.append("remarks", data.remarks || "");
             }
             
@@ -175,12 +146,8 @@ export default function AssignWorkOrderModal({
             <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold">
-                        { workOrder.status === "For Budget Request" && (
-                            <span>Accept Work Order - With Approved Budget</span>
-                        ) || (
-                            <span>Accept Work Order</span>
-                        )}
-                        </DialogTitle>
+                        <span>For Budget Request</span>
+                    </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -295,64 +262,6 @@ export default function AssignWorkOrderModal({
                                         </Select>
                                     </div>
 
-                                    {/* Target Date */}
-                                    <div className="flex-[1] space-y-2">
-                                        <Label htmlFor="scheduled_at" className="flex items-center">
-                                            Target Date <span className="text-red-500 ml-1">*</span>
-                                        </Label>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setShowCalendar(!showCalendar)}
-                                            className={cn(
-                                                "w-full flex justify-between items-center",
-                                                "text-left font-normal",
-                                                !data.scheduled_at && "text-muted-foreground"
-                                            )}
-                                        >
-                                            {data.scheduled_at
-                                                ? format(data.scheduled_at, "MM/dd/yyyy")
-                                                : "MM/DD/YYYY"}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                        {showCalendar && (
-                                            <div
-                                                className="absolute z-50 bg-white shadow-md border !-mt-[44vh] -ml-[6.5rem] rounded-md"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={
-                                                    data.scheduled_at && isValid(parseISO(data.scheduled_at))
-                                                        ? parseISO(data.scheduled_at)
-                                                        : undefined
-                                                    }
-                                                    onSelect={(date) => {
-                                                    if (date) {
-                                                        setData("scheduled_at", format(date, "yyyy-MM-dd"))
-                                                        setDate(date)
-                                                        setLocalErrors((prev) => ({ ...prev, scheduled_at: "" }))
-                                                        setShowCalendar(false)
-                                                    }
-                                                    }}
-                                                    disabled={(date) => date < new Date()}
-                                                    initialFocus
-                                                />
-                                            </div>
-                                        )}
-                                        {showCalendar && (
-                                            <div
-                                                className="fixed inset-0 z-40"
-                                                onClick={() => setShowCalendar(false)}
-                                            />
-                                        )}
-                                        {localErrors.scheduled_at && (
-                                            <p className="text-red-500 text-xs">{localErrors.scheduled_at}</p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-row justify-between gap-4 !mt-4">
 
                                     {/* Priority */}
                                     <div className="flex-[1] space-y-2">
@@ -378,111 +287,8 @@ export default function AssignWorkOrderModal({
                                     )}
                                     </div>
 
-                                    {/* Assign to */}
-                                    <div className="flex-[2] space-y-2">
-                                        <Label htmlFor="assigned_to" className="flex items-center">
-                                            Assign to <span className="text-red-500 ml-1">*</span>
-                                        </Label>
-                                        <Select
-                                            value={data.assigned_to?.id?.toString()}
-                                            onValueChange={(value) => setData("assigned_to", { id: parseInt(value), name: "" })}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select Personnel" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {maintenancePersonnel.map((person) => (
-                                                    <SelectItem key={person.id} value={person.id.toString()}>
-                                                        {person.first_name} {person.last_name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    {localErrors.assigned_to && (
-                                        <p className="text-red-500 text-xs">{localErrors.assigned_to}</p>
-                                    )}
-                                    </div>
-
                                 </div>
-                                { workOrder.status === "For Budget Request" && (
 
-                                    <div className="flex flex-row justify-between gap-4 !mt-4">
-                                        {/* Approval Date */}
-                                        <div className="flex-[1] space-y-2">
-                                            <Label htmlFor="approved_at" className="flex items-center">
-                                                Approval Date <span className="text-red-500 ml-1">*</span>
-                                            </Label>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() => setShowApprovalCalendar(!showApprovalCalendar)}
-                                                className={cn(
-                                                "w-full flex justify-between items-center",
-                                                "text-left font-normal",
-                                                !data.approved_at && "text-muted-foreground"
-                                                )}
-                                            >
-                                                {data.approved_at
-                                                ? format(data.approved_at, "MM/dd/yyyy")
-                                                : "MM/DD/YYYY"}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                            </Button>
-
-                                            {showApprovalCalendar && (
-                                                <div
-                                                className="absolute z-50 bg-white shadow-md border !-mt-[46vh] rounded-md"
-                                                onClick={(e) => e.stopPropagation()}
-                                                >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={
-                                                    data.approved_at && isValid(parseISO(data.approved_at))
-                                                        ? parseISO(data.approved_at)
-                                                        : undefined
-                                                    }
-                                                    onSelect={(date) => {
-                                                    if (date) {
-                                                        setData("approved_at", format(date, "yyyy-MM-dd"))
-                                                        setApprovedDate(date)
-                                                        setShowApprovalCalendar(false)
-                                                    }
-                                                    }}
-                                                    disabled={(date) => date > new Date()} // Optional: disallow future dates
-                                                    initialFocus
-                                                />
-                                                </div>
-                                            )}
-                                            {showApprovalCalendar && (
-                                                <div
-                                                className="fixed inset-0 z-40"
-                                                onClick={() => setShowApprovalCalendar(false)} // close on outside click
-                                                />
-                                            )}
-                                            {localErrors.approved_at && (
-                                                <p className="text-red-500 text-xs">{localErrors.approved_at}</p>
-                                            )}
-                                        </div>
-
-                                        {/* Approved by */}
-                                        <div className="flex-[2] space-y-2">
-                                            <Label htmlFor="approved_by" className="flex items-center">
-                                                Approved by <span className="text-red-500 ml-1">*</span>
-                                            </Label>
-                                            <Input
-                                                type="text"
-                                                id="approved_by"
-                                                value={data.approved_by}
-                                                onChange={(e) => setData("approved_by", e.target.value)}
-                                                className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="Enter approver's name"
-                                            />
-        
-                                        {localErrors.approved_by && (
-                                            <p className="text-red-500 text-xs">{localErrors.approved_by}</p>
-                                        )}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </form>
                     )}
@@ -491,7 +297,7 @@ export default function AssignWorkOrderModal({
                 <DialogFooter className="px-6 py-4 border-t">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
                     <Button type="submit" onClick={submit}
-                        className="bg-primary hover:bg-primary/90 text-white">Accept Request</Button>
+                        className="bg-primary hover:bg-primary/90 text-white">Accept Partially</Button>
                 </DialogFooter>
 
                 {activeImageIndex !== null && (

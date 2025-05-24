@@ -19,90 +19,70 @@ interface StatusCellProps {
         roles: { name: string }[];
         permissions: string[];
     };
-    row: any
-}; 
+    row: any;
+}
+
+// Define status transition rules
+const STATUS_TRANSITIONS: Record<string, string[]> = {
+    "Assigned": ["Assigned", "For Budget Request", "Pending", "Ongoing", "Completed", "Cancelled"],
+    "Ongoing": ["Assigned", "For Budget Request", "Ongoing", "Overdue", "Completed"],
+    "Overdue": ["Overdue", "For Budget Request", "Completed", "Cancelled"],
+    "Completed": ["Ongoing", "Completed"],
+    "Pending": ["Pending", "Assigned", "For Budget Request", "Ongoing", "Completed", "Cancelled"],
+    "For Budget Request": ["For Budget Request", "Assigned", "Pending", "Ongoing", "Completed", "Cancelled"],
+    "Cancelled": ["Cancelled", "Assigned", "For Budget Request", "Ongoing"],
+    "Declined": ["Declined", "Assigned", "For Budget Request", "Ongoing"],
+};
 
 export function StatusCell({ value, user, row }: StatusCellProps) {
-
-    const handleUpdate = (status: string, rowId: number,) => {
-            router.put(`/work-orders/${rowId}`, { status });
+    const handleUpdate = (status: string, rowId: number) => {
+        router.put(`/work-orders/${rowId}`, { status });
     };
 
-    // Define all statuses
-    const allStatuses = [
-        "Pending",
-        "Assigned",
-        "Scheduled",
-        "Ongoing",
-        "Overdue",
-        "Completed",
-        "For Budget Request",
-        "Cancelled",
-        "Declined",
-    ];
+    // Get available status transitions based on current status
+    const getAvailableStatuses = (currentStatus: string): string[] => {
+        // If user is maintenance personnel, restrict to basic statuses
+        if (user.roles[0].name === "maintenance_personnel") {
+            return ["Ongoing", "Completed"];
+        }
+        
+        // Return available transitions for current status
+        return STATUS_TRANSITIONS[currentStatus] || [];
+    };
 
-    // Filter statuses based on user role
-    const dropDownStatuses =
-        user.roles[0].name === "maintenance_personnel"
-            ? ["Ongoing", "Completed"] // Restricted statuses for maintenance personnel
-            : allStatuses; // All statuses for other roles
-
-    const disableStatus = [
-        "Pending",
-        "Scheduled",
-        "Overdue",
-        "Completed",
-        "For Budget Request",
-        "Cancelled",
-        "Declined",
-        "Deleted",
-    ]
+    const availableStatuses = getAvailableStatuses(value);
+    const canEditStatus = user.permissions.includes("manage work orders") || 
+                         (user.roles[0].name === "maintenance_personnel" && 
+                          window.route().current("work-orders.assigned-tasks"));
 
     return (
         <DropdownMenu>
-            {disableStatus.includes(value) && !user.permissions.includes("manage work orders") ? (
-            <span
-                className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(
-                value
-                )}`}
-            >
-                {value}
-            </span>
-            ) : ( window.route && (
-                    (user.roles[0].name === "maintenance_personnel" && window.route().current("work-orders.assigned-tasks")) || 
-                    (user.permissions.includes("manage work orders") && window.route().current("work-orders.index")) 
-                )) ? (
-            <DropdownMenuTrigger asChild>
-                <Button
-                variant={"link"}
-                className={`px-2 py-1 !h-6 border rounded flex items-center justify-between gap-1 text-xs hover:no-underline ${getStatusColor(
-                    value
-                )}`}
+            {!canEditStatus ? (
+                <span
+                    className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(value)}`}
                 >
-                {value}
-                <ChevronDown className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
+                    {value}
+                </span>
             ) : (
-            <span
-                className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(
-                value
-                )}`}
-            >
-                {value}
-            </span>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="link"
+                        className={`px-2 py-1 !h-6 border rounded flex items-center justify-between gap-1 text-xs hover:no-underline ${getStatusColor(value)}`}
+                    >
+                        {value}
+                        <ChevronDown className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
             )}
             <DropdownMenuContent align="center">
-            {dropDownStatuses.map((status) => (
-                <DropdownMenuItem
-                key={status}
-                onClick={() => {
-                    handleUpdate(status, row.original.id);
-                }}
-                >
-                {status}
-                </DropdownMenuItem>
-            ))}
+                {availableStatuses.map((status) => (
+                    <DropdownMenuItem
+                        key={status}
+                        onClick={() => handleUpdate(status, row.original.id)}
+                    >
+                        {status}
+                    </DropdownMenuItem>
+                ))}
             </DropdownMenuContent>
         </DropdownMenu>
     );

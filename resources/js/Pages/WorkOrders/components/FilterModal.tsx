@@ -130,10 +130,10 @@ export default function FilterModal({
         </div>
 
         <div className="flex justify-between p-4 border-t">
-          <Button className="w-full bg-primary text-white hover:bg-primary/90 mr-2" onClick={applyFilters}>
+          <Button size="sm" className="w-full bg-primary text-white hover:bg-primary/90 mr-2" onClick={applyFilters}>
             Apply
           </Button>
-          <Button variant="outline" className="w-full" onClick={clearFilters}>
+          <Button size="sm" variant="outline" className="w-full" onClick={clearFilters}>
             Clear
           </Button>
         </div>

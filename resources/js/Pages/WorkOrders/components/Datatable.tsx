@@ -234,11 +234,9 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className={`text-muted-foreground ${(cell.column.columnDef.meta as ColumnMeta<TData>)?.cellClassName || ""}`}
+                      className={`text-muted-foreground text-center ${(cell.column.columnDef.meta as ColumnMeta<TData>)?.cellClassName || ""}`}
                     >
-                      <span className="flex items-center justify-center">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </span>
                     </TableCell>
                   ))}
                 </TableRow>

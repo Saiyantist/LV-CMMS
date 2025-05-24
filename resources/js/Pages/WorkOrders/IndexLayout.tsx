@@ -17,9 +17,10 @@ import FlashToast from "@/Components/FlashToast";
 import React, { useState } from "react";
 import AssignWorkOrderModal from "./components/AssignWorkOrderModal";
 import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
-import { BookX, SquarePen } from "lucide-react";
+import { BookX, SquarePen, Trash } from "lucide-react";
 import DeclineWorkOrderModal from "./components/DeclineWorkOrderModal";
 import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
+import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
 
 interface Props {
     user: {
@@ -110,6 +111,7 @@ export default function IndexLayout({
 
     const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
     const [acceptingWorkOrder, setAcceptingWorkOrder] = useState<any>(null);
+    const [forBudgetRequest, setForBudgetRequest] = useState<any>(null);
     const [decliningWorkOrder, setDecliningWorkOrder] = useState<any>(null);
     const [cancellingWorkOrder, setCancellingWorkOrder] = useState<any>(null);
     const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>(
@@ -165,7 +167,7 @@ export default function IndexLayout({
                 />
             ),
             meta: {
-                cellClassName: "text-center",
+                cellClassName: "flex justify-center",
                 filterable: true,
             },
         },
@@ -173,34 +175,37 @@ export default function IndexLayout({
             id: "actions",
             header: "Actions",
             cell: ({ row }) => (
-                <div className="flex gap-2">
-                    <Button
-                        className="bg-primary h-6 text-xs rounded-sm"
-                        onClick={() => setIsViewingWorkOrder(row.original)}
-                    >
-                        View
-                    </Button>
-                    { row.getValue('status') === "Pending" && (
-                    <>
+                    <div className="flex gap-2 justify-start px-2">
                         <Button
-                            variant={"outline"}
-                            size={"icon"}
-                            className="h-6 text-xs rounded-sm"
-                            onClick={() => setEditingWorkOrder(row.original)}
-                        ><SquarePen />
+                            className="bg-primary h-6 text-xs rounded-sm"
+                            onClick={() => setIsViewingWorkOrder(row.original)}
+                        >
+                            View
                         </Button>
-                        <Button
-                            variant={"outline"}
-                            size={"icon"}
-                            className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
-                            onClick={() => setCancellingWorkOrder(row.original)}
-                        ><BookX />
-                        </Button>
-                    </>
-                    )}
-                </div>
+                        { row.getValue('status') === "Pending" && (
+                        <>
+                            <Button
+                                variant={"outline"}
+                                size={"icon"}
+                                className="h-6 text-xs rounded-sm"
+                                onClick={() => setEditingWorkOrder(row.original)}
+                            ><SquarePen />
+                            </Button>
+                            <Button
+                                variant={"outline"}
+                                size={"icon"}
+                                className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
+                                onClick={() => setCancellingWorkOrder(row.original)}
+                            ><BookX />
+                            </Button>
+                        </>
+                        )}
+                    </div>
             ),
             enableSorting: false,
+            meta: {
+                cellClassName: "w-[10rem]",
+            }
         },
     ];
 
@@ -239,8 +244,7 @@ export default function IndexLayout({
             ),
             enableSorting: false,
             meta: {
-                headerClassName: "min-w-[15rem]",
-                cellClassName: "max-w-16 px-2",
+                cellClassName: "max-w-[15rem] px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
             },
         },
@@ -312,10 +316,34 @@ export default function IndexLayout({
                     enableSorting: false,
                     meta: {
                         headerClassName: "max-w-10",
-                        cellClassName: "text-center",
+                        cellClassName: "flex justify-center",
                         filterable: true,
                     },
                 },
+                {
+                    id: "actions",
+                    header: "Action",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => (
+                        <div className="flex gap-2 justify-center">
+                            <Button
+                                className="bg-primary h-6 text-xs rounded-sm"
+                                onClick={() => setEditingWorkOrder(row.original)}
+                            >
+                                Edit
+                            </Button>
+                            {activeTab === "Declined" && (
+                                <Button
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                                    onClick={() => handleDelete(row.original.id)}
+                                ><Trash />
+                                </Button>
+                            )}
+                        </div>
+                    ),
+                    enableSorting: false,
+                }
               ]
             : []),
         ...(activeTab === "Pending" || activeTab === "For Budget Request"
@@ -332,14 +360,21 @@ export default function IndexLayout({
                     id: "actions",
                     header: "Action",
                     cell: ({ row }: { row: Row<WorkOrders> }) => (
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 justify-center">
                             <Button
-                                variant={"outline"}
                                 className="bg-primary h-6 text-xs text-white rounded-sm !border-none hover:bg-primary/85 hover:text-white transition-all duration-200"
                                 onClick={() => setAcceptingWorkOrder(row.original)}
                             >
                                 Accept
                             </Button>
+                            {activeTab === "Pending" && (
+                                <Button
+                                    className="h-6 text-xs text-white rounded-sm !border-none bg-secondary/60 hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                    onClick={() => setForBudgetRequest(row.original)}
+                                >
+                                    Budget Request
+                                </Button>
+                            )}
                             <Button
                                 variant={"outline"}
                                 size={"icon"}
@@ -350,31 +385,12 @@ export default function IndexLayout({
                         </div>
                     ),
                     enableSorting: false,
+                    meta: {
+                        cellClassName: "max-w-[10rem] text-center",
+                    },
                 }
             ]
-            : [
-                {
-                    id: "actions",
-                    header: "Action",
-                    cell: ({ row }: { row: Row<WorkOrders> }) => (
-                        <div className="flex gap-2">
-                            <Button
-                                className="bg-primary h-6 text-xs rounded-sm"
-                                onClick={() => setEditingWorkOrder(row.original)}
-                            >
-                                Edit
-                            </Button>
-                            <Button
-                                className="bg-red-600 h-6 text-white text-xs rounded-sm hover:bg-red-800 transition"
-                                onClick={() => handleDelete(row.original.id)}
-                            >
-                                Delete
-                            </Button>
-                        </div>
-                    ),
-                    enableSorting: false,
-                }
-            ])
+            : [])
     ];
 
     const columns: ColumnDef<WorkOrders>[] = isRequesterOrPersonnel 
@@ -417,6 +433,14 @@ export default function IndexLayout({
                 />
             )}
 
+            {forBudgetRequest && (
+                <ForBudgetRequestModal
+                    workOrder={forBudgetRequest}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setForBudgetRequest(null)}
+                />
+            )}
             {isViewingWorkOrder && (
                 <ViewWorkOrderModal
                     workOrder={isViewingWorkOrder}
@@ -466,7 +490,8 @@ export default function IndexLayout({
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
                         <TabsList className="bg-gray-200 text-black rounded-md mb-6">
                             <TabsTrigger value="Pending">Pending</TabsTrigger>
-                            <TabsTrigger value="Accepted">Accepted</TabsTrigger>
+                            <TabsTrigger value="Assigned">Assigned</TabsTrigger>
+                            <TabsTrigger value="Scheduled">Scheduled</TabsTrigger>
                             <TabsTrigger value="For Budget Request">
                                 For Budget Request
                             </TabsTrigger>
