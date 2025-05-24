@@ -152,7 +152,7 @@ export default function IndexLayout({
             enableSorting: false,
             meta: {
                 headerClassName: "w-1/2",
-                cellClassName: "max-w-16 px-2 text-left",
+                cellClassName: "max-w-16 px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
             },
         },
@@ -495,7 +495,7 @@ export default function IndexLayout({
                             <TabsTrigger value="For Budget Request">
                                 For Budget Request
                             </TabsTrigger>
-                            <TabsTrigger value="Declined">Declined</TabsTrigger>
+                            <TabsTrigger value="Declined" className="data-[state=active]:bg-red-600/80">Declined</TabsTrigger>
                         </TabsList>
                     </Tabs>
                 </div>

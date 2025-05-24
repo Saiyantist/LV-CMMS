@@ -71,8 +71,18 @@ export default function AssignedTask({
             enableSorting: false,
             meta: {
                 headerClassName: "w-[22%]",
-                cellClassName: "max-w-16 px-2",
+                cellClassName: "max-w-16 px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
+            },
+        },
+        {
+            accessorKey: "work_order_type",
+            header: "Work Order Type",
+            cell: ({ row }) => <div>{row.getValue("work_order_type")}</div>,
+            enableSorting: false,
+            meta: {
+                headerClassName: "w-[10rem]",
+                filterable: true,
             },
         },
         {
@@ -90,7 +100,6 @@ export default function AssignedTask({
             sortingFn: prioritySorting,
             meta: {
                 headerClassName: "max-w-20",
-                cellClassName: "text-center",
                 filterable: true,
             },
         },
@@ -100,18 +109,7 @@ export default function AssignedTask({
             cell: ({ row }) => <div>{row.getValue("scheduled_at")}</div>,
             meta: {
                 headerClassName: "max-w-20",
-                cellClassName: "text-center",
                 searchable: true,
-            },
-        },
-        {
-            accessorKey: "work_order_type",
-            header: "Work Order Type",
-            cell: ({ row }) => <div>{row.getValue("work_order_type")}</div>,
-            enableSorting: false,
-            meta: {
-                headerClassName: "w-[10rem]",
-                filterable: true,
             },
         },
         {
@@ -126,6 +124,7 @@ export default function AssignedTask({
             ),
             sortingFn: statusSorting,
             meta: {
+                cellClassName: "flex justify-center",
                 filterable: true,
             },
         },

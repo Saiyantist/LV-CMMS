@@ -15,8 +15,7 @@ interface StatusCellProps {
     value: string;
     user: {
         id: number;
-        name: string;
-        roles: { name: string }[];
+        roles: { id: number; name: string }[];
         permissions: string[];
     };
     row: any;
@@ -24,14 +23,15 @@ interface StatusCellProps {
 
 // Define status transition rules
 const STATUS_TRANSITIONS: Record<string, string[]> = {
-    "Assigned": ["Assigned", "For Budget Request", "Pending", "Ongoing", "Completed", "Cancelled"],
-    "Ongoing": ["Assigned", "For Budget Request", "Ongoing", "Overdue", "Completed"],
-    "Overdue": ["Overdue", "For Budget Request", "Completed", "Cancelled"],
-    "Completed": ["Ongoing", "Completed"],
-    "Pending": ["Pending", "Assigned", "For Budget Request", "Ongoing", "Completed", "Cancelled"],
-    "For Budget Request": ["For Budget Request", "Assigned", "Pending", "Ongoing", "Completed", "Cancelled"],
-    "Cancelled": ["Cancelled", "Assigned", "For Budget Request", "Ongoing"],
-    "Declined": ["Declined", "Assigned", "For Budget Request", "Ongoing"],
+    "Assigned": ["Pending", "For Budget Request", "Scheduled", "Ongoing", "Completed", "Cancelled"],
+    "Scheduled": ["Pending", "Ongoing"],
+    "Ongoing": ["Assigned", "Overdue", "Completed", "Cancelled"],
+    "Overdue": ["For Budget Request", "Completed", "Cancelled"],
+    "Completed": ["Ongoing"],
+    "Pending": ["Assigned", "For Budget Request", "Scheduled", "Ongoing", "Completed", "Cancelled"],
+    "For Budget Request": ["Pending", "Assigned", "Ongoing", "Completed", "Cancelled"],
+    "Cancelled": ["Assigned", "For Budget Request"],
+    "Declined": ["Assigned", "For Budget Request"],
 };
 
 export function StatusCell({ value, user, row }: StatusCellProps) {

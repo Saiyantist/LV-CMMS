@@ -460,8 +460,9 @@ export default function EditWorkOrderModal({
                                                 {workOrder.status === "Assigned" && (
                                                     <>
                                                         <SelectItem value="Assigned">Assigned</SelectItem>
-                                                        <SelectItem value="For Budget Request">For Budget Request</SelectItem>
                                                         <SelectItem value="Pending">Pending</SelectItem>
+                                                        <SelectItem value="For Budget Request">For Budget Request</SelectItem>
+                                                        <SelectItem value="Ongoing">Scheduled</SelectItem>
                                                         <SelectItem value="Ongoing">Ongoing</SelectItem>
                                                         <SelectItem value="Completed">Completed</SelectItem>
                                                         <SelectItem value="Cancelled">Cancelled</SelectItem>
@@ -469,17 +470,16 @@ export default function EditWorkOrderModal({
                                                 )}
                                                 {workOrder.status === "Ongoing" && (
                                                     <>
-                                                        <SelectItem value="Assigned">Assigned</SelectItem>
-                                                        <SelectItem value="For Budget Request">For Budget Request</SelectItem>
                                                         <SelectItem value="Ongoing">Ongoing</SelectItem>
+                                                        <SelectItem value="Assigned">Assigned</SelectItem>
                                                         <SelectItem value="Overdue">Overdue</SelectItem>
                                                         <SelectItem value="Completed">Completed</SelectItem>
+                                                        <SelectItem value="Completed">Cancelled</SelectItem>
                                                     </>
                                                 )}
                                                 {workOrder.status === "Overdue" && (
                                                     <>
                                                         <SelectItem value="Overdue">Overdue</SelectItem>
-                                                        <SelectItem value="Assigned">Assigned</SelectItem>
                                                         <SelectItem value="For Budget Request">For Budget Request</SelectItem>
                                                         <SelectItem value="Completed">Completed</SelectItem>
                                                         <SelectItem value="Cancelled">Cancelled</SelectItem>
@@ -487,8 +487,22 @@ export default function EditWorkOrderModal({
                                                 )}
                                                 {workOrder.status === "Completed" && (
                                                     <>
-                                                        <SelectItem value="Ongoing">Ongoing</SelectItem>
                                                         <SelectItem value="Completed">Completed</SelectItem>
+                                                        <SelectItem value="Ongoing">Ongoing</SelectItem>
+                                                    </>
+                                                )}
+                                                {workOrder.status === "Cancelled" && (
+                                                    <>
+                                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                                        <SelectItem value="Assigned">Assigned</SelectItem>
+                                                        <SelectItem value="For Budget Request">For Budget Request</SelectItem>
+                                                    </>
+                                                )}
+                                                {workOrder.status === "Declined" && (
+                                                    <>
+                                                        <SelectItem value="Declined">Declined</SelectItem>
+                                                        <SelectItem value="Assigned">Assigned</SelectItem>
+                                                        <SelectItem value="For Budget Request">For Budget Request</SelectItem>
                                                     </>
                                                 )}
                                             </SelectContent>
