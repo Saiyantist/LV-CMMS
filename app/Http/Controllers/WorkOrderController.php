@@ -466,6 +466,8 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
+        $isWorkOrderManager = $user->hasPermissionTo('manage work orders');
+
         // Validate the request data
         $validated = $request->validate([
             'report_description' => 'required|string|max:1000',

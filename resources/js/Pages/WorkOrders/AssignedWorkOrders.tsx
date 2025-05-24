@@ -1,10 +1,5 @@
-import React, { useState } from "react";
-import {
-    Tabs,
-    TabsList,
-    TabsTrigger,
-    TabsContent,
-} from "@/Components/shadcnui/tabs";
+import { useState } from "react";
+import { Tabs } from "@/Components/shadcnui/tabs";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, usePage } from "@inertiajs/react";
 import { Button } from "@/Components/shadcnui/button";
@@ -20,13 +15,14 @@ import { statusSorting } from "@/utils/statusSorting";
 // import dayGridPlugin from "@fullcalendar/daygrid"; // Month view
 // import timeGridPlugin from "@fullcalendar/timegrid"; // Week view
 
-export default function AssignedTask({
+export default function AssignedWorkOrders({
     user,
     workOrders,
 }: {
     user: {
         id: number;
-        roles: { id: number; name: string }[];
+        name: string;
+        roles: { name: string }[];
         permissions: string[];
     };
     workOrders: any;

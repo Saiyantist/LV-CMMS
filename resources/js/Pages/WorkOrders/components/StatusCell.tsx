@@ -15,7 +15,8 @@ interface StatusCellProps {
     value: string;
     user: {
         id: number;
-        roles: { id: number; name: string }[];
+        name: string;
+        roles: { name: string }[];
         permissions: string[];
     };
     row: any;

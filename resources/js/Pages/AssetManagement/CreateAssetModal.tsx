@@ -57,13 +57,7 @@ export default function AddAssetModal({
     const [yearlyMonth, setYearlyMonth] = useState("January"); // Default to January
     const [monthlyDay, setMonthlyDay] = useState("Sunday");
 
-    const [yearlyDay, setYearlyDay] = useState(1); // Default to 1
-
-    const toggleDay = (day: string) => {
-        setWeeklyDays((prev) =>
-            prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-        );
-    };
+    const [yearlyDay, setYearlyDay] = useState<string | number>(1); // Default to 1
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
