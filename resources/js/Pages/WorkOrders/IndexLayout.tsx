@@ -21,7 +21,7 @@ import { BookX, SquarePen, Trash } from "lucide-react";
 import DeclineWorkOrderModal from "./components/DeclineWorkOrderModal";
 import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
 import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
-
+import DeleteWorkOrderModal from "./components/DeleteWorkOrderModal";
 interface Props {
     user: {
         id: number;
@@ -47,7 +47,6 @@ interface Props {
     isCreating: boolean;
     editingWorkOrder: any;
     showScrollUpButton: boolean;
-    handleDelete: (id: number) => void;
     setActiveTab: (tab: string) => void;
     setIsCreating: (val: boolean) => void;
     setEditingWorkOrder: (workOrder: any) => void;
@@ -102,7 +101,6 @@ export default function IndexLayout({
     setIsCreating,
     setEditingWorkOrder,
     scrollToTop,
-    handleDelete,
 }: Props) {
     const isRequesterOrPersonnel =
     user.roles[0].name === "internal_requester" ||
@@ -114,6 +112,7 @@ export default function IndexLayout({
     const [forBudgetRequest, setForBudgetRequest] = useState<any>(null);
     const [decliningWorkOrder, setDecliningWorkOrder] = useState<any>(null);
     const [cancellingWorkOrder, setCancellingWorkOrder] = useState<any>(null);
+    const [deletingWorkOrder, setDeletingWorkOrder] = useState<any>(null);
     const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>(
         []
     );
@@ -223,7 +222,9 @@ export default function IndexLayout({
             accessorKey: "requested_at",
             header: "Date Requested",
             cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
-            meta: { headerClassName: "w-[7.5rem]" },
+            meta: { 
+                cellClassName: "min-w-[7.5rem] max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+            },
         },
         {
             accessorKey: "location.name",
@@ -231,7 +232,7 @@ export default function IndexLayout({
             cell: ({ row }) => <div>{row.original.location.name}</div>,
             enableSorting: false,
             meta: {
-                headerClassName: "w-[10rem]",
+                cellClassName: "min-w-[7.5rem] max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
                 filterable: true,
             },
@@ -265,8 +266,7 @@ export default function IndexLayout({
                     header: "Target Date",
                     cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at")}</div>,
                     meta: {
-                        headerClassName: "max-w-[6rem]",
-                        cellClassName: "text-center",
+                        cellClassName: "min-w-[7.5rem] max-w-[8rem] text-center",
                         searchable: true,
                     },
                 },
@@ -297,8 +297,7 @@ export default function IndexLayout({
                     ),
                     enableSorting: false,
                     meta: {
-                        headerClassName: "max-w-32",
-                        cellClassName: "text-center",
+                        cellClassName: "min-w-[7.5rem] max-w-[8rem] text-center",
                         searchable: true,
                         filterable: true,
                     },
@@ -336,7 +335,7 @@ export default function IndexLayout({
                                     variant={"outline"}
                                     size={"icon"}
                                     className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
-                                    onClick={() => handleDelete(row.original.id)}
+                                    onClick={() => setDeletingWorkOrder(row.original)}
                                 ><Trash />
                                 </Button>
                             )}
@@ -443,6 +442,7 @@ export default function IndexLayout({
                     onClose={() => setForBudgetRequest(null)}
                 />
             )}
+
             {isViewingWorkOrder && (
                 <ViewWorkOrderModal
                     workOrder={isViewingWorkOrder}
@@ -469,6 +469,16 @@ export default function IndexLayout({
                     onClose={() => setCancellingWorkOrder(null)}
                 />
             )}
+
+            {deletingWorkOrder && (
+                <DeleteWorkOrderModal
+                    workOrder={deletingWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setDeletingWorkOrder(null)}
+                />
+            )}
+            
             <FlashToast />
 
             {/* Header */}

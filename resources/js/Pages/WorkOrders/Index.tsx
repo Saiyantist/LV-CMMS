@@ -79,12 +79,6 @@ export default function WorkOrders({
         return wo;
     });
 
-    const handleDelete = (id: number) => {
-        const confirmDelete = confirm("Are you sure you want to delete this work order?");
-        if (confirmDelete) {
-            router.delete(`/work-orders/${id}`);
-        }
-    }
     const handleScroll = () => {
         setShowScrollUpButton(window.scrollY > 300);
     };
@@ -114,7 +108,6 @@ export default function WorkOrders({
             setIsCreating={setIsCreating}
             setEditingWorkOrder={setEditingWorkOrder}
             scrollToTop={scrollToTop}
-            handleDelete={handleDelete}
         />
     );
 }

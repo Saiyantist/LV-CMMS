@@ -146,8 +146,12 @@ export default function ForBudgetRequestModal({
         >
             <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
-                    <DialogTitle className="text-xl font-semibold">
-                        <span>For Budget Request</span>
+                    <DialogTitle className="text-xl font-semibold text-primary">
+                        <div className="flex flex-row gap-4">
+                            <span>For Budget Request</span>
+                            <span className="text-muted-foreground">|</span>
+                            <span className="text-muted-foreground">ID: {workOrder.id}</span>
+                        </div>
                     </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />

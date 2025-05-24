@@ -178,11 +178,19 @@ export default function AssignWorkOrderModal({
         >
             <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
-                    <DialogTitle className="text-xl font-semibold">
+                    <DialogTitle className="text-xl font-semibold text-primary">
                         { workOrder.status === "For Budget Request" && (
-                            <span>Accept Work Order - With Approved Budget</span>
+                            <div className="flex flex-row gap-4">
+                                <span>Accept Work Order - With Approved Budget</span>
+                                <span className="text-muted-foreground">|</span>
+                                <span className="text-muted-foreground">ID: {workOrder.id}</span>
+                            </div>
                         ) || (
-                            <span>Accept Work Order</span>
+                            <div className="flex flex-row gap-4">
+                                <span>Accept Work Order</span>
+                                <span className="text-muted-foreground">|</span>
+                                <span className="text-muted-foreground">ID: {workOrder.id}</span>
+                            </div>
                         )}
                         </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>

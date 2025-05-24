@@ -118,6 +118,7 @@ export default function EditWorkOrderModal({
             if (!data.scheduled_at) newErrors["scheduled_at"] = "Target date is required."
             if (!data.priority) newErrors["priority"] = "Priority is required."
             if (!data.status) newErrors["status"] = "Status is required."
+            if (!data.assigned_to) newErrors["assigned_to"] = "Assignee is required."
             if(workOrder.status === "For Budget Request"){
                 if (!data.approved_at) newErrors["approved_at"] = "Approval date is required."
                 if (!data.approved_by) newErrors["approved_by"] = "Approver's name is required."
@@ -227,14 +228,18 @@ export default function EditWorkOrderModal({
         >
             <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
-                    <DialogTitle className="text-xl font-semibold">
-                        {workOrder.status === "Declined" ? (
-                            <span>Accept Declined Work Order - {workOrder.id}</span>
-                        ) : workOrder.status === "Cancelled" ? (
-                            <span>Accept Cancelled Work Order - {workOrder.id}</span>
-                        ) : (
-                            <span>Editing Work Order - {workOrder.id}</span>
-                        )}
+                    <DialogTitle className="text-xl font-semibold text-primary">
+                        <div className="flex flex-row gap-4">
+                            {workOrder.status === "Declined" ? (
+                                <span>Accept Declined Work Order</span>
+                            ) : workOrder.status === "Cancelled" ? (
+                                <span>Accept Cancelled Work Order</span>
+                            ) : (
+                                <span>Edit Work Order</span>
+                            )}
+                            <span className="text-muted-foreground">|</span>
+                            <span className="text-muted-foreground">ID: {workOrder.id}</span>
+                        </div>
                         </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />

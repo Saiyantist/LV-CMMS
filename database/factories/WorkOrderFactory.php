@@ -29,24 +29,20 @@ class WorkOrderFactory extends Factory
             'work_order_type' => fake()->randomElement(['Work Order', 'Preventive Maintenance', 'Compliance']),
             'requested_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'requested_at' => fake()->dateTimeBetween('-2 month', 'now')->format('Y-m-d H:i:s'),
-            'asset_id' => fake()->boolean(80) ? Asset::inRandomOrder()->first()?->id : null, // 80% chance of having an asset
         ];  //asset shall only have if !pending
-
+        
         // Only add priority, label, and remarks if status is not Pending
         if ($status !== 'Pending') {
             $data['priority'] = fake()->randomElement(['Low', 'Medium', 'High', 'Critical']);
             $data['label'] = fake()->randomElement(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label']);
             $data['remarks'] = fake()->optional()->sentence();
+            $data['asset_id'] = fake()->boolean(85) ? Asset::inRandomOrder()->first()?->id : null; // 85% chance of having an asset
         }
 
         // Only add assigned_to and assigned_at if status is Assigned
         if ($status === 'Assigned' || $status === 'Scheduled' || $status === 'Ongoing' || $status === 'Completed') {
-            $data['assigned_to'] = User::inRandomOrder()->first()?->id ?? User::factory();
+            $data['assigned_to'] = User::role('maintenance_personnel')->inRandomOrder()->first()?->id ?? User::factory();
             $data['assigned_at'] = fake()->dateTimeBetween('-1 week', '-1 day')->format('Y-m-d H:i:s');
-        }
-        
-        // Only add scheduled_at if status is Scheduled
-        if ($status === 'Scheduled') {
             $data['scheduled_at'] = fake()->dateTimeBetween('+3 days', '+2 month')->format('Y-m-d H:i:s');
         }
 

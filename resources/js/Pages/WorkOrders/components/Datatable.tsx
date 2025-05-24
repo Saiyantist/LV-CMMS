@@ -31,6 +31,7 @@ import {
     TableRow,
 } from "@/Components/shadcnui/table";
 import FilterModal from "./FilterModal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
 
 interface ColumnMeta<TData> {
   headerClassName?: string;
@@ -50,15 +51,6 @@ interface DataTableProps<TData extends { priority?: string; status?: string; [ke
   placeholder?: string
 }
 
-interface FilterModalProps<TData> {
-  isOpen: boolean;
-  onClose: () => void;
-  columns: ColumnDef<TData, any>[];
-  columnFilters: Record<string, any>;
-  setColumnFilters: (filters: Record<string, any>) => void;
-  data: TData[];
-  buttonRef: React.RefObject<HTMLButtonElement | null>;
-}
 
 export function Datatable<TData extends { priority?: string; status?: string; [key: string]: any }, TValue>({ columns, data, placeholder = "Search" }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
@@ -66,6 +58,8 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [columnFilters, setColumnFilters] = useState<Record<string, any>>({})
   const filterButtonRef = useRef<HTMLButtonElement>(null)
+  const [pageSize, setPageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState(0);
 
   // Close filter modal when clicking outside
   useEffect(() => {
@@ -131,12 +125,21 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
     columns,
     state: {
       sorting,
+      pagination: {
+        pageSize,
+        pageIndex,
+      },
     },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater({ pageSize, pageIndex }) : updater;
+      setPageIndex(next.pageIndex);
+      setPageSize(next.pageSize);
+    },
   })
 
   // Get the total number of filtered rows
@@ -225,7 +228,7 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
                 <TableRow 
                   key={row.id} 
                   data-state={row.getIsSelected() && "selected"} 
-                  className={`h-6 ${
+                  className={`h-6 hover:font-medium ${
                     (row.original.priority === "Critical" || row.original.status === "Overdue") 
                       ? "bg-red-50 hover:bg-red-100" 
                       : ""
@@ -234,7 +237,7 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className={`text-muted-foreground text-center ${(cell.column.columnDef.meta as ColumnMeta<TData>)?.cellClassName || ""}`}
+                      className={`text-muted-foreground text-center hover:text-primary ${(cell.column.columnDef.meta as ColumnMeta<TData>)?.cellClassName || ""}`}
                     >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
@@ -297,6 +300,29 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
             >
               Next <ChevronRight className="h-4 w-4" />
             </Button>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Rows per page:</span>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
+                  setPageIndex(0);
+                }}
+              >
+                <SelectTrigger className="w-[75px] h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 15, 25, 30].map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
           </div>
         </div>
       )}

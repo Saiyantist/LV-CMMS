@@ -21,7 +21,7 @@ interface Location {
     name: string;
 }
 
-interface DeclineWorkOrderModalProps {
+interface DeleteWorkOrderProps {
     workOrder: {
         id: number;
         location: { id: number; name: string };
@@ -49,13 +49,22 @@ interface DeclineWorkOrderModalProps {
     onClose: () => void;
 }
 
-export default function DeclineWorkOrderModal({
+export default function DeleteWorkOrderModal({
     workOrder,
     locations,
     user,
     onClose,
-}: DeclineWorkOrderModalProps) {
+}: DeleteWorkOrderProps) {
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
+
+    const submit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        router.delete(`/work-orders/${workOrder.id}`);
+        setTimeout(() => {
+            onClose();
+        }, 600);
+    };
+
     const getAssetDetails = (workOrder: any) => {
         if (workOrder.asset) {
             return {
@@ -72,15 +81,6 @@ export default function DeclineWorkOrderModal({
     
     const assetDetails = getAssetDetails(workOrder);
 
-    /** Handle Form Submission */
-    const submit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        router.put(`/work-orders/${workOrder.id}`, { status: "Declined" });
-        setTimeout(() => {
-            onClose();
-        }, 600);
-    };
-
     return (
         <Dialog
             open={true}
@@ -94,12 +94,11 @@ export default function DeclineWorkOrderModal({
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
-                            <span>Decline Work Order</span>
+                            <span>Delete Work Order</span>
                             <span className="text-muted-foreground">|</span>
                             <span className="text-muted-foreground">ID: {workOrder.id}</span>
                         </div>
                     </DialogTitle>
-
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -109,7 +108,7 @@ export default function DeclineWorkOrderModal({
 
                     <Table className="w-full rounded-md">
                         <TableBody>
-                        
+
                             {/* Date Requested */}
                             <TableRow className="border-none">
                                 <TableHead className="w-1/4 ">
@@ -142,27 +141,45 @@ export default function DeclineWorkOrderModal({
                                 <TableCell className="">{workOrder.report_description}</TableCell>
                             </TableRow>
 
-                            {/* Asset Detail */}
-                            {assetDetails && (
+                            {/* Remarks */}
                             <TableRow className="border-none">
-                                <TableHead>
-                                <Label>Asset</Label>
+                                <TableHead className="">
+                                    <Label>Remarks:</Label>
                                 </TableHead>
-                                <TableCell>{assetDetails.name} - {assetDetails.location_name}</TableCell>
+                                <TableCell className="">{workOrder.remarks ? (
+                                        workOrder.remarks
+                                    ) : (
+                                        <span className="text-gray-500 italic">No Remarks</span>
+                                    )}</TableCell>
                             </TableRow>
-                            )}
 
                             {/* Status */}
-                            {/* <TableRow className="border-none">
+                            <TableRow className="border-none">
                                 <TableHead className="">
                                     <Label>Status:</Label>
                                 </TableHead>
                                 <TableCell className="">
                                     <span className={`rounded-md text-sm border font-medium shadow-sm h-8 px-2 py-1 ${getStatusColor(workOrder.status)}`}>{workOrder.status}</span>
                                 </TableCell>
-                            </TableRow> */}
+                            </TableRow>
 
-                            {/* Attachment/Images */}
+                            {/* Asset */}
+                            {assetDetails && (
+                            <TableRow className="border-none">
+                                <TableHead>
+                                <Label>Asset</Label>
+                                </TableHead>
+                                <TableCell>
+                                    {assetDetails ? (
+                                        `${assetDetails?.name} - ${assetDetails?.location_name}`
+                                    ) : (
+                                        <span className="text-gray-500 italic">No Asset attached</span>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                            )}
+
+                            {/* Attachment / Images / Photos */}
                             <TableRow className="border-none">
                                 <TableHead className="">
                                     <Label>Attachment:</Label>
@@ -197,8 +214,12 @@ export default function DeclineWorkOrderModal({
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
                     <form onSubmit={submit} className="flex gap-2">
-                        <Button variant="outline" onClick={onClose}>Back</Button>
-                        <Button variant="destructive" type="submit">Decline</Button>
+
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button type="submit" onClick={submit}
+                        className="bg-destructive hover:bg-destructive/90 text-white">
+                            Delete
+                        </Button>
                     </form>
                 </DialogFooter>
 
