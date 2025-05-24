@@ -46,10 +46,16 @@ interface EditWorkOrderProps {
         images: string[];
     };
     locations: Location[];
+    assets: {
+        id: number;
+        name: string;
+        location: { id: number; name: string };
+    }[];
     maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
     user: {
         id: number;
         name: string;
+        roles: { name: string }[];
         permissions: string[];
     };
     onClose: () => void;
@@ -58,6 +64,7 @@ interface EditWorkOrderProps {
 export default function EditWorkOrderModal({
     workOrder,
     locations,
+    assets,
     maintenancePersonnel,
     user,
     onClose,
@@ -79,18 +86,19 @@ export default function EditWorkOrderModal({
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
+    const isInternalRequesterOrMaintenancePersonnel = user.roles.some(role => role.name === "internal_requester" || role.name === "maintenance_personnel");
 
     const { data, setData, errors, processing } = useForm({
         location_id: "",
         report_description: workOrder.report_description,
-        asset: workOrder.asset,
+        asset_id: workOrder?.asset?.id ?? "",
         images: [] as File[],
         status: workOrder.status,
         work_order_type: workOrder.work_order_type,
         label: workOrder.label,
         assigned_to: workOrder.assigned_to ?? "",
         priority: workOrder.priority,
-        remarks: workOrder.remarks ?? "",
+        remarks: "",
         scheduled_at: workOrder.scheduled_at ?? "",
         approved_at: workOrder.approved_at ?? "",
         approved_by: workOrder.approved_by ?? "",
@@ -166,7 +174,8 @@ export default function EditWorkOrderModal({
             formData.append("status", data.status || "");
             formData.append("approved_at", approvedDate ? format(approvedDate, "yyyy-MM-dd") : data.approved_at ? format(data.approved_at, "yyyy-MM-dd") : "")
             formData.append("approved_by", data.approved_by || "");
-            formData.append("remarks", data.remarks || "");
+            formData.append("asset_id", data.asset_id || "");
+            formData.append("remarks", data.remarks === "" ? workOrder.remarks : data.remarks);
         }
 
         router.post(`/work-orders/${workOrder.id}`, formData, {
@@ -218,7 +227,15 @@ export default function EditWorkOrderModal({
         >
             <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
-                    <DialogTitle className="text-xl font-semibold">Editing Work Order - {workOrder.id}</DialogTitle>
+                    <DialogTitle className="text-xl font-semibold">
+                        {workOrder.status === "Declined" ? (
+                            <span>Accept Declined Work Order - {workOrder.id}</span>
+                        ) : workOrder.status === "Cancelled" ? (
+                            <span>Accept Cancelled Work Order - {workOrder.id}</span>
+                        ) : (
+                            <span>Editing Work Order - {workOrder.id}</span>
+                        )}
+                        </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -226,8 +243,106 @@ export default function EditWorkOrderModal({
 
                 <div className="space-y-4 px-6 max-h-[70vh] overflow-y-auto">
 
-                    <form onSubmit={submit}>
-                        <div className="py-1 flex flex-col space-y-4">
+                    {/* Show wO details to WOM */}
+                    {isWorkOrderManager && (
+                        <Table className="w-full rounded-md">
+                            <TableBody>
+
+                            {/* Date Requested */}
+                            <TableRow className="border-none">
+                                <TableHead className="w-1/4 ">
+                                    <Label>Date Requested:</Label>
+                                </TableHead>
+                                <TableCell className="">{workOrder.requested_at}</TableCell>
+                            </TableRow>
+
+                            {/* Requested By */}
+                            <TableRow className="border-none">
+                                <TableHead className="">
+                                    <Label>Requested by:</Label>
+                                </TableHead>
+                                <TableCell className="">{workOrder.requested_by.name}</TableCell>
+                            </TableRow>
+
+                            {/* Location */}
+                            <TableRow className="border-none">
+                                <TableHead className="">
+                                    <Label>Location:</Label>
+                                </TableHead>
+                                <TableCell className="">{workOrder.location.name}</TableCell>
+                            </TableRow>
+
+                            {/* Description */}
+                            <TableRow className="border-none">
+                                <TableHead className="">
+                                    <Label>Description:</Label>
+                                </TableHead>
+                                <TableCell className="">{workOrder.report_description}</TableCell>
+                            </TableRow>
+
+                            {/* Remarks */}
+                            <TableRow className="border-none">
+                                <TableHead className="">
+                                    <Label>Remarks:</Label>
+                                </TableHead>
+                                <TableCell className="">{workOrder.remarks ? (
+                                        workOrder.remarks
+                                    ) : (
+                                        <span className="text-gray-500 italic">No Remarks</span>
+                                    )}</TableCell>
+                            </TableRow>
+
+                            {/* Asset Detail */}
+                            {assetDetails && (
+                            <TableRow className="border-none">
+                                <TableHead>
+                                <Label>Asset</Label>
+                                </TableHead>
+                                <TableCell>
+                                    {assetDetails ? (
+                                        `${assetDetails?.name} - ${assetDetails?.location_name}`
+                                    ) : (
+                                        <span className="text-gray-500 italic">No Asset attached</span>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                            )}
+
+                            {/* Attachment / Images / Photos */}
+                            <TableRow className="border-none">
+                                <TableHead className="">
+                                    <Label>Attachment:</Label>
+                                </TableHead>
+                                <TableCell className="">
+                                    {workOrder.images.length > 0 ? (
+                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                            {workOrder.images.map((src, index) => (
+                                            <div
+                                                key={index}
+                                                className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
+                                                onClick={() => setActiveImageIndex(index)}
+                                            >
+                                                <img
+                                                src={src}
+                                                alt={`Attachment ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            ))}
+                                        </div>
+                                        ) : (
+                                        <span className="text-gray-500 italic">No attachments</span>
+                                        )}
+                                </TableCell>
+                            </TableRow>
+                            </TableBody>
+                        </Table>
+                    )}
+
+                    {/* Show editable fields to IR or MP */}
+                    { isInternalRequesterOrMaintenancePersonnel && (
+                        <form onSubmit={submit}>
+                            <div className="py-1 flex flex-col space-y-4">
 
                             {/* Location */}
                             <SmartDropdown
@@ -297,8 +412,10 @@ export default function EditWorkOrderModal({
                             )}
 
                         </div>
-                    </form>
+                        </form>
+                    )}
 
+                    {/* Show the editable fields to WOM */}
                     {isWorkOrderManager && (
                         <form onSubmit={submit}>
                             <hr className="pb-4"/>
@@ -391,10 +508,6 @@ export default function EditWorkOrderModal({
                                         )}
                                     </div>
 
-                                </div>
-
-                                {/* Row 2 */}
-                                <div className="flex flex-row justify-between gap-4 !mt-4">
                                     {/* Priority */}
                                     <div className="flex-[1] space-y-2">
                                         <Label htmlFor="priority" className="flex items-center">
@@ -418,6 +531,10 @@ export default function EditWorkOrderModal({
                                         <p className="text-red-500 text-xs">{localErrors.priority}</p>
                                     )}
                                     </div>
+                                </div>
+
+                                {/* Row 2 */}
+                                <div className="flex flex-row justify-between gap-4 !mt-4">
 
                                     {/* Assigned To */}
                                     <div className="flex-[2] space-y-2">
@@ -445,7 +562,7 @@ export default function EditWorkOrderModal({
                                     </div>
 
                                     {/* Status */}
-                                    <div className="flex-[2] space-y-2">
+                                    <div className="flex-[1] space-y-2">
                                         <Label htmlFor="status" className="flex items-center">
                                             Status <span className="text-red-500 ml-1">*</span>
                                         </Label>
@@ -462,10 +579,18 @@ export default function EditWorkOrderModal({
                                                         <SelectItem value="Assigned">Assigned</SelectItem>
                                                         <SelectItem value="Pending">Pending</SelectItem>
                                                         <SelectItem value="For Budget Request">For Budget Request</SelectItem>
-                                                        <SelectItem value="Ongoing">Scheduled</SelectItem>
+                                                        <SelectItem value="Scheduled">Scheduled</SelectItem>
                                                         <SelectItem value="Ongoing">Ongoing</SelectItem>
                                                         <SelectItem value="Completed">Completed</SelectItem>
                                                         <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                                    </>
+                                                )}
+                                                {workOrder.status === "Scheduled" && (
+                                                    <>
+                                                        <SelectItem value="Scheduled">Scheduled</SelectItem>
+                                                        <SelectItem value="Pending">Pending</SelectItem>
+                                                        <SelectItem value="Ongoing">Ongoing</SelectItem>
+
                                                     </>
                                                 )}
                                                 {workOrder.status === "Ongoing" && (
@@ -474,7 +599,7 @@ export default function EditWorkOrderModal({
                                                         <SelectItem value="Assigned">Assigned</SelectItem>
                                                         <SelectItem value="Overdue">Overdue</SelectItem>
                                                         <SelectItem value="Completed">Completed</SelectItem>
-                                                        <SelectItem value="Completed">Cancelled</SelectItem>
+                                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
                                                     </>
                                                 )}
                                                 {workOrder.status === "Overdue" && (
@@ -511,90 +636,42 @@ export default function EditWorkOrderModal({
                                             <p className="text-red-500 text-xs">{localErrors.status}</p>
                                         )}
                                     </div>
+
+                                    {/* Asset */}
+                                    <div className="flex-[3] space-y-2 -mt-1.5">
+                                        <SmartDropdown
+                                            label="Asset"
+                                            placeholder={assetDetails ? `${assetDetails.name} - ${assetDetails.location_name}` : "Select Asset (scroll down here)"}
+                                            items={assets}
+                                            getLabel={(a) =>
+                                                `${a.name} – ${a.location.name}`
+                                            }
+                                            getValue={(a) => a.id.toString()}
+                                            selectedId={data.asset_id || ""}
+                                            onChange={(id) => setData("asset_id", id)}
+                                            error={localErrors.asset_id}
+                                        />
+                                    </div>
                                     
                                 </div>
 
-                                {/* Only SHOW this row if the work order status is "FOR BUDGET REQUEST" */}
-
-                                {/* Row 3 */}
-                                {data.status === "For Budget Request" && (
-                                    <div className="flex flex-row justify-between gap-4 !mt-4">
-                                        {/* Approval Date */}
-                                        <div className="flex-[1] space-y-2">
-                                            <Label htmlFor="approved_at" className="flex items-center">
-                                                Approval Date <span className="text-red-500 ml-1">*</span>
-                                            </Label>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() => setShowApprovalCalendar(!showApprovalCalendar)}
-                                                className={cn(
-                                                "w-full flex justify-between items-center",
-                                                "text-left font-normal",
-                                                !data.approved_at && "text-muted-foreground"
-                                                )}
-                                            >
-                                                {data.approved_at
-                                                ? format(data.approved_at, "MM/dd/yyyy")
-                                                : "MM/DD/YYYY"}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                            </Button>
-
-                                            {showApprovalCalendar && (
-                                                <div
-                                                className="absolute z-50 bg-white shadow-md border !-mt-[46vh] rounded-md"
-                                                onClick={(e) => e.stopPropagation()}
-                                                >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={
-                                                    data.approved_at && isValid(parseISO(data.approved_at))
-                                                        ? parseISO(data.approved_at)
-                                                        : undefined
-                                                    }
-                                                    onSelect={(approvedDate) => {
-                                                    if (approvedDate) {
-                                                        setData("approved_at", format(approvedDate, "yyyy-MM-dd"))
-                                                        setApprovedDate(approvedDate)
-                                                        setShowApprovalCalendar(false)
-                                                    }
-                                                    }}
-                                                    disabled={(approvedDate) => approvedDate > new Date()} // Optional: disallow future dates
-                                                    initialFocus
-                                                />
-                                                </div>
-                                            )}
-                                            {showApprovalCalendar && (
-                                                <div
-                                                className="fixed inset-0 z-40"
-                                                onClick={() => setShowApprovalCalendar(false)} // close on outside click
-                                                />
-                                            )}
-                                            {localErrors.approved_at && (
-                                                <p className="text-red-500 text-xs">{localErrors.approved_at}</p>
-                                            )}
-                                        </div>
-
-                                        {/* Approved by */}
-                                        <div className="flex-[2] space-y-2">
-                                            <Label htmlFor="approved_by" className="flex items-center">
-                                                Approved by <span className="text-red-500 ml-1">*</span>
-                                            </Label>
-                                            <Input
-                                                type="text"
-                                                id="approved_by"
-                                                value={data.approved_by}
-                                                onChange={(e) => setData("approved_by", e.target.value)}
-                                                className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="Enter approver's name"
-                                            />
-        
-                                        {localErrors.approved_by && (
-                                            <p className="text-red-500 text-xs">{localErrors.approved_by}</p>
-                                        )}
-                                        </div>
-                                    </div>
-                                )}
+                                {/* Row 3 - Remarks*/}
+                                <div className="mt-4 space-y-2">
+                                    <Label htmlFor="remarks">Remarks</Label>
+                                    <Textarea
+                                        id="remarks"
+                                        value={data.remarks}
+                                        onChange={(e) =>
+                                            setData("remarks", e.target.value)
+                                        }
+                                        placeholder="Edit remarks here"
+                                    />
+                                    {localErrors.remarks && (
+                                        <p className="text-red-500 text-xs">
+                                            {localErrors.remarks}
+                                        </p>
+                                    )}
+                                </div>
 
                             </div>
                         </form>
@@ -604,7 +681,9 @@ export default function EditWorkOrderModal({
                 <DialogFooter className="px-6 py-4 border-t">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
                     <Button type="submit" onClick={submit}
-                        className="bg-primary hover:bg-primary/90 text-white">Save Changes</Button>
+                        className="bg-primary hover:bg-primary/90 text-white">
+                            {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
+                        </Button>
                 </DialogFooter>
 
             {activeImageIndex !== null && (

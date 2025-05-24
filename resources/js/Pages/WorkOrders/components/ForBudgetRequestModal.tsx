@@ -17,6 +17,7 @@ import { Label } from "@/Components/shadcnui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
 import { Calendar } from "@/Components/shadcnui/calendar";
 import { Input } from "@/Components/shadcnui/input";
+import { Textarea } from "@/Components/shadcnui/textarea";
 
 interface Location {
     id: number;
@@ -65,7 +66,7 @@ export default function ForBudgetRequestModal({
         status: "For Budget Request",
         label: workOrder.label,
         priority: workOrder.priority,
-        remarks: workOrder.remarks ?? "",
+        remarks: "",
     });
 
     const validateForm = () => {
@@ -95,7 +96,7 @@ export default function ForBudgetRequestModal({
                 formData.append("label", data.label || "");
                 formData.append("priority", data.priority || "");
                 formData.append("status", data.status || "For Budget Request");
-                formData.append("remarks", data.remarks || "");
+                formData.append("remarks", data.remarks === "" ? workOrder.remarks : data.remarks);
             }
             
             router.post(`/work-orders/${workOrder.id}`, formData, {
@@ -235,6 +236,8 @@ export default function ForBudgetRequestModal({
                     {isWorkOrderManager && (
                         <form onSubmit={submit}>
                             <div className="py-2">
+
+                                {/* Row 1 */}
                                 <div className="flex flex-row justify-between gap-4 ">
 
                                     {/* Label */}
@@ -289,6 +292,23 @@ export default function ForBudgetRequestModal({
 
                                 </div>
 
+                                {/* Row 3 - Remarks*/}
+                                <div className="mt-4 space-y-2">
+                                    <Label htmlFor="remarks">Remarks</Label>
+                                    <Textarea
+                                        id="remarks"
+                                        value={data.remarks}
+                                        onChange={(e) =>
+                                            setData("remarks", e.target.value)
+                                        }
+                                        placeholder="Additional notes or comments"
+                                    />
+                                    {localErrors.remarks && (
+                                        <p className="text-red-500 text-xs">
+                                            {localErrors.remarks}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </form>
                     )}

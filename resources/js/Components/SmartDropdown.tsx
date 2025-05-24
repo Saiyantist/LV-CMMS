@@ -36,9 +36,9 @@ export default function SmartDropdown<T>({
 
   useEffect(() => {
     const search = typedText.toLowerCase()
-    const results = items.filter((item) =>
+    const results = items?.filter((item) =>
       getLabel(item).toLowerCase().includes(search)
-    )
+    ) || []
     setFilteredItems(results)
   }, [typedText, items, getLabel])
 

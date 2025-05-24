@@ -42,7 +42,7 @@ class WorkOrderController extends Controller
                 'status' => $wo->status,
                 'work_order_type' => $wo->work_order_type,
                 'label' => $wo->label,
-                'priority' => $wo->priority ?: "No Priority",
+                'priority' => $wo->priority ?: "",
                 'remarks' => $wo->remarks,
                 'requested_by' => [
                     'id' => $wo->requestedBy->id,
@@ -151,7 +151,7 @@ class WorkOrderController extends Controller
             'status' => $workOrder->status,
             'work_order_type' => $workOrder->work_order_type,
             'label' => $workOrder->label,
-            'priority' => $workOrder->priority ?: "No Priority",
+            'priority' => $workOrder->priority ?: "",
             'remarks' => $workOrder->remarks,
             'requested_by' => [
                 'id' => $workOrder->requestedBy->id,
@@ -323,6 +323,8 @@ class WorkOrderController extends Controller
                     'status' => $request->status,
                     'approved_at' => $request->approved_at,
                     'approved_by' => $request->approved_by,
+                    'asset_id' => $request->asset_id,
+                    'remarks' => $request->remarks,
                 ]);
                 return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
             }
@@ -412,7 +414,7 @@ class WorkOrderController extends Controller
                     'status' => $wo->status,
                     'work_order_type' => $wo->work_order_type,
                     'label' => $wo->label,
-                    'priority' => $wo->priority ?: "No Priority",
+                    'priority' => $wo->priority ?: "",
                     'requested_by' => [
                         'id' => $wo->requestedBy->id,
                         'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,

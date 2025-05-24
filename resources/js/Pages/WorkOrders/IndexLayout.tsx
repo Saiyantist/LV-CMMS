@@ -417,6 +417,7 @@ export default function IndexLayout({
                 <EditWorkOrderModal
                     workOrder={editingWorkOrder}
                     locations={locations}
+                    assets={assets}
                     user={user}
                     maintenancePersonnel={maintenancePersonnel}
                     onClose={() => setEditingWorkOrder(null)}
@@ -427,6 +428,7 @@ export default function IndexLayout({
                 <AssignWorkOrderModal
                     workOrder={acceptingWorkOrder}
                     locations={locations}
+                    assets={assets}
                     user={user}
                     maintenancePersonnel={maintenancePersonnel}
                     onClose={() => setAcceptingWorkOrder(null)}
@@ -495,7 +497,7 @@ export default function IndexLayout({
                             <TabsTrigger value="For Budget Request">
                                 For Budget Request
                             </TabsTrigger>
-                            <TabsTrigger value="Declined" className="data-[state=active]:bg-red-600/80">Declined</TabsTrigger>
+                            <TabsTrigger value="Declined" className="data-[state=active]:bg-red-600/80 hover:bg-red-600/60 hover:text-white duration-200">Declined</TabsTrigger>
                         </TabsList>
                     </Tabs>
                 </div>

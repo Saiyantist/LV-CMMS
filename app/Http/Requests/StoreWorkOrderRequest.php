@@ -53,8 +53,9 @@ class StoreWorkOrderRequest extends FormRequest
                         'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])], // Maybe AI-generated in the future
                         'assigned_to' => 'required',
                         'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
-                        'approved_at' => 'date',
-                        'approved_by' => 'string|max:255',
+                        'asset_id' => 'nullable',
+                        'approved_at' => 'nullable|date',
+                        'approved_by' => 'nullable|string|max:255',
                     ];
                 }
             }

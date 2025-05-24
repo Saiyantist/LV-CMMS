@@ -17,6 +17,8 @@ import { Label } from "@/Components/shadcnui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
 import { Calendar } from "@/Components/shadcnui/calendar";
 import { Input } from "@/Components/shadcnui/input";
+import SmartDropdown from "@/Components/SmartDropdown";
+import { Textarea } from "@/Components/shadcnui/textarea";
 
 interface Location {
     id: number;
@@ -42,6 +44,11 @@ interface AssignWorkOrderModalProps {
         images: string[];
     };
     locations: Location[];
+    assets: {
+        id: number;
+        name: string;
+        location: { id: number; name: string };
+    }[];
     maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
     user: {
         id: number;
@@ -54,15 +61,11 @@ interface AssignWorkOrderModalProps {
 export default function AssignWorkOrderModal({
     workOrder,
     locations,
+    assets,
     maintenancePersonnel,
     user,
     onClose,
 }: AssignWorkOrderModalProps) {
-    const initialLocationName = locations.find((loc) =>
-        loc.id === Number(workOrder.location.id))?.name || "";
-    const initialLocationId = locations.find((loc) =>
-        loc.id === Number(workOrder.location.id))?.id || "";
-
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
     const [date, setDate] = useState<Date>()
     const [showCalendar, setShowCalendar] = useState(false)
@@ -75,18 +78,19 @@ export default function AssignWorkOrderModal({
     const { data, setData, errors, processing } = useForm({
         location_id: workOrder.location.id,
         report_description: workOrder.report_description,
-        asset: workOrder.asset,
+        asset_id: workOrder?.asset?.id ?? "",
         images: [] as File[],
         status: "Assigned",
         label: workOrder.label,
         assigned_to: workOrder.assigned_to ?? "",
-        priority: workOrder.priority,
-        remarks: workOrder.remarks ?? "",
+        priority: workOrder.priority ?? "",
+        remarks: "",
         scheduled_at: workOrder.scheduled_at ?? "",
         approved_at: workOrder.approved_at ?? "",
         approved_by: workOrder.approved_by ?? "",
     });
 
+    console.log(workOrder);
     const validateForm = () => {
         const newErrors: Record<string, string> = {}
 
@@ -124,7 +128,7 @@ export default function AssignWorkOrderModal({
                 formData.append("status", data.status || "Assigned");
                 formData.append("approved_at", approvedDate ? format(approvedDate, "yyyy-MM-dd") : data.approved_at ? format(data.approved_at, "yyyy-MM-dd") : "")
                 formData.append("approved_by", data.approved_by || "");
-                formData.append("remarks", data.remarks || "");
+                formData.append("remarks", data.remarks === "" ? workOrder.remarks : data.remarks);
             }
             
             router.post(`/work-orders/${workOrder.id}`, formData, {
@@ -222,13 +226,33 @@ export default function AssignWorkOrderModal({
                                 <TableCell className="">{workOrder.report_description}</TableCell>
                             </TableRow>
 
+                            {/* Remarks */}
+                            {workOrder.remarks && (
+                            <TableRow className="border-none">
+                                <TableHead className="">
+                                    <Label>Remarks:</Label>
+                                </TableHead>
+                                <TableCell className="">{workOrder.remarks ? (
+                                        workOrder.remarks
+                                    ) : (
+                                        <span className="text-gray-500 italic">No Remarks</span>
+                                    )}</TableCell>
+                            </TableRow>
+                            )}
+
                             {/* Asset Detail */}
                             {assetDetails && (
                             <TableRow className="border-none">
                                 <TableHead>
                                 <Label>Asset</Label>
                                 </TableHead>
-                                <TableCell>{assetDetails.name} - {assetDetails.location_name}</TableCell>
+                                <TableCell>
+                                    {assetDetails ? (
+                                        `${assetDetails?.name} - ${assetDetails?.location_name}`
+                                    ) : (
+                                        <span className="text-gray-500 italic">No Asset attached</span>
+                                    )}
+                                </TableCell>
                             </TableRow>
                             )}
 
@@ -268,6 +292,8 @@ export default function AssignWorkOrderModal({
                     {isWorkOrderManager && (
                         <form onSubmit={submit}>
                             <div className="py-2">
+
+                                {/* Row 1 */}
                                 <div className="flex flex-row justify-between gap-4 ">
 
                                     {/* Label */}
@@ -350,9 +376,6 @@ export default function AssignWorkOrderModal({
                                             <p className="text-red-500 text-xs">{localErrors.scheduled_at}</p>
                                         )}
                                     </div>
-                                </div>
-
-                                <div className="flex flex-row justify-between gap-4 !mt-4">
 
                                     {/* Priority */}
                                     <div className="flex-[1] space-y-2">
@@ -377,6 +400,10 @@ export default function AssignWorkOrderModal({
                                         <p className="text-red-500 text-xs">{localErrors.priority}</p>
                                     )}
                                     </div>
+                                </div>
+                                
+                                {/* Row 2 */}
+                                <div className="flex flex-row justify-between gap-4 !mt-4">
 
                                     {/* Assign to */}
                                     <div className="flex-[2] space-y-2">
@@ -403,9 +430,29 @@ export default function AssignWorkOrderModal({
                                     )}
                                     </div>
 
+
+                                    {/* Asset */}
+                                    <div className="flex-[3] space-y-2 -mt-1.5">
+                                        <SmartDropdown
+                                            label="Asset"
+                                            placeholder={assetDetails ? `${assetDetails.name} - ${assetDetails.location_name}` : "Select Asset (scroll down here)"}
+                                            items={assets}
+                                            getLabel={(a) =>
+                                                `${a.name} – ${a.location.name}`
+                                            }
+                                            getValue={(a) => a.id.toString()}
+                                            selectedId={data.asset_id || ""}
+                                            onChange={(id) => setData("asset_id", id)}
+                                            error={localErrors.asset_id}
+                                        />
+                                    </div>
+
                                 </div>
+
+                                {/* Row 3 */}
                                 { workOrder.status === "For Budget Request" && (
 
+                                    // Row 3
                                     <div className="flex flex-row justify-between gap-4 !mt-4">
                                         {/* Approval Date */}
                                         <div className="flex-[1] space-y-2">
@@ -483,6 +530,24 @@ export default function AssignWorkOrderModal({
                                         </div>
                                     </div>
                                 )}
+
+                                {/* Row 4 */}
+                                <div className="mt-4 space-y-2">
+                                    <Label htmlFor="remarks">Remarks</Label>
+                                        <Textarea
+                                            id="remarks"
+                                            value={data.remarks}
+                                            onChange={(e) =>
+                                                setData("remarks", e.target.value)
+                                            }
+                                            placeholder={workOrder.status === "For Budget Request" ? "Edit remarks here" : "Additional notes or comments"}
+                                        />
+                                        {localErrors.remarks && (
+                                            <p className="text-red-500 text-xs">
+                                                {localErrors.remarks}
+                                            </p>
+                                        )}
+                                </div>
                             </div>
                         </form>
                     )}
