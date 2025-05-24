@@ -25,6 +25,7 @@ class RolePermissionSeeder extends Seeder
             'request work orders',
             'view own work orders',            
             'cancel own work orders',            
+            'edit own work orders',
             'request event services', // External and dept. head
             'view own event services', // External and dept. head
             'cancel own event services', // External and dept. head
@@ -46,22 +47,22 @@ class RolePermissionSeeder extends Seeder
 
         // Define roles
         $roles = [
-            'internal_requester' => ['request work orders', 'view own work orders', 'cancel own work orders'], 
+            'internal_requester' => ['request work orders', 'view own work orders', 'cancel own work orders', 'edit own work orders'], 
             'external_requester' => ['request event services', 'view own event services', 'cancel own event services'],
             'department_head' => [
-                'request work orders', 'view own work orders', 'cancel own work orders',
+                'request work orders', 'view own work orders', 'cancel own work orders', 'edit own work orders',
                 'request event services', 'view own event services', 'cancel own event services',
             ],
             'gasd_coordinator' => [
                 'manage work orders', 'request work orders',
             ], 
             'maintenance_personnel' => [
-                'request work orders', 'view own work orders', 'cancel own work orders',
+                'request work orders', 'view own work orders', 'cancel own work orders' , 'edit own work orders',
                 'view work orders assigned to them', 'update assigned work order status'
             ],
             'communications_officer' => [
                 'manage event services',
-                'request work orders', 'view own work orders', 'cancel own work orders'
+                'request work orders', 'view own work orders', 'cancel own work orders', 'edit own work orders'
             ],
             'super_admin' => [],
         ];

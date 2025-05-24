@@ -11,6 +11,7 @@ interface SmartDropdownProps<T> {
   onChange: (id: string) => void
   onTextChange?: (text: string) => void
   error?: string
+  required?: boolean
 }
 
 export default function SmartDropdown<T>({
@@ -23,6 +24,7 @@ export default function SmartDropdown<T>({
   onChange,
   onTextChange,
   error,
+  required = false,
 }: SmartDropdownProps<T>) {
   const [typedText, setTypedText] = useState("")
   const [isOpen, setIsOpen] = useState(false)
@@ -57,7 +59,7 @@ useEffect(() => {
     <div className="space-y-2" ref={dropdownRef}>
       <label className="flex items-center font-medium text-sm">
         {label}
-        {label === "Location" && (
+        {required && (
           <span className="text-red-500 ml-1">*</span>
         )}
       </label>

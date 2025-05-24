@@ -5,7 +5,7 @@ import ScrollToTopButton from "@/Components/ScrollToTopButton";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 import { Button } from "@/Components/shadcnui/button";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import CreateWorkOrderModal from "./components/CreateModal";
 import EditWorkOrderModal from "./components/EditModal";
 import { StatusCell } from "./components/StatusCell";
@@ -17,7 +17,9 @@ import FlashToast from "@/Components/FlashToast";
 import React, { useState } from "react";
 import AssignWorkOrderModal from "./components/AssignWorkOrderModal";
 import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
-import { SquarePen } from "lucide-react";
+import { BookX, SquarePen } from "lucide-react";
+import DeclineWorkOrderModal from "./components/DeclineWorkOrderModal";
+import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
 
 interface Props {
     user: {
@@ -58,6 +60,10 @@ interface WorkOrders {
     label: string;
     priority: string;
     remarks: string;
+    requested_by: {
+        id: number;
+        name: string;
+    };
     requested_at: string;
     scheduled_at: string;
     approved_at: string;
@@ -97,16 +103,15 @@ export default function IndexLayout({
     scrollToTop,
     handleDelete,
 }: Props) {
-    // Define columns for the data table
-    let columns: ColumnDef<WorkOrders>[];
-
     const isRequesterOrPersonnel =
-        user.roles[0].name === "internal_requester" ||
-        user.roles[0].name === "maintenance_personnel";
+    user.roles[0].name === "internal_requester" ||
+    user.roles[0].name === "maintenance_personnel";
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
     const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
     const [acceptingWorkOrder, setAcceptingWorkOrder] = useState<any>(null);
+    const [decliningWorkOrder, setDecliningWorkOrder] = useState<any>(null);
+    const [cancellingWorkOrder, setCancellingWorkOrder] = useState<any>(null);
     const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>(
         []
     );
@@ -119,64 +124,64 @@ export default function IndexLayout({
         );
     };
 
-    if (isRequesterOrPersonnel) {
-        columns = [
-            {
-                accessorKey: "requested_at",
-                header: "Date Requested",
-                cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
-                meta: { headerClassName: "w-1/8" },
+    const requesterOrPersonnelColumns: ColumnDef<WorkOrders>[] = [
+        {
+            accessorKey: "requested_at",
+            header: "Date Requested",
+            cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
+            meta: { headerClassName: "w-1/8" },
+        },
+        {
+            accessorKey: "location.name",
+            header: "Location",
+            cell: ({ row }) => <div>{row.original.location.name}</div>,
+            meta: {
+                headerClassName: "max-w-1/8",
+                searchable: true,
+                filterable: true,
             },
-            {
-                accessorKey: "location.name",
-                header: "Location",
-                cell: ({ row }) => <div>{row.original.location.name}</div>,
-                meta: {
-                    headerClassName: "max-w-1/8",
-                    searchable: true,
-                    filterable: true,
-                },
+        },
+        {
+            accessorKey: "report_description",
+            header: "Description",
+            cell: ({ row }) => (
+                <div>{row.getValue("report_description")}</div>
+            ),
+            enableSorting: false,
+            meta: {
+                headerClassName: "w-1/2",
+                cellClassName: "max-w-16 px-2 text-left",
+                searchable: true,
             },
-            {
-                accessorKey: "report_description",
-                header: "Description",
-                cell: ({ row }) => (
-                    <div>{row.getValue("report_description")}</div>
-                ),
-                enableSorting: false,
-                meta: {
-                    headerClassName: "w-1/2",
-                    cellClassName: "max-w-16 px-2 text-left",
-                    searchable: true,
-                },
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => (
+                <StatusCell
+                    value={row.getValue("status")}
+                    user={user}
+                    row={row}
+                />
+            ),
+            meta: {
+                cellClassName: "text-center",
+                filterable: true,
             },
-            {
-                accessorKey: "status",
-                header: "Status",
-                cell: ({ row }) => (
-                    <StatusCell
-                        value={row.getValue("status")}
-                        user={user}
-                        row={row}
-                    />
-                ),
-                meta: {
-                    cellClassName: "text-center",
-                    filterable: true,
-                },
-            },
-            {
-                id: "actions",
-                header: "Actions",
-                cell: ({ row }) => (
-                    <div className="flex gap-2">
-                        <Button
-                            className="bg-primary h-6 text-xs rounded-sm"
-                            onClick={() => setIsViewingWorkOrder(row.original)}
-                        >
-                            View
-                        </Button>
-                        { row.getValue('status') === "Pending" && (
+        },
+        {
+            id: "actions",
+            header: "Actions",
+            cell: ({ row }) => (
+                <div className="flex gap-2">
+                    <Button
+                        className="bg-primary h-6 text-xs rounded-sm"
+                        onClick={() => setIsViewingWorkOrder(row.original)}
+                    >
+                        View
+                    </Button>
+                    { row.getValue('status') === "Pending" && (
+                    <>
                         <Button
                             variant={"outline"}
                             size={"icon"}
@@ -184,180 +189,199 @@ export default function IndexLayout({
                             onClick={() => setEditingWorkOrder(row.original)}
                         ><SquarePen />
                         </Button>
-                        )}
-                    </div>
-                ),
-                enableSorting: false,
+                        <Button
+                            variant={"outline"}
+                            size={"icon"}
+                            className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
+                            onClick={() => setCancellingWorkOrder(row.original)}
+                        ><BookX />
+                        </Button>
+                    </>
+                    )}
+                </div>
+            ),
+            enableSorting: false,
+        },
+    ];
+
+    const workOrderManagerColumns: ColumnDef<WorkOrders>[] = [
+        {
+            accessorKey: "id",
+            header: "ID",
+            cell: ({ row }) => <div>{row.getValue("id")}</div>,
+            meta: {
+                headerClassName: "w-12",
+                searchable: true,
             },
-        ];
-    } else if (isWorkOrderManager) {
-        columns = [
-            {
-                accessorKey: "id",
-                header: "ID",
-                cell: ({ row }) => <div>{row.getValue("id")}</div>,
-                meta: {
-                    headerClassName: "w-12",
-                    searchable: true,
+        },
+        {
+            accessorKey: "requested_at",
+            header: "Date Requested",
+            cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
+            meta: { headerClassName: "w-[7.5rem]" },
+        },
+        {
+            accessorKey: "location.name",
+            header: "Location",
+            cell: ({ row }) => <div>{row.original.location.name}</div>,
+            enableSorting: false,
+            meta: {
+                headerClassName: "w-[10rem]",
+                searchable: true,
+                filterable: true,
+            },
+        },
+        {
+            accessorKey: "report_description",
+            header: "Description",
+            cell: ({ row }) => (
+                <div>{row.getValue("report_description")}</div>
+            ),
+            enableSorting: false,
+            meta: {
+                headerClassName: "min-w-[15rem]",
+                cellClassName: "max-w-16 px-2",
+                searchable: true,
+            },
+        },
+        ...(activeTab !== "Pending" && activeTab !== "For Budget Request"
+            ? [
+                {
+                    accessorKey: "label",
+                    header: "Label",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("label")}</div>,
+                    enableSorting: false,
+                    meta: {
+                        cellClassName: "text-center",
+                        searchable: true,
+                    }
                 },
-            },
-            {
-                accessorKey: "requested_at",
-                header: "Date Requested",
-                cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
-                meta: { headerClassName: "w-[8rem]" },
-            },
-            {
-                accessorKey: "location.name",
-                header: "Location",
-                cell: ({ row }) => <div>{row.original.location.name}</div>,
-                enableSorting: false,
-                meta: {
-                    headerClassName: "w-[10rem]",
-                    searchable: true,
-                    filterable: true,
-                },
-            },
-            {
-                accessorKey: "report_description",
-                header: "Description",
-                cell: ({ row }) => (
-                    <div>{row.getValue("report_description")}</div>
-                ),
-                enableSorting: false,
-                meta: {
-                    headerClassName: "min-w-[15rem]",
-                    cellClassName: "max-w-16 px-2",
-                    searchable: true,
-                },
-            },
-            ...(activeTab !== "Pending" && activeTab !== "For Budget Request"
-                ? [
-                    {
-                        accessorKey: "label",
-                        header: "Label",
-                        cell: ({ row }) => <div>{row.getValue("label")}</div>,
-                        enableSorting: false,
-                        meta: {
-                            cellClassName: "text-center",
-                            searchable: true,
-                        }
+                {
+                    accessorKey: "scheduled_at",
+                    header: "Target Date",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at")}</div>,
+                    meta: {
+                        headerClassName: "max-w-[6rem]",
+                        cellClassName: "text-center",
+                        searchable: true,
                     },
-                    {
-                        accessorKey: "scheduled_at",
-                        header: "Target Date",
-                        cell: ({ row }) => <div>{row.getValue("scheduled_at")}</div>,
-                        meta: {
-                            headerClassName: "max-w-[6rem]",
-                            cellClassName: "text-center",
-                            searchable: true,
-                        },
+                },
+                {
+                    accessorKey: "priority",
+                    header: "Priority",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => (
+                        <div
+                            className={`px-2 py-1 rounded ${getPriorityColor(
+                                row.getValue("priority")
+                            )}`}
+                        >
+                            {row.getValue("priority")}
+                        </div>
+                    ),
+                    sortingFn: prioritySorting,
+                    meta: {
+                        headerClassName: "max-w-20",
+                        cellClassName: "text-center",
+                        filterable: true,
                     },
-                    {
-                        accessorKey: "priority",
-                        header: "Priority",
-                        cell: ({ row }) => (
-                            <div
-                                className={`px-2 py-1 rounded ${getPriorityColor(
-                                    row.getValue("priority")
-                                )}`}
+                },
+                {
+                    accessorKey: "assigned_to.name",
+                    header: "Assigned to",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => (
+                        <div>{row.original.assigned_to?.name || "Unassigned"}</div>
+                    ),
+                    enableSorting: false,
+                    meta: {
+                        headerClassName: "max-w-32",
+                        cellClassName: "text-center",
+                        searchable: true,
+                        filterable: true,
+                    },
+                },
+                {
+                    accessorKey: "status",
+                    header: "Status",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => (
+                        <StatusCell
+                            value={row.getValue("status")}
+                            user={user}
+                            row={row}
+                        />
+                    ),
+                    enableSorting: false,
+                    meta: {
+                        headerClassName: "max-w-10",
+                        cellClassName: "text-center",
+                        filterable: true,
+                    },
+                },
+              ]
+            : []),
+        ...(activeTab === "Pending" || activeTab === "For Budget Request"
+            ? [
+                {
+                    accessorKey: "requested_by",
+                    header: "Requested by",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => (
+                        <div>{row.original.requested_by?.name || "N/A"}</div>
+                    ),
+                    enableSorting: false,
+                },
+                {
+                    id: "actions",
+                    header: "Action",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => (
+                        <div className="flex gap-2">
+                            <Button
+                                variant={"outline"}
+                                className="bg-primary h-6 text-xs text-white rounded-sm !border-none hover:bg-primary/85 hover:text-white transition-all duration-200"
+                                onClick={() => setAcceptingWorkOrder(row.original)}
                             >
-                                {row.getValue("priority")}
-                            </div>
-                        ),
-                        sortingFn: prioritySorting,
-                        meta: {
-                            headerClassName: "max-w-20",
-                            cellClassName: "text-center",
-                            filterable: true,
-                        },
-                    },
-                    {
-                        accessorKey: "assigned_to.name",
-                        header: "Assigned to",
-                        cell: ({ row }) => (
-                            <div>{row.original.assigned_to?.name || "Unassigned"}</div>
-                        ),
-                        enableSorting: false,
-                        meta: {
-                            headerClassName: "max-w-32",
-                            cellClassName: "text-center",
-                            searchable: true,
-                            filterable: true,
-                        },
-                    },
-                    {
-                        accessorKey: "status",
-                        header: "Status",
-                        cell: ({ row }) => (
-                            <StatusCell
-                                value={row.getValue("status")}
-                                user={user}
-                                row={row}
-                            />
-                        ),
-                        enableSorting: false,
-                        meta: {
-                            headerClassName: "max-w-10",
-                            cellClassName: "text-center",
-                            filterable: true,
-                        },
-                    },
-                  ]
-                : []) /** Hide status if activeTab is "Pending" */,
-            
-            ... (activeTab === "Pending" || activeTab === "For Budget Request"
-                ? [
-                    {
-                        id: "actions",
-                        header: "Action",
-                        cell: ({ row }) => (
-                            <div className="flex gap-2">
-                                
-                                <Button
-                                    className="bg-primary h-6 text-xs rounded-sm"
-                                    onClick={() => setAcceptingWorkOrder(row.original)}
-                                >
-                                    Accept
-                                </Button>
-                                <Button
-                                    className="bg-destructive h-6 text-xs rounded-sm"
-                                    onClick={() => setEditingWorkOrder(row.original)}
-                                >
-                                    Decline
-                                </Button>
-                            </div>
-                        ),
-                        enableSorting: false,
-                    }
-                ]
-                : [
-                    {
-                        id: "actions",
-                        header: "Action",
-                        cell: ({ row }) => (
-                            <div className="flex gap-2">
-                                <Button
-                                    className="bg-primary h-6 text-xs rounded-sm"
-                                    onClick={() => setEditingWorkOrder(row.original)}
-                                >
-                                    Edit
-                                </Button>
-                                <Button
-                                    className="bg-red-600 h-6 text-white text-xs rounded-sm hover:bg-red-800 transition"
-                                    onClick={() => handleDelete(row.original.id)}
-                                >
-                                    Delete
-                                </Button>
-                            </div>
-                        ),
-                        enableSorting: false,
-                    }
-                ])
-        ];
-    } else {
-        columns = [];
-    }
+                                Accept
+                            </Button>
+                            <Button
+                                variant={"outline"}
+                                size={"icon"}
+                                className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                                onClick={() => setDecliningWorkOrder(row.original)}
+                            ><BookX />
+                            </Button>
+                        </div>
+                    ),
+                    enableSorting: false,
+                }
+            ]
+            : [
+                {
+                    id: "actions",
+                    header: "Action",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => (
+                        <div className="flex gap-2">
+                            <Button
+                                className="bg-primary h-6 text-xs rounded-sm"
+                                onClick={() => setEditingWorkOrder(row.original)}
+                            >
+                                Edit
+                            </Button>
+                            <Button
+                                className="bg-red-600 h-6 text-white text-xs rounded-sm hover:bg-red-800 transition"
+                                onClick={() => handleDelete(row.original.id)}
+                            >
+                                Delete
+                            </Button>
+                        </div>
+                    ),
+                    enableSorting: false,
+                }
+            ])
+    ];
+
+    const columns: ColumnDef<WorkOrders>[] = isRequesterOrPersonnel 
+        ? requesterOrPersonnelColumns 
+        : isWorkOrderManager 
+            ? workOrderManagerColumns 
+            : [];
 
     return (
         <AuthenticatedLayout>
@@ -402,6 +426,23 @@ export default function IndexLayout({
                 />
             )}
 
+            {decliningWorkOrder && (
+                <DeclineWorkOrderModal
+                    workOrder={decliningWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setDecliningWorkOrder(null)}
+                />
+            )}
+
+            {cancellingWorkOrder && (
+                <CancelWorkOrderModal
+                    workOrder={cancellingWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setCancellingWorkOrder(null)}
+                />
+            )}
             <FlashToast />
 
             {/* Header */}
@@ -412,7 +453,7 @@ export default function IndexLayout({
                     </h1>
                     <PrimaryButton
                         onClick={() => setIsCreating(true)}
-                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md w-full sm:w-auto text-center justify-center"
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-200 text-sm sm:text-base px-5 py-2 rounded-md w-full sm:w-auto text-center justify-center"
                     >
                         + Add Work Order
                     </PrimaryButton>

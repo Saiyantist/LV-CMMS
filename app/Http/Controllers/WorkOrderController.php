@@ -9,6 +9,7 @@ use App\Models\Location;
 use App\Models\User;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Worker;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -59,7 +60,7 @@ class WorkOrderController extends Controller
                 'approved_by' => $wo->approved_by,
                 'location' => [
                     'id' => $wo->location_id,
-                    'name' => $wo->location->name,
+                    'name' => $wo->location ? $wo->location->name : null,
                 ],
                 'images' => $wo->images->pluck('url')->toArray(), // ✅ important part
                 'asset' => $wo->asset ? [
@@ -206,6 +207,7 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
+
         // Handle image uploads
         if ($request->hasFile('images')) {
             $this->handleImageUploads($request->file('images'), $workOrder->id);
@@ -215,18 +217,22 @@ class WorkOrderController extends Controller
         if ($request->has('deleted_images')) {
             $this->handleDeleteImage($request->deleted_images, $workOrder->id);
         }
+
         
         /** Maintenance Personnel */
         if ($user->hasRole('maintenance_personnel')) {
             
-            // Request is from "Assigned Tasks" page
-            // Updating via the dropdown
+            // Cater requests to change the status
             if (count($request->all()) === 1 && array_key_exists('status', $request->all())) {
+                
                 $validTransitions = [
                     'Assigned' => ['Ongoing', 'Completed'],
                     'Ongoing' => ['Assigned', 'Completed'],
                 ];
+                
+                // Updating via the dropdown
                 if (isset($validTransitions[$workOrder->status]) && in_array($request->status, $validTransitions[$workOrder->status])) {
+                    
                     if($request->status === "Completed") {
                         $workOrder->update([
                             'status' => $request->status,
@@ -238,17 +244,22 @@ class WorkOrderController extends Controller
                     }
                     return redirect()->route('work-orders.assigned-tasks')->with(['success' => 'Work Order updated successfully']);
                 }
+
+                // Cancelling own pending work orders
+                else if ($request->status === "Cancelled") {
+                    $workOrder->update(['status' => $request->status]);
+                    return redirect()->route('work-orders.index')->with(['success' => 'Work Order cancelled successfully']);
+                }
                 else {
-                    return redirect()->route('work-orders.assigned-tasks')->with(['error' => 'Something went wrong while updating :/']);
+                    return redirect()->route('work-orders.assigned-tasks')->with(['error' => 'Something went wrong while updating status :/']);
                 }
             }
             
             // Request is from "My Work Orders" page
             else {
-
                 $workOrder->update([
-                    'report_description' => $request->report_description,
                     'location_id' => $request->location_id,
+                    'report_description' => $request->report_description,
                 ]);
                 return redirect()->route('work-orders.index')->with(['success' => 'Work Order updated successfully']);
             }
@@ -257,6 +268,10 @@ class WorkOrderController extends Controller
 
         /** Internal Requester */
         else if ($user->hasRole('internal_requester')) {
+            if (count($request->all()) === 1 && array_key_exists('status', $request->all()) && $request->status === "Cancelled") {
+                $workOrder->update(['status' => $request->status]);
+                return redirect()->route('work-orders.index')->with('success', 'Work Order cancelled successfully.');
+            }
             if ($workOrder->requested_by != $user->id) {
                 return redirect()->route('work-orders.index')->with('error', 'You are not allowed to update this work order.');
             }
@@ -276,7 +291,6 @@ class WorkOrderController extends Controller
         /** Work Order Manager */
         else if ($user->hasPermissionTo('manage work orders')) {
 
-            
             // Updating via the dropdown
             if (count($request->all()) === 1 && array_key_exists('status', $request->all())) {
                 if($request->status === "Completed") {

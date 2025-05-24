@@ -36,7 +36,7 @@ class StoreWorkOrderRequest extends FormRequest
         } 
         
         if ($this->routeIs('work-orders.update')) {
-            
+
             if ($user->hasPermissionTo('manage work orders')) {
                 if($this->status === "Assigned"){
                     return $rules = [
@@ -60,13 +60,22 @@ class StoreWorkOrderRequest extends FormRequest
                     ];
                 }
             }
+
+            if ($user->hasPermissionTo('edit own work orders')) {
+                return $rules = [
+                    'location_id' => 'required|exists:locations,id',
+                    'report_description' => 'required|string|max:1000',
+                    'images' => 'nullable|array', // Accept multiple images
+                    'images.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:1024',
+                ];
+            }
         }
         
         else {
             // Default Work Order Request Validation
             $rules = [
-                'report_description' => 'required|string|max:1000',
                 'location_id' => 'required|exists:locations,id',
+                'report_description' => 'required|string|max:1000',
                 'images' => 'nullable|array', // Accept multiple images
                 'images.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:1024',
             ];

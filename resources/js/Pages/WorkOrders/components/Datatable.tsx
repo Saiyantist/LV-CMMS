@@ -41,15 +41,26 @@ interface ColumnMeta<TData> {
 
 type ColumnDef<TData, TValue> = BaseColumnDef<TData, TValue> & {
   meta?: ColumnMeta<TData>;
+  accessorKey?: string;
 };
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { priority?: string; status?: string; [key: string]: any }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   placeholder?: string
 }
 
-export function Datatable<TData, TValue>({ columns, data, placeholder = "Search" }: DataTableProps<TData, TValue>) {
+interface FilterModalProps<TData> {
+  isOpen: boolean;
+  onClose: () => void;
+  columns: ColumnDef<TData, any>[];
+  columnFilters: Record<string, any>;
+  setColumnFilters: (filters: Record<string, any>) => void;
+  data: TData[];
+  buttonRef: React.RefObject<HTMLButtonElement | null>;
+}
+
+export function Datatable<TData extends { priority?: string; status?: string; [key: string]: any }, TValue>({ columns, data, placeholder = "Search" }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
@@ -94,7 +105,7 @@ export function Datatable<TData, TValue>({ columns, data, placeholder = "Search"
           if (!filterValue || filterValue === "all") return true
 
           const keys = key.split(".")
-          const value = keys.reduce((obj, k) => obj?.[k], row)
+          const value = keys.reduce((obj, k) => obj?.[k], row as any)
           return value === filterValue
         })
       })
@@ -104,8 +115,9 @@ export function Datatable<TData, TValue>({ columns, data, placeholder = "Search"
     if (searchQuery) {
       filtered = filtered.filter((item) =>
         searchableColumns.some((col) => {
-          const keys = (col.accessorKey as string).split(".")
-          const value = keys.reduce((obj, key) => obj?.[key], item)
+          if (!col.accessorKey) return false;
+          const keys = col.accessorKey.split(".")
+          const value = keys.reduce((obj, key) => obj?.[key], item as any)
           return value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
         }),
       )
@@ -173,7 +185,7 @@ export function Datatable<TData, TValue>({ columns, data, placeholder = "Search"
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
         data={data}
-        buttonRef={filterButtonRef}
+        buttonRef={filterButtonRef as React.RefObject<HTMLButtonElement>}
       />
 
       {/* Datatable */}
@@ -185,7 +197,7 @@ export function Datatable<TData, TValue>({ columns, data, placeholder = "Search"
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className={`h-10 font-bold text-primary bg-stone-50 ${header.column.columnDef.meta?.headerClassName || ""}`}
+                    className={`h-10 font-bold text-primary bg-stone-50 ${(header.column.columnDef.meta as ColumnMeta<TData>)?.headerClassName || ""}`}
                   >
                     {header.isPlaceholder ? null : (
                       <div
@@ -210,11 +222,19 @@ export function Datatable<TData, TValue>({ columns, data, placeholder = "Search"
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="h-6">
+                <TableRow 
+                  key={row.id} 
+                  data-state={row.getIsSelected() && "selected"} 
+                  className={`h-6 ${
+                    (row.original.priority === "Critical" || row.original.status === "Overdue") 
+                      ? "bg-red-50 hover:bg-red-100" 
+                      : ""
+                  }`}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className={`text-muted-foreground ${cell.column.columnDef.meta?.cellClassName || ""}`}
+                      className={`text-muted-foreground ${(cell.column.columnDef.meta as ColumnMeta<TData>)?.cellClassName || ""}`}
                     >
                       <span className="flex items-center justify-center">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

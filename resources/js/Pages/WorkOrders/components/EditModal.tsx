@@ -81,7 +81,7 @@ export default function EditWorkOrderModal({
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
     const { data, setData, errors, processing } = useForm({
-        location_id: workOrder.location.id,
+        location_id: "",
         report_description: workOrder.report_description,
         asset: workOrder.asset,
         images: [] as File[],
@@ -108,11 +108,12 @@ export default function EditWorkOrderModal({
             if (!data.work_order_type) newErrors["work_order_type"] = "Work order type is required."
             if (!data.label) newErrors["label"] = "Label is required."
             if (!data.scheduled_at) newErrors["scheduled_at"] = "Target date is required."
-            if (!data.approved_at) newErrors["approved_at"] = "Approval date is required."
             if (!data.priority) newErrors["priority"] = "Priority is required."
-            if (!data.assigned_to) newErrors["assigned_to"] = "Assigned personnel is required."
-            if (!data.approved_by) newErrors["approved_by"] = "Approver's name is required."
             if (!data.status) newErrors["status"] = "Status is required."
+            if(workOrder.status === "For Budget Request"){
+                if (!data.approved_at) newErrors["approved_at"] = "Approval date is required."
+                if (!data.approved_by) newErrors["approved_by"] = "Approver's name is required."
+            }
         }
 
         setLocalErrors(newErrors)
@@ -127,15 +128,23 @@ export default function EditWorkOrderModal({
 
         let locationId;
 
-        if (newLocation) {
-            const response = await axios.post("/locations", { // Create the new location before creating the work order.
-                name: newLocation.trim(),
+        // Check the typed location against existing locations
+        const existing = locations.find(
+            (loc) => loc.name.toLowerCase() === typedLocation.toLowerCase()
+        );
+
+        if (existing) {
+            locationId = existing.id.toString();
+        } else if (existing === undefined) {
+            const response = await axios.post("/locations", {
+                name: typedLocation.trim(),
             });
+
             locationId = response.data.id;
         }
 
         else {
-            locationId = initialLocationId;
+            locationId = data.location_id;
         }
 
         const formData = new FormData();
@@ -151,11 +160,11 @@ export default function EditWorkOrderModal({
         if (isWorkOrderManager) {
             formData.append("work_order_type", data.work_order_type || "");
             formData.append("label", data.label || "");
-            if (date) formData.append("scheduled_at", format(date, "yyyy-MM-dd"))
+            formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
             formData.append("assigned_to", data.assigned_to?.id?.toString() || "")
             formData.append("priority", data.priority || "");
             formData.append("status", data.status || "");
-            if (approvedDate) formData.append("approved_at", format(approvedDate, "yyyy-MM-dd"))
+            formData.append("approved_at", approvedDate ? format(approvedDate, "yyyy-MM-dd") : data.approved_at ? format(data.approved_at, "yyyy-MM-dd") : "")
             formData.append("approved_by", data.approved_by || "");
             formData.append("remarks", data.remarks || "");
         }
@@ -227,7 +236,7 @@ export default function EditWorkOrderModal({
                                 items={locations}
                                 getLabel={(loc) => loc.name}
                                 getValue={(loc) => loc.id.toString()}
-                                selectedId={data.location_id}
+                                selectedId={data.location_id.toString()}
                                 onChange={(id) => {
                                     const selectedLocation = locations.find(
                                         (loc) => loc.id.toString() === id
@@ -246,7 +255,7 @@ export default function EditWorkOrderModal({
                                     className="flex items-center"
                                 >
                                     Description{" "}
-                                    <span className="text-red-500 ml-1">*</span>
+                                    {/* <span className="text-red-500 ml-1">*</span> */}
                                 </Label>
                                 <Textarea
                                     id="description"
@@ -468,82 +477,84 @@ export default function EditWorkOrderModal({
                                 {/* Only SHOW this row if the work order status is "FOR BUDGET REQUEST" */}
 
                                 {/* Row 3 */}
-                                <div className="flex flex-row justify-between gap-4 !mt-4">
-                                    {/* Approval Date */}
-                                    <div className="flex-[1] space-y-2">
-                                        <Label htmlFor="approved_at" className="flex items-center">
-                                            Approval Date <span className="text-red-500 ml-1">*</span>
-                                        </Label>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setShowApprovalCalendar(!showApprovalCalendar)}
-                                            className={cn(
-                                            "w-full flex justify-between items-center",
-                                            "text-left font-normal",
-                                            !data.approved_at && "text-muted-foreground"
-                                            )}
-                                        >
-                                            {data.approved_at
-                                            ? format(data.approved_at, "MM/dd/yyyy")
-                                            : "MM/DD/YYYY"}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-
-                                        {showApprovalCalendar && (
-                                            <div
-                                            className="absolute z-50 bg-white shadow-md border !-mt-[46vh] rounded-md"
-                                            onClick={(e) => e.stopPropagation()}
+                                {data.status === "For Budget Request" && (
+                                    <div className="flex flex-row justify-between gap-4 !mt-4">
+                                        {/* Approval Date */}
+                                        <div className="flex-[1] space-y-2">
+                                            <Label htmlFor="approved_at" className="flex items-center">
+                                                Approval Date <span className="text-red-500 ml-1">*</span>
+                                            </Label>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => setShowApprovalCalendar(!showApprovalCalendar)}
+                                                className={cn(
+                                                "w-full flex justify-between items-center",
+                                                "text-left font-normal",
+                                                !data.approved_at && "text-muted-foreground"
+                                                )}
                                             >
-                                            <Calendar
-                                                mode="single"
-                                                selected={
-                                                data.approved_at && isValid(parseISO(data.approved_at))
-                                                    ? parseISO(data.approved_at)
-                                                    : undefined
-                                                }
-                                                onSelect={(date) => {
-                                                if (date) {
-                                                    setData("approved_at", format(date, "yyyy-MM-dd"))
-                                                    setApprovedDate(date)
-                                                    setShowApprovalCalendar(false)
-                                                }
-                                                }}
-                                                disabled={(date) => date > new Date()} // Optional: disallow future dates
-                                                initialFocus
-                                            />
-                                            </div>
-                                        )}
-                                        {showApprovalCalendar && (
-                                            <div
-                                            className="fixed inset-0 z-40"
-                                            onClick={() => setShowApprovalCalendar(false)} // close on outside click
-                                            />
-                                        )}
-                                        {localErrors.approved_at && (
-                                            <p className="text-red-500 text-xs">{localErrors.approved_at}</p>
-                                        )}
-                                    </div>
+                                                {data.approved_at
+                                                ? format(data.approved_at, "MM/dd/yyyy")
+                                                : "MM/DD/YYYY"}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
 
-                                    {/* Approved by */}
-                                    <div className="flex-[2] space-y-2">
-                                        <Label htmlFor="approved_by" className="flex items-center">
-                                            Approved by <span className="text-red-500 ml-1">*</span>
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            id="approved_by"
-                                            value={data.approved_by}
-                                            onChange={(e) => setData("approved_by", e.target.value)}
-                                            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                            placeholder="Enter approver's name"
-                                        />
-     
-                                    {localErrors.approved_by && (
-                                        <p className="text-red-500 text-xs">{localErrors.approved_by}</p>
-                                    )}
+                                            {showApprovalCalendar && (
+                                                <div
+                                                className="absolute z-50 bg-white shadow-md border !-mt-[46vh] rounded-md"
+                                                onClick={(e) => e.stopPropagation()}
+                                                >
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={
+                                                    data.approved_at && isValid(parseISO(data.approved_at))
+                                                        ? parseISO(data.approved_at)
+                                                        : undefined
+                                                    }
+                                                    onSelect={(approvedDate) => {
+                                                    if (approvedDate) {
+                                                        setData("approved_at", format(approvedDate, "yyyy-MM-dd"))
+                                                        setApprovedDate(approvedDate)
+                                                        setShowApprovalCalendar(false)
+                                                    }
+                                                    }}
+                                                    disabled={(approvedDate) => approvedDate > new Date()} // Optional: disallow future dates
+                                                    initialFocus
+                                                />
+                                                </div>
+                                            )}
+                                            {showApprovalCalendar && (
+                                                <div
+                                                className="fixed inset-0 z-40"
+                                                onClick={() => setShowApprovalCalendar(false)} // close on outside click
+                                                />
+                                            )}
+                                            {localErrors.approved_at && (
+                                                <p className="text-red-500 text-xs">{localErrors.approved_at}</p>
+                                            )}
+                                        </div>
+
+                                        {/* Approved by */}
+                                        <div className="flex-[2] space-y-2">
+                                            <Label htmlFor="approved_by" className="flex items-center">
+                                                Approved by <span className="text-red-500 ml-1">*</span>
+                                            </Label>
+                                            <Input
+                                                type="text"
+                                                id="approved_by"
+                                                value={data.approved_by}
+                                                onChange={(e) => setData("approved_by", e.target.value)}
+                                                className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="Enter approver's name"
+                                            />
+        
+                                        {localErrors.approved_by && (
+                                            <p className="text-red-500 text-xs">{localErrors.approved_by}</p>
+                                        )}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                             </div>
                         </form>

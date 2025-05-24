@@ -19,6 +19,7 @@ export default function WorkOrders({
         label: string;
         priority: string;
         remarks: string;
+        requested_by: string;
         requested_at: string;
         location: {
             id: number;

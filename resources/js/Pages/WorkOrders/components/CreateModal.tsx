@@ -149,10 +149,10 @@ export default function CreateWorkOrderModal({
         }
 
         // For Debugging
-        console.log("=== Form Data ===:");
-        for (const [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-        }
+        // console.log("=== Form Data ===:");
+        // for (const [key, value] of formData.entries()) {
+        //     console.log(`${key}:`, value);
+        // }
 
         router.post("/work-orders", formData, {
             forceFormData: true,
@@ -240,6 +240,7 @@ export default function CreateWorkOrderModal({
                         {/* Location */}
                         <SmartDropdown
                             label="Location"
+                            required={true}
                             placeholder="Search or type a new location"
                             items={locations}
                             getLabel={(loc) => loc.name}
