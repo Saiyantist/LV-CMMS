@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+// import { Inertia } from "@inertiajs/inertia";
 import DateTimeSelection from "./Date&Time";
 
 interface EventDetailsProps {
     value: {
         eventName: string;
-        department: string;
+        department: string[];
         eventPurpose: string;
         participants: string;
         participantCount: string;
@@ -12,6 +13,7 @@ interface EventDetailsProps {
     onChange: (val: EventDetailsProps["value"]) => void;
     dateTimeValue: { dateRange: string; timeRange: string };
     onDateTimeChange: (val: { dateRange: string; timeRange: string }) => void;
+    userType: "internal_requester" | "external_requester";
 }
 
 const eventPlaceholders = [
@@ -35,15 +37,31 @@ const EventDetails: React.FC<EventDetailsProps> = ({
     onChange,
     dateTimeValue,
     onDateTimeChange,
+    userType,
 }) => {
+    const departmentType =
+        userType === "internal_requester" ? "internal" : "external";
+
     const [eventPHIndex, setEventPHIndex] = useState(0);
     const [participantPHIndex, setParticipantPHIndex] = useState(0);
 
-    const [eventPlaceholder, setEventPlaceholder] = useState(
-        eventPlaceholders[0]
-    );
-    const [participantPlaceholder, setParticipantPlaceholder] = useState(
-        participantPlaceholders[0]
+    // Department auto-suggest state
+    const [deptOptions, setDeptOptions] = useState<string[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [deptInput, setDeptInput] = useState("");
+    const inputRef = useRef<HTMLInputElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null); // NEW
+
+    // Fetch department options from backend
+    useEffect(() => {
+        fetch(`/departments/${departmentType}`)
+            .then((res) => res.json())
+            .then((data) => setDeptOptions(data))
+            .catch(() => setDeptOptions([]));
+    }, [departmentType]);
+
+    const filteredOptions = deptOptions.filter((opt) =>
+        opt.toLowerCase().includes(deptInput.toLowerCase())
     );
 
     useEffect(() => {
@@ -57,13 +75,50 @@ const EventDetails: React.FC<EventDetailsProps> = ({
         return () => clearInterval(interval);
     }, []);
 
+    // Close suggestions on outside click
     useEffect(() => {
-        setEventPlaceholder(eventPlaceholders[eventPHIndex]);
-    }, [eventPHIndex]);
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(event.target as Node)
+            ) {
+                setShowSuggestions(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () =>
+            document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
-    useEffect(() => {
-        setParticipantPlaceholder(participantPlaceholders[participantPHIndex]);
-    }, [participantPHIndex]);
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setDeptInput(e.target.value);
+        setShowSuggestions(true);
+    };
+
+    const handleInputFocus = () => setShowSuggestions(true);
+
+    const handleInputBlur = () => {
+        setTimeout(() => setShowSuggestions(false), 150);
+        // Do not auto-add on blur, only on Enter
+    };
+
+    const handleCheckboxChange = (option: string) => {
+        let newSelected: string[];
+        if (
+            Array.isArray(value.department) &&
+            value.department.includes(option)
+        ) {
+            newSelected = value.department.filter((item) => item !== option);
+        } else {
+            newSelected = [
+                ...(Array.isArray(value.department) ? value.department : []),
+                option,
+            ];
+        }
+        onChange({ ...value, department: newSelected });
+        setDeptInput(""); // <-- Only clear the input after selection!
+        // Do NOT close suggestions here
+    };
 
     return (
         <div className="w-full bg-white flex flex-col p-8 rounded">
@@ -89,14 +144,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                         type="text"
                         id="eventName"
                         name="eventName"
-                        placeholder={eventPlaceholder}
-                        onFocus={() => setEventPlaceholder("")}
-                        onBlur={() => {
-                            if (!value.eventName)
-                                setEventPlaceholder(
-                                    eventPlaceholders[eventPHIndex]
-                                );
-                        }}
+                        placeholder={eventPlaceholders[eventPHIndex]}
                         value={value.eventName}
                         onChange={(e) =>
                             onChange({ ...value, eventName: e.target.value })
@@ -106,27 +154,91 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                 </div>
 
                 <div className="relative">
-                    <label
-                        htmlFor="department"
-                        className="leading-7 text-sm text-black font-bold"
-                    >
-                        Department
-                    </label>
-                    <select
+                    <div className="flex flex-col md:flex-row md:items-center mb-2 gap-2">
+                        <label
+                            htmlFor="department"
+                            className="leading-7 text-sm text-black font-bold min-w-max"
+                            style={{ minWidth: "120px" }}
+                        >
+                            Department
+                        </label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                            {value.department.map((dept) => (
+                                <span
+                                    key={dept}
+                                    className="bg-secondary text-white px-2 py-1 rounded text-xs flex items-center"
+                                >
+                                    {dept}
+                                    <button
+                                        type="button"
+                                        className="ml-1 text-white hover:text-gray-200"
+                                        onClick={() =>
+                                            handleCheckboxChange(dept)
+                                        }
+                                        tabIndex={-1}
+                                    >
+                                        ×
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                    <input
+                        ref={inputRef}
+                        type="text"
                         id="department"
                         name="department"
-                        value={value.department}
-                        onChange={(e) =>
-                            onChange({ ...value, department: e.target.value })
-                        }
+                        autoComplete="off"
+                        value={deptInput}
+                        onFocus={handleInputFocus}
+                        onBlur={handleInputBlur}
+                        onChange={handleInputChange}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                const trimmed = deptInput.trim();
+                                if (
+                                    trimmed &&
+                                    !value.department.includes(trimmed)
+                                ) {
+                                    const newSelected = [
+                                        ...value.department,
+                                        trimmed,
+                                    ];
+                                    onChange({
+                                        ...value,
+                                        department: newSelected,
+                                    });
+                                }
+                                setDeptInput(""); // Always clear input after Enter
+                            }
+                        }}
                         className="w-full bg-white rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 text-base text-gray-700 py-2 px-3 outline-none"
-                    >
-                        <option value="Marketing">Marketing</option>
-                        <option value="HR">Human Resources</option>
-                        <option value="MIS">MIS</option>
-                        <option value="Finance">Finance</option>
-                        <option value="">Other</option>
-                    </select>
+                        placeholder="Type or select department/strand"
+                    />
+                    {showSuggestions && filteredOptions.length > 0 && (
+                        <ul className="absolute z-10 bg-white border border-gray-300 rounded w-full mt-1 max-h-48 overflow-y-auto shadow-lg">
+                            {filteredOptions.map((option) => (
+                                <li
+                                    key={option}
+                                    className="flex items-center px-3 py-2 hover:bg-secondary hover:text-white cursor-pointer"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={value.department.includes(
+                                            option
+                                        )}
+                                        onChange={() =>
+                                            handleCheckboxChange(option)
+                                        }
+                                        onMouseDown={(e) => e.preventDefault()} // Prevent blur before onChange
+                                        className="mr-2"
+                                    />
+                                    <span>{option}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             </div>
 
@@ -161,14 +273,9 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                         type="text"
                         id="participants"
                         name="participants"
-                        placeholder={participantPlaceholder}
-                        onFocus={() => setParticipantPlaceholder("")}
-                        onBlur={() => {
-                            if (!value.participants)
-                                setParticipantPlaceholder(
-                                    participantPlaceholders[participantPHIndex]
-                                );
-                        }}
+                        placeholder={
+                            participantPlaceholders[participantPHIndex]
+                        }
                         value={value.participants}
                         onChange={(e) =>
                             onChange({ ...value, participants: e.target.value })

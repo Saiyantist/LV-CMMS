@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\EventServicesController;
+use App\Http\Controllers\DepartmentController;
+
+
 /**
  *  Guest Routes
  */
@@ -108,6 +111,12 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
 
     // asset history fetching
     Route::get('/asset-maintenance-history/{assetId}', [AssetMaintenanceHistoryController::class, 'show']);
+
+
+
+
+    // Route::get('/departments', [DepartmentController::class, 'index']);
+    Route::get('/departments/{type}', [DepartmentController::class, 'show']);
 
 
     /**

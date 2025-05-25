@@ -10,6 +10,7 @@ import EventDetails from "./EventDetails";
 import RequestedServices from "./RequestedServices";
 import ComplianceAndConsent from "./Compliance&Consent";
 import EventSummaryModal from "./EventSummaryModal";
+import { usePage } from "@inertiajs/react";
 
 export default function EventServicesRequest() {
     // Step state
@@ -25,34 +26,34 @@ export default function EventServicesRequest() {
 
     // Step 2: Venue
     const [selectedGalleryItem, setSelectedGalleryItem] = useState<
-        number | null
+        number[] | null
     >(null);
 
-    // Step 3: Date & Time
-    const [dateRange, setDateRange] = useState<string>("");
-    const [timeRange, setTimeRange] = useState<string>("");
-
-    // Step 4: Event Details
+    // Step 3   : Event Details
     const [eventDetails, setEventDetails] = useState<{
         eventName: string;
-        department: string;
+        department: string[]; // <-- Change to array
         eventPurpose: string;
         participants: string;
         participantCount: string;
     }>({
         eventName: "",
-        department: "",
+        department: [], // <-- Initialize as empty array
         eventPurpose: "",
         participants: "",
         participantCount: "",
     });
 
-    // Step 5: Requested Services
+    //  Date & Time
+    const [dateRange, setDateRange] = useState<string>("");
+    const [timeRange, setTimeRange] = useState<string>("");
+
+    // Step 4: Requested Services
     const [requestedServices, setRequestedServices] = useState<
         Record<string, string[]>
     >({});
 
-    // Step 6: Compliance & Consent
+    // Compliance & Consent Modal
     const [dataPrivacyAgreed, setDataPrivacyAgreed] = useState(false);
     const [equipmentPolicyAgreed, setEquipmentPolicyAgreed] = useState(false);
     const [consentChoice, setConsentChoice] = useState("");
@@ -138,6 +139,19 @@ export default function EventServicesRequest() {
         }
         if (currentStep > 1) setCurrentStep(currentStep - 1);
     };
+
+    // Get user from Inertia page props
+    const user = usePage().props.auth.user;
+
+    // Use a Set for easy role checking (like in Dashboard)
+    const roleNames = new Set(
+        user.roles?.map((role: { name: string }) => role.name)
+    );
+
+    // Determine userType based on roles
+    const userType = roleNames.has("external_requester")
+        ? "external_requester"
+        : "internal_requester";
 
     return (
         <AuthenticatedLayout>
@@ -287,7 +301,7 @@ export default function EventServicesRequest() {
                 {currentStep === 2 && (
                     <Gallery
                         selectedId={selectedGalleryItem}
-                        onSelect={(id: number | null) => {
+                        onSelect={(id: number[] | null) => {
                             setSelectedGalleryItem(id);
                             setError(null);
                         }}
@@ -303,6 +317,7 @@ export default function EventServicesRequest() {
                             setDateRange(dateRange);
                             setTimeRange(timeRange);
                         }}
+                        userType={userType}
                     />
                 )}
                 {/* Step 4: Requested Services */}
@@ -315,12 +330,11 @@ export default function EventServicesRequest() {
                 {/* Step 5: Summary */}
                 {currentStep === 5 && (
                     <EventSummaryModal
-                        // open={true}
                         onClose={handleBack}
                         onSubmit={() => setShowConsentModal(true)}
                         data={{
                             file,
-                            venue: selectedGalleryItem ? "Auditorium" : "",
+                            venue: "", // Not needed anymore, handled by selectedVenueIds
                             dateRange,
                             timeRange,
                             eventDetails,
@@ -330,6 +344,7 @@ export default function EventServicesRequest() {
                             consentChoice,
                             showSuccess,
                         }}
+                        selectedVenueIds={selectedGalleryItem}
                     />
                 )}
 

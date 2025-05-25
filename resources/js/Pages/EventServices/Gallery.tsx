@@ -7,82 +7,42 @@ type GalleryItem = {
 };
 
 const galleryItems: GalleryItem[] = [
-    {
-        id: 1,
-        title: "Auditorium",
-        subtitle: "Capacities: 300",
-    },
-    {
-        id: 2,
-        title: "Auditorium Lobby",
-        subtitle: "Capacities: 500",
-    },
-    {
-        id: 3,
-        title: "College Library",
-        subtitle: "Capacities: ",
-    },
-    {
-        id: 4,
-        title: "Meeting Room",
-        subtitle: "Capacities: ",
-    },
-    {
-        id: 5,
-        title: "Training Room A",
-        subtitle: "Capacities: ",
-    },
-
-    {
-        id: 6,
-        title: "Computer Laboratory A",
-        subtitle: "Capacities: ",
-    },
-    
-    {
-        id: 7,
-        title: "Computer Laboratory B",
-        subtitle: "Capacities: ",
-    },
-
-    {
-        id: 8,
-        title: "EFS Classroom(s) Room #:",
-        subtitle: "Capacities: ",
-    },
-
-    {
-        id: 9,
-        title: "LVCC Grounds",
-        subtitle: "Capacities: 700 ",
-    },
-
-    {
-        id: 10,
-        title: "LVCC  Main Lobby",
-        subtitle: "Capacities: ",
-    },
+    { id: 1, title: "Auditorium", subtitle: "Capacities: 300" },
+    { id: 2, title: "Auditorium Lobby", subtitle: "Capacities: 500" },
+    { id: 3, title: "College Library", subtitle: "Capacities: " },
+    { id: 4, title: "Meeting Room", subtitle: "Capacities: " },
+    { id: 5, title: "Training Room A", subtitle: "Capacities: " },
+    { id: 6, title: "Computer Laboratory A", subtitle: "Capacities: " },
+    { id: 7, title: "Computer Laboratory B", subtitle: "Capacities: " },
+    { id: 8, title: "EFS Classroom(s) Room #:", subtitle: "Capacities: " },
+    { id: 9, title: "LVCC Grounds", subtitle: "Capacities: 700 " },
+    { id: 10, title: "LVCC  Main Lobby", subtitle: "Capacities: " },
     {
         id: 11,
         title: "Elementary & High School Library",
         subtitle: "Capacities: ",
     },
-
-    {
-        id: 12,
-        title: "Basketball Court",
-        subtitle: "Capacities: ",
-    },
-
+    { id: 12, title: "Basketball Court", subtitle: "Capacities: " },
 ];
 
 interface GalleryProps {
-    selectedId: number | null;
-    onSelect: (id: number | null) => void;
+    selectedId: number[] | null;
+    onSelect: (id: number[] | null) => void;
 }
 
 const Gallery: React.FC<GalleryProps> = ({ selectedId, onSelect }) => {
-    const selectedItem = galleryItems.find((item) => item.id === selectedId);
+    const isSelected = (id: number) => selectedId?.includes(id);
+
+    const handleSelect = (id: number) => {
+        if (!selectedId) {
+            onSelect([id]);
+        } else if (selectedId.includes(id)) {
+            const updated = selectedId.filter((i) => i !== id);
+            onSelect(updated.length > 0 ? updated : null);
+        } else {
+            onSelect([...selectedId, id]);
+        }
+    };
 
     return (
         <section className="text-gray-600 body-font">
@@ -98,15 +58,11 @@ const Gallery: React.FC<GalleryProps> = ({ selectedId, onSelect }) => {
                         <div
                             key={item.id}
                             className={`lg:w-1/3 sm:w-1/2 p-4 cursor-pointer transition-transform ${
-                                selectedId === item.id
+                                isSelected(item.id)
                                     ? "ring-4 ring-secondary scale-105"
                                     : "hover:ring-2 hover:ring-secondary"
                             }`}
-                            onClick={() =>
-                                onSelect(
-                                    selectedId === item.id ? null : item.id
-                                )
-                            }
+                            onClick={() => handleSelect(item.id)}
                         >
                             <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow duration-300">
                                 <img
@@ -127,9 +83,13 @@ const Gallery: React.FC<GalleryProps> = ({ selectedId, onSelect }) => {
                     ))}
                 </div>
                 <br />
-                {selectedItem && (
+                {selectedId && selectedId.length > 0 && (
                     <p className="mt-6 text-center text-secondary font-medium">
-                        Selected Venue: "{selectedItem.title}"
+                        Selected Venue{selectedId.length > 1 ? "s" : ""}:{" "}
+                        {galleryItems
+                            .filter((item) => selectedId.includes(item.id))
+                            .map((item) => `"${item.title}"`)
+                            .join(", ")}
                     </p>
                 )}
             </div>
@@ -137,4 +97,6 @@ const Gallery: React.FC<GalleryProps> = ({ selectedId, onSelect }) => {
     );
 };
 
+export type { GalleryItem };
+export { galleryItems };
 export default Gallery;
