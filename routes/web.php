@@ -75,11 +75,6 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
      */
     Route::middleware(['auth', 'restrict_external', 'verified', 'hasRole'])->group(function () {
     
-        // Internal and Maintenance Personnel only
-        Route::get('/work-orders/submit-request', [WorkOrderController::class, 'create'])
-            ->middleware('restrict_work_order_manager')
-            ->name('work-orders.submit-request');
-    
         // Maintenance Personnel only
         Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])
             ->middleware(['role:maintenance_personnel'])

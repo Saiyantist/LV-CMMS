@@ -4,16 +4,29 @@ import { useState, useEffect, useRef } from "react"
 import { X } from "lucide-react"
 import { Button } from "@/Components/shadcnui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select"
-import type { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef } from "@tanstack/react-table"
+
+interface ColumnMeta {
+  headerClassName?: string;
+  cellClassName?: string;
+  searchable?: boolean;
+  filterable?: boolean;
+}
+
+// Change to type instead of interface
+type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
+  meta?: ColumnMeta;
+  accessorKey?: string;
+}
 
 interface FilterModalProps {
-  isOpen: boolean
-  onClose: () => void
-  columns: ColumnDef<any, any>[]
-  columnFilters: Record<string, any>
-  setColumnFilters: (filters: Record<string, any>) => void
-  data: any[]
-  buttonRef: React.RefObject<HTMLButtonElement>
+  isOpen: boolean;
+  onClose: () => void;
+  columns: CustomColumnDef<any, any>[];
+  columnFilters: Record<string, any>;
+  setColumnFilters: (filters: Record<string, any>) => void;
+  data: any[];
+  buttonRef: React.RefObject<HTMLButtonElement>;
 }
 
 export default function FilterModal({

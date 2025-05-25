@@ -92,18 +92,6 @@ class WorkOrderController extends Controller
     }
 
     /**
-     * This is used for showing the Work Order Request Form for INTERNAL USERS
-     * The create work order form for WORK ORDER MANAGER(S) is handled in the main component which uses the data from the index method.
-     */
-    public function create()
-    {
-        return Inertia::render('WorkOrders/SubmitRequest',
-        [
-            'locations' => Location::select('id', 'name')->get(),
-        ]);
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreWorkOrderRequest $request)
