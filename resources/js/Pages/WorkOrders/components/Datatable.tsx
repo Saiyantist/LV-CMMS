@@ -65,8 +65,8 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
 
   const user = usePage().props.user as User;
 
-  const isWorkOrderManager = user.permissions.some((permission: string) =>["manage work orders"].includes(permission));
-  const isMaintenancePersonnel = user.roles.some((role) => role.name === "maintenance_personnel");
+  const isWorkOrderManager = user?.permissions.some((permission: string) =>["manage work orders"].includes(permission));
+  const isMaintenancePersonnel = user?.roles.some((role) => role.name === "maintenance_personnel");
 
   const canSeeCriticalOrOverdue = (row: TData) => {
     if (isWorkOrderManager) {
