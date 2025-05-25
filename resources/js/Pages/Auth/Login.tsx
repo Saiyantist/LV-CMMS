@@ -32,7 +32,7 @@ export default function Login({
         e.preventDefault();
 
         post(route("login"), {
-            onFinish: () => reset("password"),
+            onFinish: () => reset("password" as never),
         });
     };
 
@@ -70,7 +70,7 @@ export default function Login({
                             className={`mt-1 block w-full ${
                                 errors.email ? "border-red-500" : ""
                             }`}
-                            autoComplete="username"
+                            autoComplete="email"
                             isFocused
                             onChange={(e) => setData("email", e.target.value)}
                         />
@@ -106,6 +106,7 @@ export default function Login({
                         />
                     </div>
 
+                    {/* Remember Me Checkbox */}
                     <div className="mt-4 block">
                         <label className="flex items-center">
                             <Checkbox
@@ -121,6 +122,7 @@ export default function Login({
                         </label>
                     </div>
 
+                    {/* Forgot Password */}
                     <div className="mt-4 flex">
                         {canResetPassword && (
                             <Link
@@ -133,6 +135,8 @@ export default function Login({
                     </div>
 
                     <div className="mt-4 flex flex-col items-center justify-between space-y-2 w-full">
+
+                        {/* Login Button */}
                         <PrimaryButton
                             className="bg-secondary hover:bg-primary w-full rounded-xl flex items-center justify-center"
                             disabled={processing}
@@ -140,6 +144,7 @@ export default function Login({
                             Log in
                         </PrimaryButton>
 
+                        {/* Register Link */}
                         <div>
                             <span className="text-sm text-gray-600 dark:text-gray-400">
                                 Don't have an account yet?{" "}
