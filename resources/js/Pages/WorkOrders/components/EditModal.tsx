@@ -388,7 +388,7 @@ export default function EditWorkOrderModal({
                                     }
                                     placeholder="Describe your report here..."
                                     required
-                                    className="h-[7rem]"
+                                    className="h-[7rem] text-xs sm:text-sm"
                                 />
                                 {localErrors.report_description && (
                                     <p className="text-red-500 text-xs">

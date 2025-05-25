@@ -140,7 +140,7 @@ export default function CancelWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex max-h-[100px] overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Status */}

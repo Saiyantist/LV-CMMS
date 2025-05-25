@@ -14,14 +14,16 @@ import { getPriorityColor } from "@/utils/getPriorityColor";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import AssignWorkOrderModal from "./components/AssignWorkOrderModal";
 import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
-import { BookX, SquarePen, Trash } from "lucide-react";
+import { BookX, Search, SlidersHorizontal, SquarePen, Trash } from "lucide-react";
 import DeclineWorkOrderModal from "./components/DeclineWorkOrderModal";
 import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
 import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
 import DeleteWorkOrderModal from "./components/DeleteWorkOrderModal";
+import { Input } from "@/Components/shadcnui/input";
+import FilterModal from "./components/FilterModal";
 interface Props {
     user: {
         id: number;
@@ -72,7 +74,7 @@ interface WorkOrders {
         id: number;
         name: string;
     };
-    images: string;
+    images: string[];
     asset: {
         id: number;
         name: string;
@@ -113,9 +115,13 @@ export default function IndexLayout({
     const [decliningWorkOrder, setDecliningWorkOrder] = useState<any>(null);
     const [cancellingWorkOrder, setCancellingWorkOrder] = useState<any>(null);
     const [deletingWorkOrder, setDeletingWorkOrder] = useState<any>(null);
-    const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>(
-        []
-    );
+    const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>([]);
+    const [mobileSearchQuery, setMobileSearchQuery] = useState("");
+    const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
+    const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, any>>({});
+    const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
+    
+    console.log(filteredWorkOrders);
 
     const toggleDescription = (id: number) => {
         setExpandedDescriptions((prev) =>
@@ -124,6 +130,65 @@ export default function IndexLayout({
                 : [...prev, id]
         );
     };
+
+    // const filteredMobileWorkOrders = useMemo(() => {
+    //     return filteredWorkOrders.filter((workOrder) => {
+    //         const searchLower = mobileSearchQuery.toLowerCase();
+    //         return (
+    //             workOrder.report_description?.toLowerCase().includes(searchLower) ||
+    //             workOrder.location?.name?.toLowerCase().includes(searchLower)
+    //         );
+    //     });
+    // }, [filteredWorkOrders, mobileSearchQuery]);
+
+    const filteredMobileWorkOrders = useMemo(() => {
+        let filtered = filteredWorkOrders;
+    
+        // Apply column filters
+        if (Object.keys(mobileColumnFilters).length > 0) {
+            filtered = filtered.filter((row) => {
+                return Object.entries(mobileColumnFilters).every(([key, filterValue]) => {
+                    if (!filterValue || filterValue === "all") return true;
+                    const keys = key.split(".");
+                    const value = keys.reduce((obj, k) => obj?.[k], row as any);
+                    return value === filterValue;
+                });
+            });
+        }
+    
+        // Apply search query
+        if (mobileSearchQuery) {
+            filtered = filtered.filter((workOrder) => {
+                const searchLower = mobileSearchQuery.toLowerCase();
+                return (
+                    workOrder.report_description?.toLowerCase().includes(searchLower) ||
+                    workOrder.location?.name?.toLowerCase().includes(searchLower)
+                );
+            });
+        }
+    
+        return filtered;
+    }, [filteredWorkOrders, mobileSearchQuery, mobileColumnFilters]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isMobileFilterModalOpen && mobileFilterButtonRef.current && !mobileFilterButtonRef.current.contains(event.target as Node)) {
+                const modalElement = document.querySelector('[data-filter-modal="true"]');
+                if (
+                    modalElement &&
+                    !modalElement.contains(event.target as Node) &&
+                    !mobileFilterButtonRef.current.contains(event.target as Node)
+                ) {
+                    setIsMobileFilterModalOpen(false);
+                }
+            }
+        };
+    
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isMobileFilterModalOpen]);
 
     const requesterOrPersonnelColumns: ColumnDef<WorkOrders>[] = [
         {
@@ -549,7 +614,49 @@ export default function IndexLayout({
 
             {/* Mobile Card View */}
             <div className="md:hidden flex flex-col gap-4 mt-4 px-4">
-                {filteredWorkOrders.map((workOrder) => {
+
+                {/* Search and Filter Controls */}
+                <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search description or location"
+                            value={mobileSearchQuery}
+                            onChange={(event) => setMobileSearchQuery(event.target.value)}
+                            className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
+                        />
+                    </div>
+                    <Button
+                        ref={mobileFilterButtonRef}
+                        variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
+                        size="sm"
+                        className={`h-10 gap-1 border rounded-md ${
+                            Object.keys(mobileColumnFilters).length > 0 ? "bg-primary text-white" : ""
+                        }`}
+                        onClick={() => setIsMobileFilterModalOpen(!isMobileFilterModalOpen)}
+                    >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        Filter
+                        {Object.keys(mobileColumnFilters).length > 0 && (
+                            <span className="ml-1 rounded-full bg-white text-primary w-5 h-5 flex items-center justify-center text-xs">
+                                {Object.values(mobileColumnFilters).filter((value) => value !== "" && value !== "all").length}
+                            </span>
+                        )}
+                    </Button>
+                </div>
+
+                {/* Filter Modal */}
+                <FilterModal
+                    isOpen={isMobileFilterModalOpen}
+                    onClose={() => setIsMobileFilterModalOpen(false)}
+                    columns={columns}
+                    columnFilters={mobileColumnFilters}
+                    setColumnFilters={setMobileColumnFilters}
+                    data={filteredWorkOrders}
+                    buttonRef={mobileFilterButtonRef as React.RefObject<HTMLButtonElement>}
+                />
+
+                {filteredMobileWorkOrders.map((workOrder) => {
                     const description = workOrder.report_description || "";
                     const shouldTruncate = description.length > 25;
                     const priorities = ["Low", "Medium", "High", "Critical"];

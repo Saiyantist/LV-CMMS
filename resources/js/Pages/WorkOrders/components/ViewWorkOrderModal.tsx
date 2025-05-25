@@ -251,7 +251,7 @@ export default function ViewWorkOrderModal({
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[3.3] items-start max-h-[100px] overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {isMaintenancePersonnel && (
