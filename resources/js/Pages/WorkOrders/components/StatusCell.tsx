@@ -19,7 +19,7 @@ interface StatusCellProps {
         roles: { name: string }[];
         permissions: string[];
     };
-    row: any;
+    row?: any;
 }
 
 // Define status transition rules
@@ -50,11 +50,21 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
         // Return available transitions for current status
         return STATUS_TRANSITIONS[currentStatus] || [];
     };
-
     const availableStatuses = getAvailableStatuses(value);
     const canEditStatus = user.permissions.includes("manage work orders") || 
                          (user.roles[0].name === "maintenance_personnel" && 
                           window.route().current("work-orders.assigned-tasks"));
+
+    // If maintenance personnel and status is completed, show static status
+    if (user.roles[0].name === "maintenance_personnel" && value === "Completed") {
+        return (
+            <span
+                className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(value)}`}
+            >
+                {value}
+            </span>
+        );
+    }
 
     return (
         <DropdownMenu>

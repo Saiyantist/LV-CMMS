@@ -32,6 +32,8 @@ import {
 } from "@/Components/shadcnui/table";
 import FilterModal from "./FilterModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
+import { usePage } from "@inertiajs/react";
+import { User } from "@/types";
 
 interface ColumnMeta<TData> {
   headerClassName?: string;
@@ -61,6 +63,19 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
 
+  const user = usePage().props.user as User;
+
+  const isWorkOrderManager = user.permissions.some((permission: string) =>["manage work orders"].includes(permission));
+  const isMaintenancePersonnel = user.roles.some((role) => role.name === "maintenance_personnel");
+
+  const canSeeCriticalOrOverdue = (row: TData) => {
+    if (isWorkOrderManager) {
+      return (row.original.priority === "Critical" || row.original.status === "Overdue")
+    } else if (isMaintenancePersonnel && row.original.assigned_to?.id === user.id) {
+      return (row.original.priority === "Critical" || row.original.status === "Overdue")
+    }
+    return false
+  }
   // Close filter modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -229,7 +244,7 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
                   key={row.id} 
                   data-state={row.getIsSelected() && "selected"} 
                   className={`h-6 hover:font-medium ${
-                    (row.original.priority === "Critical" || row.original.status === "Overdue") 
+                    (canSeeCriticalOrOverdue(row as any)) 
                       ? "bg-red-50 hover:bg-red-100" 
                       : ""
                   }`}

@@ -136,6 +136,7 @@ export default function IndexLayout({
             accessorKey: "location.name",
             header: "Location",
             cell: ({ row }) => <div>{row.original.location.name}</div>,
+            enableSorting: false,
             meta: {
                 headerClassName: "max-w-1/8",
                 searchable: true,
@@ -412,6 +413,7 @@ export default function IndexLayout({
                     onClose={() => setIsCreating(false)}
                 />
             )}
+
             {editingWorkOrder && (
                 <EditWorkOrderModal
                     workOrder={editingWorkOrder}

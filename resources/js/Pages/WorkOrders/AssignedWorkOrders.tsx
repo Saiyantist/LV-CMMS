@@ -10,6 +10,8 @@ import { getPriorityColor } from "@/utils/getPriorityColor";
 import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
 import { statusSorting } from "@/utils/statusSorting";
+import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
+import { CircleEllipsis } from "lucide-react";
 
 // import FullCalendar from "@fullcalendar/react"; // FullCalendar library
 // import dayGridPlugin from "@fullcalendar/daygrid"; // Month view
@@ -17,6 +19,7 @@ import { statusSorting } from "@/utils/statusSorting";
 
 export default function AssignedWorkOrders({
     user,
+    locations,
     workOrders,
 }: {
     user: {
@@ -25,9 +28,11 @@ export default function AssignedWorkOrders({
         roles: { name: string }[];
         permissions: string[];
     };
+    locations: { id: number; name: string }[];
     workOrders: any;
 }) {
     const [activeTab, setActiveTab] = useState("list");
+    const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
 
     // Define columns for the data table
     const columns: ColumnDef<{ id: number; location?: { name?: string } }>[] = [
@@ -54,6 +59,7 @@ export default function AssignedWorkOrders({
             cell: ({ row }) => (
                 <div>{row.original.location?.name || "N/A"}</div>
             ),
+            enableSorting: false,
             meta: {
                 headerClassName: "max-w-16",
                 searchable: true,
@@ -79,6 +85,7 @@ export default function AssignedWorkOrders({
             meta: {
                 headerClassName: "w-[10rem]",
                 filterable: true,
+                searchable: true,
             },
         },
         {
@@ -86,7 +93,7 @@ export default function AssignedWorkOrders({
             header: "Priority",
             cell: ({ row }) => (
                 <div
-                    className={`px-2 py-1 rounded ${getPriorityColor(
+                    className={`px-4 py-1 rounded ${getPriorityColor(
                         row.getValue("priority")
                     )}`}
                 >
@@ -95,7 +102,8 @@ export default function AssignedWorkOrders({
             ),
             sortingFn: prioritySorting,
             meta: {
-                headerClassName: "max-w-20",
+                headerClassName: "w-24",
+                cellClassName: "max-w-24 flex justify-center",
                 filterable: true,
             },
         },
@@ -127,8 +135,11 @@ export default function AssignedWorkOrders({
         {
             id: "actions",
             header: "Action",
-            cell: () => (
-                <Button className="bg-primary hover:bg-secondary text-white text-xs h-6 w-14 rounded">
+            cell: ({ row }) => (
+                <Button
+                    className="bg-primary h-6 text-xs rounded-sm"
+                    onClick={() => setIsViewingWorkOrder(row.original)}
+                >
                     View
                 </Button>
             ),
@@ -141,6 +152,15 @@ export default function AssignedWorkOrders({
             <Head title="Assigned Work Orders" />
 
             <FlashToast />
+
+            {isViewingWorkOrder && (
+                <ViewWorkOrderModal
+                    workOrder={isViewingWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setIsViewingWorkOrder(null)}
+                />
+            )}
 
             <div className="container mx-auto py-4">
                 <header className="flex justify-center sm:justify-start">

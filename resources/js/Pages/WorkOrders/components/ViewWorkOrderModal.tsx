@@ -2,7 +2,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/Components/shadcnui/dialog";
 import { Button } from "@/Components/shadcnui/button";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -12,6 +12,8 @@ import {
 } from "@/Components/shadcnui/table"
 import { Label } from "@/Components/shadcnui/label";
 import { getStatusColor } from "@/utils/getStatusColor";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
+import { router } from "@inertiajs/react";
 
 
 
@@ -39,10 +41,11 @@ interface ViewWorkOrderProps {
         remarks: string;
         images: string[];
     };
-    locations: Location[];
+    locations: { id: number; name: string }[];
     user: {
         id: number;
         name: string;
+        roles: { name: string }[];
         permissions: string[];
     };
     onClose: () => void;
@@ -54,22 +57,34 @@ export default function ViewWorkOrderModal({
     user,
     onClose,
 }: ViewWorkOrderProps) {
+    const isMaintenancePersonnel = user.roles.some(role => role.name === 'maintenance_personnel');
+    const isInternalRequester = user.roles.some(role => role.name === 'internal_requester');
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
-    // const getAssetDetails = (workOrder: any) => {
-    //     if (workOrder.asset) {
-    //         return {
-    //             id: workOrder.asset.id,
-    //             name: workOrder.asset.name,
-    //             location_id: workOrder.asset.location_id,
-    //             location_name: locations.find(
-    //                 (loc) => loc.id === workOrder.asset.location_id
-    //             )?.name || "No Location",
-    //         };
-    //     }
-    //     return null;
-    // };
+
+    const getAssetDetails = (workOrder: any) => {
+        if (workOrder.asset) {
+            return {
+                id: workOrder.asset.id,
+                name: workOrder.asset.name,
+                location_id: workOrder.asset.location_id,
+                location_name: locations.find(
+                    (loc) => loc.id === workOrder.asset.location_id
+                )?.name || "No Location",
+            };
+        }
+        return null;
+    };
     
-    // const assetDetails = getAssetDetails(workOrder);
+    const assetDetails = getAssetDetails(workOrder);
+
+    const getAvailableStatuses = (status: string): string[] => {
+        return ["Ongoing", "Completed"];
+    }
+    const availableStatuses = getAvailableStatuses(workOrder.status);
+
+    const handleUpdate = (status: string, workOrderId: number) => {
+        router.put(`/work-orders/${workOrderId}`, { status });
+    };
 
     return (
         <Dialog
@@ -79,10 +94,16 @@ export default function ViewWorkOrderModal({
                 onClose()
                 }
             }}
-        >
+        >   
             <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
-                    <DialogTitle className="text-xl font-semibold">Request Details</DialogTitle>
+                    <DialogTitle className="text-xl font-semibold text-primary">
+                        <div className="flex flex-row gap-4">
+                            <span>Request Details</span>
+                            <span className="text-muted-foreground">|</span>
+                            <span className="text-muted-foreground">ID: {workOrder.id}</span>
+                        </div>
+                        </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -91,66 +112,185 @@ export default function ViewWorkOrderModal({
                 <div className="px-6 max-h-[70vh] overflow-y-auto">
 
                     <Table className="w-full rounded-md">
-                        <TableBody>
+                        <TableBody className="flex flex-col">
+
+                            {isMaintenancePersonnel && (
+                                <TableRow className="border-none flex flex-row items-center justify-between w-full">
+
+                                    {/* Requested By */}
+                                    <div className="flex-[1] flex">
+                                        <TableHead className="flex flex-[1] items-center">
+                                            <Label>Requested By:</Label>
+                                        </TableHead>
+                                        <TableCell className="flex flex-[1] items-center">{workOrder.requested_by.name}</TableCell>
+                                    </div>
+
+                                    {workOrder.assigned_to?.id === user.id ? [
+
+                                    // Status if Work Order Request is Assigned to the Maintenance Personnel = DROPDOWN MENU
+                                    <div className="flex-[1] flex gap-8">
+                                        <TableHead className="flex flex-[1] items-center">
+                                            <Label>Status:</Label>
+                                        </TableHead>
+                                        <TableCell className="flex flex-[2] items-center">
+                                            {workOrder.status === "Completed" ? [
+                                            <span
+                                                className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(workOrder.status)}`}
+                                            >
+                                                {workOrder.status}
+                                            </span>
+                                            ] : [
+                                            <>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button
+                                                            variant="link"
+                                                            className={`px-2 !h-7 border rounded flex items-center justify-between gap-1 hover:no-underline ${getStatusColor(workOrder.status)}`}
+                                                        >
+                                                            {workOrder.status}
+                                                            <ChevronDown className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="center">
+                                                        {availableStatuses.map((status) => (
+                                                            <DropdownMenuItem
+                                                                key={status}
+                                                                onClick={() => handleUpdate(status, workOrder.id)}
+                                                                className="hover:bg-gray-100"
+                                                            >
+                                                                {status}
+                                                            </DropdownMenuItem>
+                                                        ))}
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </>
+                                            ]}
+                                        </TableCell>
+                                    </div>
+
+                                    ] : [
+                                        
+                                    // Status if Work Order Request is own = STATIC VIEWING ONLY
+                                    <div className="flex-[1] flex gap-8">
+                                        <TableHead className="flex flex-[1] items-center">
+                                            <Label>Status:</Label>
+                                        </TableHead>
+                                        <TableCell className="flex flex-[2] items-center">
+                                            <span
+                                                className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(workOrder.status)}`}
+                                            >
+                                                {workOrder.status}
+                                            </span>
+                                        </TableCell>
+                                    </div>
+
+                                    ]}
+
+
+                                </TableRow>
+                            )}
+                    
+                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
+
+                                {/* Date Requested */}
+                                <div className="flex-[1] flex">
+                                    <TableHead className="flex flex-[1] items-center">
+                                        <Label>Date Requested:</Label>
+                                    </TableHead>
+                                    <TableCell className="flex flex-[1] items-center">{workOrder.requested_at}</TableCell>
+                                </div>
+
+                                {/* Work Order Type */}
+                                {isMaintenancePersonnel && (
+                                <div className="flex-[1] flex">
+                                    <TableHead className="flex flex-[0.7] items-center">
+                                        <Label>Work Order Type:</Label>
+                                    </TableHead>
+                                    <TableCell className="flex flex-[1] items-center">
+                                        {workOrder.work_order_type}
+                                    </TableCell>
+                                </div>
+                                )}
+
+                                {/* Status */}
+                                {isInternalRequester && (   
+                                    <div className="flex-[1] flex">
+                                        <TableHead className="flex flex-[1] items-center">
+                                            <Label>Status:</Label>
+                                        </TableHead>
+                                        <TableCell className="flex flex-[3] items-center">
+                                            <span
+                                                className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(workOrder.status)}`}
+                                            >
+                                                {workOrder.status}
+                                            </span>
+                                        </TableCell>
+                                    </div>
+                                )}
+                            </TableRow>
                             
-                            {/* ID */}
-                            <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
-                                    <Label>Work Order ID:</Label>
-                                </TableHead>
-                                <TableCell className="">{workOrder.id}</TableCell>
-                            </TableRow>
+                        </TableBody>
+                    </Table>
 
-                            {/* Date Requested */}
-                            <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
-                                    <Label>Date Requested:</Label>
-                                </TableHead>
-                                <TableCell className="">{workOrder.requested_at}</TableCell>
-                            </TableRow>
+                    {isMaintenancePersonnel && (
+                        <hr className="my-2" />
+                    )}
 
+                    <Table>
+                        <TableBody className="flex flex-col">
                             {/* Location */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Location:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.location.name}</TableCell>
+                                <TableCell className="flex flex-[3.3] items-center">{workOrder.location.name}</TableCell>
                             </TableRow>
 
                             {/* Description */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[3.3] items-center">{workOrder.report_description}</TableCell>
                             </TableRow>
 
-                            {/* Status */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
-                                    <Label>Status:</Label>
-                                </TableHead>
-                                <TableCell className="">
-                                    <span className={`rounded-md text-sm border font-medium shadow-sm h-8 px-2 py-1 ${getStatusColor(workOrder.status)}`}>{workOrder.status}</span>
-                                </TableCell>
-                            </TableRow>
+                            {isMaintenancePersonnel && (
+                                <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                    <TableHead className="flex flex-[1] items-center">
+                                        <Label>Remarks:</Label>
+                                    </TableHead>
+                                    <TableCell className="flex flex-[3.3] items-center">
+                                        {workOrder.remarks ? (
+                                            workOrder.remarks
+                                        ) : (
+                                            <span className="text-gray-500 italic">No Remarks</span>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            )}
 
                             {/* Asset */}
-                            {/* {assetDetails && (
-                            <TableRow className="border-none">
-                                <TableHead>
+                            {assetDetails && (
+                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                <TableHead className="flex flex-[1] items-center">
                                 <Label>Asset</Label>
                                 </TableHead>
-                                <TableCell>{assetDetails.name} - {assetDetails.location_name}</TableCell>
+                                <TableCell className="flex flex-[3.3] items-center">
+                                    {assetDetails ? (
+                                        `${assetDetails?.name} - ${assetDetails?.location_name}`
+                                    ) : (
+                                        <span className="text-gray-500 italic">No Asset attached</span>
+                                    )}
+                                </TableCell>
                             </TableRow>
-                            )} */}
+                            )}
 
                             {/* Attachment/Images */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Attachment:</Label>
                                 </TableHead>
-                                <TableCell className="">
+                                <TableCell className="flex flex-[3.3] items-center">
                                     {workOrder.images.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                             {workOrder.images.map((src, index) => (

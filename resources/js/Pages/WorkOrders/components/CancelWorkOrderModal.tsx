@@ -92,7 +92,15 @@ export default function CancelWorkOrderModal({
         >
             <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
-                    <DialogTitle className="text-xl font-semibold">Cancel Work Order</DialogTitle>
+                    <DialogTitle className="text-xl font-semibold text-primary">
+                        <div className="flex flex-row gap-4">
+                            <div className="flex flex-row gap-1.5">
+                                <span className="text-red-500">Cancel</span><span>Work Order</span>
+                            </div>
+                            <span className="text-muted-foreground">|</span>
+                            <span className="text-muted-foreground">ID: {workOrder.id}</span>
+                        </div>
+                    </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -191,7 +199,7 @@ export default function CancelWorkOrderModal({
                 <DialogFooter className="px-6 py-4 border-t">
                     <form onSubmit={submit} className="flex gap-2">
                         <Button variant="outline" onClick={onClose}>Back</Button>
-                        <Button variant="destructive" type="submit">Cancel</Button>
+                        <Button variant="destructive" type="submit">Cance Work Order</Button>
                     </form>
                 </DialogFooter>
 
