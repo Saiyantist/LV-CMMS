@@ -15,7 +15,7 @@ export const getStatusColor = (status: string) => {
             case "For Budget Request":
                 return "bg-orange-200 text-orange-800 border-orange-300";
             case "Cancelled":
-                return "bg-slate-200 text-slate-600 border-slate-400";
+                return "bg-rose-200 text-rose-600 border-rose-400";
             case "Declined":
                 return "bg-red-50 text-pink-800 border-pink-300";
             case "Deleted":

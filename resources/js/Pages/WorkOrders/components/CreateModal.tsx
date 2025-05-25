@@ -697,16 +697,18 @@ export default function CreateWorkOrderModal({
 
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <Button variant="outline" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        type="submit"
-                        onClick={submit}
-                        className="bg-primary hover:bg-primary/90 text-white"
-                    >
-                        Create
-                    </Button>
+                    <div className="flex gap-2 xs:flex-row flex-col">
+                        <Button variant="outline" onClick={onClose}>
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            onClick={submit}
+                            className="bg-primary hover:bg-primary/90 text-white"
+                        >
+                            Create
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

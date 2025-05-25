@@ -177,7 +177,7 @@ export default function IndexLayout({
             cell: ({ row }) => (
                     <div className="flex gap-2 justify-start px-2">
                         <Button
-                            className="bg-primary h-6 text-xs rounded-sm"
+                            className="bg-secondary h-6 text-xs rounded-sm"
                             onClick={() => setIsViewingWorkOrder(row.original)}
                         >
                             View
@@ -187,7 +187,7 @@ export default function IndexLayout({
                             <Button
                                 variant={"outline"}
                                 size={"icon"}
-                                className="h-6 text-xs rounded-sm"
+                                className="h-6 text-xs text-secondary rounded-sm"
                                 onClick={() => setEditingWorkOrder(row.original)}
                             ><SquarePen />
                             </Button>
@@ -326,7 +326,7 @@ export default function IndexLayout({
                     cell: ({ row }: { row: Row<WorkOrders> }) => (
                         <div className="flex gap-2 justify-center">
                             <Button
-                                className="bg-primary h-6 text-xs rounded-sm"
+                                className="bg-secondary h-6 text-xs rounded-sm hover:bg-secondary/80 hover:text-white transition-all duration-200"
                                 onClick={() => setEditingWorkOrder(row.original)}
                             >
                                 Edit
@@ -362,14 +362,14 @@ export default function IndexLayout({
                     cell: ({ row }: { row: Row<WorkOrders> }) => (
                         <div className="flex gap-2 justify-center">
                             <Button
-                                className="bg-primary h-6 text-xs text-white rounded-sm !border-none hover:bg-primary/85 hover:text-white transition-all duration-200"
+                                className="bg-secondary h-6 text-xs text-white rounded-sm !border-none hover:bg-secondary/80 hover:text-white transition-all duration-200"
                                 onClick={() => setAcceptingWorkOrder(row.original)}
                             >
                                 Accept
                             </Button>
                             {activeTab === "Pending" && (
                                 <Button
-                                    className="h-6 text-xs text-white rounded-sm !border-none bg-secondary/60 hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                    className="h-6 text-xs text-white rounded-sm !border-none bg-secondary/65 hover:bg-secondary/80 hover:text-white transition-all duration-200"
                                     onClick={() => setForBudgetRequest(row.original)}
                                 >
                                     Budget Request
@@ -491,7 +491,7 @@ export default function IndexLayout({
                     </h1>
                     <PrimaryButton
                         onClick={() => setIsCreating(true)}
-                        className="bg-secondary text-white hover:bg-primary transition-all duration-200 text-sm sm:text-base px-5 py-2 rounded-md w-full sm:w-auto text-center justify-center"
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-200 !text-lg sm:text-base px-5 py-3 sm:py-2 rounded-md w-[95%] sm:w-auto text-center self-center justify-center"
                     >
                         + Add Work Order
                     </PrimaryButton>
@@ -563,16 +563,19 @@ export default function IndexLayout({
                     return (
                         <div
                             key={workOrder.id}
-                            className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
+                            className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"
+                            onClick={() => {
+                                setIsViewingWorkOrder(workOrder);
+                            }}
                         >
                             {/* Top row: ID and Status aligned horizontally */}
-                            <div className="flex justify-between items-start text-sm text-gray-800 mb-1">
+                            <div className="flex justify-between items-start text-gray-800 mb-1">
                                 <p>
-                                    <span className="font-medium">ID:</span>{" "}
+                                    <span className="font-bold text-primary">ID:</span>{" "}
                                     {workOrder.id}
                                 </p>
                                 <span
-                                    className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusColor(
+                                    className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
                                         workOrder.status
                                     )}`}
                                 >
@@ -581,84 +584,93 @@ export default function IndexLayout({
                             </div>
 
                             {/* Info Section */}
-                            <div className="space-y-1 pr-8 text-sm text-gray-800">
+                            <div className="space-y-1 pr-8 text-gray-800">
+
+                                {/* Description */}
                                 <p>
-                                    <span className="font-medium">
+                                    <span className="font-bold text-primary">
                                         Description:
                                     </span>{" "}
                                     {shouldTruncate
                                         ? `${description.slice(0, 25)}...`
                                         : description}
                                 </p>
+
+                                {/* Location */}
                                 <p>
-                                    <span className="font-medium">
+                                    <span className="font-bold text-primary">
                                         Location:
                                     </span>{" "}
                                     {workOrder.location?.name || "N/A"}
                                 </p>
-                                <p className="flex items-center text-sm">
-                                    <span className="font-medium mr-1">
-                                        Priority:
-                                    </span>
-                                    <span className="flex gap-1">
-                                        {["low", "med", "high", "crit"].map(
-                                            (level) => {
-                                                const normalizedPriority =
-                                                    workOrder.priority
-                                                        ?.toLowerCase()
-                                                        .trim();
 
-                                                // Mapping for alternate values like "medium" -> "med"
-                                                const priorityAliases: Record<
-                                                    string,
-                                                    string
-                                                > = {
-                                                    low: "low",
-                                                    medium: "med",
-                                                    med: "med",
-                                                    high: "high",
-                                                    critical: "crit",
-                                                    crit: "crit",
-                                                };
+                                {/* Priority */}
+                                {isWorkOrderManager && (
+                                    <p className="flex items-center text-sm">
+                                        <span className="font-bold text-primary mr-1">
+                                            Priority:
+                                        </span>
+                                        <span className="flex gap-1">
+                                            {["low", "med", "high", "crit"].map(
+                                                (level) => {
+                                                    const normalizedPriority =
+                                                        workOrder.priority
+                                                            ?.toLowerCase()
+                                                            .trim();
 
-                                                const current =
-                                                    priorityAliases[
-                                                        normalizedPriority || ""
-                                                    ] || "";
+                                                    // Mapping for alternate values like "medium" -> "med"
+                                                    const priorityAliases: Record<
+                                                        string,
+                                                        string
+                                                    > = {
+                                                        low: "low",
+                                                        medium: "med",
+                                                        med: "med",
+                                                        high: "high",
+                                                        critical: "crit",
+                                                        crit: "crit",
+                                                    };
 
-                                                const isActive =
-                                                    current === level;
+                                                    const current =
+                                                        priorityAliases[
+                                                            normalizedPriority || ""
+                                                        ] || "";
 
-                                                const bgColorMap: Record<
-                                                    string,
-                                                    string
-                                                > = {
-                                                    low: "bg-green-100 text-green-800",
-                                                    med: "bg-yellow-100 text-yellow-800",
-                                                    high: "bg-orange-100 text-orange-800",
-                                                    crit: "bg-red-100 text-red-800",
-                                                };
+                                                    const isActive =
+                                                        current === level;
 
-                                                return (
-                                                    <span
-                                                        key={level}
-                                                        className={`px-2 py-1 text-xs font-semibold border ${
-                                                            isActive
-                                                                ? `${bgColorMap[level]} border-transparent`
-                                                                : "bg-gray-100 text-gray-400 border-gray-300"
-                                                        }`}
-                                                    >
-                                                        {level}
-                                                    </span>
-                                                );
-                                            }
-                                        )}
-                                    </span>
-                                </p>
+                                                    const bgColorMap: Record<
+                                                        string,
+                                                        string
+                                                    > = {
+                                                        low: "bg-green-100 text-green-800",
+                                                        med: "bg-yellow-100 text-yellow-800",
+                                                        high: "bg-orange-100 text-orange-800",
+                                                        crit: "bg-red-100 text-red-800",
+                                                    };
 
+                                                    return (
+                                                        <span
+                                                            key={level}
+                                                            className={`px-2 py-1 text-xs font-semibold border ${
+                                                                isActive
+                                                                    ? `${bgColorMap[level]} border-transparent`
+                                                                    : "bg-gray-100 text-gray-400 border-gray-300"
+                                                            }`}
+                                                        >
+                                                            {level}
+                                                        </span>
+                                                    );
+                                                }
+                                            )}
+                                        </span>
+                                    </p>
+                                )}
+
+                                {/* Date Requested */}
                                 <p>
-                                    <span className="font-medium">
-                                        Requested At:
+                                    <span className="font-bold text-primary">
+                                        Date Requested:
                                     </span>{" "}
                                     {new Date(
                                         workOrder.requested_at
@@ -667,15 +679,35 @@ export default function IndexLayout({
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="mt-4 flex justify-end gap-2">
-                                <PrimaryButton
-                                    className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:bg-blue-700 transition"
+                            <div className="mt-4 flex justify-end gap-2"
+                                onClick={(e) => {e.stopPropagation();}}
+                            >
+                                {/* <Button
+                                    className="bg-secondary self-center text-white px-4 h-8 xs:h-10 xs:px-6 text-xs xs:text-[1rem] rounded-md hover:bg-secondary/80 hover:text-white transition-all duration-200"
                                     onClick={() =>
-                                        setEditingWorkOrder(workOrder)
+                                        setIsViewingWorkOrder(workOrder)
                                     }
                                 >
                                     View
-                                </PrimaryButton>
+                                </Button> */}
+                                { workOrder.status === "Pending" && (
+                                <div className="flex gap-2 items-center justify-center">
+                                    <Button
+                                        variant={"outline"}
+                                        size={"icon"}
+                                        className="h-8 xs:h-10 w-12 text-white rounded bg-secondary hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                        onClick={() => setEditingWorkOrder(workOrder)}
+                                    ><SquarePen />
+                                    </Button>
+                                    <Button
+                                        variant={"outline"}
+                                        size={"icon"}
+                                        className="h-8 xs:h-10 w-12 text-white rounded bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
+                                        onClick={() => setCancellingWorkOrder(workOrder)}
+                                    ><BookX />
+                                    </Button>
+                                </div>
+                                )}
                             </div>
                         </div>
                     );

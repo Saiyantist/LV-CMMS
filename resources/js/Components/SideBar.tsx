@@ -19,6 +19,7 @@ import {
     ChevronUp,
     ArrowLeft,
 } from "lucide-react";
+import { Button } from "./shadcnui/button";
 
 interface Role {
     name: string;
@@ -83,7 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             href: route("work-orders.assigned-tasks") || "",
                             text: "Assigned Tasks",
                             icon: (
-                                <BriefcaseBusiness size={16} className="mr-2" />
+                                <BriefcaseBusiness size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                             ),
                         },
                     ]
@@ -95,7 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             routeName: "work-orders.index",
                             href: route("work-orders.index") || "",
                             text: "My Work Orders",
-                            icon: <ClipboardList size={16} className="mr-2" />,
+                            icon: <ClipboardList size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
                         },
                     ]
                   : []),
@@ -106,20 +107,20 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             routeName: "booking-calendar",
                             href: route("booking-calendar") || "",
                             text: "Booking Calendar",
-                            icon: <Calendar size={16} className="mr-2" />,
+                            icon: <Calendar size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
                         },
                         {
                             // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
                             routeName: "event-services.request",
                             href: route("event-services.request") || "",
                             text: "Event Services Request",
-                            icon: <FileText size={16} className="mr-2" />,
+                            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
                         },
                         {
                             routeName: "event-services.my-bookings",
                             href: route("event-services.my-bookings") || "",
                             text: "My Bookings",
-                            icon: <Book size={16} className="mr-2" />,
+                            icon: <Book size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
                         },
                     ]
                   : []),
@@ -135,25 +136,25 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             routeName: "work-orders.index",
             href: route("work-orders.index") || "",
             text: "Work Order Requests",
-            icon: <ClipboardList size={16} className="mr-2" />,
+            icon: <ClipboardList size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         hasRoute("assets.index") && {
             routeName: "assets.index",
             href: route("assets.index") || "",
             text: "Asset Management",
-            icon: <Wrench size={14} className="mr-2" />,
+            icon: <Wrench size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         hasRoute("work-orders.preventive-maintenance") && {
             routeName: "work-orders.preventive-maintenance",
             href: route("work-orders.preventive-maintenance") || "",
             text: "Preventive Maintenance",
-            icon: <ShieldCheck size={14} className="mr-2" />,
+            icon: <ShieldCheck size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         hasRoute("work-orders.compliance-and-safety") && {
             routeName: "work-orders.compliance-and-safety",
             href: route("work-orders.compliance-and-safety") || "",
             text: "Compliance and Safety",
-            icon: <FileText size={14} className="mr-2" />,
+            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
     ].filter(Boolean);
 
@@ -163,32 +164,32 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             routeName: "booking-calendar",
             href: route("booking-calendar") || "",
             text: "Booking Calendar",
-            icon: <Calendar size={16} className="mr-2" />,
+            icon: <Calendar size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
             routeName: "event-services.request",
             href: route("event-services.request") || "",
             text: "Event Services Request",
-            icon: <FileText size={16} className="mr-2" />,
+            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "event-services.my-bookings",
             href: route("event-services.my-bookings") || "",
             text: "My Bookings",
-            icon: <Book size={16} className="mr-2" />,
+            icon: <Book size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "",
             href: "",
             text: "Requests Management",
-            icon: <CalendarCog size={16} className="mr-2" />,
+            icon: <CalendarCog size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "",
             href: "",
             text: "Venue Management",
-            icon: <FileText size={16} className="mr-2" />,
+            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
     ];
 
@@ -196,7 +197,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         hasRoute("admin.manage-roles") && {
             routeName: "admin.manage-roles",
             href: route("admin.manage-roles") || "",
-            icon: <User size={16} className="mr-2" />,
+            icon: <User size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
             text: "User Management",
         },
     ];
@@ -219,25 +220,25 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             routeName: "work-orders.index",
             href: route("work-orders.index") || "",
             text: "Work Order Requests",
-            icon: <ClipboardList size={16} className="mr-2" />,
+            icon: <ClipboardList size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "assets.index",
             href: route("assets.index") || "",
             text: "Asset Management",
-            icon: <Wrench size={14} className="mr-2" />,
+            icon: <Wrench size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "work-orders.preventive-maintenance",
             href: route("work-orders.preventive-maintenance") || "",
             text: "Preventive Maintenance",
-            icon: <ShieldCheck size={14} className="mr-2" />,
+            icon: <ShieldCheck size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "work-orders.compliance-and-safety",
             href: route("work-orders.compliance-and-safety") || "",
             text: "Compliance and Safety",
-            icon: <FileText size={14} className="mr-2" />,
+            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
     ].filter((item) => item.href);
 
@@ -247,31 +248,31 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             routeName: "booking-calendar",
             href: route("booking-calendar") || "",
             text: "Booking Calendar",
-            icon: <Calendar size={16} className="mr-2" />,
+            icon: <Calendar size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "event-services.request",
             href: route("event-services.request") || "",
             text: "Event Services Request",
-            icon: <FileText size={16} className="mr-2" />,
+            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "event-services.my-bookings",
             href: route("event-services.my-bookings") || "",
             text: "My Bookings",
-            icon: <Book size={16} className="mr-2" />,
+            icon: <Book size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "",
             href: "",
             text: "Requests Management",
-            icon: <CalendarCog size={16} className="mr-2" />,
+            icon: <CalendarCog size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "",
             href: "",
             text: "Venue Management",
-            icon: <FileText size={16} className="mr-2" />,
+            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
     ];
 
@@ -281,7 +282,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             ? {
                   routeName: "admin.manage-roles",
                   href: route("admin.manage-roles") || "",
-                  icon: <User size={16} className="mr-2" />,
+                  icon: <User size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
                   text: "User Management",
               }
             : null;
@@ -312,7 +313,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         <li key={item.text}>
             <Link
                 href={item.href}
-                className={`flex items-center h-12 pr-2 text-sm hover:text-opacity-80 ${
+                className={`flex items-center text-sm h-12 pr-2 hover:text-opacity-80 ${
                     isActive(item.routeName)
                         ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-4 mr-1 ml-3 rounded-full"
                         : "text-white"
@@ -365,7 +366,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     : "text-white"
                             }`}
                         >
-                            <Home size={16} className="mr-2" />
+                            <Home size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                             Dashboard
                         </Link>
                     </li>
@@ -385,7 +386,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     }
                                     className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
                                 >
-                                    <ClipboardList size={16} className="mr-2" />
+                                    <ClipboardList size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                                     Work Orders
                                     <span className="ml-auto">
                                         {openDropdown === "workOrders" ? (
@@ -414,7 +415,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     }
                                     className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
                                 >
-                                    <Calendar size={16} className="mr-2" />
+                                    <Calendar size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                                     Event Services
                                     <span className="ml-auto">
                                         {openDropdown === "eventServices" ? (
@@ -471,7 +472,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             href="#"
                             className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80"
                         >
-                            <Settings size={16} className="mr-2" />
+                            <Settings size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                             <span>Settings</span>
                         </Link>
                     </li>
@@ -480,7 +481,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             onClick={handleLogout}
                             className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80"
                         >
-                            <LogOut size={16} className="mr-2" />
+                            <LogOut size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                             <span>Logout</span>
                         </button>
                     </li>
@@ -488,65 +489,79 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             </div>
 
             {/* --- Mobile Navbar --- */}
-            <div className="md:hidden fixed top-0 left-0 w-full bg-primary text-white shadow-md z-50">
-                <div className="flex items-center justify-between px-4 py-3 h-14">
-                    <Link
-                        href={route("dashboard")}
-                        className={`flex flex-col items-center text-sm px-3 py-1 rounded-md transition ${
-                            currentRoute === "dashboard"
-                                ? "bg-white text-primary"
-                                : "text-white hover:text-opacity-80"
-                        }`}
-                    >
-                        <Home size={20} />
-                        Dashboard
-                    </Link>
-                    <Link
-                        href={route("profile.edit")}
-                        className={`flex flex-col items-center text-sm px-3 py-1 rounded-md transition ${
-                            currentRoute === "profile.edit"
-                                ? "bg-white text-primary"
-                                : "text-white hover:text-opacity-80"
-                        }`}
-                    >
-                        <UserCircle size={20} />
-                        Profile
-                    </Link>
+            <div className="md:hidden fixed bottom-0 w-full bg-primary text-white shadow-md z-50">
+                <div className="flex items-center justify-between px-4 py-3 h-16 xs:h-[4.2rem]">
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className={`focus:outline-none flex flex-col items-center text-sm px-3 py-1 rounded-md transition ${
+                        className={`flex flex-col items-center text-xs sm:text-sm px-2 xs:px-8 py-1 transition ${
                             mobileMenuOpen
                                 ? "bg-white text-primary"
                                 : "text-white hover:text-opacity-80"
                         }`}
                     >
-                        <Menu size={22} />
+                        <Menu className="w-6 h-6 xs:w-7 xs:h-7" />
                         Menu
                     </button>
+                    <Link
+                        href={route("dashboard")}
+                        className={`flex flex-col items-center text-xs sm:text-sm px-2 xs:px-8 py-1 rounded-md transition ${
+                            currentRoute === "dashboard"
+                                ? "bg-white text-primary"
+                                : "text-white hover:text-opacity-80"
+                        }`}
+                    >
+                        <Home size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
+                        Dashboard
+                    </Link>
+                    <Link
+                        href={route("work-orders.index")}
+                        className={`flex flex-col items-center text-xs sm:text-sm text-center px-2 xs:px-8 py-1 rounded-md transition ${
+                            currentRoute === "work-orders.index"
+                                ? "bg-white text-primary"
+                                : "text-white hover:text-opacity-80"
+                        }`}
+                    >
+                        <ClipboardList size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
+                        Work Orders
+                    </Link>
+                    <Link
+                        href={route("profile.edit")}
+                        className={`flex flex-col items-center text-xs sm:text-sm px-2 xs:px-8 py-1 rounded-md transition ${
+                            currentRoute === "profile.edit"
+                                ? "bg-white text-primary"
+                                : "text-white hover:text-opacity-80"
+                        }`}
+                    >
+                        <UserCircle size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
+                        Profile
+                    </Link>
                 </div>
             </div>
 
             {/* --- Mobile Burger Full Page Overlay --- */}
             {mobileMenuOpen && (
-                <div className="md:hidden fixed top-0 left-0 w-full h-full bg-primary text-white z-50 p-5 pt-6 overflow-y-auto flex flex-col justify-between">
+                <div className="md:hidden fixed top-0 left-0 w-full h-full bg-primary text-white text-md xs:text-lg z-50 p-5 pt-6 overflow-y-auto flex flex-col justify-between">
                     {/* Top content */}
                     <div>
                         <div className="relative mb-6">
                             <button
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="absolute left-0 top-1 text-sm flex items-center text-white hover:text-opacity-80"
+                                className="absolute left-0 top-0 flex items-center text-white hover:text-opacity-80"
                             >
-                                <ArrowLeft size={16} className="mr-1" />
+                                <ArrowLeft size={16} className="w-6 h-6 xs:w-7 xs:h-7 mr-4" />
                                 Back
                             </button>
 
-                            <div className="flex justify-center">
+
+                            
+                            <hr className="absolute mt-12 w-full" /> 
+                            <Link href={route("dashboard")} className="flex justify-center pt-20 py-4">
                                 <img
                                     src="/images/Lvlogo.jpg"
                                     alt="Logo"
-                                    className="h-20 w-20 rounded-full object-cover"
+                                    className="h-24 w-24 rounded-full object-cover"
                                 />
-                            </div>
+                            </Link>
                         </div>
 
                         {/* Super Admin Dropdowns */}
@@ -567,7 +582,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     >
                                         <ClipboardList
                                             size={16}
-                                            className="mr-2"
+                                            className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
                                         />
                                         Work Orders
                                         <span className="ml-auto">
@@ -600,7 +615,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                         }
                                         className="flex items-center w-full px-4 py-3 text-white text-sm hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
                                     >
-                                        <Calendar size={16} className="mr-2" />
+                                        <Calendar
+                                            size={16}
+                                            className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                        />
                                         Event Services
                                         <span className="ml-auto">
                                             {openDropdown ===
@@ -635,7 +653,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     </div>
 
                     {/* Bottom content */}
-                    <div className="border-t pt-4 mt-4 space-y-1 list-none">
+                    <div className="border-t pt-4 mt-4 space-y-1 list-none ">
                         {isSuperAdmin && userManagementItem && (
                             <Link
                                 href={userManagementItem.href}
@@ -651,16 +669,16 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         )}
                         <Link
                             href="#"
-                            className="flex items-center px-4 py-3 text-sm hover:bg-white hover:text-primary rounded-lg transition"
+                            className="flex items-center px-4 py-3 hover:bg-white hover:text-primary rounded-lg transition"
                         >
-                            <Settings size={16} className="mr-2" />
+                            <Settings size={16} className="mr-4 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                             Settings
                         </Link>
                         <button
                             onClick={handleLogout}
-                            className="flex items-center px-4 py-3 text-sm text-red-300 hover:bg-white hover:text-red-500 rounded-lg w-full transition"
+                            className="flex items-center px-4 py-3 text-red-300 hover:bg-white hover:text-red-500 rounded-lg w-full transition"
                         >
-                            <LogOut size={16} className="mr-2" />
+                            <LogOut size={16} className="mr-4 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                             Logout
                         </button>
                     </div>

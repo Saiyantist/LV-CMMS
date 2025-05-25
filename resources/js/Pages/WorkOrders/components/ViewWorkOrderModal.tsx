@@ -97,7 +97,7 @@ export default function ViewWorkOrderModal({
         >   
             <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
-                    <DialogTitle className="text-xl font-semibold text-primary">
+                    <DialogTitle className="text-md sm:text-lg font-semibold text-primary">
                         <div className="flex flex-row gap-4">
                             <span>Request Details</span>
                             <span className="text-muted-foreground">|</span>
@@ -109,9 +109,9 @@ export default function ViewWorkOrderModal({
                     </Button>
                 </DialogHeader>
 
-                <div className="px-6 max-h-[70vh] overflow-y-auto">
+                <div className="px-2 sm:px-6 max-h-[70vh] overflow-y-auto">
 
-                    <Table className="w-full rounded-md">
+                    <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody className="flex flex-col">
 
                             {isMaintenancePersonnel && (
@@ -236,7 +236,7 @@ export default function ViewWorkOrderModal({
                         <hr className="my-2" />
                     )}
 
-                    <Table>
+                    <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody className="flex flex-col">
                             {/* Location */}
                             <TableRow className="border-none flex flex-row items-center justify-between w-full">
@@ -251,7 +251,7 @@ export default function ViewWorkOrderModal({
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[3.3] items-center">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[3.3] items-start max-h-[100px] overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {isMaintenancePersonnel && (
@@ -275,7 +275,7 @@ export default function ViewWorkOrderModal({
                                 <TableHead className="flex flex-[1] items-center">
                                 <Label>Asset</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[3.3] items-center">
+                                <TableCell className="flex flex-[3.3] items-center whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll">
                                     {assetDetails ? (
                                         `${assetDetails?.name} - ${assetDetails?.location_name}`
                                     ) : (

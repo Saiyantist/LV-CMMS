@@ -388,6 +388,7 @@ export default function EditWorkOrderModal({
                                     }
                                     placeholder="Describe your report here..."
                                     required
+                                    className="h-[7rem]"
                                 />
                                 {localErrors.report_description && (
                                     <p className="text-red-500 text-xs">
@@ -684,11 +685,13 @@ export default function EditWorkOrderModal({
                 </div>
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" onClick={submit}
-                        className="bg-primary hover:bg-primary/90 text-white">
-                            {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
+                    <div className="flex gap-2 xs:flex-row flex-col">
+                        <Button variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="submit" onClick={submit}
+                            className="bg-primary hover:bg-primary/90 text-white">
+                                {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
                         </Button>
+                    </div>
                 </DialogFooter>
 
             {activeImageIndex !== null && (

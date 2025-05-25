@@ -16,11 +16,11 @@ export default function Dashboard() {
     return (
         <AuthenticatedLayout>
             <Head title="Dashboard" />
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6 h-full">
                 {/* Welcome Card */}
-                <div className="overflow-hidden bg-white shadow-lg rounded-lg">
-                    <div className="p-6 text-black text-lg sm:text-xl text-center sm:text-left">
-                        Welcome {user.first_name} {user.last_name}!
+                <div className="overflow-hidden bg-white shadow rounded">
+                    <div className="p-4 text-black text-lg sm:text-xl sm:p-6 text-center xs:text-left">
+                        Welcome, {user.first_name} {user.last_name}!👋🏻
                     </div>
                 </div>
 
@@ -30,6 +30,12 @@ export default function Dashboard() {
                         <Chart />
                     </div>
                 )}
+
+                <div className="hidden md:block">
+                    Card
+                </div>
+
+
             </div>
         </AuthenticatedLayout>
     );

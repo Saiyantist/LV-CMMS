@@ -113,7 +113,7 @@ export default function CancelWorkOrderModal({
                             
                             {/* ID */}
                             <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
+                                <TableHead className="w-1/3">
                                     <Label>Work Order ID:</Label>
                                 </TableHead>
                                 <TableCell className="">{workOrder.id}</TableCell>
@@ -140,7 +140,7 @@ export default function CancelWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex max-h-[100px] overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Status */}
@@ -197,7 +197,7 @@ export default function CancelWorkOrderModal({
 
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <form onSubmit={submit} className="flex gap-2">
+                    <form onSubmit={submit} className="flex gap-2 xs:flex-row flex-col">
                         <Button variant="outline" onClick={onClose}>Back</Button>
                         <Button variant="destructive" type="submit">Cance Work Order</Button>
                     </form>
