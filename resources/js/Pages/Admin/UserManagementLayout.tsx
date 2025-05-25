@@ -1,4 +1,5 @@
 import { UserRoleProps } from "@/types";
+// import Pagination from "@/Components/Pagination";
 
 interface Props extends UserRoleProps {
     selectedRole: { [key: number]: string };
@@ -27,7 +28,7 @@ export default function UserManagementLayout({
                         <tr className="bg-secondary dark:bg-gray-800">
                             <th className="border p-3">Id</th>
                             <th className="border p-3">Name</th>
-                            <th className="border p-3">Birthday</th>
+                            {/* <th className="border p-3">Birthday</th> */}
                             <th className="border p-3">Contact</th>
                             <th className="border p-3">Email</th>
                             <th className="border p-3">Current Role</th>
@@ -45,7 +46,7 @@ export default function UserManagementLayout({
                                 <td className="p-3">
                                     {user.first_name} {user.last_name}
                                 </td>
-                                <td className="p-3">{user.birth_date}</td>
+                                {/* <td className="p-3">{user.birth_date}</td> */}
                                 <td className="p-3">
                                     +63 {user.contact_number}
                                 </td>
@@ -86,7 +87,20 @@ export default function UserManagementLayout({
                                                 key={role.id}
                                                 value={role.name}
                                             >
-                                                {role.name}
+                                                {role.name
+                                                    .replace(/_/g, " ") // Replace underscores with spaces
+                                                    .split(" ") // Split into words
+                                                    .map(
+                                                        (word) =>
+                                                            word
+                                                                .charAt(0)
+                                                                .toUpperCase() +
+                                                            word
+                                                                .slice(1)
+                                                                .toLowerCase()
+                                                    ) // Capitalize each word
+                                                    .join(" ")}{" "}
+                                                {/* Join them back */}
                                             </option>
                                         ))}
                                     </select>
@@ -134,9 +148,9 @@ export default function UserManagementLayout({
                                 <strong>Name:</strong> {user.first_name}{" "}
                                 {user.last_name}
                             </div>
-                            <div>
+                            {/* <div>
                                 <strong>Birthday:</strong> {user.birth_date}
-                            </div>
+                            </div> */}
                             <div>
                                 <strong>Contact:</strong> +63{" "}
                                 {user.contact_number}

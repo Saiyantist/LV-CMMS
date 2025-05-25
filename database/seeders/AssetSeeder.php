@@ -28,12 +28,12 @@ class AssetSeeder extends Seeder
                 'name' => $name,
                 'specification_details' => fake()->sentence(5),
                 'date_acquired' => fake()->date(),
-                'status' => fake()->randomElement(['functional', 'non-functional']),
+                'status' => fake()->randomElement(['Functional', 'Failed', 'Under Maintenance', 'End of Useful Life']),
                 'location_id' => Location::inRandomOrder()->first()->id ?? null, // Assign random location if exists
                 'preventive_maintenance_interval_value' => fake()->numberBetween(1, 12),
                 'preventive_maintenance_interval_unit' => fake()->randomElement(['day', 'week', 'month', 'year']),
                 'last_maintained_at' => now()->subDays(fake()->numberBetween(0, 365)),
-                'qr_code' => Str::uuid(),
+                // 'qr_code' => Str::uuid(),
             ]);
         }
     }

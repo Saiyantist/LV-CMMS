@@ -13,6 +13,7 @@ interface Props {
     location: string;
     description: string;
     images: { url: string; name: string }[];
+    onViewWorkOrders: () => void; // Add this property
 }
 
 const formatDate = (dateString: string) => {
@@ -32,6 +33,7 @@ const WOSubmittedModal: React.FC<Props> = ({
     location,
     description,
     images,
+    onViewWorkOrders, // Destructure the new property
 }) => {
     if (!isOpen) return null;
 

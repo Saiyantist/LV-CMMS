@@ -6,15 +6,18 @@ import {
     Wrench,
     ShieldCheck,
     FileText,
-    Send,
     User,
     LogOut,
     Menu,
-    ChevronDown,
-    ChevronUp,
     UserCircle,
     Settings,
     BriefcaseBusiness,
+    Calendar,
+    Book,
+    CalendarCog,
+    ChevronDown,
+    ChevronUp,
+    ArrowLeft,
 } from "lucide-react";
 
 interface Role {
@@ -33,8 +36,11 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ user }) => {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    // Only one dropdown open at a time
+    const [openDropdown, setOpenDropdown] = useState<
+        "workOrders" | "eventServices" | null
+    >(null);
     const { post } = useForm();
     const currentRoute = route().current();
 
@@ -43,106 +49,263 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         post(route("logout"));
     };
 
+    const isWorkOrderRequester = user.permissions.some((permission) =>
+        [
+            "request work orders",
+            "view own work orders",
+            "cancel own work orders",
+        ].includes(permission)
+    );
+    const isEventServiceRequester = user.permissions.some((permission) =>
+        [
+            "request event services",
+            "view own event services",
+            "cancel own event services",
+        ].includes(permission)
+    );
+    const isMaintenancePersonnel = user.roles.some(
+        (role) => role.name === "maintenance_personnel"
+    );
     const isWorkOrderManager = user.permissions.some(
         (permission) => permission === "manage work orders"
     );
-    const isSuperAdmin = user.roles.some((role) => role.name === "super_admin");
-    const isGasdCoordinator = user.roles.some(
-        (role) => role.name === "gasd_coordinator"
+    const isEventServicesManager = user.permissions.some(
+        (permission) => permission === "manage event services"
     );
+    const isSuperAdmin = user.roles.some((role) => role.name === "super_admin");
 
-    const menuItems = [
-        // Check if the user is not an external_requester before rendering "Work Order"
-        ...(user.roles.some((role) => role.name !== "external_requester" && role.name !== "maintenance_personnel" && role.name !== "communications_officer") // REFACTOR these sheez
-            ? [
-                  {
-                      text: "Work Order",
-                      isDropdown: true,
-                      icon: <ClipboardList size={16} className="mr-2" />,
-                      children: [
-                          {
-                              routeName: "work-orders.index",
-                              href: route("work-orders.index") || "",
-                              text: isWorkOrderManager
-                                  ? "Work Order Requests"
-                                  : "Work Order List",
-                              icon: (
-                                  <ClipboardList size={16} className="mr-2" />
-                              ),
-                          },
-                          // Hide "Submit a Request" for WorkOrderManager, super_admin, and gasd_coordinator
-                          ...(isWorkOrderManager ||
-                          isSuperAdmin ||
-                          isGasdCoordinator
-                              ? []
-                              : [
-                                    {
-                                        routeName: "work-orders.submit-request",
-                                        href:
-                                            route(
-                                                "work-orders.submit-request"
-                                            ) || "",
-                                        text: "Submit a Request",
-                                        icon: (
-                                            <Send size={14} className="mr-2" />
-                                        ),
-                                    },
-                                ]),
-                      ],
-                  },
-              ]
-            : []),
+    const menuItems = !isSuperAdmin
+        ? [
+              ...(isMaintenancePersonnel
+                  ? [
+                        {
+                            routeName: "work-orders.assigned-tasks",
+                            href: route("work-orders.assigned-tasks") || "",
+                            text: "Assigned Tasks",
+                            icon: (
+                                <BriefcaseBusiness size={16} className="mr-2" />
+                            ),
+                        },
+                    ]
+                  : []),
 
-        // Check if the user is a maintenance personnel to render "Assigned Tasks" page
-        ...(user.roles.some((role) => role.name === "maintenance_personnel")
-            ? [
-                {
-                    routeName: "work-orders.assigned-tasks",
-                    href: route("work-orders.assigned-tasks") || "",
-                    text: "Assigned Tasks",
-                    icon: <BriefcaseBusiness size={16} className="mr-2" />,
-                },
-                {   
-                    routeName: "work-orders.index",
-                    href: route("work-orders.index") || "",
-                    text: "Work Order List",
-                    icon: <ClipboardList size={16} className="mr-2" />,
-                }
-            ]
-            : []),
+              ...(isWorkOrderRequester && !isWorkOrderManager
+                  ? [
+                        {
+                            routeName: "work-orders.index",
+                            href: route("work-orders.index") || "",
+                            text: "My Work Orders",
+                            icon: <ClipboardList size={16} className="mr-2" />,
+                        },
+                    ]
+                  : []),
+
+              ...(isEventServiceRequester
+                  ? [
+                        {
+                            routeName: "booking-calendar",
+                            href: route("booking-calendar") || "",
+                            text: "Booking Calendar",
+                            icon: <Calendar size={16} className="mr-2" />,
+                        },
+                        {
+                            // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
+                            routeName: "event-services.request",
+                            href: route("event-services.request") || "",
+                            text: "Event Services Request",
+                            icon: <FileText size={16} className="mr-2" />,
+                        },
+                        {
+                            routeName: "event-services.my-bookings",
+                            href: route("event-services.my-bookings") || "",
+                            text: "My Bookings",
+                            icon: <Book size={16} className="mr-2" />,
+                        },
+                    ]
+                  : []),
+          ]
+        : [];
+
+    const hasRoute = (name: string) => {
+        return typeof route().has === "function" ? route().has(name) : false;
+    };
+
+    const workOrderAdminItems = [
+        hasRoute("assets.index") && {
+            routeName: "work-orders.index",
+            href: route("work-orders.index") || "",
+            text: "Work Order Requests",
+            icon: <ClipboardList size={16} className="mr-2" />,
+        },
+        hasRoute("assets.index") && {
+            routeName: "assets.index",
+            href: route("assets.index") || "",
+            text: "Asset Management",
+            icon: <Wrench size={14} className="mr-2" />,
+        },
+        hasRoute("work-orders.preventive-maintenance") && {
+            routeName: "work-orders.preventive-maintenance",
+            href: route("work-orders.preventive-maintenance") || "",
+            text: "Preventive Maintenance",
+            icon: <ShieldCheck size={14} className="mr-2" />,
+        },
+        hasRoute("work-orders.compliance-and-safety") && {
+            routeName: "work-orders.compliance-and-safety",
+            href: route("work-orders.compliance-and-safety") || "",
+            text: "Compliance and Safety",
+            icon: <FileText size={14} className="mr-2" />,
+        },
+    ].filter(Boolean);
+
+    // Insert the following routes if there are pages na.
+    const eventServicesAdminItems = [
+        {
+            routeName: "booking-calendar",
+            href: route("booking-calendar") || "",
+            text: "Booking Calendar",
+            icon: <Calendar size={16} className="mr-2" />,
+        },
+        {
+            // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
+            routeName: "event-services.request",
+            href: route("event-services.request") || "",
+            text: "Event Services Request",
+            icon: <FileText size={16} className="mr-2" />,
+        },
+        {
+            routeName: "event-services.my-bookings",
+            href: route("event-services.my-bookings") || "",
+            text: "My Bookings",
+            icon: <Book size={16} className="mr-2" />,
+        },
+        {
+            routeName: "",
+            href: "",
+            text: "Requests Management",
+            icon: <CalendarCog size={16} className="mr-2" />,
+        },
+        {
+            routeName: "",
+            href: "",
+            text: "Venue Management",
+            icon: <FileText size={16} className="mr-2" />,
+        },
     ];
 
-    const adminItems =
-        isSuperAdmin || isWorkOrderManager
-            ? [
-                  {
-                      routeName: "work-orders.asset-management",
-                      href: route("work-orders.asset-management") || "",
-                      text: "Asset Management",
-                      icon: <Wrench size={14} className="mr-2" />,
-                  },
-                  {
-                      routeName: "work-orders.preventive-maintenance",
-                      href: route("work-orders.preventive-maintenance") || "",
-                      text: "Preventive Maintenance",
-                      icon: <ShieldCheck size={14} className="mr-2" />,
-                  },
-                  {
-                      routeName: "work-orders.compliance-and-safety",
-                      href: route("work-orders.compliance-and-safety") || "",
-                      text: "Compliance and Safety",
-                      icon: <FileText size={14} className="mr-2" />,
-                  },
-                  isSuperAdmin && {
-                      routeName: "admin.manage-roles",
-                      href: route("admin.manage-roles") || "",
-                      icon: <User size={16} className="mr-2" />,
-                      text: "User Management",
-                  },
-              ]
-            : [];
+    const superAdminItems = [
+        hasRoute("admin.manage-roles") && {
+            routeName: "admin.manage-roles",
+            href: route("admin.manage-roles") || "",
+            icon: <User size={16} className="mr-2" />,
+            text: "User Management",
+        },
+    ];
 
-    // Menu item rendering logic remains the same
+    const adminItems = isSuperAdmin
+        ? [
+              ...workOrderAdminItems,
+              ...eventServicesAdminItems,
+              ...superAdminItems,
+          ]
+        : isWorkOrderManager
+        ? workOrderAdminItems
+        : isEventServicesManager
+        ? eventServicesAdminItems
+        : [];
+
+    // Work Orders dropdown items for super admin
+    const workOrdersDropdownItems = [
+        {
+            routeName: "work-orders.index",
+            href: route("work-orders.index") || "",
+            text: "Work Order Requests",
+            icon: <ClipboardList size={16} className="mr-2" />,
+        },
+        {
+            routeName: "assets.index",
+            href: route("assets.index") || "",
+            text: "Asset Management",
+            icon: <Wrench size={14} className="mr-2" />,
+        },
+        {
+            routeName: "work-orders.preventive-maintenance",
+            href: route("work-orders.preventive-maintenance") || "",
+            text: "Preventive Maintenance",
+            icon: <ShieldCheck size={14} className="mr-2" />,
+        },
+        {
+            routeName: "work-orders.compliance-and-safety",
+            href: route("work-orders.compliance-and-safety") || "",
+            text: "Compliance and Safety",
+            icon: <FileText size={14} className="mr-2" />,
+        },
+    ].filter((item) => item.href);
+
+    // Event Services dropdown items for super admin
+    const eventServicesDropdownItems = [
+        {
+            routeName: "booking-calendar",
+            href: route("booking-calendar") || "",
+            text: "Booking Calendar",
+            icon: <Calendar size={16} className="mr-2" />,
+        },
+        {
+            routeName: "event-services.request",
+            href: route("event-services.request") || "",
+            text: "Event Services Request",
+            icon: <FileText size={16} className="mr-2" />,
+        },
+        {
+            routeName: "event-services.my-bookings",
+            href: route("event-services.my-bookings") || "",
+            text: "My Bookings",
+            icon: <Book size={16} className="mr-2" />,
+        },
+        {
+            routeName: "",
+            href: "",
+            text: "Requests Management",
+            icon: <CalendarCog size={16} className="mr-2" />,
+        },
+        {
+            routeName: "",
+            href: "",
+            text: "Venue Management",
+            icon: <FileText size={16} className="mr-2" />,
+        },
+    ];
+
+    // User Management tab for super admin
+    const userManagementItem =
+        isSuperAdmin && hasRoute("admin.manage-roles")
+            ? {
+                  routeName: "admin.manage-roles",
+                  href: route("admin.manage-roles") || "",
+                  icon: <User size={16} className="mr-2" />,
+                  text: "User Management",
+              }
+            : null;
+
+    // Keep only one dropdown open at a time, and auto-open if a child is active
+    React.useEffect(() => {
+        if (isSuperAdmin) {
+            if (
+                workOrdersDropdownItems.some(
+                    (item) => item.routeName && currentRoute === item.routeName
+                )
+            ) {
+                setOpenDropdown("workOrders");
+            } else if (
+                eventServicesDropdownItems.some(
+                    (item) => item.routeName && currentRoute === item.routeName
+                )
+            ) {
+                setOpenDropdown("eventServices");
+            }
+        }
+        // eslint-disable-next-line
+    }, [currentRoute]);
+
     const isActive = (routeName: string) => currentRoute === routeName;
 
     const renderMenuItem = (item: any) => (
@@ -153,7 +316,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     isActive(item.routeName)
                         ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-4 mr-1 ml-3 rounded-full"
                         : "text-white"
-                } ${item.isChild ? "pl-8" : "pl-4"}`}
+                } pl-4`}
             >
                 {item.icon}
                 {item.text}
@@ -161,46 +324,37 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         </li>
     );
 
-    const renderDropdownMenu = (item: any) => (
-        <li key={item.text}>
-            <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center w-full h-12 pl-4 pr-2 text-white hover:text-opacity-80"
-            >
-                <span className="text-sm font-medium flex items-center">
-                    {item.icon}
-                    {item.text}
-                    <span className="ml-1">
-                        {isDropdownOpen ? (
-                            <ChevronUp size={14} />
-                        ) : (
-                            <ChevronDown size={14} />
-                        )}
-                    </span>
-                </span>
-            </button>
-            {isDropdownOpen && (
-                <ul>
-                    {item.children?.map((child) =>
-                        renderMenuItem({ ...child, isChild: true })
-                    )}
-                </ul>
-            )}
-        </li>
+    // Helper for dropdown animation
+    const Dropdown = ({
+        open,
+        children,
+    }: {
+        open: boolean;
+        children: React.ReactNode;
+    }) => (
+        <ul
+            className={`ml-4 transition-all duration-300 ease-in-out overflow-hidden ${
+                open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            }`}
+            style={{ transitionProperty: "max-height, opacity" }}
+        >
+            {children}
+        </ul>
     );
 
     return (
         <>
             {/* --- Desktop Sidebar --- */}
             <div className="hidden md:flex fixed min-h-screen max-h-screen bg-primary w-56 flex-col">
-                <div className="flex items-center justify-center h-24">
+                <div className="flex items-center justify-center mt-4 py-4">
                     <img
                         src="/images/Lvlogo.jpg"
                         alt="Logo"
-                        className="h-20 w-auto object-contain rounded-full"
+                        className="h-16 w-auto object-contain rounded-full"
                     />
                 </div>
 
+                {/* Top Links */}
                 <ul className="flex flex-col py-4 flex-grow">
                     <li>
                         <Link
@@ -215,15 +369,103 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             Dashboard
                         </Link>
                     </li>
-                    {menuItems.map((item) =>
-                        item.isDropdown
-                            ? renderDropdownMenu(item)
-                            : renderMenuItem(item)
+                    {/* Super Admin Dropdowns */}
+                    {isSuperAdmin ? (
+                        <>
+                            {/* Work Orders Dropdown */}
+                            <li>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setOpenDropdown(
+                                            openDropdown === "workOrders"
+                                                ? null
+                                                : "workOrders"
+                                        )
+                                    }
+                                    className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
+                                >
+                                    <ClipboardList size={16} className="mr-2" />
+                                    Work Orders
+                                    <span className="ml-auto">
+                                        {openDropdown === "workOrders" ? (
+                                            <ChevronUp size={16} />
+                                        ) : (
+                                            <ChevronDown size={16} />
+                                        )}
+                                    </span>
+                                </button>
+                                <Dropdown open={openDropdown === "workOrders"}>
+                                    {workOrdersDropdownItems.map((item) =>
+                                        renderMenuItem(item)
+                                    )}
+                                </Dropdown>
+                            </li>
+                            {/* Event Services Dropdown */}
+                            <li>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setOpenDropdown(
+                                            openDropdown === "eventServices"
+                                                ? null
+                                                : "eventServices"
+                                        )
+                                    }
+                                    className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
+                                >
+                                    <Calendar size={16} className="mr-2" />
+                                    Event Services
+                                    <span className="ml-auto">
+                                        {openDropdown === "eventServices" ? (
+                                            <ChevronUp size={16} />
+                                        ) : (
+                                            <ChevronDown size={16} />
+                                        )}
+                                    </span>
+                                </button>
+                                <Dropdown
+                                    open={openDropdown === "eventServices"}
+                                >
+                                    {eventServicesDropdownItems.map((item) =>
+                                        renderMenuItem(item)
+                                    )}
+                                </Dropdown>
+                            </li>
+                        </>
+                    ) : (
+                        <>
+                            {menuItems.map(renderMenuItem)}
+                            {adminItems.map(renderMenuItem)}
+                        </>
                     )}
-                    {adminItems.map(renderMenuItem)}
                 </ul>
 
+                {/* Bottom Links */}
                 <ul className="py-4">
+                    {isSuperAdmin && userManagementItem && (
+                        <li>
+                            <Link
+                                href={userManagementItem.href}
+                                className={`flex items-center w-full h-12 pl-4 pr-2 text-sm hover:text-opacity-80 ${
+                                    isActive(userManagementItem.routeName)
+                                        ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-4 mr-1 ml-3 rounded-full"
+                                        : "text-white"
+                                }`}
+                                style={
+                                    isActive(userManagementItem.routeName)
+                                        ? {
+                                              boxShadow:
+                                                  "0 0 0 1px #fff, 0 0 0 4px #fff",
+                                          }
+                                        : undefined
+                                }
+                            >
+                                {userManagementItem.icon}
+                                <span>{userManagementItem.text}</span>
+                            </Link>
+                        </li>
+                    )}
                     <li>
                         <Link
                             href="#"
@@ -245,7 +487,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 </ul>
             </div>
 
-            {/* --- Mobile Navbar (Updated Layout with Active Tab Styling) --- */}
+            {/* --- Mobile Navbar --- */}
             <div className="md:hidden fixed top-0 left-0 w-full bg-primary text-white shadow-md z-50">
                 <div className="flex items-center justify-between px-4 py-3 h-14">
                     <Link
@@ -286,84 +528,127 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
             {/* --- Mobile Burger Full Page Overlay --- */}
             {mobileMenuOpen && (
-                <div className="md:hidden fixed top-0 left-0 w-full h-full bg-primary text-white z-50 p-5 pt-6 overflow-y-auto">
-                    {/* Top Row: Back Button + Centered Logo */}
-                    <div className="relative mb-6">
-                        <button
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="absolute left-0 top-1 text-sm flex items-center text-white hover:text-opacity-80"
-                        >
-                            <ChevronDown size={20} className="mr-1 rotate-90" />
-                            Back
-                        </button>
-                        <div className="flex justify-center">
-                            <img
-                                src="/images/Lvlogo.jpg"
-                                alt="Logo"
-                                className="h-20 w-20 rounded-full object-cover"
-                            />
-                        </div>
-                    </div>
+                <div className="md:hidden fixed top-0 left-0 w-full h-full bg-primary text-white z-50 p-5 pt-6 overflow-y-auto flex flex-col justify-between">
+                    {/* Top content */}
+                    <div>
+                        <div className="relative mb-6">
+                            <button
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="absolute left-0 top-1 text-sm flex items-center text-white hover:text-opacity-80"
+                            >
+                                <ArrowLeft size={16} className="mr-1" />
+                                Back
+                            </button>
 
-                    {/* Work Order Dropdown */}
-                    <div className="space-y-1 border-t border-white border-opacity-20 pt-4">
-                        <button
-                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            className="w-full text-left flex items-center justify-between px-4 py-3 text-sm font-medium hover:bg-white hover:text-primary rounded-lg transition"
-                        >
-                            <span className="flex items-center">
-                                <ClipboardList size={18} className="mr-2" />
-                                Work Order
-                            </span>
-                            {isDropdownOpen ? (
-                                <ChevronUp size={16} />
-                            ) : (
-                                <ChevronDown size={16} />
-                            )}
-                        </button>
-                        {isDropdownOpen && (
-                            <ul className="space-y-1 mt-1">
-                                {menuItems[0].children?.map((child) => (
-                                    <li key={child.text}>
-                                        <Link
-                                            href={child.href}
-                                            className={`flex items-center px-4 py-2 text-sm rounded-lg transition ${
-                                                isActive(child.routeName)
-                                                    ? "bg-white text-primary"
-                                                    : "hover:bg-white hover:text-primary"
-                                            }`}
-                                        >
-                                            {child.icon}
-                                            {child.text}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
+                            <div className="flex justify-center">
+                                <img
+                                    src="/images/Lvlogo.jpg"
+                                    alt="Logo"
+                                    className="h-20 w-20 rounded-full object-cover"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Super Admin Dropdowns */}
+                        {isSuperAdmin ? (
+                            <>
+                                {/* Work Orders Dropdown */}
+                                <div>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setOpenDropdown(
+                                                openDropdown === "workOrders"
+                                                    ? null
+                                                    : "workOrders"
+                                            )
+                                        }
+                                        className="flex items-center w-full px-4 py-3 text-white text-sm hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
+                                    >
+                                        <ClipboardList
+                                            size={16}
+                                            className="mr-2"
+                                        />
+                                        Work Orders
+                                        <span className="ml-auto">
+                                            {openDropdown === "workOrders" ? (
+                                                <ChevronUp size={16} />
+                                            ) : (
+                                                <ChevronDown size={16} />
+                                            )}
+                                        </span>
+                                    </button>
+                                    <Dropdown
+                                        open={openDropdown === "workOrders"}
+                                    >
+                                        {workOrdersDropdownItems.map((item) =>
+                                            renderMenuItem(item)
+                                        )}
+                                    </Dropdown>
+                                </div>
+
+                                {/* Event Services Dropdown */}
+                                <div>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setOpenDropdown(
+                                                openDropdown === "eventServices"
+                                                    ? null
+                                                    : "eventServices"
+                                            )
+                                        }
+                                        className="flex items-center w-full px-4 py-3 text-white text-sm hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
+                                    >
+                                        <Calendar size={16} className="mr-2" />
+                                        Event Services
+                                        <span className="ml-auto">
+                                            {openDropdown ===
+                                            "eventServices" ? (
+                                                <ChevronUp size={16} />
+                                            ) : (
+                                                <ChevronDown size={16} />
+                                            )}
+                                        </span>
+                                    </button>
+                                    <Dropdown
+                                        open={openDropdown === "eventServices"}
+                                    >
+                                        {eventServicesDropdownItems.map(
+                                            (item) => renderMenuItem(item)
+                                        )}
+                                    </Dropdown>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="space-y-1 border-t pt-4 list-none">
+                                    {menuItems.map(renderMenuItem)}
+                                </div>
+                                {adminItems.length > 0 && (
+                                    <div className="border-t pt-4 mt-4 space-y-1 list-none">
+                                        {adminItems.map(renderMenuItem)}
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
 
-                    {/* Admin Items (if any) */}
-                    {adminItems.length > 0 && (
-                        <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
-                            {adminItems.map((item) => (
-                                <Link
-                                    key={item.text}
-                                    href={item.href}
-                                    className={`flex items-center px-4 py-3 text-sm rounded-lg transition ${
-                                        isActive(item.routeName)
-                                            ? "bg-white text-primary"
-                                            : "hover:bg-white hover:text-primary"
-                                    }`}
-                                >
-                                    {item.icon}
-                                    {item.text}
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Settings and Logout */}
-                    <div className="border-t border-white border-opacity-20 pt-4 mt-4 space-y-1">
+                    {/* Bottom content */}
+                    <div className="border-t pt-4 mt-4 space-y-1 list-none">
+                        {isSuperAdmin && userManagementItem && (
+                            <Link
+                                href={userManagementItem.href}
+                                className={`flex items-center px-4 py-3 text-sm hover:bg-white hover:text-primary rounded-lg transition ${
+                                    isActive(userManagementItem.routeName)
+                                        ? "bg-white text-primary"
+                                        : ""
+                                }`}
+                            >
+                                {userManagementItem.icon}
+                                {userManagementItem.text}
+                            </Link>
+                        )}
                         <Link
                             href="#"
                             className="flex items-center px-4 py-3 text-sm hover:bg-white hover:text-primary rounded-lg transition"

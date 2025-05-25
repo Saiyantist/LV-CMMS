@@ -16,7 +16,7 @@ class Asset extends Model
         'preventive_maintenance_interval_value',
         'preventive_maintenance_interval_unit',
         'last_maintained_at',
-        'qr_code',
+        // 'qr_code',
     ];
 
     public function location()
@@ -29,9 +29,9 @@ class Asset extends Model
         return $this->hasMany(WorkOrder::class);
     }
 
-    public function scheduledMaintenances()
+    public function maintenanceHistories()
     {
-        return $this->hasMany(ScheduledMaintenance::class, 'asset_id');
+        return $this->hasMany(AssetMaintenanceHistory::class);
     }
 
     /**

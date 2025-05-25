@@ -16,7 +16,7 @@ class RestrictExternalRequester
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->user()->hasRole('external_requester')) {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized to access this page');
         }
 
         return $next($request);

@@ -1,16 +1,19 @@
 import React, { useState } from "react";
+import PrimaryButton from "@/Components/PrimaryButton";
 import { toast } from "sonner"; // Importing toast
+import { router } from "@inertiajs/react";
 
 interface AddAssetModalProps {
+    locations: Location[];
     isOpen: boolean;
     onClose: () => void;
     onSave: (asset: {
         name: string;
-        specification: string;
-        location: string;
-        condition: string;
-        dateAcquired: string;
-        lastMaintenance?: string; // Optional
+        specification_details: string;
+        location_id: string;
+        status: string;
+        date_acquired: string;
+        last_maintained_at?: string; // Optional
         image?: File | null; // Optional
         preventiveMaintenance?: {
             description: string;
@@ -20,15 +23,21 @@ interface AddAssetModalProps {
     }) => void;
 }
 
-const AddAssetModal: React.FC<AddAssetModalProps> = ({
+interface Location {
+    id: number;
+    name: string;
+}
+
+export default function AddAssetModal({
+    locations,
     isOpen,
     onClose,
     onSave,
-}) => {
+}: AddAssetModalProps) {
     const [name, setName] = useState("");
-    const [specification, setSpecification] = useState("");
+    const [specificationDetails, setSpecificationDetails] = useState("");
     const [location, setLocation] = useState("");
-    const [condition, setCondition] = useState("");
+    const [status, setStatus] = useState("");
     const [dateAcquired, setDateAcquired] = useState("");
     const [lastMaintenance, setLastMaintenance] = useState("");
     const [image, setImage] = useState<File | null>(null);
@@ -42,16 +51,13 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
     const [assignTo, setAssignTo] = useState("");
     const [schedule, setSchedule] = useState("");
     const [dailyFrequency, setDailyFrequency] = useState(1); // Default to 1
-    const [weeklyDays, setWeeklyDays] = useState<string[]>([]); // State for selected weekly days
+    // const [weeklyDays, setWeeklyDays] = useState<string[]>([]); // State for selected weekly days
+    const [weeklyFrequency, setWeeklyFrequency] = useState(1);
     const [monthlyFrequency, setMonthlyFrequency] = useState(1); // Default to 1
     const [yearlyMonth, setYearlyMonth] = useState("January"); // Default to January
-    const [yearlyDay, setYearlyDay] = useState(1); // Default to 1
+    const [monthlyDay, setMonthlyDay] = useState("Sunday");
 
-    const toggleDay = (day: string) => {
-        setWeeklyDays((prev) =>
-            prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-        );
-    };
+    const [yearlyDay, setYearlyDay] = useState<string | number>(1); // Default to 1
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -67,31 +73,51 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
     const handleConfirmSubmit = () => {
         try {
             // Trigger success toast first
-            toast.success("Asset saved successfully!");
+            toast.success("Saving asset...");
 
-            // Simulate saving asset and then close modal after toast
-            setTimeout(() => {
-                onSave({
-                    name,
-                    specification,
-                    location,
-                    condition,
-                    dateAcquired,
-                    lastMaintenance: lastMaintenance || undefined,
-                    image: image || undefined,
-                    preventiveMaintenance: isPreventiveMaintenance
-                        ? {
-                              description,
-                              assignTo,
-                              schedule,
-                          }
-                        : undefined,
-                });
-                setShowConfirmModal(false); // Close confirmation modal after toast
-                onClose(); // Close the main modal after the confirmation
-            }, 500); // Give time for the toast to show
+            // Prepare the form data
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("specification_details", specificationDetails);
+            formData.append("location_id", location);
+            formData.append("status", status);
+            formData.append("date_acquired", dateAcquired);
+            if (lastMaintenance) {
+                formData.append("last_maintained_at", lastMaintenance);
+            }
+            if (image) {
+                formData.append("image", image);
+            }
+            if (isPreventiveMaintenance) {
+                formData.append("has_preventive_maintenance", "1");
+                formData.append(
+                    "preventiveMaintenance",
+                    JSON.stringify({
+                        description,
+                        assignTo,
+                        schedule,
+                    })
+                );
+            }
+
+            // Use Inertia's post method to send the data
+            router.post("/assets", formData, {
+                onSuccess: () => {
+                    toast.success("Asset saved successfully!");
+                    setShowConfirmModal(false); // Close confirmation modal
+                    onClose(); // Close the main modal
+                },
+                onError: (errors) => {
+                    console.error(errors);
+                    toast.error(
+                        "Failed to save asset. Please check the form and try again."
+                    );
+                },
+            });
         } catch (error) {
-            toast.error("Failed to save asset. Please try again.");
+            // Handle unexpected errors
+            console.error(error);
+            toast.error("An unexpected error occurred. Please try again.");
             setShowConfirmModal(false); // Ensure the modal closes on failure as well
         }
     };
@@ -109,7 +135,8 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Asset Name
+                                Asset Name{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -122,20 +149,19 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Specification
+                                Specification{" "}
+                                <span className="text-red-500">*</span>
                             </label>
-                            <select
-                                value={specification}
+                            <input
+                                type="text"
+                                value={specificationDetails}
                                 onChange={(e) =>
-                                    setSpecification(e.target.value)
-                                }
+                                    setSpecificationDetails(e.target.value)
+                                } // Update the specification state
                                 className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                                placeholder="Enter Specification"
                                 required
-                            >
-                                <option value="">Select Specification</option>
-                                <option value="Spec 1">Spec 1</option>
-                                <option value="Spec 2">Spec 2</option>
-                            </select>
+                            />
                         </div>
                     </div>
 
@@ -143,39 +169,50 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Location
+                                Location <span className="text-red-500">*</span>
                             </label>
                             <select
                                 value={location}
-                                onChange={(e) => setLocation(e.target.value)}
+                                onChange={(e) => setLocation(e.target.value)} // Update the location state
                                 className="w-full mt-1 p-2 border border-gray-300 rounded-md"
                                 required
                             >
                                 <option value="">Select Location</option>
-                                <option value="Location 1">Location 1</option>
-                                <option value="Location 2">Location 2</option>
+                                {locations.map((loc) => (
+                                    <option key={loc.id} value={loc.id}>
+                                        {loc.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Condition
+                                Condition{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <select
-                                value={condition}
-                                onChange={(e) => setCondition(e.target.value)}
+                                value={status}
+                                onChange={(e) => setStatus(e.target.value)}
                                 className="w-full mt-1 p-2 border border-gray-300 rounded-md"
                                 required
                             >
                                 <option value="">Select Condition</option>
-                                <option value="New">New</option>
-                                <option value="Used">Used</option>
+                                <option value="Functional">Functional</option>
+                                <option value="Failed">Failed</option>
+                                <option value="Under Maintenance">
+                                    Under Maintenance
+                                </option>
+                                <option value="End of Useful Life">
+                                    End of Useful Life
+                                </option>
                             </select>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Date Acquired
+                                Date Acquired{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="date"
@@ -256,7 +293,8 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
 
                                 <label className="block text-sm font-medium text-gray-700">
                                     <br />
-                                    Description
+                                    Description{" "}
+                                    <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
                                     value={description}
@@ -270,7 +308,8 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Assign To
+                                    Assign To{" "}
+                                    <span className="text-red-500">*</span>
                                 </label>
                                 <select
                                     value={assignTo}
@@ -290,7 +329,7 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                                 {/* Toggle Group */}
                                 <div className="flex flex-wrap sm:inline-flex w-full sm:w-auto rounded-md overflow-hidden border border-gray-300">
                                     {[
-                                        "Daily",
+                                        // "Daily",
                                         "Weekly",
                                         "Monthly",
                                         "Yearly",
@@ -316,7 +355,7 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
 
                                 {/* Conditional Fields */}
                                 <div className="mt-4">
-                                    {schedule === "Daily" && (
+                                    {/* {schedule === "Daily" && (
                                         <div className="flex items-center gap-2">
                                             <span>Every</span>
                                             <input
@@ -332,14 +371,88 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                                             />
                                             <span>Day(s)</span>
                                         </div>
-                                    )}
+                                    )} */}
 
                                     {schedule === "Weekly" && (
-                                        <div>
-                                            <span className="block mb-2">
-                                                Every
-                                            </span>
-                                            <div className="grid grid-cols-4 gap-2 max-w-md">
+                                        <div className="flex items-center gap-2">
+                                            <span>Every</span>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                max="99"
+                                                className="w-20 px-2 py-1 border rounded-md"
+                                                value={
+                                                    weeklyFrequency === 0
+                                                        ? ""
+                                                        : weeklyFrequency
+                                                }
+                                                onChange={(e) => {
+                                                    const value =
+                                                        e.target.value;
+                                                    if (value === "") {
+                                                        setWeeklyFrequency(0); // or you can set to null depending on your logic
+                                                    } else {
+                                                        const numberValue =
+                                                            Number(value);
+                                                        if (
+                                                            numberValue >= 1 &&
+                                                            numberValue <= 99
+                                                        ) {
+                                                            setWeeklyFrequency(
+                                                                numberValue
+                                                            );
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                            <span>Week(s)</span>
+                                        </div>
+                                    )}
+
+                                    {schedule === "Monthly" && (
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span>On the</span>
+
+                                            {/* Week Number (1st–4th) */}
+                                            <select
+                                                className="w-32 sm:w-40 px-2 py-1 border rounded-md"
+                                                value={monthlyFrequency}
+                                                onChange={(e) =>
+                                                    setMonthlyFrequency(
+                                                        Number(e.target.value)
+                                                    )
+                                                }
+                                            >
+                                                {[1, 2, 3, 4].map((week) => (
+                                                    <option
+                                                        key={week}
+                                                        value={week}
+                                                    >
+                                                        {week}
+                                                        {week === 1
+                                                            ? "st"
+                                                            : week === 2
+                                                            ? "nd"
+                                                            : week === 3
+                                                            ? "rd"
+                                                            : "th"}{" "}
+                                                        week
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            <span>Of</span>
+
+                                            {/* Day of the Week */}
+                                            <select
+                                                className="w-32 sm:w-40 px-2 py-1 border rounded-md"
+                                                value={monthlyDay}
+                                                onChange={(e) =>
+                                                    setMonthlyDay(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            >
                                                 {[
                                                     "Sunday",
                                                     "Monday",
@@ -349,43 +462,14 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                                                     "Friday",
                                                     "Saturday",
                                                 ].map((day) => (
-                                                    <label
+                                                    <option
                                                         key={day}
-                                                        className="flex items-center gap-1"
+                                                        value={day}
                                                     >
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={weeklyDays.includes(
-                                                                day
-                                                            )}
-                                                            onChange={() =>
-                                                                toggleDay(day)
-                                                            }
-                                                        />
-                                                        <span className="text-sm">
-                                                            {day}
-                                                        </span>
-                                                    </label>
+                                                        {day}
+                                                    </option>
                                                 ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {schedule === "Monthly" && (
-                                        <div className="flex items-center gap-2">
-                                            <span>Every</span>
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                className="w-20 px-2 py-1 border rounded-md"
-                                                value={monthlyFrequency}
-                                                onChange={(e) =>
-                                                    setMonthlyFrequency(
-                                                        Number(e.target.value)
-                                                    )
-                                                }
-                                            />
-                                            <span>Month(s)</span>
+                                            </select>
                                         </div>
                                     )}
 
@@ -399,7 +483,7 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                                                         e.target.value
                                                     )
                                                 }
-                                                className="border rounded-md px-2 py-1"
+                                                className="border rounded-md px-2 py-1 w-32 sm:w-40"
                                             >
                                                 {[
                                                     "January",
@@ -430,11 +514,27 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                                                 max="31"
                                                 className="w-20 px-2 py-1 border rounded-md"
                                                 value={yearlyDay}
-                                                onChange={(e) =>
-                                                    setYearlyDay(
-                                                        Number(e.target.value)
-                                                    )
-                                                }
+                                                onChange={(e) => {
+                                                    const value =
+                                                        e.target.value;
+                                                    // Allow empty string for clearing
+                                                    if (value === "") {
+                                                        setYearlyDay("");
+                                                        return;
+                                                    }
+
+                                                    // Parse number and clamp it between 1 and 31
+                                                    const num = Number(value);
+                                                    if (!isNaN(num)) {
+                                                        if (num < 1) {
+                                                            setYearlyDay(1);
+                                                        } else if (num > 31) {
+                                                            setYearlyDay(31);
+                                                        } else {
+                                                            setYearlyDay(num);
+                                                        }
+                                                    }
+                                                }}
                                             />
                                         </div>
                                     )}
@@ -452,32 +552,34 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
                             Cancel
                         </button>
 
-                        <button
+                        <PrimaryButton
                             type="submit"
-                            className="w-full sm:w-auto rounded-full bg-secondary hover:bg-primary text-white py-2 px-6"
+                            className="justify-center w-full sm:w-auto bg-secondary hover:bg-primary"
                         >
-                            Save
-                        </button>
+                            Save Asset
+                        </PrimaryButton>
                     </div>
                 </form>
             </div>
 
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-md w-80">
-                        <h3 className="text-lg font-semibold mb-4">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h2 className="text-lg font-semibold mb-4">
                             Are you sure you want to save this asset?
-                        </h3>
+                        </h2>
                         <div className="flex justify-between gap-4">
                             <button
+                                type="button"
                                 onClick={() => setShowConfirmModal(false)}
-                                className="bg-gray-300 text-black px-4 py-2 rounded-full"
+                                className="bg-white text-black border border-gray-500 px-4 py-2 rounded-md hover:bg-destructive hover:text-white"
                             >
                                 Cancel
                             </button>
                             <button
+                                type="button"
                                 onClick={handleConfirmSubmit}
-                                className="bg-primary text-white px-4 py-2 rounded-full"
+                                className="bg-secondary hover:bg-primary text-white px-4 py-2 rounded-md"
                             >
                                 Confirm
                             </button>
@@ -487,6 +589,4 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({
             )}
         </div>
     );
-};
-
-export default AddAssetModal;
+}

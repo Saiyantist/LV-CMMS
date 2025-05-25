@@ -1,10 +1,47 @@
 import React, { useEffect, useRef, useState } from "react";
 import ApexCharts from "apexcharts";
+import axios from "axios";
 
-// Chart options with updated labels
-const getChartOptions = (data: number[]) => ({
+interface WorkOrder {
+    status: string;
+}
+
+const allStatuses = [
+    "Pending",
+    "Assigned",
+    "Ongoing",
+    "Overdue",
+    "Completed",
+    "For Budget Request",
+    "Declined",
+    "Cancelled",
+];
+
+const statusColors: Record<string, string> = {
+    Pending: "#1C64F2",
+    Assigned: "#22C55E",
+    Ongoing: "#FDBA8C",
+    Overdue: "#FF0000",
+    Completed: "#16A34A",
+    "For Budget Request": "#FACC15",
+    Declined: "#F87171",
+    Cancelled: "#64748B",
+};
+
+const getStatusCounts = (workOrders: WorkOrder[] = []) => {
+    const counts: Record<string, number> = {};
+    allStatuses.forEach((status) => (counts[status] = 0));
+    for (const wo of workOrders) {
+        if (counts.hasOwnProperty(wo.status)) {
+            counts[wo.status]++;
+        }
+    }
+    return counts;
+};
+
+const getChartOptions = (labels: string[], data: number[]) => ({
     series: data,
-    colors: ["#1C64F2", "#16BDCA", "#FDBA8C", "#E74694"], // Color mapping
+    colors: labels.map((label) => statusColors[label]),
     chart: {
         height: 320,
         width: "100%",
@@ -33,7 +70,7 @@ const getChartOptions = (data: number[]) => ({
                                 (a: number, b: number) => a + b,
                                 0
                             );
-                            return `${sum} Work Orders`;
+                            return `${sum}`;
                         },
                     },
                     value: {
@@ -41,7 +78,7 @@ const getChartOptions = (data: number[]) => ({
                         fontFamily: "Inter, sans-serif",
                         offsetY: -20,
                         formatter: function (value: number) {
-                            return `${value} Work Orders`;
+                            return `${value}`;
                         },
                     },
                 },
@@ -49,74 +86,116 @@ const getChartOptions = (data: number[]) => ({
             },
         },
     },
-    grid: {
-        padding: {
-            top: -2,
-        },
-    },
-    labels: ["Pending", "Accepted", "For Budget Request", "Declined"], // Updated labels
+    labels,
     dataLabels: {
         enabled: false,
     },
     legend: {
-        position: "bottom",
-        fontFamily: "Inter, sans-serif",
+        show: false,
     },
 });
 
 const Chart: React.FC = () => {
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<ApexCharts | null>(null);
+    const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
 
-    // Example data for the statuses (you can replace this with dynamic data)
-    const [chartData, setChartData] = useState([35, 25, 15, 5]); // Pending, Accepted, For Budget Request, Declined
-
-    // Update chart data when the component is mounted or data changes
     useEffect(() => {
+        axios
+            .get("/api/work-orders/statuses")
+            .then((res) => setWorkOrders(res.data))
+            .catch(() => setWorkOrders([]));
+    }, []);
+
+    useEffect(() => {
+        if (workOrders.length === 0) return;
+
+        const counts = getStatusCounts(workOrders);
+        const data = allStatuses.map((status) => counts[status]);
+
         if (chartRef.current) {
-            chartInstance.current = new ApexCharts(
-                chartRef.current,
-                getChartOptions(chartData) // Pass dynamic data
-            );
-            chartInstance.current.render();
+            if (chartInstance.current) {
+                chartInstance.current.updateOptions(
+                    getChartOptions(allStatuses, data),
+                    true,
+                    true
+                );
+                chartInstance.current.updateSeries(data);
+            } else {
+                chartInstance.current = new ApexCharts(
+                    chartRef.current,
+                    getChartOptions(allStatuses, data)
+                );
+                chartInstance.current.render();
+            }
         }
 
         return () => {
             chartInstance.current?.destroy();
+            chartInstance.current = null;
         };
-    }, [chartData]); // Re-render when chartData changes
+    }, [workOrders]);
 
-    // Function to simulate fetching or processing data dynamically
-    const fetchData = () => {
-        // Simulate fetching work order data (replace with actual data)
-        const fetchedData = [40, 30, 20, 10]; // Example data (Pending, Accepted, For Budget Request, Declined)
-        setChartData(fetchedData); // Update chartData state
-    };
-
-    useEffect(() => {
-        fetchData(); // Fetch data when the component is mounted
-    }, []);
+    const statusTotals = getStatusCounts(workOrders);
 
     return (
-        <div className="max-w-sm w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
-            {/* Header */}
-            <div className="flex justify-between mb-3">
-                <div className="flex justify-center items-center">
-                    <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white pe-1">
-                        Work Order Statuses
-                    </h5>
+        <div className="w-full flex flex-col md:flex-row gap-6 md:gap-8 bg-transparent rounded-2xl dark:bg-gray-800 p-4 md:p-8 items-stretch justify-between transition-all duration-300">
+            {/* Status Totals */}
+            <div className="flex flex-col items-center flex-1">
+                {/* <h6 className="font-semibold text-sm mb-4 text-gray-700 dark:text-gray-200 tracking-wide">
+                    Status Totals
+                </h6> */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
+                    {allStatuses.map((status) => (
+                        <div key={status} className="flex justify-center">
+                            <div
+                                className="w-28 h-16 sm:w-32 sm:h-20 flex flex-col items-center justify-center rounded-lg font-bold text-xs sm:text-sm shadow text-black text-center px-2 border"
+                                style={{
+                                    backgroundColor: "#ffffff",
+                                    borderColor: "transparent",
+                                    // borderWidth: "1px",
+                                }}
+                                title={status}
+                            >
+                                <span className="text-[0.65rem] sm:text-xs font-medium">
+                                    {status}
+                                </span>
+                                <span className="text-lg sm:text-xl">
+                                    {statusTotals[status]}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            {/* Chart */}
-            <div className="py-6">
-                <div ref={chartRef} />
-            </div>
+            {/* Donut Chart with Custom Legend */}
+            <div className="flex flex-col md:flex-row items-center justify-center flex-1 mt-8 md:mt-0 gap-6">
+                {/* Donut Chart */}
+                <div
+                    ref={chartRef}
+                    className="w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] md:w-[300px] md:h-[300px] transition-all duration-300"
+                />
 
-         
+                {/* Custom Legend */}
+                <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
+                    {allStatuses.map((status) => (
+                        <div key={status} className="flex items-center gap-2">
+                            <span
+                                className="w-3 h-3 rounded-full"
+                                style={{
+                                    backgroundColor: statusColors[status],
+                                }}
+                            />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                                {status}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 };
 
 export default Chart;
-    

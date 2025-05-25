@@ -7,19 +7,47 @@ import IndexLayout from "./IndexLayout";
 export default function WorkOrders({
     workOrders,
     locations,
+    assets,
+    maintenancePersonnel,
     user,
 }: PageProps<{
-    workOrders: any[];
+    workOrders: {
+        id: number;
+        report_description: string;
+        status: string;
+        work_order_type: string;
+        label: string;
+        priority: string;
+        remarks: string;
+        requested_by: string;
+        requested_at: string;
+        location: {
+            id: number;
+            name: string;
+        };
+        images: string;
+        asset: {
+            id: number;
+            name: string;
+            specification_details: string;
+            status: string;
+            location_id: number;
+        }[];
+    }[];
     locations: { id: number; name: string }[];
-    user: any;
+    assets: { 
+        id: number;
+        name: string;
+        location: { id: number; name: string};
+    }[];
+    maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
+    user: { id: number; name: string; roles: {name: string;}[]; permissions: string[] };
 }>) {
+
     const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState("Pending");
     const [editingWorkOrder, setEditingWorkOrder] = useState(null);
-    const [showScrollUpButton, setShowScrollUpButton] = useState(false);
-
-    const pageUser = usePage().props.auth.user;
-    const userName = `${pageUser.first_name} ${pageUser.last_name}`;
+    const [showScrollUpButton, setShowScrollUpButton] = useState(false)
 
     const tabs =
         user.permissions.includes("manage work orders")
@@ -35,71 +63,28 @@ export default function WorkOrders({
             user.permissions.includes("manage work orders")
         ) {
             if (activeTab === "Pending") return wo.status === "Pending";
-            if (activeTab === "Accepted")
-                return ["Assigned", "Ongoing", "Overdue", "Completed"].includes(
+            if (activeTab === "Assigned")
+                return ["Assigned", "Ongoing", "Completed", "Overdue"].includes(
+                    wo.status
+                );
+            if (activeTab === "Scheduled")
+                return ["Scheduled",].includes(
                     wo.status
                 );
             if (activeTab === "For Budget Request")
                 return wo.status === "For Budget Request";
-            if (activeTab === "Declined") return wo.status === "Cancelled";
+            if (activeTab === "Declined") return wo.status === "Cancelled" || wo.status === "Declined";
             return true;
         }
         return wo;
     });
 
-    const handleDelete = (id: number) => {
-        const confirmDelete = confirm("Are you sure you want to delete this work order?");
-        if (confirmDelete) {
-            router.delete(`/work-orders/${id}`, {
-
-                // For testing purposes, replace with actual delete flash messages
-                onSuccess: () => {
-                    alert("Work order deleted successfully.");
-                },
-                onError: () => {
-                    alert("Failed to delete the work order. Please try again.");
-                },
-            });
-        }
-    }
     const handleScroll = () => {
         setShowScrollUpButton(window.scrollY > 300);
     };
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
-    };
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "Pending":
-                return "bg-yellow-100 text-yellow-800";
-            case "Assigned":
-                return "bg-blue-200 text-blue-800";
-            case "Ongoing":
-                return "bg-green-200 text-green-800";
-            case "Overdue":
-                return "bg-red-200 text-red-800";
-            case "Completed":
-                return "bg-teal-200 text-teal-800";
-            case "Cancelled":
-                return "bg-red-300 text-red-900";
-            default:
-                return "bg-gray-200 text-gray-800";
-        }
-    };
-
-    const getPriorityColor = (priority: string) => {
-        switch (priority) {
-            case "Low":
-                return "bg-green-100 text-green-700";
-            case "Medium":
-                return "bg-yellow-100 text-yellow-700";
-            case "High":
-                return "bg-red-100 text-red-700";
-            default:
-                return "bg-gray-200 text-gray-700";
-        }
     };
 
     useEffect(() => {
@@ -111,6 +96,8 @@ export default function WorkOrders({
         <IndexLayout
             user={user}
             locations={locations}
+            assets={assets}
+            maintenancePersonnel={maintenancePersonnel}
             filteredWorkOrders={filteredWorkOrders}
             tabs={tabs}
             activeTab={activeTab}
@@ -121,9 +108,6 @@ export default function WorkOrders({
             setIsCreating={setIsCreating}
             setEditingWorkOrder={setEditingWorkOrder}
             scrollToTop={scrollToTop}
-            getStatusColor={getStatusColor}
-            getPriorityColor={getPriorityColor}
-            handleDelete={handleDelete}
         />
     );
 }
