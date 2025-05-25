@@ -7,12 +7,12 @@ import GuestLayout from "@/Layouts/GuestLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { FormEventHandler } from "react";
 
-interface LoginFormData {
-    email: string;
-    password: string;
-    remember: boolean;
-    [key: string]: string | boolean | File | null;
-}
+// interface LoginFormData {
+//     email: string;
+//     password: string;
+//     remember: boolean;
+//     [key: string]: string | boolean | File | null;
+// }
 
 export default function Login({
     status,
@@ -22,17 +22,17 @@ export default function Login({
     canResetPassword: boolean;
 }) {
     const { data, setData, post, processing, errors, reset } =
-        useForm<LoginFormData>({
+        useForm({
             email: "",
             password: "",
-            remember: false,
+            remember: false as boolean,
         });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
         post(route("login"), {
-            onFinish: () => reset("password" as never),
+            onFinish: () => reset("password"),
         });
     };
 
@@ -70,7 +70,7 @@ export default function Login({
                             className={`mt-1 block w-full ${
                                 errors.email ? "border-red-500" : ""
                             }`}
-                            autoComplete="email"
+                            autoComplete="username"
                             isFocused
                             onChange={(e) => setData("email", e.target.value)}
                         />

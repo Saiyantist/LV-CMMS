@@ -350,7 +350,7 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                 {/* Desktop Table View (Datatable) */}
                 <div className="hidden md:block border rounded-md overflow-hidden">
                     <Datatable
-                        columns={columns}
+                        columns={columns as any}
                         data={filteredBookings}
                         placeholder="Search Bookings"
                     />
