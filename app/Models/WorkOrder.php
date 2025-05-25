@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WorkOrder extends Model
@@ -18,12 +18,16 @@ class WorkOrder extends Model
         'work_order_type',
         'label',
         'priority',
+        'requested_by',
         'requested_at',
+        'assigned_to',
+        'assigned_at',
+        'scheduled_at',
+        'approved_at',
+        'approved_by',
         'completed_at',
         'remarks',
         'asset_id',
-        'requested_by',
-        'assigned_to',
     ];
 
     public function location()
@@ -36,9 +40,16 @@ class WorkOrder extends Model
         return $this->belongsTo(Asset::class);
     }
 
-    public function scheduledMaintenance()
+    public function maintenanceHistories()  
     {
-        return $this->hasOne(ScheduledMaintenance::class, 'work_order_id');
+        return $this->hasManyThrough(
+            AssetMaintenanceHistory::class,
+            Asset::class,
+            'id',         // Local key on Asset: Primary key on Asset used to join with AssetMaintenanceHistory
+            'asset_id',   // Foreign key on AssetMaintenanceHistory: References the Asset model
+            'asset_id',   // Foreign key on WorkOrder: References the Asset model
+            'id'          // Local key on Asset: Primary key on Asset used to join with WorkOrder
+        );
     }
 
     public function images()

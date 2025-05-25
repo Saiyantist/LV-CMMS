@@ -1,7 +1,11 @@
 import { PropsWithChildren } from "react";
 import NavBar from "@/Components/NavBar";
 
-export default function Register({ children }: PropsWithChildren) {
+interface RegisterLayoutProps extends PropsWithChildren {
+    width?: string;
+}
+
+export default function Register({ children, width = "" }: RegisterLayoutProps) {
     return (
         <div className="min-h-screen flex flex-col">
             {/* Navbar at the top always */}
@@ -22,7 +26,7 @@ export default function Register({ children }: PropsWithChildren) {
                 />
 
                 {/* Centered form content with top margin */}
-                <div className="relative z-10 mt-20 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl bg-form px-4 py-8 shadow-md rounded-lg dark:bg-gray-800">
+                <div className={`relative z-10 mt-16 bg-white p-4 shadow-md rounded dark:bg-gray-800 max-h-[85vh] ${width}`}>
                     {children}
                 </div>
             </main>

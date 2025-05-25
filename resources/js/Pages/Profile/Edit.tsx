@@ -32,7 +32,7 @@ export default function Edit({
                 <UserProfileCard
                     user={{
                         name: `${user.first_name} ${user.last_name}`,
-                        role: user.role ?? "User",
+                        roles: [{ name: user.role ?? "User" }],
                         profile_photo_url:
                             user.gender === "male"
                                 ? "/images/m.png"
@@ -51,7 +51,7 @@ export default function Edit({
                                 name: `${user.first_name} ${user.last_name}`,
                                 email: user.email,
                                 contact_number: user.contact_number,
-                                birth_date: user.birth_date,
+                                // birth_date: user.birth_date,
                                 gender: toTitleCase(user.gender),
                                 staff_type: toTitleCase(user.staff_type),
                             }}

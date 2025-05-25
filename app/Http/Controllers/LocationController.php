@@ -1,11 +1,19 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Location;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class LocationController extends Controller
 {
+    public function index(Request $request)
+    {
+        //
+    }
+
     public function store(Request $request)
     {
         $user = auth()->user();

@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ScheduledMaintenance;
+use App\Models\AssetMaintenanceHistory;
 use Illuminate\Http\Request;
+use App\Models\Asset;
+use Inertia\Inertia;
 
-class ScheduledMaintenanceController extends Controller
+
+class AssetMaintenanceHistoryController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,15 +37,21 @@ class ScheduledMaintenanceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ScheduledMaintenance $scheduledMaintenance)
-    {
-        //
-    }
+    public function show($assetId)
+{
+    $history = AssetMaintenanceHistory::with('workOrder')
+        ->where('asset_id', $assetId)
+        ->orderByDesc('maintained_at')
+        ->get();
+
+    return response()->json($history);
+}
+
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ScheduledMaintenance $scheduledMaintenance)
+    public function edit(AssetMaintenanceHistory $assetMaintenanceHistory)
     {
         //
     }
@@ -50,7 +59,7 @@ class ScheduledMaintenanceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ScheduledMaintenance $scheduledMaintenance)
+    public function update(Request $request, AssetMaintenanceHistory $assetMaintenanceHistory)
     {
         //
     }
@@ -58,7 +67,7 @@ class ScheduledMaintenanceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ScheduledMaintenance $scheduledMaintenance)
+    public function destroy(AssetMaintenanceHistory $assetMaintenanceHistory)
     {
         //
     }

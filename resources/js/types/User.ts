@@ -4,7 +4,7 @@ export interface User {
     first_name: string;
     last_name: string;
     contact_number: string;
-    birth_date: Date; // Accepts both Date and string for flexibility
+    // birth_date: Date; // Accepts both Date and string for flexibility
     gender: "male" | "female"; // Restrict to valid gender options
     staff_type: string;
     email: string;

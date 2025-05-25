@@ -7,8 +7,8 @@ export default function NavBar() {
     return (
         <>
             {/* NavBar */}
-            <header className="fixed top-0 left-0 w-full py-4 z-50 bg-white">
-                <div className="px-4 mx-auto max-w-7xl flex items-center justify-between">
+            <header className="fixed top-0 left-0 w-full py-3 z-50 bg-white shadow">
+                <div className="px-10 mx-auto w-full flex items-center justify-between">
                     {/* Logo */}
                     <div className="flex items-center space-x-2">
                         <img
@@ -46,24 +46,24 @@ export default function NavBar() {
                         </Link>
                     </nav>
 
-                {/* Desktop Register and Login Button */}
-                <div className="hidden lg:flex items-center space-x-5">
-                    <span>
-                        |
-                    </span>
-                    <Link
-                        href="/register"
-                        className="text-sm sm:text-base underline text-bluetitle transition-all duration-200 hover:text-opacity-80 hover:underline"
+                    {/* Desktop Register and Login Button */}
+                    <div className="hidden lg:flex items-center space-x-5">
+                        <span>
+                            |
+                        </span>
+                        <Link
+                            href="/register"
+                            className="text-sm sm:text-base underline text-bluetitle transition-all duration-200 hover:text-opacity-80 hover:underline"
+                            >
+                                Register
+                            </Link>
+                        <Link
+                            href="/login"
+                            className="hidden lg:inline-flex px-4 py-2 font-bold text-sm text-white transition-all duration-300 uppercase tracking-widest bg-secondary rounded-md hover:bg-opacity-90 hover:scale-105"
                         >
-                            Register
+                            Log In
                         </Link>
-                    <Link
-                        href="/login"
-                        className="hidden lg:inline-flex px-8 py-2.5 text-base text-white transition-all duration-300 bg-secondary rounded-md hover:bg-opacity-90 hover:scale-105"
-                    >
-                        Log In
-                    </Link>
-                </div>
+                    </div>
 
                     {/* Mobile Menu Button */}
                     <button

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\Department;
 use App\Models\User;
+use App\Models\WorkGroup;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,9 +29,10 @@ class RegisteredUserController extends Controller
     }
 
     public function createInternal(): Response
-{
+{       
     return Inertia::render('Auth/InternalRegistration', [
         'departments' => Department::all(),
+        'work_groups' => WorkGroup::all(),
     ]);
 }
 
@@ -45,11 +47,12 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
-            'birth_date' => $request->birth_date,
+            // 'birth_date' => $request->birth_date,
             'gender' => $request->gender,
             'contact_number' => '0' . $request->contact_number,
-            'staff_type' => $request->staff_type,
-            'department_id' => $request->department_id,
+            'staff_type' => $request->staff_type ?? null,
+            'department_id' => $request->department_id ?? null,
+            'work_group_id' => $request->work_group_id ?? null,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);

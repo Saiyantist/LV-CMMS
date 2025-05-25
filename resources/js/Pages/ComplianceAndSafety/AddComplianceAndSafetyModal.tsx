@@ -201,44 +201,46 @@ const AddComplianceAndSafetyModal: React.FC<
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium">
-                            Target Date
-                        </label>
-                        <input
-                            type="date"
-                            name="targetDate"
-                            className="mt-1 block w-full border rounded p-2"
-                            value={formData.targetDate}
-                            onChange={handleInputChange}
-                        />
-                        {errors.targetDate && (
-                            <p className="text-red-500 text-sm">
-                                {errors.targetDate}
-                            </p>
-                        )}
-                    </div>
+                    <div className="flex gap-4">
+                        <div className="w-1/2">
+                            <label className="block text-sm font-medium">
+                                Target Date
+                            </label>
+                            <input
+                                type="date"
+                                name="targetDate"
+                                className="mt-1 block w-full border rounded p-2"
+                                value={formData.targetDate}
+                                onChange={handleInputChange}
+                            />
+                            {errors.targetDate && (
+                                <p className="text-red-500 text-sm">
+                                    {errors.targetDate}
+                                </p>
+                            )}
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-medium">
-                            Priority
-                        </label>
-                        <select
-                            name="priority"
-                            className="mt-1 block w-full border rounded p-2"
-                            value={formData.priority}
-                            onChange={handleInputChange}
-                        >
-                            <option value="">Select Priority</option>
-                            <option value="Low">Low</option>
-                            <option value="Medium">Medium</option>
-                            <option value="High">High</option>
-                        </select>
-                        {errors.priority && (
-                            <p className="text-red-500 text-sm">
-                                {errors.priority}
-                            </p>
-                        )}
+                        <div className="w-1/2">
+                            <label className="block text-sm font-medium">
+                                Priority
+                            </label>
+                            <select
+                                name="priority"
+                                className="mt-1 block w-full border rounded p-2"
+                                value={formData.priority}
+                                onChange={handleInputChange}
+                            >
+                                <option value="">Select Priority</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                            {errors.priority && (
+                                <p className="text-red-500 text-sm">
+                                    {errors.priority}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </form>
 

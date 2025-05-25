@@ -27,14 +27,13 @@ const About: React.FC = () => {
 
                     {/* Description Text */}
                     <p className="text-bluetext">
-                        The Computer Maintenance Management System with Facility
-                        Scheduling is designed to streamline the management of
-                        computer resources, maintenance tasks, and facility
-                        bookings. We aim to provide an efficient and organized
-                        platform that ensures assets are well-maintained and
-                        that facility usage is properly scheduled, supporting a
-                        smooth and productive environment for everyone on
-                        campus.
+                    The Computer Maintenance Management System with Event Services streamlines 
+                    work order management, asset tracking, preventive maintenance scheduling, 
+                    compliance and safety, and facility bookings. We aim to provide an efficient 
+                    platform that ensures work orders are well-managed, assets are maintained, 
+                    preventive maintenance is scheduled, compliance and safety are upheld, and 
+                    facility usage is properly coordinated supporting a smooth and productive 
+                    environment for everyone on campus.
                     </p>
                 </div>
             </div>

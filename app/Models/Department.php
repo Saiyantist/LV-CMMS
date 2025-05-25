@@ -11,7 +11,7 @@ class Department extends Model
     use HasFactory;
 
     protected
-    $fillable = ['name'];
+    $fillable = ['name', 'type'];
 
         /**
      * Get all users in this department.

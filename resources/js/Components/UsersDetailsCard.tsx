@@ -6,7 +6,7 @@ export default function UserDetailsCard({
         name: string;
         email: string; // ✅ Added email here
         contact_number?: string;
-        birth_date?: string;
+        // birth_date?: string;
         gender?: string;
         staff_type?: string;
         roles?: string;
@@ -33,12 +33,12 @@ export default function UserDetailsCard({
                     </p>
                     <p className="text-black">0{user.contact_number}</p>
                 </div>
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Birthday:
                     </p>
                     <p className="text-black">{user.birth_date}</p>
-                </div>
+                </div> */}
                 <div className="flex justify-between">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Gender:
