@@ -16,6 +16,7 @@ import {
     DialogHeader,
 } from "@/Components/shadcnui/dialog";
 import { createPortal } from "react-dom";
+import EventSummary from "./EventSummaryModal";
 
 // Define the booking type
 interface Booking {
@@ -179,7 +180,44 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                                   {selectedBooking?.name}
                               </DialogTitle>
                           </DialogHeader>
-                          {/* ...modal content... */}
+                          {/* Render EventSummary here */}
+                          <EventSummary
+                              data={{
+                                  eventDetails: {
+                                      eventName: selectedBooking.name,
+                                      department: selectedBooking.department
+                                          ? Array.isArray(
+                                                selectedBooking.department
+                                            )
+                                              ? selectedBooking.department
+                                              : [selectedBooking.department]
+                                          : [],
+                                      eventPurpose:
+                                          selectedBooking.eventPurpose || "",
+                                      participants:
+                                          selectedBooking.participants || "",
+                                      participantCount:
+                                          selectedBooking.numberOfParticipants
+                                              ? String(
+                                                    selectedBooking.numberOfParticipants
+                                                )
+                                              : "",
+                                  },
+                                  dateRange: selectedBooking.eventDate,
+                                  timeRange: selectedBooking.time,
+                                  venue: selectedBooking.venue,
+                                  requestedServices:
+                                      Object.fromEntries(
+                                          Object.entries(selectedBooking.requestedServices || {}).map(
+                                              ([key, value]) => [key, value ? (Array.isArray(value) ? value : [value]) : []]
+                                          )
+                                      ),
+                                  // Add other fields as needed
+                              }}
+                              onClose={() => setIsModalOpen(false)}
+                              onSubmit={() => {}}
+                              selectedVenueIds={[]} // Pass actual venue IDs if available
+                          />
                       </div>
                   </div>,
                   document.body
@@ -366,8 +404,6 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                                         </Button>
                                     </div>
                                 </div>
-
-                            
                             </div>
                         </div>
                     ))}

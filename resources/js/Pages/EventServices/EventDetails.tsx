@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 // import { Inertia } from "@inertiajs/inertia";
 import DateTimeSelection from "./Date&Time";
+import { ArrowRightCircle } from "lucide-react"; // or any icon you use
 
 interface EventDetailsProps {
     value: {
@@ -21,15 +22,24 @@ const eventPlaceholders = [
     "Foundation Week",
     "Campus Clean-Up Drive",
     "Student Council Election",
-    "Alumni Homecoming",
+    "Graduation",
 ];
 
 const participantPlaceholders = [
-    "ICT Majors",
-    "BAB Students",
-    "Senior Highschool",
-    "BaBAB",
-    "Student Council Officers",
+    "Students",
+    "Teachers",
+    "Parents",
+    "Staff",
+    "Community Members",
+    "External Participants",
+    "Alumni",
+    "Volunteers",
+    "Event Organizers",
+    "Speakers",
+    "Panelists",
+    "Performers",
+    "Audience",
+    "Guests",
 ];
 
 const EventDetails: React.FC<EventDetailsProps> = ({
@@ -139,6 +149,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                         className="leading-7 text-sm text-black font-bold"
                     >
                         Event Name
+                        <span className="ml-1 font-medium text-red-500">*</span>
                     </label>
                     <input
                         type="text"
@@ -154,47 +165,62 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                 </div>
 
                 <div className="relative">
-                    <div className="flex flex-col md:flex-row md:items-center mb-2 gap-2">
+                    {/* <div className="flex flex-col md:flex-row md:items-center mb-2 gap-2"> */}
+                    <div>
                         <label
                             htmlFor="department"
                             className="leading-7 text-sm text-black font-bold min-w-max"
                             style={{ minWidth: "120px" }}
                         >
                             Department
+                            <span className="ml-1 font-medium text-red-500">
+                                *
+                            </span>
                         </label>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                            {value.department.map((dept) => (
-                                <span
-                                    key={dept}
-                                    className="bg-secondary text-white px-2 py-1 rounded text-xs flex items-center"
-                                >
-                                    {dept}
-                                    <button
-                                        type="button"
-                                        className="ml-1 text-white hover:text-gray-200"
-                                        onClick={() =>
-                                            handleCheckboxChange(dept)
-                                        }
-                                        tabIndex={-1}
-                                    >
-                                        ×
-                                    </button>
-                                </span>
-                            ))}
-                        </div>
                     </div>
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        id="department"
-                        name="department"
-                        autoComplete="off"
-                        value={deptInput}
-                        onFocus={handleInputFocus}
-                        onBlur={handleInputBlur}
-                        onChange={handleInputChange}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
+
+                    <div className="relative flex items-center">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            id="department"
+                            name="department"
+                            autoComplete="off"
+                            value={deptInput}
+                            onFocus={handleInputFocus}
+                            onBlur={handleInputBlur}
+                            onChange={handleInputChange}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const trimmed = deptInput.trim();
+                                    if (
+                                        trimmed &&
+                                        !value.department.includes(trimmed)
+                                    ) {
+                                        const newSelected = [
+                                            ...value.department,
+                                            trimmed,
+                                        ];
+                                        onChange({
+                                            ...value,
+                                            department: newSelected,
+                                        });
+                                    }
+                                    setDeptInput(""); // Always clear input after Enter
+                                }
+                            }}
+                            className="w-full bg-white rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 text-base text-gray-700 py-2 px-3 outline-none pr-10"
+                            placeholder="Type or select multiple departments"
+                        />
+                        {/* Mobile submit button */}
+                        <button
+                            type="button"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 md:hidden text-secondary"
+                            style={{
+                                display: deptInput.trim() ? "block" : "none",
+                            }}
+                            onMouseDown={(e) => {
                                 e.preventDefault();
                                 const trimmed = deptInput.trim();
                                 if (
@@ -209,30 +235,48 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                                         ...value,
                                         department: newSelected,
                                     });
+                                    setDeptInput("");
                                 }
-                                setDeptInput(""); // Always clear input after Enter
-                            }
-                        }}
-                        className="w-full bg-white rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 text-base text-gray-700 py-2 px-3 outline-none"
-                        placeholder="Type or select department/strand"
-                    />
+                            }}
+                            tabIndex={-1}
+                        >
+                            <ArrowRightCircle className="w-6 h-6" />
+                        </button>
+                    </div>
+                    {/* Typing hint */}
+                    {deptInput && (
+                        <div className="text-xs text-gray-500 mt-1">
+                            <span className="hidden md:inline">
+                                Press{" "}
+                                <span className="font-semibold">Enter</span> to
+                                add department
+                            </span>
+                            <span className="inline md:hidden">
+                                Tap the{" "}
+                                <ArrowRightCircle className="inline w-4 h-4 mb-0.5" />{" "}
+                                icon to add department
+                            </span>
+                        </div>
+                    )}
                     {showSuggestions && filteredOptions.length > 0 && (
                         <ul className="absolute z-10 bg-white border border-gray-300 rounded w-full mt-1 max-h-48 overflow-y-auto shadow-lg">
                             {filteredOptions.map((option) => (
                                 <li
                                     key={option}
-                                    className="flex items-center px-3 py-2 hover:bg-secondary hover:text-white cursor-pointer"
+                                    className="flex items-center px-3 py-2 hover:bg-gray-200 hover:text-black cursor-pointer"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        handleCheckboxChange(option);
+                                    }}
                                 >
                                     <input
                                         type="checkbox"
                                         checked={value.department.includes(
                                             option
                                         )}
-                                        onChange={() =>
-                                            handleCheckboxChange(option)
-                                        }
-                                        onMouseDown={(e) => e.preventDefault()} // Prevent blur before onChange
-                                        className="mr-2"
+                                        readOnly
+                                        tabIndex={-1}
+                                        className="mr-2 pointer-events-none"
                                     />
                                     <span>{option}</span>
                                 </li>
@@ -242,12 +286,35 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                 </div>
             </div>
 
+            {/* Move chips/tags here, outside the input container */}
+            {value.department.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                    {value.department.map((dept) => (
+                        <span
+                            key={dept}
+                            className="bg-secondary text-white px-2 py-1 rounded text-xs flex items-center"
+                        >
+                            {dept}
+                            <button
+                                type="button"
+                                className="ml-1 text-white hover:text-gray-200"
+                                onClick={() => handleCheckboxChange(dept)}
+                                tabIndex={-1}
+                            >
+                                ×
+                            </button>
+                        </span>
+                    ))}
+                </div>
+            )}
+
             <div className="relative mb-4">
                 <label
                     htmlFor="eventPurpose"
                     className="leading-7 text-sm text-black font-bold"
                 >
                     Event Purpose
+                    <span className="ml-1 font-medium text-red-500">*</span>
                 </label>
                 <textarea
                     id="eventPurpose"
@@ -268,6 +335,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                         className="leading-7 text-sm text-black font-bold"
                     >
                         Participants
+                        <span className="ml-1 font-medium text-red-500">*</span>
                     </label>
                     <input
                         type="text"
@@ -290,6 +358,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                         className="leading-7 text-sm text-black font-bold"
                     >
                         Number of Participants
+                        <span className="ml-1 font-medium text-red-500">*</span>
                     </label>
                     <input
                         type="text"

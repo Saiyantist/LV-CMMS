@@ -42,7 +42,7 @@ interface ColumnMeta<TData> {
   filterable?: boolean;
 }
 
-type ColumnDef<TData, TValue> = BaseColumnDef<TData, TValue> & {
+export type ColumnDef<TData, TValue> = BaseColumnDef<TData, TValue> & {
   meta?: ColumnMeta<TData>;
   accessorKey?: string;
 };
