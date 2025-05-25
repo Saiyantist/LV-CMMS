@@ -135,10 +135,10 @@ const EventSummary: React.FC<EventSummaryProps> = ({
                     Requested Venue
                 </div>
                 <div
-                    className={`ml-7 italic ${
+                    className={`ml-7 ${
                         selectedVenueIds && selectedVenueIds.length > 0
                             ? "text-gray-700"
-                            : "text-gray-400"
+                            : "text-gray-400 italic"
                     }`}
                 >
                     {selectedVenueIds && selectedVenueIds.length > 0

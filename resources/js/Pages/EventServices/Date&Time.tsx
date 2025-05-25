@@ -434,10 +434,9 @@ export default function DateTimeSelection({
 
             {/* Time Selection */}
             <div className="w-full">
-                <h2 className="text-2xl font-medium mb-2">Select Time Slot</h2>
-                <p className="text-gray-600 mb-6">
-                    Choose your start and end times
-                </p>
+                <h2 className="text-2xl font-medium mb-2 text-center sm:text-left">
+                    Select Time Slot
+                </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 mb-8">
                     <div className="bg-transparent p-4 rounded-md">
                         <label className="block text-left text-lg font-medium mb-2">
@@ -495,7 +494,6 @@ export default function DateTimeSelection({
                         </select>
 
                         <div className="mt-2 w-full text-left">
-                            
                             {!startTime && (
                                 <div className="text-red-500 text-xs mb-2 text-left">
                                     Please select a Start Time before choosing
