@@ -43,11 +43,7 @@ function getToday() {
 }
 
 // Add a palette of nice Tailwind background colors
-const EVENT_COLORS = [
-    "bg-orange-500",
-    "bg-red-600",
-
-];
+const EVENT_COLORS = ["bg-orange-500", "bg-red-600"];
 
 // Helper to get a random color based on event index and day (so it's stable per render)
 function getRandomColor(day: number, idx: number) {
