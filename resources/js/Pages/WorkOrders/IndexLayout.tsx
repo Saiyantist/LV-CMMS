@@ -601,7 +601,7 @@ export default function IndexLayout({
             <div
                 className={`hidden md:block overflow-x-auto rounded-md -mt-[4.1rem] ${
                     !user.permissions.includes("manage work orders")
-                        ? "!-mt-[0.7rem]"
+                        ? "-mt-[3.8rem]"
                         : ""
                 }`}
             >

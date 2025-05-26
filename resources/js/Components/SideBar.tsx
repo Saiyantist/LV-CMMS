@@ -101,7 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     ]
                   : []),
 
-              ...(isEventServiceRequester
+              ...(isEventServiceRequester || isWorkOrderRequester
                   ? [
                         {
                             routeName: "booking-calendar",
@@ -282,7 +282,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             ? {
                   routeName: "admin.manage-roles",
                   href: route("admin.manage-roles") || "",
-                  icon: <User size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+                  icon: <User size={16} className="mr-4 md:mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
                   text: "User Management",
               }
             : null;
@@ -313,7 +313,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         <li key={item.text}>
             <Link
                 href={item.href}
-                className={`flex items-center text-sm h-12 pr-2 hover:text-opacity-80 ${
+                className={`flex items-center text-sm xs:text-base md:text-sm h-12 pr-2 hover:text-opacity-80 ${
                     isActive(item.routeName)
                         ? "bg-white text-primary border-r-4 border-primary rounded-l-lg pl-4 mr-1 ml-3 rounded-full"
                         : "text-white"
@@ -578,11 +578,11 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                                     : "workOrders"
                                             )
                                         }
-                                        className="flex items-center w-full px-4 py-3 text-white text-sm hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
+                                        className="flex items-center w-full px-4 py-3 text-white text-base xs:text-lg hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
                                     >
                                         <ClipboardList
                                             size={16}
-                                            className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                            className="mr-4 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
                                         />
                                         Work Orders
                                         <span className="ml-auto">
@@ -613,11 +613,11 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                                     : "eventServices"
                                             )
                                         }
-                                        className="flex items-center w-full px-4 py-3 text-white text-sm hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
+                                        className="flex items-center w-full px-4 py-3 text-white text-base xs:text-lg hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
                                     >
                                         <Calendar
                                             size={16}
-                                            className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                            className="mr-4 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
                                         />
                                         Event Services
                                         <span className="ml-auto">
@@ -657,7 +657,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         {isSuperAdmin && userManagementItem && (
                             <Link
                                 href={userManagementItem.href}
-                                className={`flex items-center px-4 py-3 text-sm hover:bg-white hover:text-primary rounded-lg transition ${
+                                className={`flex items-center px-4 py-3 text-base xs:text-lg hover:bg-white hover:text-primary rounded-lg transition ${
                                     isActive(userManagementItem.routeName)
                                         ? "bg-white text-primary"
                                         : ""

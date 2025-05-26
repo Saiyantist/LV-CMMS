@@ -13,17 +13,33 @@ const getDateLimits = () => {
 
     return { minDate, maxDate };
 };
+
+interface Department {
+    id: number;
+    name: string;
+    type: string;
+}
+
+interface WorkGroup {
+    id: number;
+    name: string;
+}
+
+interface UpdateProfileInformationProps {
+    mustVerifyEmail: boolean;
+    status?: string;
+    className?: string;
+    departments?: Department[];
+    work_groups?: WorkGroup[];
+}
+
 export default function UpdateProfileInformation({
     mustVerifyEmail,
     status,
     className = '',
     departments = [],
-}: {
-    mustVerifyEmail: boolean;
-    status?: string;
-    className?: string;
-    departments?: { id:number; name:string;}[];
-}) {
+    work_groups = [],
+}: UpdateProfileInformationProps) {
 
     const { minDate, maxDate } = getDateLimits();
     const user = usePage().props.auth.user;

@@ -10,7 +10,7 @@ import EventDetails from "./EventDetails";
 import RequestedServices from "./RequestedServices";
 import ComplianceAndConsent from "./Compliance&Consent";
 import EventSummaryModal from "./EventSummaryModal";
-import { usePage } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 
 export default function EventServicesRequest() {
     // Step state
@@ -155,6 +155,7 @@ export default function EventServicesRequest() {
 
     return (
         <AuthenticatedLayout>
+            <Head title="Event Services" />
             <div className="w-[99%] mx-auto p-4 md:p-6 bg-white min-h-screen">
                 {/* Progress Steps */}
                 <div className="text-center">

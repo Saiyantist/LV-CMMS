@@ -36,7 +36,7 @@ class EventServicesController extends Controller
         ];
     });
 
-    return Inertia::render('EventServices/booking-calendar', [
+    return Inertia::render('EventServices/BookingCalendar', [
         'calendarEvents' => $calendarEvents,
         'listEvents' => $listEvents,
     ]);

@@ -4,8 +4,8 @@ import * as React from "react";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import BookingList from "./booking-list";
-import { usePage } from "@inertiajs/react";
+import BookingList from "./BookingList";
+import { Head, usePage } from "@inertiajs/react";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
 import { router } from "@inertiajs/react";
 
@@ -174,12 +174,14 @@ export default function EventCalendar() {
 
     return (
         <AuthenticatedLayout>
+            <Head title="Booking Calendar" />
             <div className="flex flex-col min-h-screen bg-gray-50">
                 {/* Header */}
                 <div className="border-b bg-white">
                     <div className="container mx-auto px-4 py-2">
                         <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
                             <div className="flex space-x-2">
+                                <h1 className="text-2xl font-semibold">Booking Calendar</h1>
                                 {/* <button
                                     className={`px-4 py-2 rounded-md ${
                                         view === "calendar"
@@ -265,7 +267,7 @@ export default function EventCalendar() {
                     {view === "calendar" && (
                         <>
                             {/* Mobile: Vertical list of days with events */}
-                            <div className="block sm:hidden">
+                            <div className="block md:hidden">
                                 <div className="flex flex-col gap-2">
                                     {Array.from(
                                         { length: daysInMonth },

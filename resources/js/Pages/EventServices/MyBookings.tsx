@@ -64,7 +64,12 @@ export default function MyBookings({
         null
     );
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    
+    // const [isFilterOpen, setIsFilterOpen] = useState(false); 
+        // ‼️ Heyya JOSH, you can refer sa nagawa kong search and filter (for MOBILE) sa IndexLayout.tsx
+        // Kasi dito, inayos ko na 'yung search and filter for desktop (datatable).
+        // Sa desktop, just add meta { filterable: true } in the column definition of desired column.
+
     const [searchQuery, setSearchQuery] = useState("");
     const [filteredBookings, setFilteredBookings] = useState<any[]>(bookings);
     const [currentPage, setCurrentPage] = useState(1);
@@ -218,11 +223,17 @@ export default function MyBookings({
             accessorKey: "venue",
             header: "Requested Venue",
             cell: ({ row }) => <div>{row.getValue("venue")}</div>,
+            meta: {
+                searchable: true,
+            },
         },
         {
             accessorKey: "name",
             header: "Event Name",
             cell: ({ row }) => <div>{row.getValue("name")}</div>,
+            meta: {
+                searchable: true,
+            },
         },
         {
             accessorKey: "eventDate",
@@ -238,6 +249,9 @@ export default function MyBookings({
             accessorKey: "status",
             header: "Status",
             cell: ({ row }) => getStatusBadge(row.getValue("status")),
+            meta: {
+                filterable: true,
+            }
         },
         {
             id: "actions",
@@ -291,8 +305,8 @@ export default function MyBookings({
 
     return (
         <AuthenticatedLayout>
+            <Head title="My Bookings" />
             <div className="container mx-auto py-6">
-                <Head title="My Bookings" />
 
                 <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
@@ -330,9 +344,9 @@ export default function MyBookings({
                 />
 
                 {/* Filter Dropdown */}
-                {isFilterOpen && (
+                {/* {isFilterOpen && (
                     <div className="border rounded-md p-4 mb-6 shadow-md w-full max-w-md ml-auto">
-                        <h3 className="font-semibold text-lg mb-4">Filter</h3>
+                        <h3 className="font-semibold text-lg mb-4">Filters</h3>
 
                         <div className="mb-4">
                             <p className="mb-2">Requested Venue</p>
@@ -384,10 +398,10 @@ export default function MyBookings({
                             </Button>
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* Desktop Table View (Datatable) */}
-                <div className="hidden md:block overflow-hidden">
+                <div className="hidden md:block -mt-16 overflow-hidden">
                     <Datatable
                         columns={columns as any}
                         data={filteredBookings}

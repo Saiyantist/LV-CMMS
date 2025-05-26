@@ -13,10 +13,12 @@ export default function Edit({
     mustVerifyEmail,
     status,
     departments,
+    work_groups,
 }: PageProps<{
     mustVerifyEmail: boolean;
     status?: string;
-    departments?: { id: number; name: string }[];
+    departments?: { id: number; name: string; type: string;}[];
+    work_groups?: { id: number; name: string;}[];
 }>) {
     // ✅ Get the user from usePage()
     const user = usePage().props.auth.user;
@@ -68,6 +70,7 @@ export default function Edit({
                                 status={status}
                                 className="max-w-xl"
                                 departments={departments}
+                                work_groups={work_groups}
                             />
                         </div>
 
