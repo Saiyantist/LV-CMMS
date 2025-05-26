@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSeeder::class);
         $this->call(LocationSeeder::class);
         $this->call(AssetSeeder::class);
+        $this->call(EventServiceSeeder::class);
         User::factory(50)->create();
         
         WorkOrder::factory(100)->create();

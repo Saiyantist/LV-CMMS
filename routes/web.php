@@ -129,15 +129,18 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::get('/event-services/my-bookings', [EventServicesController::class, 'MyBookings'])->name('event-services.my-bookings');
         
         // My Bookings Page Route (renders the page/component, not the data)
-        Route::get('/event-services/my-bookings-page', function () {
-            return Inertia::render('EventServices/MyBookings');
-        })->name('event-services.my-bookings-page');
+        // Route::get('/event-services/my-bookings-page', function () {
+        //     return Inertia::render('EventServices/MyBookings');
+        // })->name('event-services.my-bookings-page');
         
         // Event Services Request Route
         Route::get('/event-services/request', function () {
             return Inertia::render('EventServices/EventServicesRequest');
         })->name('event-services.request');
     
+        Route::post('/event-services', [EventServicesController::class, 'store'])->name('event-services.store');
+        Route::delete('/event-services/{id}', [EventServicesController::class, 'destroy'])->name('event-services.destroy');
+        Route::put('/event-services/{id}', [EventServicesController::class, 'update'])->name('event-services.update');
     });
 });
 

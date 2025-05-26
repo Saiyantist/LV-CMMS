@@ -1,208 +1,149 @@
 <?php
-
 namespace App\Http\Controllers;
 
+use App\Models\EventService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class EventServicesController extends Controller
 {
-    public function index()
-    {
-        $calendarEvents = [
-            1 => [
-                [
-                    "title" => "Auditorium",
-                    "time" => "6:00 AM to 12 NN",
-                    "color" => "bg-red-800",
-                ],
-            ],
-            2 => [
-                [
-                    "title" => "LVCC Grounds",
-                    "time" => "6:00 AM to 12 NN",
-                    "color" => "bg-red-800",
-                ],
-            ],
-            3 => [
-                [
-                    "title" => "Auditorium Lobby",
-                    "time" => "1:00 PM to 4:00 PM",
-                    "color" => "bg-orange-500",
-                ],
-            ],
-            4 => [
-                [
-                    "title" => "EFS 301",
-                    "time" => "1:00 PM to 4:00 PM",
-                    "color" => "bg-orange-500",
-                ],
-            ],
-            7 => [
-                [
-                    "title" => "Auditorium",
-                    "time" => "6:00 AM to 12 NN",
-                    "color" => "bg-red-800",
-                ],
-            ],
-            9 => [
-                [
-                    "title" => "DSR 309",
-                    "time" => "1:00 PM to 4:00 PM",
-                    "color" => "bg-orange-500",
-                ],
-            ],
-            16 => [
-                [
-                    "title" => "DSR 309",
-                    "time" => "6:00 AM to 12 NN",
-                    "color" => "bg-orange-500",
-                ],
-                [
-                    "title" => "Meeting Room",
-                    "time" => "1:00 PM to 4:00 PM",
-                    "color" => "bg-red-800",
-                ],
-            ],
-            17 => [
-                [
-                    "title" => "Elementary & High School Library",
-                    "time" => "6:00 AM to 12 NN",
-                    "color" => "bg-orange-500",
-                ],
-            ],
-            14 => [
-                [
-                    "title" => "Main Lobby",
-                    "time" => "1:00 PM to 4:00 PM",
-                    "color" => "bg-red-800",
-                ],
-            ],
-            22 => [
-                [
-                    "title" => "College Library",
-                    "time" => "6:00 AM to 12 NN",
-                    "color" => "bg-red-800",
-                ],
-            ],
-            24 => [
-                [
-                    "title" => "Basketball Court",
-                    "time" => "6:00 AM to 12 NN",
-                    "color" => "bg-orange-500",
-                ],
-            ],
+   public function index()
+{
+    $events = EventService::all();
+
+    // Map events for calendar view
+    $calendarEvents = [];
+    foreach ($events as $event) {
+        $day = date('j', strtotime($event->event_date)); // day of month (1-31)
+        $calendarEvents[$day][] = [
+            'title' => $event->event_name,
+            'time' => date('H:i', strtotime($event->event_date)),
+            'status' => $event->status,
         ];
-
-        $listEvents = $this->getDummyBookings();
-
-        return Inertia::render('EventServices/booking-calendar', [
-            'calendarEvents' => $calendarEvents,
-            'listEvents' => $listEvents,
-        ]);
     }
 
-    public function myBookings()
-    {
-        $bookings = $this->getDummyBookings();
-        return Inertia::render('EventServices/MyBookings', [
-            'bookings' => $bookings,
-        ]);
-    }
-
-    private function getDummyBookings()
-    {
+    // Map events for list view
+    $listEvents = $events->map(function ($event) {
         return [
-            [
-                "id" => "1",
-                "date" => "March 02, 2025",
-                "venue" => "DSR 401",
-                "eventDate" => "March 02, 2025",
-                "time" => "9:00 AM - 6:00 PM",
-                "name" => "Regular text column",
-                "status" => "Completed",
-            ],
-            [
-                "id" => "2",
-                "date" => "March 02, 2025",
-                "venue" => "DSR 402",
-                "eventDate" => "March 02, 2025",
-                "time" => "9:00 AM - 6:00 PM",
-                "name" => "Regular text column",
-                "status" => "In Progress",
-            ],
-            [
-                "id" => "3",
-                "date" => "March 02, 2025",
-                "venue" => "MIS Office",
-                "eventDate" => "March 02, 2025",
-                "time" => "9:00 AM - 6:00 PM",
-                "name" => "Regular text column",
-                "status" => "Cancelled",
-            ],
-            [
-                "id" => "4",
-                "date" => "March 02, 2025",
-                "venue" => "Registrar Office",
-                "eventDate" => "March 02, 2025",
-                "time" => "9:00 AM - 6:00 PM",
-                "name" => "Regular text column",
-                "status" => "Not Started",
-            ],
-            [
-                "id" => "5",
-                "date" => "March 02, 2025",
-                "venue" => "CR DSR 3rd Floor",
-                "eventDate" => "March 02, 2025",
-                "time" => "9:00 AM - 6:00 PM",
-                "name" => "Regular text column",
-                "status" => "Not Started",
-            ],
-            [
-                "id" => "6",
-                "date" => "March 02, 2025",
-                "venue" => "DSR 401",
-                "eventDate" => "March 02, 2025",
-                "time" => "9:00 AM - 6:00 PM",
-                "name" => "Regular text column",
-                "status" => "Not Started",
-            ],
-            [
-                "id" => "7",
-                "date" => "March 02, 2025",
-                "venue" => "DSR 401",
-                "eventDate" => "March 02, 2025",
-                "time" => "9:00 AM - 6:00 PM",
-                "name" => "Regular text column",
-                "status" => "Not Started",
-            ],
-            [
-                "id" => "8",
-                "date" => "March 02, 2025",
-                "venue" => "DSR 401",
-                "eventDate" => "March 02, 2025",
-                "time" => "9:00 AM - 6:00 PM",
-                "name" => "Regular text column",
-                "status" => "Not Started",
-            ],
-            [
-                "id" => "9",
-                "date" => "March 02, 2025",
-                "venue" => "DSR 401",
-                "eventDate" => "March 02, 2025",
-                "time" => "9:00 AM - 6:00 PM",
-                "name" => "Regular text column",
-                "status" => "Not Started",
-            ],
-            [
-                "id" => "10",
-                "date" => "March 02, 2025",
-                "venue" => "DSR 401",
-                "eventDate" => "March 02, 2025",
-                "time" => "9:00 AM - 6:00 PM",
-                "name" => "Regular text column",
-                "status" => "Not Started",
-            ],
+            'id' => $event->id,
+            'date' => $event->created_at->format('Y-m-d'),
+            'venue' => $event->location,
+            'eventDate' => $event->event_date,
+            'time' => date('H:i', strtotime($event->event_date)),
+            'name' => $event->event_name,
+            'status' => $event->status,
         ];
+    });
+
+    return Inertia::render('EventServices/booking-calendar', [
+        'calendarEvents' => $calendarEvents,
+        'listEvents' => $listEvents,
+    ]);
+}
+// filepath: app\Http\Controllers\EventServicesController.php
+public function MyBookings()
+{
+    $user = Auth::user();
+
+    // Check if user is super admin or communications officer
+    if ($user->hasRole('super_admin') || $user->hasRole('communications_officer')) {
+        $myEvents = EventService::all();
+    } else {
+        $myEvents = EventService::where('user_id', $user->id)->get();
     }
+
+    $bookings = $myEvents->map(function ($event) {
+        return [
+            'id' => $event->id,
+            'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
+            'venue' => $event->venue,
+            'eventDate' => $event->event_date,
+            'time' => $event->time,
+            'name' => $event->name,
+            'status' => $event->status,
+        ];
+    });
+
+    return Inertia::render('EventServices/MyBookings', [
+        'bookings' => $bookings
+    ]);
+}
+
+    public function create()
+    {
+        // List of venue names for the form dropdown
+        $venueNames = [
+            "Auditorium",
+            "Auditorium Lobby",
+            "College Library",
+            "Meeting Room",
+            "Training Room A",
+            "Computer Laboratory A",
+            "Computer Laboratory B",
+            "EFS Classroom(s) Room #:",
+            "LVCC Grounds",
+            "LVCC  Main Lobby",
+            "Elementary & High School Library",
+            "Basketball Court",
+        ];
+
+        return Inertia::render('EventServices/CreateBooking', [
+            'venueNames' => $venueNames,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',           // Event Name
+            'venue' => 'required|string|max:255',          // Requested Venue
+            'event_date' => 'required|date',               // Event Date
+            'time' => 'required',                          // Event Time
+        ]);
+
+        $event = EventService::create([
+            'user_id' => Auth::id(),
+            'name' => $validated['name'],
+            'venue' => $validated['venue'],
+            'event_date' => $validated['event_date'],
+            'time' => $validated['time'],
+            'status' => 'Pending',                         // Always "Pending" when created
+        ]);
+
+        return redirect()->route('event-services.my-bookings')->with('success', 'Event booked!');
+    }
+
+public function update(Request $request, $id)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'venue' => 'required|string|max:255',
+        'event_date' => 'required|date',
+        'time' => 'required',
+        'status' => 'required|string|max:255',
+    ]);
+
+    $event = EventService::findOrFail($id);
+    $event->update([
+        'name' => $validated['name'],
+        'venue' => $validated['venue'],
+        'event_date' => $validated['event_date'],
+        'time' => $validated['time'],
+        'status' => $validated['status'],
+        'created_at' => now(), // Date Requested is updated to now
+    ]);
+
+    return redirect()->route('event-services.my-bookings')->with('success', 'Booking updated!');
+}
+
+
+public function destroy($id)
+{
+    $event = EventService::findOrFail($id);
+    $event->delete();
+
+    return redirect()->route('event-services.my-bookings')->with('success', 'Booking deleted!');
+}
+
 }

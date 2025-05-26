@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Filter, ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/Components/shadcnui/button";
-import { Input } from "@/Components/shadcnui/input";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import { Datatable } from "@/Pages/WorkOrders/components/Datatable";
@@ -16,7 +15,9 @@ import {
     DialogHeader,
 } from "@/Components/shadcnui/dialog";
 import { createPortal } from "react-dom";
-import EventSummary from "./EventSummaryModal";
+import { router } from "@inertiajs/react";
+import CreateBookingModal from "./CreateBookingModal";
+import ViewBookingModal from "./ViewBookingModal";
 
 // Define the booking type
 interface Booking {
@@ -52,7 +53,13 @@ interface Booking {
     [key: string]: any;
 }
 
-export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
+export default function MyBookings({
+    bookings = [],
+    venueNames = [],
+}: {
+    bookings?: any[];
+    venueNames?: string[];
+}) {
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(
         null
     );
@@ -63,6 +70,14 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [filterVenue, setFilterVenue] = useState<string>("");
     const [filterStatus, setFilterStatus] = useState<string>("");
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [form, setForm] = useState({
+        name: "",
+        venue: "",
+        event_date: "",
+        time: "",
+    });
+    const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
     const itemsPerPage = 5;
     const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
@@ -180,44 +195,6 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                                   {selectedBooking?.name}
                               </DialogTitle>
                           </DialogHeader>
-                          {/* Render EventSummary here */}
-                          <EventSummary
-                              data={{
-                                  eventDetails: {
-                                      eventName: selectedBooking.name,
-                                      department: selectedBooking.department
-                                          ? Array.isArray(
-                                                selectedBooking.department
-                                            )
-                                              ? selectedBooking.department
-                                              : [selectedBooking.department]
-                                          : [],
-                                      eventPurpose:
-                                          selectedBooking.eventPurpose || "",
-                                      participants:
-                                          selectedBooking.participants || "",
-                                      participantCount:
-                                          selectedBooking.numberOfParticipants
-                                              ? String(
-                                                    selectedBooking.numberOfParticipants
-                                                )
-                                              : "",
-                                  },
-                                  dateRange: selectedBooking.eventDate,
-                                  timeRange: selectedBooking.time,
-                                  venue: selectedBooking.venue,
-                                  requestedServices:
-                                      Object.fromEntries(
-                                          Object.entries(selectedBooking.requestedServices || {}).map(
-                                              ([key, value]) => [key, value ? (Array.isArray(value) ? value : [value]) : []]
-                                          )
-                                      ),
-                                  // Add other fields as needed
-                              }}
-                              onClose={() => setIsModalOpen(false)}
-                              onSubmit={() => {}}
-                              selectedVenueIds={[]} // Pass actual venue IDs if available
-                          />
                       </div>
                   </div>,
                   document.body
@@ -266,18 +243,51 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
             id: "actions",
             header: "Action",
             cell: ({ row }) => (
-                <div className="flex justify-center">
+                <div className="flex justify-center space-x-2">
                     <Button
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        className="bg-secondary hover:bg-primary text-white"
                         onClick={() => handleViewBooking(row.original)}
                     >
                         View
+                    </Button>
+                    <Button
+                        className="bg-destructive hover:bg-red-700 text-white"
+                        onClick={() => handleDeleteBooking(row.original)}
+                    >
+                        Delete
                     </Button>
                 </div>
             ),
             enableSorting: false,
         },
     ];
+
+    // Handle form input change
+    const handleFormChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    // Handle form submit
+    const handleFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setFormErrors({});
+        router.post("/event-services", form, {
+            onError: (errors) => setFormErrors(errors),
+            onSuccess: () => {
+                setShowCreateModal(false);
+                setForm({ name: "", venue: "", event_date: "", time: "" });
+            },
+        });
+    };
+
+    // Delete handler
+    const handleDeleteBooking = (booking: Booking) => {
+        if (confirm("Are you sure you want to delete this booking?")) {
+            router.delete(`/event-services/${booking.id}`);
+        }
+    };
 
     return (
         <AuthenticatedLayout>
@@ -287,8 +297,37 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                 <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                         <h1 className="text-2xl font-semibold">My Bookings</h1>
+                        <Button
+                            className="bg-secondary hover:bg-primary text-white"
+                            onClick={() => setShowCreateModal(true)}
+                        >
+                            + Create Booking
+                        </Button>
                     </div>
                 </header>
+
+                <CreateBookingModal
+                    open={showCreateModal}
+                    onClose={() => setShowCreateModal(false)}
+                    venueNames={
+                        venueNames.length
+                            ? venueNames
+                            : [
+                                  "Auditorium",
+                                  "Auditorium Lobby",
+                                  "College Library",
+                                  "Meeting Room",
+                                  "Training Room A",
+                                  "Computer Laboratory A",
+                                  "Computer Laboratory B",
+                                  "EFS Classroom(s) Room #:",
+                                  "LVCC Grounds",
+                                  "LVCC  Main Lobby",
+                                  "Elementary & High School Library",
+                                  "Basketball Court",
+                              ]
+                    }
+                />
 
                 {/* Filter Dropdown */}
                 {isFilterOpen && (
@@ -348,7 +387,7 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                 )}
 
                 {/* Desktop Table View (Datatable) */}
-                <div className="hidden md:block border rounded-md overflow-hidden">
+                <div className="hidden md:block overflow-hidden">
                     <Datatable
                         columns={columns as any}
                         data={filteredBookings}
@@ -393,14 +432,22 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                                 </div>
 
                                 <div className="flex justify-end mt-2 w-full">
-                                    <div className="w-1/3">
+                                    <div className="flex w-full space-x-2">
                                         <Button
-                                            className="w-full bg-secondary hover:bg-blue-700 text-white"
+                                            className="w-1/2 bg-secondary hover:bg-primary text-white"
                                             onClick={() =>
                                                 handleViewBooking(booking)
                                             }
                                         >
                                             View
+                                        </Button>
+                                        <Button
+                                            className="w-1/2 bg-destructive hover:bg-red-700 text-white"
+                                            onClick={() =>
+                                                handleDeleteBooking(booking)
+                                            }
+                                        >
+                                            Delete
                                         </Button>
                                     </div>
                                 </div>
@@ -409,68 +456,12 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                     ))}
                 </div>
 
-                {/* Pagination */}
-                <div className="mt-6">
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            className="flex items-center gap-2"
-                            onClick={() =>
-                                setCurrentPage((prev) => Math.max(prev - 1, 1))
-                            }
-                            disabled={currentPage === 1}
-                        >
-                            <ArrowLeft size={16} />
-                            Previous
-                        </Button>
-
-                        {Array.from(
-                            { length: Math.min(totalPages, 5) },
-                            (_, i) => {
-                                const pageNumber = i + 1;
-                                return (
-                                    <Button
-                                        key={pageNumber}
-                                        variant={
-                                            currentPage === pageNumber
-                                                ? "default"
-                                                : "outline"
-                                        }
-                                        className={`w-8 h-8 p-0 ${
-                                            currentPage === pageNumber
-                                                ? "bg-blue-600"
-                                                : ""
-                                        }`}
-                                        onClick={() =>
-                                            setCurrentPage(pageNumber)
-                                        }
-                                    >
-                                        {pageNumber}
-                                    </Button>
-                                );
-                            }
-                        )}
-
-                        {totalPages > 5 && <span>...</span>}
-
-                        <Button
-                            variant="outline"
-                            className="flex items-center gap-2"
-                            onClick={() =>
-                                setCurrentPage((prev) =>
-                                    Math.min(prev + 1, totalPages)
-                                )
-                            }
-                            disabled={currentPage === totalPages}
-                        >
-                            Next
-                            <ArrowLeft size={16} className="rotate-180" />
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Booking Details Modal */}
-                <BookingDetailsModal />
+                <ViewBookingModal
+                    open={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    booking={selectedBooking}
+                    venueNames={venueNames}
+                />
             </div>
         </AuthenticatedLayout>
     );
