@@ -29,10 +29,14 @@ class EventServiceFactory extends Factory
         return [
             'user_id' => User::factory(),
             'name' => $this->faker->sentence(3),
-            'venue' => $this->faker->randomElement($venueNames), // Use the correct venue names
-            'event_date' => $this->faker->date(),
+            // 'venue' => $this->faker->randomElement($venueNames), // Use the correct venue names
+            'venue' => json_encode([$this->faker->randomElement($venueNames)]),
             'status' => $this->faker->randomElement(['Completed', 'In Progress', 'Cancelled', 'Not Started']),
-            'time' => $this->faker->time(),
+            // 'time' => $this->faker->time(),
+            'event_start_date' => $this->faker->date(),
+            'event_end_date' => $this->faker->date(),
+            'event_start_time' => $this->faker->time(),
+            'event_end_time' => $this->faker->time(),
             // ...other fields
         ];
     }

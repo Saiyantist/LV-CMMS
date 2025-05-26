@@ -64,11 +64,11 @@ export default function MyBookings({
         null
     );
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
-    // const [isFilterOpen, setIsFilterOpen] = useState(false); 
-        // ‼️ Heyya JOSH, you can refer sa nagawa kong search and filter (for MOBILE) sa IndexLayout.tsx
-        // Kasi dito, inayos ko na 'yung search and filter for desktop (datatable).
-        // Sa desktop, just add meta { filterable: true } in the column definition of desired column.
+
+    // const [isFilterOpen, setIsFilterOpen] = useState(false);
+    // ‼️ Heyya JOSH, you can refer sa nagawa kong search and filter (for MOBILE) sa IndexLayout.tsx
+    // Kasi dito, inayos ko na 'yung search and filter for desktop (datatable).
+    // Sa desktop, just add meta { filterable: true } in the column definition of desired column.
 
     const [searchQuery, setSearchQuery] = useState("");
     const [filteredBookings, setFilteredBookings] = useState<any[]>(bookings);
@@ -129,6 +129,24 @@ export default function MyBookings({
         setFilteredBookings(result);
         setCurrentPage(1); // Reset to first page when filters change
     }, [searchQuery, filterVenue, filterStatus, bookings]);
+
+    useEffect(() => {
+        // Parse venue/requested_services if needed
+        const parsed = bookings.map((booking) => ({
+            ...booking,
+            venue: Array.isArray(booking.venue)
+                ? booking.venue
+                : booking.venue
+                ? JSON.parse(booking.venue)
+                : [],
+            requestedServices: Array.isArray(booking.requested_services)
+                ? booking.requested_services
+                : booking.requested_services
+                ? JSON.parse(booking.requested_services)
+                : [],
+        }));
+        setFilteredBookings(parsed);
+    }, [bookings]);
 
     const handleViewBooking = (booking: Booking) => {
         setSelectedBooking(booking);
@@ -222,10 +240,14 @@ export default function MyBookings({
         {
             accessorKey: "venue",
             header: "Requested Venue",
-            cell: ({ row }) => <div>{row.getValue("venue")}</div>,
-            meta: {
-                searchable: true,
-            },
+            cell: ({ row }) => (
+                <div>
+                    {Array.isArray(row.original.venue)
+                        ? row.original.venue.join(", ")
+                        : row.getValue("venue")}
+                </div>
+            ),
+            meta: { searchable: true },
         },
         {
             accessorKey: "name",
@@ -238,12 +260,32 @@ export default function MyBookings({
         {
             accessorKey: "eventDate",
             header: "Event Date",
-            cell: ({ row }) => <div>{row.getValue("eventDate")}</div>,
+            cell: ({ row }) => {
+                const start = row.original.event_start_date;
+                const end = row.original.event_end_date;
+                return (
+                    <div>
+                        {start && end
+                            ? `${formatDate(start)} to ${formatDate(end)}`
+                            : "N/A"}
+                    </div>
+                );
+            },
         },
         {
             accessorKey: "time",
             header: "Event Time",
-            cell: ({ row }) => <div>{row.getValue("time")}</div>,
+            cell: ({ row }) => {
+                const start = row.original.event_start_time;
+                const end = row.original.event_end_time;
+                return (
+                    <div>
+                        {start && end
+                            ? `${formatTime(start)} to ${formatTime(end)}`
+                            : "N/A"}
+                    </div>
+                );
+            },
         },
         {
             accessorKey: "status",
@@ -251,7 +293,7 @@ export default function MyBookings({
             cell: ({ row }) => getStatusBadge(row.getValue("status")),
             meta: {
                 filterable: true,
-            }
+            },
         },
         {
             id: "actions",
@@ -303,11 +345,34 @@ export default function MyBookings({
         }
     };
 
+    // Format date as "Month Day, Year"
+    function formatDate(dateString: string) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+    }
+
+    // Format time as "hh:mm AM/PM"
+    function formatTime(timeString: string) {
+        if (!timeString) return "";
+        const [hour, minute] = timeString.split(":");
+        const date = new Date();
+        date.setHours(Number(hour), Number(minute));
+        return date.toLocaleTimeString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        });
+    }
+
     return (
         <AuthenticatedLayout>
             <Head title="My Bookings" />
             <div className="container mx-auto py-6">
-
                 <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                         <h1 className="text-2xl font-semibold">My Bookings</h1>
@@ -343,63 +408,6 @@ export default function MyBookings({
                     }
                 />
 
-                {/* Filter Dropdown */}
-                {/* {isFilterOpen && (
-                    <div className="border rounded-md p-4 mb-6 shadow-md w-full max-w-md ml-auto">
-                        <h3 className="font-semibold text-lg mb-4">Filters</h3>
-
-                        <div className="mb-4">
-                            <p className="mb-2">Requested Venue</p>
-                            <select
-                                className="w-full border rounded-md px-3 py-2"
-                                value={filterVenue}
-                                onChange={(e) => setFilterVenue(e.target.value)}
-                            >
-                                <option value="">All Venues</option>
-                                {uniqueVenues.map((venue) => (
-                                    <option key={venue} value={venue}>
-                                        {venue}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="mb-4">
-                            <p className="mb-2">Status</p>
-                            <select
-                                className="w-full border rounded-md px-3 py-2"
-                                value={filterStatus}
-                                onChange={(e) =>
-                                    setFilterStatus(e.target.value)
-                                }
-                            >
-                                <option value="">All Statuses</option>
-                                {uniqueStatuses.map((status) => (
-                                    <option key={status} value={status}>
-                                        {status}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="flex gap-2 mt-6">
-                            <Button
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                                onClick={() => setIsFilterOpen(false)}
-                            >
-                                Apply
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="flex-1"
-                                onClick={handleClearFilters}
-                            >
-                                Clear
-                            </Button>
-                        </div>
-                    </div>
-                )} */}
-
                 {/* Desktop Table View (Datatable) */}
                 <div className="hidden md:block -mt-16 overflow-hidden">
                     <Datatable
@@ -428,7 +436,7 @@ export default function MyBookings({
 
                                 <div>
                                     <strong>Date Requested:</strong>{" "}
-                                    {booking.date}
+                                    {formatDate(booking.date)}
                                 </div>
                                 <div>
                                     <strong>Requested Venue:</strong>{" "}
@@ -439,10 +447,11 @@ export default function MyBookings({
                                 </div>
                                 <div>
                                     <strong>Event Date:</strong>{" "}
-                                    {booking.eventDate}
+                                    {formatDate(booking.eventDate)}
                                 </div>
                                 <div>
-                                    <strong>Event Time:</strong> {booking.time}
+                                    <strong>Event Time:</strong>{" "}
+                                    {formatTime(booking.time)}
                                 </div>
 
                                 <div className="flex justify-end mt-2 w-full">

@@ -1,21 +1,58 @@
 import React, { useState } from "react";
 import {
     Dialog,
-    DialogTitle,
     DialogContent,
     DialogHeader,
+    DialogTitle,
 } from "@/Components/shadcnui/dialog";
 import { Button } from "@/Components/shadcnui/button";
-import { ArrowLeft } from "lucide-react";
-import { router } from "@inertiajs/react";
+import {
+    FileText,
+    CalendarDays,
+    Clock,
+    Users,
+    BadgeCheck,
+    Building2,
+} from "lucide-react";
+import EditBookingsModal from "./EditBookingsModal";
+
+const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+};
+
+const formatTime = (timeString: string) => {
+    if (!timeString) return "";
+    const [hour, minute] = timeString.split(":");
+    const date = new Date();
+    date.setHours(Number(hour), Number(minute));
+    return date.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    });
+};
 
 interface Booking {
     id: number | string;
     date: string;
-    venue: string;
+    venue: string | string[];
     name: string;
-    eventDate: string;
-    time: string;
+    department?: string;
+    description?: string;
+    participants?: string;
+    number_of_participants?: number;
+    event_start_date?: string;
+    event_end_date?: string;
+    event_start_time?: string;
+    event_end_time?: string;
+    requested_services?: string | string[];
+    proof_of_approval?: string;
     status: string;
     [key: string]: any;
 }
@@ -27,254 +64,187 @@ interface Props {
     venueNames?: string[];
 }
 
-const statusOptions = [
-    "Pending",
-    "Completed",
-    "In Progress",
-    "Cancelled",
-    "Not Started",
-];
-
 const ViewBookingModal: React.FC<Props> = ({
     open,
     onClose,
     booking,
     venueNames = [],
 }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [form, setForm] = useState({
-        name: booking?.name || "",
-        venue: booking?.venue || "",
-        event_date: booking?.eventDate || "",
-        time: booking?.time || "",
-        status: booking?.status || "Pending",
-    });
-    const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
-
-    // Sync form when booking changes
-    React.useEffect(() => {
-        if (booking) {
-            setForm({
-                name: booking.name || "",
-                venue: booking.venue || "",
-                event_date: booking.eventDate || "",
-                time: booking.time || "",
-                status: booking.status || "Pending",
-            });
-        }
-    }, [booking]);
-
-    const handleFormChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
-
-    const handleEdit = () => setIsEditing(true);
-
-    const handleUpdate = (e: React.FormEvent) => {
-        e.preventDefault();
-        setFormErrors({});
-        if (booking) {
-            router.put(`/event-services/${booking.id}`, form, {
-                onError: (errors) => setFormErrors(errors),
-                onSuccess: () => {
-                    setIsEditing(false);
-                    onClose();
-                },
-            });
-        }
-    };
+    const [showEdit, setShowEdit] = useState(false);
 
     if (!booking) return null;
 
+    const venues = Array.isArray(booking.venue)
+        ? booking.venue
+        : booking.venue
+        ? JSON.parse(booking.venue)
+        : [];
+    const requestedServices = Array.isArray(booking.requested_services)
+        ? booking.requested_services
+        : booking.requested_services
+        ? JSON.parse(booking.requested_services)
+        : [];
+
+    const InfoBlock = ({
+        label,
+        value,
+        icon,
+    }: {
+        label: string;
+        value: string | number;
+        icon?: React.ReactNode;
+    }) => (
+        <div className="space-y-0.5">
+            <div className="text-xs text-gray-500 flex items-center gap-1.5">
+                {icon}
+                {label}
+            </div>
+            <div className="text-sm font-medium text-gray-900">
+                {value || "N/A"}
+            </div>
+        </div>
+    );
+
     return (
-        <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-                        <ArrowLeft
-                            className="cursor-pointer"
-                            onClick={onClose}
-                        />
-                        {isEditing ? "Edit Booking" : booking.name}
-                    </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-2 mt-4">
-                    <div>
-                        <strong>ID:</strong> {booking.id}
+        <>
+            <Dialog open={open} onOpenChange={onClose}>
+                <DialogContent className="max-w-2xl w-full rounded-lg shadow-xl border border-gray-200 p-0 overflow-hidden">
+                    <DialogHeader className="bg-blue-50 px-5 py-3 border-b">
+                        <DialogTitle className="text-xl font-semibold text-gray-800 text-center">
+                            Booking Summary
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="p-5 space-y-5 max-h-[75vh] overflow-y-auto bg-white text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <InfoBlock
+                                label="Booking ID"
+                                value={booking.id}
+                                icon={<BadgeCheck size={14} />}
+                            />
+                            <InfoBlock
+                                label="Date Requested"
+                                value={formatDate(booking.date)}
+                                icon={<CalendarDays size={14} />}
+                            />
+                            <InfoBlock
+                                label="Event Name"
+                                value={booking.name}
+                                icon={<FileText size={14} />}
+                            />
+                            <InfoBlock
+                                label="Department"
+                                value={booking.department || "N/A"}
+                                icon={<Building2 size={14} />}
+                            />
+                            <InfoBlock
+                                label="Participants"
+                                value={booking.participants || "N/A"}
+                                icon={<Users size={14} />}
+                            />
+                            <InfoBlock
+                                label="No. of Participants"
+                                value={booking.number_of_participants || "N/A"}
+                                icon={<Users size={14} />}
+                            />
+                            <InfoBlock
+                                label="Event Date"
+                                value={
+                                    booking.event_start_date &&
+                                    booking.event_end_date
+                                        ? `${formatDate(
+                                              booking.event_start_date
+                                          )} to ${formatDate(
+                                              booking.event_end_date
+                                          )}`
+                                        : "N/A"
+                                }
+                                icon={<CalendarDays size={14} />}
+                            />
+                            <InfoBlock
+                                label="Event Time"
+                                value={
+                                    booking.event_start_time &&
+                                    booking.event_end_time
+                                        ? `${formatTime(
+                                              booking.event_start_time
+                                          )} - ${formatTime(
+                                              booking.event_end_time
+                                          )}`
+                                        : "N/A"
+                                }
+                                icon={<Clock size={14} />}
+                            />
+                        </div>
+
+                        <div className="space-y-3">
+                            <InfoBlock
+                                label="Description"
+                                value={booking.description || "N/A"}
+                            />
+                            <InfoBlock
+                                label="Requested Venue"
+                                value={
+                                    venues.length ? venues.join(", ") : "N/A"
+                                }
+                            />
+                            <InfoBlock
+                                label="Requested Services"
+                                value={
+                                    requestedServices.length
+                                        ? requestedServices.join(", ")
+                                        : "N/A"
+                                }
+                            />
+                            <div className="space-y-0.5">
+                                <div className="text-xs text-gray-500">
+                                    Proof of Approval
+                                </div>
+                                {booking.proof_of_approval ? (
+                                    <a
+                                        href={`/storage/${booking.proof_of_approval}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 underline font-semibold text-sm"
+                                    >
+                                        View File
+                                    </a>
+                                ) : (
+                                    <div className="text-sm font-medium text-gray-900">
+                                        N/A
+                                    </div>
+                                )}
+                            </div>
+                            <InfoBlock label="Status" value={booking.status} />
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
+                            <Button
+                                variant="outline"
+                                className="w-full sm:w-auto text-sm"
+                                onClick={() => setShowEdit(true)}
+                            >
+                                ✏️ Edit
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                className="w-full sm:w-auto text-sm"
+                                onClick={onClose}
+                            >
+                                ❌ Close
+                            </Button>
+                        </div>
                     </div>
-                    <div>
-                        <strong>Date Requested:</strong> {booking.date}
-                    </div>
-                    {isEditing ? (
-                        <form onSubmit={handleUpdate} className="space-y-2">
-                            <div>
-                                <label className="block mb-1 font-medium">
-                                    Requested Venue
-                                </label>
-                                <select
-                                    name="venue"
-                                    value={form.venue}
-                                    onChange={handleFormChange}
-                                    className="w-full border rounded-md px-3 py-2"
-                                    required
-                                >
-                                    <option value="">Select Venue</option>
-                                    {(venueNames.length
-                                        ? venueNames
-                                        : [
-                                              "Auditorium",
-                                              "Auditorium Lobby",
-                                              "College Library",
-                                              "Meeting Room",
-                                              "Training Room A",
-                                              "Computer Laboratory A",
-                                              "Computer Laboratory B",
-                                              "EFS Classroom(s) Room #:",
-                                              "LVCC Grounds",
-                                              "LVCC  Main Lobby",
-                                              "Elementary & High School Library",
-                                              "Basketball Court",
-                                          ]
-                                    ).map((venue) => (
-                                        <option key={venue} value={venue}>
-                                            {venue}
-                                        </option>
-                                    ))}
-                                </select>
-                                {formErrors.venue && (
-                                    <div className="text-red-500 text-sm">
-                                        {formErrors.venue}
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block mb-1 font-medium">
-                                    Event Name
-                                </label>
-                                <input
-                                    name="name"
-                                    value={form.name}
-                                    onChange={handleFormChange}
-                                    className="w-full border rounded-md px-3 py-2"
-                                    required
-                                />
-                                {formErrors.name && (
-                                    <div className="text-red-500 text-sm">
-                                        {formErrors.name}
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block mb-1 font-medium">
-                                    Event Date
-                                </label>
-                                <input
-                                    type="date"
-                                    name="event_date"
-                                    value={form.event_date}
-                                    onChange={handleFormChange}
-                                    className="w-full border rounded-md px-3 py-2"
-                                    required
-                                />
-                                {formErrors.event_date && (
-                                    <div className="text-red-500 text-sm">
-                                        {formErrors.event_date}
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block mb-1 font-medium">
-                                    Event Time
-                                </label>
-                                <input
-                                    type="time"
-                                    name="time"
-                                    value={form.time}
-                                    onChange={handleFormChange}
-                                    className="w-full border rounded-md px-3 py-2"
-                                    required
-                                />
-                                {formErrors.time && (
-                                    <div className="text-red-500 text-sm">
-                                        {formErrors.time}
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block mb-1 font-medium">
-                                    Status
-                                </label>
-                                <select
-                                    name="status"
-                                    value={form.status}
-                                    onChange={handleFormChange}
-                                    className="w-full border rounded-md px-3 py-2"
-                                    required
-                                >
-                                    {statusOptions.map((status) => (
-                                        <option key={status} value={status}>
-                                            {status}
-                                        </option>
-                                    ))}
-                                </select>
-                                {formErrors.status && (
-                                    <div className="text-red-500 text-sm">
-                                        {formErrors.status}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex justify-end mt-6 space-x-2">
-                                <Button
-                                    type="submit"
-                                    className="bg-blue-600 text-white"
-                                >
-                                    Save
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setIsEditing(false)}
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        </form>
-                    ) : (
-                        <>
-                            <div>
-                                <strong>Requested Venue:</strong>{" "}
-                                {booking.venue}
-                            </div>
-                            <div>
-                                <strong>Event Name:</strong> {booking.name}
-                            </div>
-                            <div>
-                                <strong>Event Date:</strong> {booking.eventDate}
-                            </div>
-                            <div>
-                                <strong>Event Time:</strong> {booking.time}
-                            </div>
-                            <div>
-                                <strong>Status:</strong> {booking.status}
-                            </div>
-                            <div className="flex justify-end mt-6 space-x-2">
-                                <Button
-                                    onClick={handleEdit}
-                                    className="text-white bg-secondary hover:bg-primary"
-                                >
-                                    Edit
-                                </Button>
-                                <Button onClick={onClose} variant="outline">
-                                    Close
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </DialogContent>
-        </Dialog>
+                </DialogContent>
+            </Dialog>
+
+            <EditBookingsModal
+                open={showEdit}
+                onClose={() => setShowEdit(false)}
+                booking={booking}
+                venueNames={venueNames}
+            />
+        </>
     );
 };
 

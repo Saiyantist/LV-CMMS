@@ -4,12 +4,12 @@ import type React from "react";
 import { useState } from "react";
 import { Upload, X, FileText, Check } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import Gallery from "./Gallery";
+import Gallery from "./Stepper/Gallery";
 // import DateTimeSelection from "./Date&Time";
-import EventDetails from "./EventDetails";
-import RequestedServices from "./RequestedServices";
-import ComplianceAndConsent from "./Compliance&Consent";
-import EventSummaryModal from "./EventSummaryModal";
+import EventDetails from "./Stepper/EventDetails";
+import RequestedServices from "./Stepper/RequestedServices";
+import ComplianceAndConsent from "./Stepper/Compliance&Consent";
+import EventSummaryModal from "./Stepper/EventSummaryModal";
 import { Head, usePage } from "@inertiajs/react";
 
 export default function EventServicesRequest() {

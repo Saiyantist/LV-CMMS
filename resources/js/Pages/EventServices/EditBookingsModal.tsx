@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Dialog,
     DialogTitle,
@@ -9,12 +9,6 @@ import { Button } from "@/Components/shadcnui/button";
 import { Input } from "@/Components/shadcnui/input";
 import { router } from "@inertiajs/react";
 
-interface Props {
-    open: boolean;
-    onClose: () => void;
-    venueNames: string[];
-}
-
 const serviceOptions = [
     "Sound System",
     "Projector",
@@ -24,30 +18,46 @@ const serviceOptions = [
     // Add more as needed
 ];
 
-const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
-    const [form, setForm] = useState<any>({
-        name: "",
-        venue: [],
-        department: "",
-        description: "",
-        participants: "",
-        number_of_participants: "",
-        event_start_date: "",
-        event_end_date: "",
-        event_start_time: "",
-        event_end_time: "",
-        requested_services: [],
-        proof_of_approval: null,
-    });
+const EditBookingsModal = ({
+    open,
+    onClose,
+    booking,
+    venueNames = [],
+}: {
+    open: boolean;
+    onClose: () => void;
+    booking: any;
+    venueNames?: string[];
+}) => {
+    const [form, setForm] = useState<any>({});
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [venueDropdownOpen, setVenueDropdownOpen] = useState(false);
     const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
 
-    // Refs for dropdowns
     const venueDropdownRef = useRef<HTMLDivElement>(null);
     const servicesDropdownRef = useRef<HTMLDivElement>(null);
 
-    // Close dropdowns when clicking outside
+    useEffect(() => {
+        if (booking) {
+            const venues = Array.isArray(booking?.venue)
+                ? booking?.venue
+                : booking?.venue
+                ? JSON.parse(booking.venue)
+                : [];
+            const requestedServices = Array.isArray(booking?.requested_services)
+                ? booking?.requested_services
+                : booking?.requested_services
+                ? JSON.parse(booking.requested_services)
+                : [];
+            setForm({
+                ...booking,
+                venue: venues,
+                requested_services: requestedServices,
+            });
+        }
+    }, [booking, open]);
+
+    // Dropdown close on outside click
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (
@@ -102,66 +112,30 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
         }
     };
 
-    const handleFormSubmit = (e: React.FormEvent) => {
+    const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
         setFormErrors({});
-        const data = new FormData();
-        Object.entries(form).forEach(([key, value]) => {
-            if (Array.isArray(value)) {
-                value.forEach((v, i) => {
-                    if (
-                        v !== undefined &&
-                        v !== null &&
-                        typeof v !== "object"
-                    ) {
-                        data.append(`${key}[${i}]`, v);
-                    }
-                });
-            } else if (
-                value !== null &&
-                value !== undefined &&
-                (typeof value === "string" || value instanceof Blob)
-            ) {
-                data.append(key, value);
-            }
-        });
-        router.post("/event-services", data, {
-            forceFormData: true,
+        router.put(`/event-services/${booking.id}`, form, {
             onError: (errors) => setFormErrors(errors),
-            onSuccess: () => {
-                setForm({
-                    name: "",
-                    venue: [],
-                    department: "",
-                    description: "",
-                    participants: "",
-                    number_of_participants: "",
-                    event_start_date: "",
-                    event_end_date: "",
-                    event_start_time: "",
-                    event_end_time: "",
-                    requested_services: [],
-                    proof_of_approval: null,
-                });
-                onClose();
-            },
+            onSuccess: () => onClose(),
         });
     };
+
+    if (!booking) return null;
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-lg w-full p-0">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold px-6 pt-6 pb-2 text-center">
-                        Create Booking
+                        Edit Booking
                     </DialogTitle>
                 </DialogHeader>
                 <form
-                    onSubmit={handleFormSubmit}
+                    onSubmit={handleSave}
                     className="space-y-4 px-6 pb-6 pt-2"
                     autoComplete="off"
                 >
-                    {/* Scrollable content */}
                     <div className="max-h-[60vh] overflow-y-auto pr-2">
                         {/* Proof of Approval at the top (not sticky) */}
                         <div className="flex flex-col">
@@ -181,7 +155,6 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                                 </span>
                             )}
                         </div>
-
                         {/* Requested Venue Dropdown */}
                         <div
                             className="flex flex-col relative w-full mt-5"
@@ -196,7 +169,7 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                                 className="border rounded-md px-3 py-2 text-sm text-left bg-white"
                                 onClick={() => setVenueDropdownOpen((v) => !v)}
                             >
-                                {form.venue.length
+                                {form.venue && form.venue.length
                                     ? form.venue.join(", ")
                                     : "Select venue(s)"}
                             </button>
@@ -228,7 +201,6 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                                 </span>
                             )}
                         </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
@@ -267,7 +239,6 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                                 )}
                             </div>
                         </div>
-
                         <div className="flex flex-col mt-5">
                             <label className="mb-1 font-medium text-sm">
                                 Description
@@ -276,7 +247,7 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                                 name="description"
                                 value={form.description}
                                 onChange={handleFormChange}
-                                className="text-sm h-32" // Increased height here
+                                className="text-sm h-32"
                                 placeholder="Enter purpose"
                             />
                             {formErrors.description && (
@@ -285,7 +256,6 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                                 </span>
                             )}
                         </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
@@ -314,16 +284,7 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                                     min={1}
                                     max={9999}
                                     value={form.number_of_participants}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (
-                                            value === "" ||
-                                            (/^\d{1,4}$/.test(value) &&
-                                                parseInt(value) <= 9999)
-                                        ) {
-                                            handleFormChange(e);
-                                        }
-                                    }}
+                                    onChange={handleFormChange}
                                     className="text-sm"
                                     placeholder="1-9999"
                                 />
@@ -334,7 +295,6 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                                 )}
                             </div>
                         </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
@@ -375,7 +335,6 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                                 )}
                             </div>
                         </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
@@ -416,59 +375,56 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                                 )}
                             </div>
                         </div>
-
-                        <div className="flex flex-col gap-4 w-full mt-5">
-                            {/* Requested Services Dropdown */}
-                            <div
-                                className="flex flex-col relative w-full"
-                                ref={servicesDropdownRef}
+                        {/* Requested Services Dropdown */}
+                        <div
+                            className="flex flex-col relative w-full mt-5"
+                            ref={servicesDropdownRef}
+                        >
+                            <label className="mb-1 font-medium text-sm">
+                                Requested Services
+                            </label>
+                            <button
+                                type="button"
+                                className="border rounded-md px-3 py-2 text-sm text-left bg-white"
+                                onClick={() =>
+                                    setServicesDropdownOpen((v) => !v)
+                                }
                             >
-                                <label className="mb-1 font-medium text-sm">
-                                    Requested Services
-                                </label>
-                                <button
-                                    type="button"
-                                    className="border rounded-md px-3 py-2 text-sm text-left bg-white"
-                                    onClick={() =>
-                                        setServicesDropdownOpen((v) => !v)
-                                    }
-                                >
-                                    {form.requested_services.length
-                                        ? form.requested_services.join(", ")
-                                        : "Select service(s)"}
-                                </button>
-                                {servicesDropdownOpen && (
-                                    <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
-                                        {serviceOptions.map((service) => (
-                                            <label
-                                                key={service}
-                                                className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={form.requested_services.includes(
+                                {form.requested_services &&
+                                form.requested_services.length
+                                    ? form.requested_services.join(", ")
+                                    : "Select service(s)"}
+                            </button>
+                            {servicesDropdownOpen && (
+                                <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
+                                    {serviceOptions.map((service) => (
+                                        <label
+                                            key={service}
+                                            className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={form.requested_services.includes(
+                                                    service
+                                                )}
+                                                onChange={() =>
+                                                    handleServiceCheckbox(
                                                         service
-                                                    )}
-                                                    onChange={() =>
-                                                        handleServiceCheckbox(
-                                                            service
-                                                        )
-                                                    }
-                                                    className="mr-2"
-                                                />
-                                                {service}
-                                            </label>
-                                        ))}
-                                    </div>
-                                )}
-                                {formErrors.requested_services && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {formErrors.requested_services}
-                                    </span>
-                                )}
-                            </div>
+                                                    )
+                                                }
+                                                className="mr-2"
+                                            />
+                                            {service}
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                            {formErrors.requested_services && (
+                                <span className="text-red-500 text-xs mt-1">
+                                    {formErrors.requested_services}
+                                </span>
+                            )}
                         </div>
-                        
                     </div>
                     <div className="flex justify-end gap-2 mt-6">
                         <Button
@@ -483,7 +439,7 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
                             type="submit"
                             className="bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
                         >
-                            Submit
+                            Save
                         </Button>
                     </div>
                 </form>
@@ -492,4 +448,4 @@ const CreateBookingModal: React.FC<Props> = ({ open, onClose, venueNames }) => {
     );
 };
 
-export default CreateBookingModal;
+export default EditBookingsModal;

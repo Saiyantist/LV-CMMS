@@ -15,10 +15,10 @@ class EventServicesController extends Controller
     // Map events for calendar view
     $calendarEvents = [];
     foreach ($events as $event) {
-        $day = date('j', strtotime($event->event_date)); // day of month (1-31)
+        $day = date('j', strtotime($event->event_start_date)); // day of month (1-31)
         $calendarEvents[$day][] = [
             'title' => $event->event_name,
-            'time' => date('H:i', strtotime($event->event_date)),
+            'time' => date('H:i', strtotime($event->event_start_date)),
             'status' => $event->status,
         ];
     }
@@ -29,8 +29,8 @@ class EventServicesController extends Controller
             'id' => $event->id,
             'date' => $event->created_at->format('Y-m-d'),
             'venue' => $event->location,
-            'eventDate' => $event->event_date,
-            'time' => date('H:i', strtotime($event->event_date)),
+            'eventDate' => $event->event_start_date,
+            'time' => $event->event_start_time,
             'name' => $event->event_name,
             'status' => $event->status,
         ];
@@ -53,17 +53,25 @@ public function MyBookings()
         $myEvents = EventService::where('user_id', $user->id)->get();
     }
 
-    $bookings = $myEvents->map(function ($event) {
-        return [
-            'id' => $event->id,
-            'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
-            'venue' => $event->venue,
-            'eventDate' => $event->event_date,
-            'time' => $event->time,
-            'name' => $event->name,
-            'status' => $event->status,
-        ];
-    });
+$bookings = $myEvents->map(function ($event) {
+    return [
+        'id' => $event->id,
+        'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
+        'venue' => $event->venue,
+        'name' => $event->name,
+        'department' => $event->department,
+        'description' => $event->description,
+        'participants' => $event->participants,
+        'number_of_participants' => $event->number_of_participants,
+        'event_start_date' => $event->event_start_date,
+        'event_end_date' => $event->event_end_date,
+        'event_start_time' => $event->event_start_time,
+        'event_end_time' => $event->event_end_time,
+        'requested_services' => $event->requested_services,
+        'proof_of_approval' => $event->proof_of_approval,
+        'status' => $event->status,
+    ];
+});
 
     return Inertia::render('EventServices/MyBookings', [
         'bookings' => $bookings
@@ -96,19 +104,33 @@ public function MyBookings()
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',           // Event Name
-            'venue' => 'required|string|max:255',          // Requested Venue
-            'event_date' => 'required|date',               // Event Date
-            'time' => 'required',                          // Event Time
+            'name' => 'required|string|max:255',
+            'venue' => 'nullable|array',
+            'venue.*' => 'string|max:255',
+            'department' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'participants' => 'nullable|string|max:255',
+            'number_of_participants' => 'nullable|integer|min:1|max:9999',
+            'event_start_date' => 'required|date',
+            'event_end_date' => 'required|date|after_or_equal:event_start_date',
+            'event_start_time' => 'required',
+            'event_end_time' => 'required',
+            'requested_services' => 'nullable|array',
+            'requested_services.*' => 'string|max:255',
+            'proof_of_approval' => 'nullable|file|mimes:jpg,png,pdf|max:10240', // 10MB
         ]);
 
-        $event = EventService::create([
+        if ($request->hasFile('proof_of_approval')) {
+            $validated['proof_of_approval'] = $request->file('proof_of_approval')->store('proofs', 'public');
+        }
+
+        $validated['venue'] = json_encode($validated['venue'] ?? []);
+        $validated['requested_services'] = json_encode($validated['requested_services'] ?? []);
+
+        EventService::create([
+            ...$validated,
             'user_id' => Auth::id(),
-            'name' => $validated['name'],
-            'venue' => $validated['venue'],
-            'event_date' => $validated['event_date'],
-            'time' => $validated['time'],
-            'status' => 'Pending',                         // Always "Pending" when created
+            'status' => 'Pending',
         ]);
 
         return redirect()->route('event-services.my-bookings')->with('success', 'Event booked!');
@@ -117,22 +139,36 @@ public function MyBookings()
 public function update(Request $request, $id)
 {
     $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'venue' => 'required|string|max:255',
-        'event_date' => 'required|date',
-        'time' => 'required',
-        'status' => 'required|string|max:255',
+        'name' => 'nullable|string|max:255',
+        'venue' => 'nullable|array',
+        'venue.*' => 'string|max:255',
+        'department' => 'nullable|string|max:255',
+        'description' => 'nullable|string|max:1000',
+        'participants' => 'nullable|string|max:255',
+        'number_of_participants' => 'nullable|integer|min:1|max:9999',
+        'event_start_date' => 'nullable|date',
+        'event_end_date' => 'nullable|date|after_or_equal:event_start_date',
+        'event_start_time' => 'nullable',
+        'event_end_time' => 'nullable',
+        'requested_services' => 'nullable|array',
+        'requested_services.*' => 'string|max:255',
+        'proof_of_approval' => 'nullable|file|mimes:jpg,png,pdf|max:10240',
+        'status' => 'nullable|string|max:255',
     ]);
 
+    if ($request->hasFile('proof_of_approval')) {
+        $validated['proof_of_approval'] = $request->file('proof_of_approval')->store('proofs', 'public');
+    }
+
+    if (isset($validated['venue'])) {
+        $validated['venue'] = json_encode($validated['venue']);
+    }
+    if (isset($validated['requested_services'])) {
+        $validated['requested_services'] = json_encode($validated['requested_services']);
+    }
+
     $event = EventService::findOrFail($id);
-    $event->update([
-        'name' => $validated['name'],
-        'venue' => $validated['venue'],
-        'event_date' => $validated['event_date'],
-        'time' => $validated['time'],
-        'status' => $validated['status'],
-        'created_at' => now(), // Date Requested is updated to now
-    ]);
+    $event->update($validated);
 
     return redirect()->route('event-services.my-bookings')->with('success', 'Booking updated!');
 }
