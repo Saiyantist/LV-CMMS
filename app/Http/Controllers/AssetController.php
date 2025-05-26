@@ -27,8 +27,6 @@ class AssetController extends Controller
      */
     public function store(Request $request)
     {
-        // WILL CHANGE INTO A FORM REQUEST VALIDATION CLASS
-
         // Initial pa lang, there's no validation for preventive maintenance yet bc 'di pa plantsa 'yon.
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
