@@ -349,7 +349,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             <div className="hidden md:flex fixed min-h-screen max-h-screen bg-primary w-56 flex-col">
                 <div className="flex items-center justify-center mt-4 py-4">
                     <img
-                        src="/images/Lvlogo.jpg"
+                        src="/images/lvlogo.jpg"
                         alt="Logo"
                         className="h-16 w-auto object-contain rounded-full"
                     />
