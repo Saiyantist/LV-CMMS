@@ -32,6 +32,13 @@ interface Asset {
     };
 }
 
+interface MaintenancePersonnel {
+    id: number;
+    first_name: string;
+    last_name: string;
+    roles: { id: number; name: string };
+}[];
+
 interface Location {
     id: number;
     name: string;
@@ -42,7 +49,7 @@ const AssetManagement: React.FC = () => {
 
     const assets = props.assets as Asset[]; // Gotten from the controller
     const locations = props.locations as Location[]; // Gotten from the controller
-
+    const maintenancePersonnel = props.maintenancePersonnel as MaintenancePersonnel[]; // Gotten from the controller
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [isCreating, setIsCreating] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(
@@ -306,6 +313,7 @@ const AssetManagement: React.FC = () => {
             {isCreating && (
                 <CreateAssetModal
                     locations={locations}
+                    maintenancePersonnel={maintenancePersonnel}
                     isOpen={isCreating}
                     onClose={() => setIsCreating(false)}
                     onSave={() => setIsCreating(false)}

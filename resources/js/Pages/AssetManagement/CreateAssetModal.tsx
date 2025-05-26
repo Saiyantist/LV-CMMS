@@ -2,16 +2,18 @@ import React, { useState } from "react";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { toast } from "sonner"; // Importing toast
 import { router } from "@inertiajs/react";
+import { Label } from "@/Components/shadcnui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
 
 interface AddAssetModalProps {
     locations: Location[];
+    maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: {id: number; name: string;}}[];
     isOpen: boolean;
     onClose: () => void;
     onSave: (asset: {
         name: string;
         specification_details: string;
         location_id: string;
-        status: string;
         date_acquired: string;
         last_maintained_at?: string; // Optional
         image?: File | null; // Optional
@@ -30,6 +32,7 @@ interface Location {
 
 export default function AddAssetModal({
     locations,
+    maintenancePersonnel,
     isOpen,
     onClose,
     onSave,
@@ -37,9 +40,8 @@ export default function AddAssetModal({
     const [name, setName] = useState("");
     const [specificationDetails, setSpecificationDetails] = useState("");
     const [location, setLocation] = useState("");
-    const [status, setStatus] = useState("");
     const [dateAcquired, setDateAcquired] = useState("");
-    const [lastMaintenance, setLastMaintenance] = useState("");
+    // const [lastMaintenance, setLastMaintenance] = useState("");
     const [image, setImage] = useState<File | null>(null);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -48,7 +50,7 @@ export default function AddAssetModal({
     const [isPreventiveMaintenance, setIsPreventiveMaintenance] =
         useState(false);
     const [description, setDescription] = useState("");
-    const [assignTo, setAssignTo] = useState("");
+    const [assignedTo, setAssignedTo] = useState<{ id: number; name: string } | null>(null);
     const [schedule, setSchedule] = useState("");
     const [dailyFrequency, setDailyFrequency] = useState(1); // Default to 1
     // const [weeklyDays, setWeeklyDays] = useState<string[]>([]); // State for selected weekly days
@@ -74,32 +76,48 @@ export default function AddAssetModal({
         try {
             // Trigger success toast first
             toast.success("Saving asset...");
-
+            
             // Prepare the form data
             const formData = new FormData();
             formData.append("name", name);
             formData.append("specification_details", specificationDetails);
             formData.append("location_id", location);
-            formData.append("status", status);
+            formData.append("status", "Functional");
             formData.append("date_acquired", dateAcquired);
-            if (lastMaintenance) {
-                formData.append("last_maintained_at", lastMaintenance);
-            }
+            // if (lastMaintenance) {
+            //     formData.append("last_maintained_at", lastMaintenance);
+            // }
             if (image) {
                 formData.append("image", image);
             }
             if (isPreventiveMaintenance) {
                 formData.append("has_preventive_maintenance", "1");
-                formData.append(
-                    "preventiveMaintenance",
-                    JSON.stringify({
-                        description,
-                        assignTo,
-                        schedule,
-                    })
-                );
+                formData.append("description", description);
+                formData.append("assigned_to", assignedTo?.id.toString() || "");
+                formData.append("schedule", schedule);
+                switch (schedule) {
+                    case "Weekly":
+                        formData.append("weeklyFrequency", weeklyFrequency.toString());
+                        break;
+            
+                    case "Monthly":
+                        formData.append("monthlyFrequency", monthlyFrequency.toString());
+                        formData.append("monthlyDay", monthlyDay); // e.g., "Tuesday"
+                        break;
+            
+                    case "Yearly":
+                        formData.append("yearlyMonth", yearlyMonth); // e.g., "March"
+                        formData.append("yearlyDay", yearlyDay.toString()); // e.g., "15"
+                        break;
+                }
             }
-
+            
+            // For Debugging
+            // console.log("=== Form Data ===:");
+            // for (const [key, value] of formData.entries()) {
+            //     console.log(`${key}:`, value);
+            // }
+            // return;
             // Use Inertia's post method to send the data
             router.post("/assets", formData, {
                 onSuccess: () => {
@@ -188,29 +206,6 @@ export default function AddAssetModal({
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
-                                Condition{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-                                required
-                            >
-                                <option value="">Select Condition</option>
-                                <option value="Functional">Functional</option>
-                                <option value="Failed">Failed</option>
-                                <option value="Under Maintenance">
-                                    Under Maintenance
-                                </option>
-                                <option value="End of Useful Life">
-                                    End of Useful Life
-                                </option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">
                                 Date Acquired{" "}
                                 <span className="text-red-500">*</span>
                             </label>
@@ -261,7 +256,7 @@ export default function AddAssetModal({
                             <span
                                 className={`w-11 h-6 bg-gray-200 rounded-full inline-flex items-center p-1 transition-colors duration-200 ease-in-out ${
                                     isPreventiveMaintenance
-                                        ? "bg-green-500"
+                                        ? "bg-secondary"
                                         : ""
                                 }`}
                             >
@@ -306,23 +301,37 @@ export default function AddAssetModal({
                                 />
                             </div>
 
+                            {/* Assign to */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Assign To{" "}
-                                    <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    value={assignTo}
-                                    onChange={(e) =>
-                                        setAssignTo(e.target.value)
-                                    }
-                                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-                                    required
+                                <Label htmlFor="assigned_to" className="flex items-center">
+                                    Assign to <span className="text-red-500 ml-1">*</span>
+                                </Label>
+                                <Select
+                                    value={assignedTo?.id.toString() || ""}
+                                    onValueChange={(value) => {
+                                        const person = maintenancePersonnel.find(p => p.id.toString() === value);
+                                        if (person) {
+                                            setAssignedTo({ 
+                                                id: person.id, 
+                                                name: `${person.first_name} ${person.last_name}` 
+                                            });
+                                        }
+                                    }}
                                 >
-                                    <option value="">Select Person</option>
-                                    <option value="Person 1">Person 1</option>
-                                    <option value="Person 2">Person 2</option>
-                                </select>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select Personnel" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {maintenancePersonnel.map((person) => (
+                                            <SelectItem key={person.id} value={person.id.toString()}>
+                                                {person.first_name} {person.last_name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            {/* {localErrors.assigned_to && (
+                                <p className="text-red-500 text-xs">{localErrors.assigned_to}</p>
+                            )} */}
                             </div>
 
                             <div>
@@ -379,7 +388,7 @@ export default function AddAssetModal({
                                             <input
                                                 type="number"
                                                 min="1"
-                                                max="99"
+                                                max="3"
                                                 className="w-20 px-2 py-1 border rounded-md"
                                                 value={
                                                     weeklyFrequency === 0
