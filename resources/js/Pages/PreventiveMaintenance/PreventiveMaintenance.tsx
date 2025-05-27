@@ -16,7 +16,6 @@ interface Asset {
 }
 
 const PreventiveMaintenance: React.FC = () => {
-    // Get assets from Inertia props (provided by backend/controller)
     const { props } = usePage();
     const assets = (props.assets as Asset[]) || [];
 

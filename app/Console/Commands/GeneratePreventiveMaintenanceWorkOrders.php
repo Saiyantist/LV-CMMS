@@ -33,26 +33,40 @@ class GeneratePreventiveMaintenanceWorkOrders extends Command
     
         foreach ($schedules as $schedule) {
             $asset = $schedule->asset;
+            $nextDueDate = $this->getNextDueDate($schedule);
+            // $alreadyScheduled = WorkOrder::where('maintenance_schedule_id', $schedule->id)
+            //     ->whereDate('scheduled_at', $nextDueDate->toDateString())
+            //     ->exists();
 
+            $this->info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
             $this->info("Checking schedule ID: {$schedule->id} for asset #{$asset->id}");
-            $this->info("Is the asset Functional? " . ($asset->status === 'Functional' ? 'yes' : 'no'));
-            $this->info("Is due today? " . ($this->isDueToday($schedule, $now) ? 'yes' : 'no'));
-            $this->info("Already run today? " . ($schedule->last_run_at?->isSameDay($now) ? 'yes' : 'no'));
-            $this->info("--------------------------------");
-    
+            $this->info("Next Due Date:" . ($nextDueDate));
+            // $this->info("Already Scheduled: " . ($alreadyScheduled ? 'yes, break.' : 'no'));
+            $this->info("Is the asset Functional? " . ($asset->status === 'Functional' ? 'yes' : 'no, break.'));
+            $this->info("Already run today? " . ($schedule->last_run_at?->isSameDay($now) ? 'yes, break.' : 'no'));
+            $this->info("Is due in 3 days? " . ($nextDueDate->isAfter(now()->addDays(3)) || $nextDueDate->isBefore(now()) ? 'no, break.' : 'yes'));
+            
             if (!$asset || $asset->status !== 'Functional') {
                 continue; // Skip broken/invalid assets
             }
-    
-            if (!$this->isDueToday($schedule, $now)) {
-                continue; // Skip if not due today
+            
+            if (!$nextDueDate || ($nextDueDate->isAfter(now()->addDays(3)) || $nextDueDate->isBefore(now()) ) ) {
+                continue; // Skip, it's not close enough yet
             }
-    
+            
+            // if ($alreadyScheduled) {
+            //     // $this->info("Already scheduled");
+            //     continue; // Don't create duplicates
+            // }
+            
             // Check if already generated today
             if ($schedule->last_run_at && $schedule->last_run_at->isSameDay($now)) {
-                continue;
+                // $this->info("Already run today? " . ($schedule->last_run_at?->isSameDay($now) ? 'yes' : 'no'));
+                continue; // Avoid duplicates
             }
-    
+            
+            $this->info("--------------------------------");
+            // dd("Will create work order");
             // Create the work order
             WorkOrder::create([
                 'asset_id' => $asset->id,
@@ -60,47 +74,61 @@ class GeneratePreventiveMaintenanceWorkOrders extends Command
                 'work_order_type' => 'Preventive Maintenance',
                 'report_description' => 'Scheduled Preventive Maintenance', // Might change this...
                 'status' => 'Pending',
+                'priority' => 'High',
                 'requested_by' => 1, // set to super admin user
                 'requested_at' => $now,
-                'scheduled_at' => $now,
+                'scheduled_at' => $nextDueDate,
                 'maintenance_schedule_id' => $schedule->id,
             ]);
-    
+            
             // Update last run
             $schedule->update(['last_run_at' => $now]);
-    
+            
             $this->info("Created PM work order for asset #{$asset->id}");
+            $this->info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         }
     
         return Command::SUCCESS;
         
     }
 
-    protected function isDueToday(MaintenanceSchedule $schedule, Carbon $now): bool
+    protected function getNextDueDate(MaintenanceSchedule $schedule): ?Carbon
     {
+
+        $lastRun = $schedule->last_run_at ?? $schedule->asset->date_acquired;
+        $next = null;
+
         switch ($schedule->interval_unit) {
             case 'weeks':
-                if (!$schedule->last_run_at) return true;
-
-                $weeksSince = $schedule->last_run_at->diffInWeeks($now);
-                return $weeksSince >= $schedule->interval_value;
+                $next = Carbon::parse($lastRun)->addWeeks($schedule->interval_value);
+                break;
 
             case 'monthly':
-                $currentWeek = ceil($now->day / 7);
-                $currentDay = strtolower($now->format('l'));
+                $next = now()->copy()->startOfMonth();
+                $week = $schedule->month_week;
+                $day = ucfirst($schedule->month_weekday);
+                $matches = 0;
 
-                return $schedule->month_week == $currentWeek
-                    && $schedule->month_weekday === $currentDay;
+                while ($next->month === now()->month) {
+                    if ($next->englishDayOfWeek === $day) {
+                        $matches++;
+                        if ($matches === $week) {
+                            break;
+                        }
+                    }
+                    $next->addDay();
+                }
+                break;
 
             case 'yearly':
-                $currentDay = $now->day;
-                $currentMonth = strtolower($now->format('F'));
-
-                return $schedule->year_day == $currentDay
-                    && $schedule->year_month == $currentMonth;
-
-            default:
-                return false;
+                $next = now()->copy()->setMonth(Carbon::parse($schedule->year_month)->month)
+                            ->setDay($schedule->year_day);
+                if ($next->isPast()) {
+                    $next->addYear();
+                }
+                break;
         }
+
+        return $next;
     }
 }

@@ -11,6 +11,7 @@ import { Datatable } from "../WorkOrders/components/Datatable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Asset {
     id: number;
@@ -32,6 +33,32 @@ interface Asset {
     };
 }
 
+interface PreventiveMaintenanceWorkOrder {
+    id: number;
+    report_description: string;
+    location_id: number;
+    work_order_type: string;
+    label: string;
+    priority: string;
+    requested_by: number;
+    requested_at: string;
+    assigned_to: number;
+    scheduled_at: string;
+    asset_id: number;
+    maintenance_schedule: {
+        id: number;
+        asset_id: number;
+        interval_unit: string;
+        interval_value: number | null;
+        month_week: number | null;
+        month_weekday: string | null;
+        year_day: number | null;
+        year_month: number | null;
+        last_run_at: string;
+        is_active: boolean;
+    };
+}
+
 interface MaintenancePersonnel {
     id: number;
     first_name: string;
@@ -47,9 +74,10 @@ interface Location {
 const AssetManagement: React.FC = () => {
     const { props } = usePage();
 
-    const assets = props.assets as Asset[]; // Gotten from the controller
-    const locations = props.locations as Location[]; // Gotten from the controller
-    const maintenancePersonnel = props.maintenancePersonnel as MaintenancePersonnel[]; // Gotten from the controller
+    const assets = props.assets as Asset[];
+    const locations = props.locations as Location[];
+    const maintenancePersonnel = props.maintenancePersonnel as MaintenancePersonnel[];
+    const preventiveMaintenanceWorkOrders = props.preventiveMaintenanceWorkOrders as PreventiveMaintenanceWorkOrder[];
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [isCreating, setIsCreating] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(
@@ -99,6 +127,7 @@ const AssetManagement: React.FC = () => {
             accessorKey: "name",
             header: "Asset Name",
             cell: ({ row }) => <div>{row.getValue("name")}</div>,
+            enableSorting: false,
             meta: {
                 headerClassName: "w-[15%]",
                 searchable: true,
@@ -117,6 +146,7 @@ const AssetManagement: React.FC = () => {
                     </div>
                 );
             },
+            enableSorting: false,
             meta: {
                 headerClassName: "w-[20%]",
                 searchable: true,
@@ -127,6 +157,7 @@ const AssetManagement: React.FC = () => {
             accessorKey: "location.name",
             header: "Location",
             cell: ({ row }) => <div>{row.original.location.name}</div>,
+            enableSorting: false,
             meta: {
                 headerClassName: "w-[15%]",
                 searchable: true,
@@ -230,9 +261,9 @@ const AssetManagement: React.FC = () => {
             </div>
 
             {/* Main content below header */}
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 mx-auto">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 mx-auto ">
                 {/* Desktop Table View */}
-                <div className="hidden md:block w-full overflow-x-auto rounded-md">
+                <div className="hidden md:block w-full overflow-x-auto rounded-md -mt-[6.5rem]">
                     <Datatable
                         columns={columns}
                         data={assets}
@@ -323,6 +354,8 @@ const AssetManagement: React.FC = () => {
             {viewingAsset && (
                 <ViewAssetModal
                     data={viewingAsset}
+                    maintenancePersonnel={maintenancePersonnel}
+                    preventiveMaintenanceWorkOrders={preventiveMaintenanceWorkOrders}
                     onClose={() => setViewingAsset(null)}
                 />
             )}

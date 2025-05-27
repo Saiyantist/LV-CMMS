@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\Location;
 use App\Models\User;
+use App\Models\WorkOrder;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -16,11 +17,13 @@ class AssetController extends Controller
     public function index()
     {
         $assets = Asset::with(['location:id,name', 'maintenanceHistories'])->get();
+        $workOrders = WorkOrder::whereNotNull('maintenance_schedule_id')->with('maintenanceSchedule')->get();
 
         return Inertia::render('AssetManagement/AssetManagement', [
             'assets' => $assets,
             'locations' => Location::all(),
             'maintenancePersonnel' => User::role('maintenance_personnel')->with('roles')->get(),
+            'preventiveMaintenanceWorkOrders' => $workOrders,
         ]);
     }
 
@@ -30,7 +33,7 @@ class AssetController extends Controller
     public function store(Request $request)
     {
 
-        $validatedData = $request->validate([
+        $validatedAssetData = $request->validate([
             'name' => 'required|string|max:255',
             'specification_details' => 'required|string',
             'location_id' => 'required|exists:locations,id',
@@ -50,7 +53,9 @@ class AssetController extends Controller
             'yearlyDay' => 'required_if:schedule,Yearly',
         ]);
 
-        $validatedPreventiveMaintenance['schedule'] === "Weekly" ? $validatedPreventiveMaintenance['schedule'] = "weeks" : $validatedPreventiveMaintenance['schedule'];
+        $validatedPreventiveMaintenance['schedule'] === "Weekly" 
+            ? $validatedPreventiveMaintenance['schedule'] = "weeks"
+            : $validatedPreventiveMaintenance['schedule'];
         
         /** 
          * Preventive Maintenance 
@@ -60,7 +65,7 @@ class AssetController extends Controller
         if ($request->has('has_preventive_maintenance')) {
 
             // 1. Create the asset first
-            $asset = Asset::create($validatedData);
+            $asset = Asset::create($validatedAssetData);
             
             $unit = strtolower($validatedPreventiveMaintenance['schedule']); // 'Weeks' -> 'weeks'
             
@@ -104,13 +109,28 @@ class AssetController extends Controller
                     break;
                 }
                         
-            $asset->maintenanceSchedule()->create($scheduleData);
+            $maintenanceSchedule = $asset->maintenanceSchedule()->create($scheduleData);
+
+            $now = now();
+
+            WorkOrder::create([
+                'asset_id' => $validatedAssetData['id'],
+                'location_id' => $validatedAssetData['location_id'],
+                'work_order_type' => 'Preventive Maintenance',
+                'report_description' => $validatedPreventiveMaintenance['description'] ?? 'Auto-generated PM from schedule',
+                'status' => 'Pending',
+                'requested_by' => 1, // or set to system admin
+                'requested_at' => $now,
+                'scheduled_at' => $now,
+                'maintenance_schedule_id' => $maintenanceSchedule->id,
+            ]);
+
             return redirect()->back()->with('success', 'Asset created successfully.');
         }
 
         else {
             // Create a new asset normally using the validate data
-            Asset::create($validatedData);
+            Asset::create($validatedAssetData);
             return redirect()->back()->with('success', 'Asset created successfully.');
         }
         return redirect()->back()->with('error', 'Something went wrong while creating asset :/');
