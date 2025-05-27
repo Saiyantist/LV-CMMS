@@ -4,13 +4,60 @@ import type React from "react";
 import { useState } from "react";
 import { Upload, X, FileText, Check } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import Gallery from "./Stepper/Gallery";
-// import DateTimeSelection from "./Date&Time";
+import Gallery, { galleryItems } from "./Stepper/Gallery"; // <-- Add this import
 import EventDetails from "./Stepper/EventDetails";
 import RequestedServices from "./Stepper/RequestedServices";
 import ComplianceAndConsent from "./Stepper/Compliance&Consent";
 import EventSummaryModal from "./Stepper/EventSummaryModal";
-import { Head, usePage } from "@inertiajs/react";
+import { Head, usePage, router } from "@inertiajs/react";
+
+function parseDateRange(dateRange: string): { start: string; end: string } {
+    // Example: "May 27 - May 28, 2025"
+    // Should return { start: "2025-05-27", end: "2025-05-28" }
+    if (!dateRange) return { start: "", end: "" };
+    const match = dateRange.match(
+        /^([A-Za-z]+) (\d{1,2}) - ([A-Za-z]+) (\d{1,2}), (\d{4})$/
+    );
+    if (!match) return { start: "", end: "" };
+    const months = {
+        January: "01",
+        February: "02",
+        March: "03",
+        April: "04",
+        May: "05",
+        June: "06",
+        July: "07",
+        August: "08",
+        September: "09",
+        October: "10",
+        November: "11",
+        December: "12",
+    } as Record<string, string>;
+    const [, startMonth, startDay, endMonth, endDay, year] = match;
+    const start = `${year}-${months[startMonth]}-${startDay.padStart(2, "0")}`;
+    const end = `${year}-${months[endMonth]}-${endDay.padStart(2, "0")}`;
+    return { start, end };
+}
+
+function parseTimeRange(timeRange: string): { start: string; end: string } {
+    // Example: "08:00 AM - 10:00 AM"
+    // Should return { start: "08:00", end: "10:00" }
+    if (!timeRange) return { start: "", end: "" };
+    const match = timeRange.match(
+        /^(\d{2}:\d{2} [AP]M) - (\d{2}:\d{2} [AP]M)$/
+    );
+    if (!match) return { start: "", end: "" };
+    const [start, end] = [match[1], match[2]].map((t) => {
+        let [time, meridian] = t.split(" ");
+        let [hour, minute] = time.split(":").map(Number);
+        if (meridian === "PM" && hour !== 12) hour += 12;
+        if (meridian === "AM" && hour === 12) hour = 0;
+        return `${hour.toString().padStart(2, "0")}:${minute
+            .toString()
+            .padStart(2, "0")}`;
+    });
+    return { start, end };
+}
 
 export default function EventServicesRequest() {
     // Step state
@@ -140,6 +187,75 @@ export default function EventServicesRequest() {
         if (currentStep > 1) setCurrentStep(currentStep - 1);
     };
 
+    const handleBookingSubmit = () => {
+        setError(null);
+        if (
+            !dataPrivacyAgreed ||
+            !equipmentPolicyAgreed ||
+            consentChoice !== "agree"
+        ) {
+            setError("You must agree to all terms and consent to proceed.");
+            return;
+        }
+
+        // Parse date and time
+        const { start: event_start_date, end: event_end_date } =
+            parseDateRange(dateRange);
+        const { start: event_start_time, end: event_end_time } =
+            parseTimeRange(timeRange);
+
+        // Map selected venue IDs to names
+        const selectedVenueNames =
+            selectedGalleryItem && selectedGalleryItem.length > 0
+                ? galleryItems
+                      .filter((item) => selectedGalleryItem.includes(item.id))
+                      .map((item) => item.title)
+                : [];
+
+        // Flatten requested services
+        const requestedServicesFlat = Object.values(requestedServices).flat();
+
+        // Build FormData
+        const formData = new FormData();
+        if (file) formData.append("proof_of_approval", file);
+
+        // Venue (array of names)
+        selectedVenueNames.forEach((venue, i) => {
+            formData.append(`venue[${i}]`, venue);
+        });
+
+        // Event Details
+        formData.append("name", eventDetails.eventName);
+        formData.append("department", eventDetails.department.join(", ")); // or just eventDetails.department[0]
+        formData.append("description", eventDetails.eventPurpose);
+        formData.append("participants", eventDetails.participants);
+        formData.append(
+            "number_of_participants",
+            eventDetails.participantCount
+        );
+
+        // Date & Time (now in correct format)
+        formData.append("event_start_date", event_start_date);
+        formData.append("event_end_date", event_end_date);
+        formData.append("event_start_time", event_start_time);
+        formData.append("event_end_time", event_end_time);
+
+        // Requested Services (flat array)
+        requestedServicesFlat.forEach((service, i) => {
+            formData.append(`requested_services[${i}]`, service);
+        });
+
+        router.post("/event-services", formData, {
+            forceFormData: true,
+            onError: (errors) =>
+                setError("Submission failed. Please check your inputs."),
+            onSuccess: () => {
+                setShowConsentModal(false);
+                setShowSuccess(true);
+            },
+        });
+    };
+
     // Get user from Inertia page props
     const user = usePage().props.auth.user;
 
@@ -152,6 +268,17 @@ export default function EventServicesRequest() {
     const userType = roleNames.has("external_requester")
         ? "external_requester"
         : "internal_requester";
+
+    // Map selected IDs to names
+    const selectedVenueNames =
+        selectedGalleryItem && selectedGalleryItem.length > 0
+            ? galleryItems
+                  .filter((item) => selectedGalleryItem.includes(item.id))
+                  .map((item) => item.title)
+            : [];
+
+    // Flatten requested services for easier display
+    const requestedServicesFlat = Object.values(requestedServices).flat();
 
     return (
         <AuthenticatedLayout>
@@ -364,20 +491,7 @@ export default function EventServicesRequest() {
                             setConsentChoice(e.target.value)
                         }
                         onClose={() => setShowConsentModal(false)}
-                        onSubmit={() => {
-                            if (
-                                !dataPrivacyAgreed ||
-                                !equipmentPolicyAgreed ||
-                                consentChoice !== "agree"
-                            ) {
-                                setError(
-                                    "You must agree to all terms and consent to proceed."
-                                );
-                                return;
-                            }
-                            setShowConsentModal(false);
-                            setShowSuccess(true); // or your actual submit logic
-                        }}
+                        onSubmit={handleBookingSubmit}
                         isModal
                     />
                 )}
