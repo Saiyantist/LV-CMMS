@@ -3,9 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-class MaintenanceSchedule extends Model
+
+class PreventiveMaintenance extends Model
 {
+    /** @use HasFactory<\Database\Factories\PreventiveMaintenanceFactory> */
+    use HasFactory;
+
+    protected $table = 'maintenance_schedules';
+
     protected $fillable = [
         'asset_id',
         'interval_unit',
@@ -27,5 +34,4 @@ class MaintenanceSchedule extends Model
     {
         return $this->belongsTo(Asset::class);
     }
-    
 }

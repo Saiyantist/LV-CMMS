@@ -493,7 +493,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                         </p>
                                         <p>
                                             <strong>Maintained at:</strong>{" "}
-                                            {formatDate(item.maintained_at)}
+                                            {item.maintained_at ? formatDate(item.maintained_at) : 'Not (yet) maintained'}
                                         </p>
                                     </div>
                                 ))}

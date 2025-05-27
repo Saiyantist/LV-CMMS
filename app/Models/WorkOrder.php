@@ -55,7 +55,7 @@ class WorkOrder extends Model
 
     public function maintenanceSchedule()
     {
-        return $this->belongsTo(MaintenanceSchedule::class, 'maintenance_schedule_id');
+        return $this->belongsTo(PreventiveMaintenance::class, 'maintenance_schedule_id');
     }
 
     public function images()

@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\MaintenanceSchedule;
+use App\Models\PreventiveMaintenance;
 use App\Models\WorkOrder;
 use Carbon\Carbon;
 
@@ -29,7 +29,7 @@ class GeneratePreventiveMaintenanceWorkOrders extends Command
     public function handle()
     {
         $now = now();
-        $schedules = MaintenanceSchedule::where('is_active', true)->get();
+        $schedules = PreventiveMaintenance::where('is_active', true)->get();
     
         foreach ($schedules as $schedule) {
             $asset = $schedule->asset;
@@ -92,7 +92,7 @@ class GeneratePreventiveMaintenanceWorkOrders extends Command
         
     }
 
-    protected function getNextDueDate(MaintenanceSchedule $schedule): ?Carbon
+    protected function getNextDueDate(PreventiveMaintenance $schedule): ?Carbon
     {
 
         $lastRun = $schedule->last_run_at ?? $schedule->asset->date_acquired;
