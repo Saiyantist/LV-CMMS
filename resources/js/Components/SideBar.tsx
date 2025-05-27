@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useForm, Link } from "@inertiajs/react";
 import {
-    Home,
+    LayoutDashboard,
     ClipboardList,
     Wrench,
     ShieldCheck,
@@ -18,6 +18,9 @@ import {
     ChevronDown,
     ChevronUp,
     ArrowLeft,
+    UsersRound,
+    CalendarDays,
+    Building,
 } from "lucide-react";
 import { Button } from "./shadcnui/button";
 
@@ -107,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             routeName: "booking-calendar",
                             href: route("booking-calendar") || "",
                             text: "Booking Calendar",
-                            icon: <Calendar size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+                            icon: <CalendarDays size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
                         },
                         {
                             // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
@@ -164,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             routeName: "booking-calendar",
             href: route("booking-calendar") || "",
             text: "Booking Calendar",
-            icon: <Calendar size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: <CalendarDays size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
@@ -197,7 +200,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         hasRoute("admin.manage-roles") && {
             routeName: "admin.manage-roles",
             href: route("admin.manage-roles") || "",
-            icon: <User size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: <UsersRound size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
             text: "User Management",
         },
     ];
@@ -248,7 +251,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             routeName: "booking-calendar",
             href: route("booking-calendar") || "",
             text: "Booking Calendar",
-            icon: <Calendar size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: <CalendarDays size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
         },
         {
             routeName: "event-services.request",
@@ -282,7 +285,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             ? {
                   routeName: "admin.manage-roles",
                   href: route("admin.manage-roles") || "",
-                  icon: <User size={16} className="mr-4 md:mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+                  icon: <UsersRound size={16} className="mr-4 md:mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
                   text: "User Management",
               }
             : null;
@@ -366,7 +369,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     : "text-white"
                             }`}
                         >
-                            <Home size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                            <LayoutDashboard size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                             Dashboard
                         </Link>
                     </li>
@@ -386,7 +389,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     }
                                     className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
                                 >
-                                    <ClipboardList size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                                    <Building size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                                     Work Orders
                                     <span className="ml-auto">
                                         {openDropdown === "workOrders" ? (
@@ -415,7 +418,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     }
                                     className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
                                 >
-                                    <Calendar size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                                    <CalendarCog size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
                                     Event Services
                                     <span className="ml-auto">
                                         {openDropdown === "eventServices" ? (
@@ -510,7 +513,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 : "text-white hover:text-opacity-80"
                         }`}
                     >
-                        <Home size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
+                        <LayoutDashboard size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
                         Dashboard
                     </Link>
                     <Link
@@ -521,7 +524,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 : "text-white hover:text-opacity-80"
                         }`}
                     >
-                        <ClipboardList size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
+                        <Building size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
                         Work Orders
                     </Link>
                     <Link
@@ -580,7 +583,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                         }
                                         className="flex items-center w-full px-4 py-3 text-white text-base xs:text-lg hover:bg-white hover:text-primary rounded-lg transition focus:outline-none"
                                     >
-                                        <ClipboardList
+                                        <Building
                                             size={16}
                                             className="mr-4 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
                                         />
