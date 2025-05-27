@@ -216,6 +216,15 @@ export default function DateTimeSelection({
         return false;
     };
 
+    // Add this useEffect to sync with parent
+    useEffect(() => {
+        if (value) {
+            // Parse dateRange and timeRange to set internal state
+            // (You may need to parse the string to set startDate, endDate, etc.)
+            // For now, just keep as is if you want to always use parent state
+        }
+    }, [value?.dateRange, value?.timeRange]);
+
     return (
         <div className="w-full">
             <div className="mb-8">

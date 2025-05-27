@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, X, FileText, Check } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Gallery, { galleryItems } from "./Stepper/Gallery"; // <-- Add this import
@@ -11,9 +11,27 @@ import ComplianceAndConsent from "./Stepper/Compliance&Consent";
 import EventSummaryModal from "./Stepper/EventSummaryModal";
 import { Head, usePage, router } from "@inertiajs/react";
 
+const STORAGE_KEY = "eventServicesStepperState";
+
+function saveStepperState(state: any) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadStepperState() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return null;
+    }
+}
+
+function clearStepperState() {
+    localStorage.removeItem(STORAGE_KEY);
+}
+
 function parseDateRange(dateRange: string): { start: string; end: string } {
-    // Example: "May 27 - May 28, 2025"
-    // Should return { start: "2025-05-27", end: "2025-05-28" }
     if (!dateRange) return { start: "", end: "" };
     const match = dateRange.match(
         /^([A-Za-z]+) (\d{1,2}) - ([A-Za-z]+) (\d{1,2}), (\d{4})$/
@@ -66,6 +84,7 @@ export default function EventServicesRequest() {
     const [showSummary, setShowSummary] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [showConsentModal, setShowConsentModal] = useState(false);
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
     // Step 1: File
     const [file, setFile] = useState<File | null>(null);
@@ -189,6 +208,12 @@ export default function EventServicesRequest() {
 
     const handleBookingSubmit = () => {
         setError(null);
+        if (!file) {
+            setError(
+                "File is required. Please re-upload your proof of approval."
+            );
+            return;
+        }
         if (
             !dataPrivacyAgreed ||
             !equipmentPolicyAgreed ||
@@ -252,6 +277,7 @@ export default function EventServicesRequest() {
             onSuccess: () => {
                 setShowConsentModal(false);
                 setShowSuccess(true);
+                clearStepperState(); // <-- Add this line
             },
         });
     };
@@ -279,6 +305,72 @@ export default function EventServicesRequest() {
 
     // Flatten requested services for easier display
     const requestedServicesFlat = Object.values(requestedServices).flat();
+
+    // Load state on mount
+    useEffect(() => {
+        const saved = loadStepperState();
+        if (saved) {
+            setCurrentStep(saved.currentStep || 1);
+            setFile(null);
+            setSelectedGalleryItem(saved.selectedGalleryItem || null);
+            setEventDetails(
+                saved.eventDetails || {
+                    eventName: "",
+                    department: [],
+                    eventPurpose: "",
+                    participants: "",
+                    participantCount: "",
+                }
+            );
+            setDateRange(saved.dateRange || "");
+            setTimeRange(saved.timeRange || "");
+            setRequestedServices(saved.requestedServices || {});
+        }
+    }, []);
+
+    useEffect(() => {
+        saveStepperState({
+            currentStep,
+            file,
+            selectedGalleryItem,
+            eventDetails,
+            dateRange,
+            timeRange,
+            requestedServices,
+        });
+    }, [
+        currentStep,
+        file,
+        selectedGalleryItem,
+        eventDetails,
+        dateRange,
+        timeRange,
+        requestedServices,
+    ]);
+
+    function handleCancelBooking() {
+        clearStepperState();
+        setCurrentStep(1);
+        setFile(null);
+        setSelectedGalleryItem(null);
+        setEventDetails({
+            eventName: "",
+            department: [],
+            eventPurpose: "",
+            participants: "",
+            participantCount: "",
+        });
+        setDateRange("");
+        setTimeRange("");
+        setRequestedServices({});
+        setDataPrivacyAgreed(false);
+        setEquipmentPolicyAgreed(false);
+        setConsentChoice("");
+        setError(null);
+        setShowSummary(false);
+        setShowSuccess(false);
+        setShowConsentModal(false);
+    }
 
     return (
         <AuthenticatedLayout>
@@ -422,6 +514,14 @@ export default function EventServicesRequest() {
                                     Example: 112424_EnglishMonth
                                 </p>
                             </div>
+                            {/* In Step 1, add a warning if file is missing after reload */}
+                            {!file && (
+                                <div className="text-red-500 text-sm mt-2 text-center">
+                                    {currentStep === 1
+                                        ? "File is required. Please re-upload your proof of approval."
+                                        : ""}
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -502,25 +602,72 @@ export default function EventServicesRequest() {
                 )}
                 {/* Navigation Buttons */}
                 {!showSuccess && (
-                    <div className="mt-16 max-w-2xl mx-auto flex flex-row justify-between gap-4">
+                    <div className="mt-16 max-w-2xl mx-auto flex flex-col gap-4">
+                        <div className="flex flex-row justify-between gap-4">
+                            <button
+                                className="w-1/2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
+                                onClick={handleBack}
+                                disabled={currentStep === 1 && !showSummary}
+                            >
+                                Back
+                            </button>
+                            <button
+                                className="w-1/2 px-4 py-2 bg-secondary hover:bg-primary text-white rounded-md"
+                                onClick={handleContinue}
+                            >
+                                {currentStep === 5 && !showSummary
+                                    ? "Continue"
+                                    : "Continue"}
+                            </button>
+                        </div>
                         <button
-                            className="w-1/2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
-                            onClick={handleBack}
-                            disabled={currentStep === 1 && !showSummary}
+                            className="w-full px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md"
+                            onClick={() => {
+                                if (
+                                    window.confirm(
+                                        "Are you sure you want to cancel and clear all your booking data? This action cannot be undone."
+                                    )
+                                ) {
+                                    handleCancelBooking();
+                                }
+                            }}
+                            type="button"
                         >
-                            Back
-                        </button>
-                        <button
-                            className="w-1/2 px-4 py-2 bg-secondary hover:bg-primary text-white rounded-md"
-                            onClick={handleContinue}
-                        >
-                            {currentStep === 5 && !showSummary
-                                ? "Continue"
-                                : "Continue"}
+                            Cancel Booking
                         </button>
                     </div>
                 )}
             </div>
+            {showCancelConfirm && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
+                        <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                            Cancel Booking?
+                        </h2>
+                        <p className="mb-6 text-gray-600">
+                            Are you sure you want to cancel and clear all your
+                            booking data? This action cannot be undone.
+                        </p>
+                        <div className="flex justify-center gap-4">
+                            <button
+                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-700"
+                                onClick={() => setShowCancelConfirm(false)}
+                            >
+                                No, Go Back
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded text-white"
+                                onClick={() => {
+                                    setShowCancelConfirm(false);
+                                    handleCancelBooking();
+                                }}
+                            >
+                                Yes, Cancel Booking
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

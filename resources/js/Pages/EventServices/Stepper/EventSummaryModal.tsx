@@ -33,7 +33,8 @@ interface EventSummaryProps {
     selectedVenueIds?: number[] | null;
 }
 
-function shortenFileName(name: string, maxLen = 30) {
+function shortenFileName(name?: string, maxLen = 30) {
+    if (!name) return "";
     if (name.length <= maxLen) return name;
     return name.slice(0, 15) + "..." + name.slice(-10);
 }
@@ -112,7 +113,7 @@ const EventSummary: React.FC<EventSummaryProps> = ({
                     <FileText className="text-blue-600" size={20} />
                     Proof of Approval
                 </div>
-                {data.file ? (
+                {data.file && data.file.name ? (
                     <div className="ml-7 flex items-center border rounded px-3 py-2 bg-gray-50 text-sm">
                         <span className="font-mono font-medium">
                             {shortenFileName(data.file.name)}
