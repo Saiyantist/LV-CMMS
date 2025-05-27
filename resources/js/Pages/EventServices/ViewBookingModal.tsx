@@ -62,6 +62,8 @@ interface Props {
     onClose: () => void;
     booking: Booking | null;
     venueNames?: string[];
+    canEdit: boolean;
+    onBookingUpdate?: (updatedBooking: Booking) => void;
 }
 
 const ViewBookingModal: React.FC<Props> = ({
@@ -69,8 +71,17 @@ const ViewBookingModal: React.FC<Props> = ({
     onClose,
     booking,
     venueNames = [],
+    canEdit,
+    onBookingUpdate,
 }) => {
     const [showEdit, setShowEdit] = useState(false);
+
+    // This function will close both modals
+    const handleEditSuccess = (updatedBooking: any) => {
+        setShowEdit(false); // Close Edit modal
+        if (onBookingUpdate) onBookingUpdate(updatedBooking); // Update parent state
+        onClose(); // Close View modal
+    };
 
     if (!booking) return null;
 
@@ -104,6 +115,8 @@ const ViewBookingModal: React.FC<Props> = ({
             </div>
         </div>
     );
+
+    // const canEdit = true; // Removed duplicate declaration
 
     return (
         <>
@@ -219,21 +232,30 @@ const ViewBookingModal: React.FC<Props> = ({
                         </div>
 
                         <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
-                            <Button
-                                variant="outline"
-                                className="w-full sm:w-auto text-sm"
-                                onClick={() => setShowEdit(true)}
-                            >
-                                ✏️ Edit
-                            </Button>
+                            {canEdit && (
+                                <Button
+                                    onClick={() => setShowEdit(true)}
+                                    variant="outline"
+                                    className="min-w-[100px]"
+                                >
+                                    Edit
+                                </Button>
+                            )}
                             <Button
                                 variant="secondary"
-                                className="w-full sm:w-auto text-sm"
+                                className="w-full sm:w-auto text-sm text-white"
                                 onClick={onClose}
                             >
                                 ❌ Close
                             </Button>
                         </div>
+
+                        {!canEdit && (
+                            <div className="text-xs text-red-500 mt-2">
+                                You can only edit bookings that are still
+                                pending.
+                            </div>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>
@@ -243,6 +265,8 @@ const ViewBookingModal: React.FC<Props> = ({
                 onClose={() => setShowEdit(false)}
                 booking={booking}
                 venueNames={venueNames}
+                // Use handleEditSuccess to close both modals and update state
+                onBookingUpdate={handleEditSuccess}
             />
         </>
     );

@@ -7,7 +7,7 @@ import {
 } from "@/Components/shadcnui/dialog";
 import { Button } from "@/Components/shadcnui/button";
 import { Input } from "@/Components/shadcnui/input";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 
 const serviceOptions = [
     "Sound System",
@@ -23,16 +23,23 @@ const EditBookingsModal = ({
     onClose,
     booking,
     venueNames = [],
+    onBookingUpdate,
 }: {
     open: boolean;
     onClose: () => void;
     booking: any;
     venueNames?: string[];
+    onBookingUpdate?: (updatedBooking: any) => void;
 }) => {
+    const { props } = usePage();
+    const user = props.auth?.user || {};
+    const userRoles = user.roles?.map((r: any) => r.name) || [];
+
     const [form, setForm] = useState<any>({});
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [venueDropdownOpen, setVenueDropdownOpen] = useState(false);
     const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+    const [previewFile, setPreviewFile] = useState<string | null>(null);
 
     const venueDropdownRef = useRef<HTMLDivElement>(null);
     const servicesDropdownRef = useRef<HTMLDivElement>(null);
@@ -53,7 +60,9 @@ const EditBookingsModal = ({
                 ...booking,
                 venue: venues,
                 requested_services: requestedServices,
+                status: booking.status,
             });
+            setPreviewFile(null);
         }
     }, [booking, open]);
 
@@ -107,6 +116,18 @@ const EditBookingsModal = ({
         const { name, value, type, files } = e.target as any;
         if (type === "file") {
             setForm({ ...form, [name]: files[0] });
+            if (files && files[0]) {
+                const file = files[0];
+                if (file.type.startsWith("image/")) {
+                    setPreviewFile(URL.createObjectURL(file));
+                } else if (file.type === "application/pdf") {
+                    setPreviewFile(URL.createObjectURL(file));
+                } else {
+                    setPreviewFile(null);
+                }
+            } else {
+                setPreviewFile(null);
+            }
         } else {
             setForm({ ...form, [name]: value });
         }
@@ -115,13 +136,93 @@ const EditBookingsModal = ({
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
         setFormErrors({});
-        router.put(`/event-services/${booking.id}`, form, {
+        onClose();
+
+        if (!window.confirm("Are you sure you want to save these changes?")) {
+            return;
+        }
+
+        // Only send changed fields
+        const changedFields: any = {};
+        Object.keys(form).forEach((key) => {
+            const original =
+                Array.isArray(form[key]) && Array.isArray(booking[key])
+                    ? JSON.stringify(booking[key])
+                    : booking[key];
+            const current = Array.isArray(form[key])
+                ? JSON.stringify(form[key])
+                : form[key];
+            if (current !== original && form[key] !== undefined) {
+                changedFields[key] = form[key];
+            }
+        });
+
+        router.put(`/event-services/${booking.id}`, changedFields, {
+            preserveScroll: true,
+            preserveState: true,
             onError: (errors) => setFormErrors(errors),
-            onSuccess: () => onClose(),
+            onSuccess: () => {
+                fetch(`/event-services/${booking.id}`)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        if (onBookingUpdate) onBookingUpdate(data);
+                    });
+                onClose();
+            },
         });
     };
 
     if (!booking) return null;
+
+    // Helper to render proof preview
+    const renderProofPreview = () => {
+        const file = form.proof_of_approval;
+        const existing = booking.proof_of_approval;
+        if (previewFile && file) {
+            if (file.type && file.type.startsWith("image/")) {
+                return (
+                    <img
+                        src={previewFile}
+                        alt="Proof Preview"
+                        className="mt-2 max-h-40 rounded border"
+                    />
+                );
+            } else if (file.type === "application/pdf") {
+                return (
+                    <iframe
+                        src={previewFile}
+                        title="PDF Preview"
+                        className="mt-2 w-full h-40 border rounded"
+                    />
+                );
+            }
+        } else if (existing) {
+            const ext = existing.split(".").pop().toLowerCase();
+            if (["jpg", "jpeg", "png"].includes(ext)) {
+                return (
+                    <img
+                        src={`/storage/${existing}`}
+                        alt="Proof"
+                        className="mt-2 max-h-40 rounded border"
+                    />
+                );
+            } else if (ext === "pdf") {
+                return (
+                    <iframe
+                        src={`/storage/${existing}`}
+                        title="PDF Proof"
+                        className="mt-2 w-full h-40 border rounded"
+                    />
+                );
+            }
+        }
+        return null;
+    };
+
+    // Only super_admin and communications_officer can edit status
+    const canEditStatus =
+        userRoles.includes("super_admin") ||
+        userRoles.includes("communications_officer");
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
@@ -138,7 +239,7 @@ const EditBookingsModal = ({
                 >
                     <div className="max-h-[60vh] overflow-y-auto pr-2">
                         {/* Proof of Approval at the top (not sticky) */}
-                        <div className="flex flex-col">
+                        {/* <div className="flex flex-col">
                             <label className="mb-1 font-medium text-sm">
                                 Proof of Approval (JPG, PNG, PDF, max 10MB)
                             </label>
@@ -149,20 +250,20 @@ const EditBookingsModal = ({
                                 onChange={handleFormChange}
                                 className="text-sm"
                             />
+                            {renderProofPreview()}
                             {formErrors.proof_of_approval && (
                                 <span className="text-red-500 text-xs mt-1">
                                     {formErrors.proof_of_approval}
                                 </span>
                             )}
-                        </div>
+                        </div> */}
                         {/* Requested Venue Dropdown */}
                         <div
                             className="flex flex-col relative w-full mt-5"
                             ref={venueDropdownRef}
                         >
                             <label className="mb-1 font-medium text-sm">
-                                Requested Venue{" "}
-                                <span className="text-red-500">*</span>
+                                Requested Venue
                             </label>
                             <button
                                 type="button"
@@ -204,14 +305,12 @@ const EditBookingsModal = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
-                                    Event Name{" "}
-                                    <span className="text-red-500">*</span>
+                                    Event Name
                                 </label>
                                 <Input
                                     name="name"
-                                    value={form.name}
+                                    value={form.name || ""}
                                     onChange={handleFormChange}
-                                    required
                                     className="text-sm"
                                     placeholder="Enter event name"
                                 />
@@ -227,7 +326,7 @@ const EditBookingsModal = ({
                                 </label>
                                 <Input
                                     name="department"
-                                    value={form.department}
+                                    value={form.department || ""}
                                     onChange={handleFormChange}
                                     className="text-sm"
                                     placeholder="Enter department"
@@ -245,7 +344,7 @@ const EditBookingsModal = ({
                             </label>
                             <Input
                                 name="description"
-                                value={form.description}
+                                value={form.description || ""}
                                 onChange={handleFormChange}
                                 className="text-sm h-32"
                                 placeholder="Enter purpose"
@@ -263,7 +362,7 @@ const EditBookingsModal = ({
                                 </label>
                                 <Input
                                     name="participants"
-                                    value={form.participants}
+                                    value={form.participants || ""}
                                     onChange={handleFormChange}
                                     className="text-sm"
                                     placeholder="Enter participants"
@@ -283,7 +382,7 @@ const EditBookingsModal = ({
                                     name="number_of_participants"
                                     min={1}
                                     max={9999}
-                                    value={form.number_of_participants}
+                                    value={form.number_of_participants || ""}
                                     onChange={handleFormChange}
                                     className="text-sm"
                                     placeholder="1-9999"
@@ -298,15 +397,13 @@ const EditBookingsModal = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
-                                    Event Start Date{" "}
-                                    <span className="text-red-500">*</span>
+                                    Event Start Date
                                 </label>
                                 <Input
                                     type="date"
                                     name="event_start_date"
-                                    value={form.event_start_date}
+                                    value={form.event_start_date || ""}
                                     onChange={handleFormChange}
-                                    required
                                     className="text-sm"
                                 />
                                 {formErrors.event_start_date && (
@@ -317,15 +414,13 @@ const EditBookingsModal = ({
                             </div>
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
-                                    Event End Date{" "}
-                                    <span className="text-red-500">*</span>
+                                    Event End Date
                                 </label>
                                 <Input
                                     type="date"
                                     name="event_end_date"
-                                    value={form.event_end_date}
+                                    value={form.event_end_date || ""}
                                     onChange={handleFormChange}
-                                    required
                                     className="text-sm"
                                 />
                                 {formErrors.event_end_date && (
@@ -338,15 +433,13 @@ const EditBookingsModal = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
-                                    Event Start Time{" "}
-                                    <span className="text-red-500">*</span>
+                                    Event Start Time
                                 </label>
                                 <Input
                                     type="time"
                                     name="event_start_time"
-                                    value={form.event_start_time}
+                                    value={form.event_start_time || ""}
                                     onChange={handleFormChange}
-                                    required
                                     className="text-sm"
                                 />
                                 {formErrors.event_start_time && (
@@ -357,15 +450,13 @@ const EditBookingsModal = ({
                             </div>
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
-                                    Event End Time{" "}
-                                    <span className="text-red-500">*</span>
+                                    Event End Time
                                 </label>
                                 <Input
                                     type="time"
                                     name="event_end_time"
-                                    value={form.event_end_time}
+                                    value={form.event_end_time || ""}
                                     onChange={handleFormChange}
-                                    required
                                     className="text-sm"
                                 />
                                 {formErrors.event_end_time && (
@@ -425,6 +516,31 @@ const EditBookingsModal = ({
                                 </span>
                             )}
                         </div>
+                        {/* Status field for super_admin and comms officer */}
+                        {canEditStatus && (
+                            <div className="flex flex-col mt-5">
+                                <label className="mb-1 font-medium text-sm">
+                                    Status
+                                </label>
+                                <select
+                                    name="status"
+                                    value={form.status || ""}
+                                    onChange={handleFormChange}
+                                    className="border rounded-md px-3 py-2 text-sm"
+                                >
+                                    <option value="">Select status</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                                {formErrors.status && (
+                                    <span className="text-red-500 text-xs mt-1">
+                                        {formErrors.status}
+                                    </span>
+                                )}
+                            </div>
+                        )}
                     </div>
                     <div className="flex justify-end gap-2 mt-6">
                         <Button

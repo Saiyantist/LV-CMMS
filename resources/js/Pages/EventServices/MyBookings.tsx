@@ -15,19 +15,24 @@ import {
     DialogHeader,
 } from "@/Components/shadcnui/dialog";
 import { createPortal } from "react-dom";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import CreateBookingModal from "./CreateBookingModal";
 import ViewBookingModal from "./ViewBookingModal";
 
 // Define the booking type
-interface Booking {
+export interface Booking {
     id: number | string;
     date: string;
     venue: string;
     name: string;
     eventDate: string;
     time: string;
-    status: "Completed" | "In Progress" | "Cancelled" | "Not Started";
+    status:
+        | "Completed"
+        | "In Progress"
+        | "Cancelled"
+        | "Not Started"
+        | "Pending";
     // Additional fields for view modal
     email?: string;
     type?: string;
@@ -60,6 +65,13 @@ export default function MyBookings({
     bookings?: any[];
     venueNames?: string[];
 }) {
+    const { props } = usePage();
+    const user = props.auth?.user || {};
+    const userRoles = user.roles?.map((r: any) => r.name) || [];
+    const isAdmin =
+        userRoles.includes("super_admin") ||
+        userRoles.includes("communications_officer");
+
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(
         null
     );
@@ -91,6 +103,13 @@ export default function MyBookings({
     const uniqueVenues = Array.from(
         new Set(bookings.map((booking) => booking.venue))
     );
+
+    const handleBookingUpdate = (updatedBooking: Booking) => {
+        setFilteredBookings((prev) =>
+            prev.map((b) => (b.id === updatedBooking.id ? updatedBooking : b))
+        );
+        setSelectedBooking(updatedBooking); // This updates the modal instantly!
+    };
 
     // Get unique statuses for filter dropdown
     const uniqueStatuses = Array.from(
@@ -298,22 +317,37 @@ export default function MyBookings({
         {
             id: "actions",
             header: "Action",
-            cell: ({ row }) => (
-                <div className="flex justify-center space-x-2">
-                    <Button
-                        className="bg-secondary hover:bg-primary text-white"
-                        onClick={() => handleViewBooking(row.original)}
-                    >
-                        View
-                    </Button>
-                    <Button
-                        className="bg-destructive hover:bg-red-700 text-white"
-                        onClick={() => handleDeleteBooking(row.original)}
-                    >
-                        Delete
-                    </Button>
-                </div>
-            ),
+            cell: ({ row }) => {
+                const booking = row.original;
+                const canEdit = isAdmin || booking.status === "Pending";
+                return (
+                    <div className="flex justify-center space-x-2">
+                        <Button
+                            className="bg-secondary hover:bg-primary text-white"
+                            onClick={() => handleViewBooking(booking)}
+                            disabled={!canEdit}
+                        >
+                            View
+                        </Button>
+                        {isAdmin ? (
+                            <Button
+                                className="bg-destructive hover:bg-red-700 text-white"
+                                onClick={() => handleDeleteBooking(booking)}
+                            >
+                                Delete
+                            </Button>
+                        ) : (
+                            <Button
+                                className="bg-orange-500 hover:bg-orange-600 text-white"
+                                onClick={() => handleCancelBooking(booking)}
+                                disabled={booking.status !== "Pending"}
+                            >
+                                Cancel
+                            </Button>
+                        )}
+                    </div>
+                );
+            },
             enableSorting: false,
         },
     ];
@@ -342,6 +376,20 @@ export default function MyBookings({
     const handleDeleteBooking = (booking: Booking) => {
         if (confirm("Are you sure you want to delete this booking?")) {
             router.delete(`/event-services/${booking.id}`);
+        }
+    };
+
+    // Cancel handler
+    const handleCancelBooking = (booking: Booking) => {
+        if (window.confirm("Are you sure you want to cancel this booking?")) {
+            router.put(
+                `/event-services/${booking.id}`,
+                { status: "Cancelled" },
+                {
+                    preserveScroll: true,
+                    preserveState: true,
+                }
+            );
         }
     };
 
@@ -461,17 +509,35 @@ export default function MyBookings({
                                             onClick={() =>
                                                 handleViewBooking(booking)
                                             }
+                                            disabled={
+                                                !isAdmin &&
+                                                booking.status !== "Pending"
+                                            }
                                         >
                                             View
                                         </Button>
-                                        <Button
-                                            className="w-1/2 bg-destructive hover:bg-red-700 text-white"
-                                            onClick={() =>
-                                                handleDeleteBooking(booking)
-                                            }
-                                        >
-                                            Delete
-                                        </Button>
+                                        {isAdmin ? (
+                                            <Button
+                                                className="w-1/2 bg-destructive hover:bg-red-700 text-white"
+                                                onClick={() =>
+                                                    handleDeleteBooking(booking)
+                                                }
+                                            >
+                                                Delete
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                className="w-1/2 bg-orange-500 hover:bg-orange-600 text-white"
+                                                onClick={() =>
+                                                    handleCancelBooking(booking)
+                                                }
+                                                disabled={
+                                                    booking.status !== "Pending"
+                                                }
+                                            >
+                                                Cancel
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -484,6 +550,8 @@ export default function MyBookings({
                     onClose={() => setIsModalOpen(false)}
                     booking={selectedBooking}
                     venueNames={venueNames}
+                    canEdit={isAdmin || selectedBooking?.status === "Pending"}
+                    // onBookingUpdate={handleBookingUpdate}
                 />
             </div>
         </AuthenticatedLayout>

@@ -96,7 +96,7 @@ $bookings = $myEvents->map(function ($event) {
             "Basketball Court",
         ];
 
-        return Inertia::render('EventServices/CreateBooking', [
+        return Inertia::render('EventServices/CreateBooking',  [
             'venueNames' => $venueNames,
         ]);
     }
