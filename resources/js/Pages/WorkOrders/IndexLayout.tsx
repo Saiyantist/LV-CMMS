@@ -121,8 +121,6 @@ export default function IndexLayout({
     const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, any>>({});
     const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
     
-    console.log(filteredWorkOrders);
-
     const toggleDescription = (id: number) => {
         setExpandedDescriptions((prev) =>
             prev.includes(id)

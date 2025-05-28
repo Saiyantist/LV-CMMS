@@ -104,6 +104,10 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::post('/locations', [LocationController::class, 'store']);
     });
     
+    /**
+     * Unorganized Routes
+     */
+
     // API route for work order statuses (for chart)
     Route::get('/api/work-orders/statuses', function () {
         return \App\Models\WorkOrder::select('status')->get();
@@ -112,13 +116,10 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     // asset history fetching
     Route::get('/asset-maintenance-history/{assetId}', [AssetMaintenanceHistoryController::class, 'show']);
 
-
-
-
     // Route::get('/departments', [DepartmentController::class, 'index']);
     Route::get('/departments/{type}', [DepartmentController::class, 'show']);
 
-
+    
     /**
      * Event Services Routes
      */

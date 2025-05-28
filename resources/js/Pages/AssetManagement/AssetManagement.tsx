@@ -12,6 +12,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import FlashToast from "@/Components/FlashToast";
 
 interface Asset {
     id: number;
@@ -33,32 +34,6 @@ interface Asset {
     };
 }
 
-interface PreventiveMaintenanceWorkOrder {
-    id: number;
-    report_description: string;
-    location_id: number;
-    work_order_type: string;
-    label: string;
-    priority: string;
-    requested_by: number;
-    requested_at: string;
-    assigned_to: number;
-    scheduled_at: string;
-    asset_id: number;
-    maintenance_schedule: {
-        id: number;
-        asset_id: number;
-        interval_unit: string;
-        interval_value: number | null;
-        month_week: number | null;
-        month_weekday: string | null;
-        year_day: number | null;
-        year_month: number | null;
-        last_run_at: string;
-        is_active: boolean;
-    };
-}
-
 interface MaintenancePersonnel {
     id: number;
     first_name: string;
@@ -77,7 +52,6 @@ const AssetManagement: React.FC = () => {
     const assets = props.assets as Asset[];
     const locations = props.locations as Location[];
     const maintenancePersonnel = props.maintenancePersonnel as MaintenancePersonnel[];
-    const preventiveMaintenanceWorkOrders = props.preventiveMaintenanceWorkOrders as PreventiveMaintenanceWorkOrder[];
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [isCreating, setIsCreating] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(
@@ -345,20 +319,20 @@ const AssetManagement: React.FC = () => {
                 <CreateAssetModal
                     locations={locations}
                     maintenancePersonnel={maintenancePersonnel}
-                    isOpen={isCreating}
                     onClose={() => setIsCreating(false)}
-                    onSave={() => setIsCreating(false)}
                 />
             )}
 
             {viewingAsset && (
                 <ViewAssetModal
-                    data={viewingAsset}
+                    asset={viewingAsset}
                     maintenancePersonnel={maintenancePersonnel}
-                    preventiveMaintenanceWorkOrders={preventiveMaintenanceWorkOrders}
-                    onClose={() => setViewingAsset(null)}
+                    onClose={() => setViewingAsset(null)}   
+                    locations={locations}
                 />
             )}
+
+            <FlashToast />
         </Authenticated>
     );
 };
