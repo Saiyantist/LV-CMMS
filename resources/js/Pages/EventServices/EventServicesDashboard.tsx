@@ -28,6 +28,7 @@ import { ChevronDown } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import ApexCharts from "apexcharts";
 import axios from "axios";
+import { ColumnDef } from "../WorkOrders/components/Datatable";
 
 interface Booking {
     id: number | string;
@@ -129,7 +130,19 @@ const getChartOptions = (labels: string[], data: number[]) => ({
     legend: { show: false },
 });
 
-export default function EventServicesDashboard({ bookings = [] }: Props) {
+export default function EventServicesDashboard({
+    bookings: initialBookings = [],
+}: Props) {
+    const [bookings, setBookings] = useState<Booking[]>(initialBookings);
+
+    useEffect(() => {
+        if (!initialBookings || initialBookings.length === 0) {
+            axios.get("/api/event-services/bookings").then((res) => {
+                setBookings(res.data);
+            });
+        }
+    }, [initialBookings]);
+
     // Status counts
     const statusList = [
         "Completed",
@@ -205,7 +218,7 @@ export default function EventServicesDashboard({ bookings = [] }: Props) {
     const bookingActivity = bookings
         .slice()
         .sort((a, b) => (b.date > a.date ? 1 : -1))
-        .slice(0, 10)
+        .slice(0, 3)
         .map((b) => ({
             dateRequested: b.date,
             venue: b.venue.join(", "),
@@ -295,227 +308,242 @@ export default function EventServicesDashboard({ bookings = [] }: Props) {
         };
     }, [statuses]);
 
+    const columns: ColumnDef<Booking, any>[] = [
+        {
+            accessorKey: "date",
+            header: "Date Requested",
+            cell: ({ row }) => <div>{row.getValue("date")}</div>,
+        },
+        {
+            accessorKey: "venue",
+            header: "Requested Venue",
+            cell: ({ row }) => (
+                <div>
+                    {Array.isArray(row.original.venue)
+                        ? row.original.venue.join(", ")
+                        : row.getValue("venue")}
+                </div>
+            ),
+        },
+        // ...other columns as needed
+    ];
+
     return (
-        <AuthenticatedLayout>
+        <div className="min-h-screen bg-white p-6">
+            {/* <AuthenticatedLayout> */}
             <Head title="Event Services Dashboard" />
-            <div className="min-h-screen bg-white p-6">
-                <div className="max-w-7xl mx-auto space-y-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            Event Services Dashboard
-                        </h1>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className="flex items-center gap-2"
-                                >
-                                    This Month
-                                    <ChevronDown className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem>This Month</DropdownMenuItem>
-                                <DropdownMenuItem>Last Month</DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    This Quarter
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    Last Quarter
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>This Year</DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    Custom Range
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+            <div className="max-w-7xl mx-auto space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <h1 className="text-3xl font-bold text-gray-900">
+                        Event Services Dashboard
+                    </h1>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="flex items-center gap-2"
+                            >
+                                This Month
+                                <ChevronDown className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem>This Month</DropdownMenuItem>
+                            <DropdownMenuItem>Last Month</DropdownMenuItem>
+                            <DropdownMenuItem>This Quarter</DropdownMenuItem>
+                            <DropdownMenuItem>Last Quarter</DropdownMenuItem>
+                            <DropdownMenuItem>This Year</DropdownMenuItem>
+                            <DropdownMenuItem>Custom Range</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
 
-                    {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {statsData.map((stat, index) => (
-                            <Card key={index}>
-                                <CardContent className="p-6">
-                                    <div className="text-sm font-medium text-gray-600 mb-2">
-                                        {stat.title}
-                                    </div>
-                                    <div className="text-3xl font-bold text-gray-900">
-                                        {stat.value}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-
-                    {/* Main Content Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Top Departments */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-lg font-semibold">
-                                    Top Departments
-                                </CardTitle>
-                                <p className="text-sm text-gray-600">
-                                    Departments with the highest number of
-                                    bookings
-                                </p>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="divide-y divide-gray-200">
-                                    {topDepartments.length === 0 && (
-                                        <li className="py-2 text-gray-400 italic">
-                                            No data available.
-                                        </li>
-                                    )}
-                                    {topDepartments.map((dept) => (
-                                        <li
-                                            key={dept.rank}
-                                            className="flex justify-between items-center py-2"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <span className="font-mono text-gray-500 w-6">
-                                                    {dept.rank}.
-                                                </span>
-                                                <span className="text-gray-900">
-                                                    {dept.department}
-                                                </span>
-                                            </div>
-                                            <span className="font-semibold text-blue-700">
-                                                {dept.bookings}
-                                            </span>
-                                        </li>
-                                    ))}
-                                </ul>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {statsData.map((stat, index) => (
+                        <Card key={index}>
+                            <CardContent className="p-6">
+                                <div className="text-sm font-medium text-gray-600 mb-2">
+                                    {stat.title}
+                                </div>
+                                <div className="text-3xl font-bold text-gray-900">
+                                    {stat.value}
+                                </div>
                             </CardContent>
                         </Card>
+                    ))}
+                </div>
 
-                        {/* Recently Booked Venues Chart */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-lg font-semibold">
-                                    Booking Satistics
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex flex-col md:flex-row items-center justify-center my-8 gap-6">
-                                    <div
-                                        ref={chartRef}
-                                        className="w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] md:w-[300px] md:h-[300px]"
-                                    />
-                                    <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
-                                        {allStatuses.map((status) => (
-                                            <div
-                                                key={status}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <span
-                                                    className="w-3 h-3 rounded-full"
-                                                    style={{
-                                                        backgroundColor:
-                                                            statusColors[
-                                                                status
-                                                            ],
-                                                    }}
-                                                />
-                                                <span className="text-sm text-gray-700">
-                                                    {status}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Top Departments */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg font-semibold">
+                                Top Departments
+                            </CardTitle>
+                            <p className="text-sm text-gray-600">
+                                Departments with the highest number of bookings
+                            </p>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="divide-y divide-gray-200">
+                                {topDepartments.length === 0 && (
+                                    <li className="py-2 text-gray-400 italic">
+                                        No data available.
+                                    </li>
+                                )}
+                                {topDepartments.map((dept) => (
+                                    <li
+                                        key={dept.rank}
+                                        className="flex justify-between items-center py-2"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-mono text-gray-500 w-6">
+                                                {dept.rank}.
+                                            </span>
+                                            <span className="text-gray-900">
+                                                {dept.department}
+                                            </span>
+                                        </div>
+                                        <span className="font-semibold text-blue-700">
+                                            {dept.bookings}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
 
-                                <CardTitle className="text-lg font-semibold">
-                                    Frequently Booked Venues
-                                </CardTitle>
-
-                                <div className="flex items-end justify-between h-64 gap-4">
-                                    {recentVenues.map((venue, index) => (
+                    {/* Recently Booked Venues Chart */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg font-semibold">
+                                Booking Satistics
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex flex-col md:flex-row items-center justify-center my-8 gap-6">
+                                <div
+                                    ref={chartRef}
+                                    className="w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] md:w-[300px] md:h-[300px]"
+                                />
+                                <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
+                                    {allStatuses.map((status) => (
                                         <div
-                                            key={index}
-                                            className="flex flex-col items-center gap-2 flex-1"
+                                            key={status}
+                                            className="flex items-center gap-2"
                                         >
-                                            <div
-                                                className="w-full bg-blue-500 rounded-t"
+                                            <span
+                                                className="w-3 h-3 rounded-full"
                                                 style={{
-                                                    height: `${
-                                                        venue.value * 10
-                                                    }px`,
+                                                    backgroundColor:
+                                                        statusColors[status],
                                                 }}
-                                            ></div>
-                                            <span className="text-xs text-gray-600 text-center">
-                                                {venue.name}
+                                            />
+                                            <span className="text-sm text-gray-700">
+                                                {status}
                                             </span>
                                         </div>
                                     ))}
                                 </div>
+                            </div>
 
-                                <div className="flex justify-between text-xs text-gray-500 mt-2">
-                                    <span>0</span>
-                                    <span>2</span>
-                                    <span>4</span>
-                                    <span>6</span>
-                                    <span>8</span>
-                                    <span>10+</span>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Recent Booking Activity */}
-                    <Card>
-                        <CardHeader>
                             <CardTitle className="text-lg font-semibold">
-                                Recent Booking Activity
+                                Frequently Booked venues
                             </CardTitle>
-                            <p className="text-sm text-gray-600">
-                                Recent facility bookings and status
-                            </p>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Date Requested</TableHead>
-                                        <TableHead>Requested Venue</TableHead>
-                                        <TableHead>Event Date</TableHead>
-                                        <TableHead>Event Time</TableHead>
-                                        <TableHead>Event Name</TableHead>
-                                        <TableHead>Status</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {bookingActivity.map((booking, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>
-                                                {booking.dateRequested}
-                                            </TableCell>
-                                            <TableCell>
-                                                {booking.venue}
-                                            </TableCell>
-                                            <TableCell>
-                                                {booking.eventDate}
-                                            </TableCell>
-                                            <TableCell>
-                                                {booking.eventTime}
-                                            </TableCell>
-                                            <TableCell>
-                                                {booking.eventName}
-                                            </TableCell>
-                                            <TableCell>
-                                                {getStatusBadge(booking.status)}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between h-auto sm:h-64 gap-4">
+                                {recentVenues.map((venue, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex flex-row sm:flex-col items-center gap-2 flex-1"
+                                    >
+                                        <div
+                                            className="bg-blue-500 rounded w-full sm:w-full"
+                                            style={{
+                                                height: "32px",
+                                                width: `${venue.value * 10}px`,
+                                                // On sm and up, use height for bar, width 100%
+                                                ...(window.innerWidth >= 640
+                                                    ? {
+                                                          height: `${
+                                                              venue.value * 10
+                                                          }px`,
+                                                          width: "100%",
+                                                      }
+                                                    : {}),
+                                            }}
+                                        ></div>
+                                        <span className="text-xs text-gray-600 text-center">
+                                            {venue.name}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-between text-xs text-gray-500 mt-2">
+                                <span>0</span>
+                                <span>2</span>
+                                <span>4</span>
+                                <span>6</span>
+                                <span>8</span>
+                                <span>10+</span>
+                            </div>
                         </CardContent>
                     </Card>
-
-                    {/* Chart and Status Legend */}
                 </div>
+
+                {/* Recent Booking Activity */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg font-semibold">
+                            Recent Booking Activity
+                        </CardTitle>
+                        <p className="text-sm text-gray-600">
+                            Recent facility bookings and status
+                        </p>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Date Requested</TableHead>
+                                    <TableHead>Requested Venue</TableHead>
+                                    <TableHead>Event Date</TableHead>
+                                    <TableHead>Event Time</TableHead>
+                                    <TableHead>Event Name</TableHead>
+                                    <TableHead>Status</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {bookingActivity.map((booking, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>
+                                            {booking.dateRequested}
+                                        </TableCell>
+                                        <TableCell>{booking.venue}</TableCell>
+                                        <TableCell>
+                                            {booking.eventDate}
+                                        </TableCell>
+                                        <TableCell>
+                                            {booking.eventTime}
+                                        </TableCell>
+                                        <TableCell>
+                                            {booking.eventName}
+                                        </TableCell>
+                                        <TableCell>
+                                            {getStatusBadge(booking.status)}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
             </div>
-        </AuthenticatedLayout>
+            {/* </AuthenticatedLayout> */}
+        </div>
     );
 }

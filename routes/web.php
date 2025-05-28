@@ -129,11 +129,6 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         // My Bookings Route (use controller method)
         Route::get('/event-services/my-bookings', [EventServicesController::class, 'MyBookings'])->name('event-services.my-bookings');
         
-        // My Bookings Page Route (renders the page/component, not the data)
-        // Route::get('/event-services/my-bookings-page', function () {
-        //     return Inertia::render('EventServices/MyBookings');
-        // })->name('event-services.my-bookings-page');
-        
         // Event Services Request Route
         Route::get('/event-services/request', function () {
             return Inertia::render('EventServices/EventServicesRequest');
@@ -143,17 +138,28 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::delete('/event-services/{id}', [EventServicesController::class, 'destroy'])->name('event-services.destroy');
         Route::put('/event-services/{id}', [EventServicesController::class, 'update'])->name('event-services.update');
         
-        Route::get('/event-services/dashboard', [EventServicesController::class, 'dashboardData'])
-            ->name('event-services.dashboard');
+   
 
+// Route to fetch the Booking Statistics (Donut Chart = COMMS Officer's Dashboard)
     Route::get('/api/event-services/statuses', function () {
     return \App\Models\EventService::select('status')->get();
 })->middleware(['auth', 'verified'])->name('api.event-services.statuses');
+
+
+
+// Routes to fetch data in Top Departments,
+// Frequently Booked venues, and 
+// Recent Booking Activity, and
+// for (COMMS Officer's Dashboard)
+    Route::get('/api/event-services/bookings', [EventServicesController::class, 'bookingsData'])
+    ->middleware(['auth', 'verified']);
     });
 });
 
 Route::get('/api/event-services/status-counts', [EventServicesController::class, 'statusCounts'])
     ->middleware(['auth', 'verified'])
     ->name('api.event-services.status-counts');
+
+    
 
 require __DIR__ . '/auth.php';

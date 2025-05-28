@@ -183,11 +183,10 @@ public function destroy($id)
 }
 
 
-public function dashboardData()
-{
-    $events = EventService::all();
 
-    $bookings = $events->map(function ($event) {
+public function bookingsData()
+{
+    $bookings = EventService::all()->map(function ($event) {
         return [
             'id' => $event->id,
             'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
@@ -204,9 +203,7 @@ public function dashboardData()
         ];
     });
 
-    return Inertia::render('EventServices/EventServicesDashboard', [
-        'bookings' => $bookings,
-    ]);
+    return response()->json($bookings);
 }
 
 
