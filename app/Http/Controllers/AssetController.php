@@ -87,7 +87,7 @@ class AssetController extends Controller
             $scheduleData = [
                 'asset_id' => $request->id,
                 'interval_unit' => $unit,
-                'is_active' => true,
+                'is_active' => $request->is_active == "true" ? "1" : "0",
                 'last_run_at' => null,
             ];
             

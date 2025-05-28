@@ -159,7 +159,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
         }
         
         if (interval_unit === 'monthly' && month_week && month_weekday) {
-            return `Every ${getOrdinalSuffix(month_week)} ${month_weekday} of the month`;
+            return `Every ${getOrdinalSuffix(month_week)} ${month_weekday.charAt(0).toUpperCase() + month_weekday.slice(1)} of the month`;
         }
         
         if (interval_unit === 'yearly' && year_month && year_day) {

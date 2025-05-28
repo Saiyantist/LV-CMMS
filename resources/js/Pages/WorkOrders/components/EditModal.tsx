@@ -86,7 +86,7 @@ export default function EditWorkOrderModal({
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
-    const isInternalRequesterOrMaintenancePersonnel = user.roles.some(role => role.name === "internal_requester" || role.name === "maintenance_personnel");
+    const isDepartmentHeadOrMaintenancePersonnel = user.roles.some(role => role.name === "department_head" || role.name === "maintenance_personnel");
 
     const { data, setData, errors, processing } = useForm({
         location_id: "",
@@ -345,7 +345,7 @@ export default function EditWorkOrderModal({
                     )}
 
                     {/* Show editable fields to IR or MP */}
-                    { isInternalRequesterOrMaintenancePersonnel && (
+                    { isDepartmentHeadOrMaintenancePersonnel && (
                         <form onSubmit={submit}>
                             <div className="py-1 flex flex-col space-y-4">
 

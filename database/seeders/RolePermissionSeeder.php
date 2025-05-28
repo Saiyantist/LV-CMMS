@@ -47,7 +47,7 @@ class RolePermissionSeeder extends Seeder
 
         // Define roles
         $roles = [
-            'internal_requester' => ['request work orders', 'view own work orders', 'cancel own work orders', 'edit own work orders'], 
+            'internal_requester' => ['request event services', 'view own event services', 'cancel own event services'], 
             'external_requester' => ['request event services', 'view own event services', 'cancel own event services'],
             'department_head' => [
                 'request work orders', 'view own work orders', 'cancel own work orders', 'edit own work orders',

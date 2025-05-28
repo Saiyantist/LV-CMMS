@@ -24,6 +24,7 @@ import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
 import DeleteWorkOrderModal from "./components/DeleteWorkOrderModal";
 import { Input } from "@/Components/shadcnui/input";
 import FilterModal from "./components/FilterModal";
+import { clearLine } from "readline";
 interface Props {
     user: {
         id: number;
@@ -106,6 +107,7 @@ export default function IndexLayout({
 }: Props) {
     const isRequesterOrPersonnel =
     user.roles[0].name === "internal_requester" ||
+    user.roles[0].name === "department_head" ||
     user.roles[0].name === "maintenance_personnel";
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
@@ -278,7 +280,7 @@ export default function IndexLayout({
             header: "ID",
             cell: ({ row }) => <div>{row.getValue("id")}</div>,
             meta: {
-                headerClassName: "w-12",
+                cellClassName: "w-12",
                 searchable: true,
             },
         },
@@ -287,7 +289,7 @@ export default function IndexLayout({
             header: "Date Requested",
             cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
             meta: { 
-                cellClassName: "min-w-[7.5rem] max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                cellClassName: "w-[8.5rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
             },
         },
         {
@@ -296,7 +298,7 @@ export default function IndexLayout({
             cell: ({ row }) => <div>{row.original.location.name}</div>,
             enableSorting: false,
             meta: {
-                cellClassName: "min-w-[7.5rem] max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                cellClassName: "max-w-[6rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
                 filterable: true,
             },
@@ -309,7 +311,7 @@ export default function IndexLayout({
             ),
             enableSorting: false,
             meta: {
-                cellClassName: "max-w-[15rem] px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                cellClassName: "max-w-[14rem] px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
             },
         },
@@ -419,6 +421,37 @@ export default function IndexLayout({
                     ),
                     enableSorting: false,
                 },
+                ...(activeTab === "For Budget Request" ? [
+                    {
+                        accessorKey: "label",
+                        header: "Label",
+                        cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("label")}</div>,
+                        enableSorting: false,
+                        meta: {
+                            cellClassName: "text-center",
+                            searchable: true,
+                        }
+                    },
+                    // {
+                    //     accessorKey: "priority",
+                    //     header: "Priority",
+                    //     cell: ({ row }: { row: Row<WorkOrders> }) => (
+                    //         <div
+                    //             className={`px-2 py-1 rounded ${getPriorityColor(
+                    //                 row.getValue("priority")
+                    //             )}`}
+                    //         >
+                    //             {row.getValue("priority")}
+                    //         </div>
+                    //     ),
+                    //     sortingFn: prioritySorting,
+                    //     meta: {
+                    //         headerClassName: "max-w-10",
+                    //         cellClassName: "text-center",
+                    //         filterable: true,
+                    //     },
+                    // },
+                ] : []),
                 {
                     id: "actions",
                     header: "Action",

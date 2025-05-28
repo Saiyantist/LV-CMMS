@@ -58,7 +58,7 @@ export default function ViewWorkOrderModal({
     onClose,
 }: ViewWorkOrderProps) {
     const isMaintenancePersonnel = user.roles.some(role => role.name === 'maintenance_personnel');
-    const isInternalRequester = user.roles.some(role => role.name === 'internal_requester');
+    const isDepartmentHead = user.roles.some(role => role.name === 'department_head');
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
 
     const getAssetDetails = (workOrder: any) => {
@@ -213,7 +213,7 @@ export default function ViewWorkOrderModal({
                                 )}
 
                                 {/* Status */}
-                                {isInternalRequester && (   
+                                {isDepartmentHead && (   
                                     <div className="flex-[1] flex">
                                         <TableHead className="flex flex-[1] items-center">
                                             <Label>Status:</Label>

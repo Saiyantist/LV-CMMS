@@ -22,37 +22,37 @@ export default function UserDetailsCard({
             {/* User Info */}
             <div className="mt-6 space-y-4">
                 <div className="flex justify-between">
-                    <p className="text-xs sm:text-sm font-bold text-secondary dark:text-gray-300">
+                    <p className="text-xs sm:text-sm text-primary dark:text-gray-300">
                         Name:
                     </p>
                     <p className="text-black text-xs sm:text-sm">{user.name}</p>
                 </div>
                 <div className="flex justify-between">
-                    <p className="text-xs sm:text-sm font-bold text-secondary dark:text-gray-300">
+                    <p className="text-xs sm:text-sm text-primary dark:text-gray-300">
                         Contact Number:
                     </p>
                     <p className="text-black text-xs sm:text-sm">0{user.contact_number}</p>
                 </div>
                 {/* <div className="flex justify-between">
-                    <p className="text-xs sm:text-sm font-bold text-secondary dark:text-gray-300">
+                    <p className="text-xs sm:text-sm text-primary dark:text-gray-300">
                         Birthday:
                     </p>
                     <p className="text-black text-xs sm:text-sm">{user.birth_date}</p>
                 </div> */}
                 <div className="flex justify-between">
-                    <p className="text-xs sm:text-sm font-bold text-secondary dark:text-gray-300">
+                    <p className="text-xs sm:text-sm text-primary dark:text-gray-300">
                         Gender:
                     </p>
                     <p className="text-black text-xs sm:text-sm">{user.gender}</p>
                 </div>
                 <div className="flex justify-between">
-                    <p className="text-xs sm:text-sm font-bold text-secondary dark:text-gray-300">
+                    <p className="text-xs sm:text-sm text-primary dark:text-gray-300">
                         Type of Staff:
                     </p>
                     <p className="text-black text-xs sm:text-sm">{user.staff_type}</p>
                 </div>
                 <div className="flex justify-between">
-                    <p className="text-xs sm:text-sm font-bold text-secondary dark:text-gray-300">
+                    <p className="text-xs sm:text-sm text-primary dark:text-gray-300">
                         Email:
                     </p>
                     <p className="text-black text-xs sm:text-sm">{user.email}</p>{" "}

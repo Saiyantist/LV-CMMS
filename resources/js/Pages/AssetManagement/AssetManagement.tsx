@@ -326,7 +326,6 @@ const AssetManagement: React.FC = () => {
             {viewingAsset && (
                 <ViewAssetModal
                     asset={viewingAsset}
-                    maintenancePersonnel={maintenancePersonnel}
                     onClose={() => setViewingAsset(null)}   
                     locations={locations}
                 />

@@ -610,7 +610,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         </li>
                     )}
                     <li>
-                        <Link
+                        {/* <Link
                             href="#"
                             className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80"
                         >
@@ -619,7 +619,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
                             />
                             <span>Settings</span>
-                        </Link>
+                        </Link> */}
                     </li>
                     <li>
                         <button
@@ -638,7 +638,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
             {/* --- Mobile Navbar --- */}
             <div className="md:hidden fixed bottom-0 w-full bg-primary text-white shadow-md z-50">
-                <div className="flex items-center justify-between px-4 py-3 h-16 xs:h-[4.2rem]">
+                <div className="flex items-center justify-between px-2 py-3 h-16 xs:h-[4.2rem]">
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className={`flex flex-col items-center text-xs sm:text-sm px-2 xs:px-8 py-1 transition ${
@@ -825,7 +825,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 {userManagementItem.text}
                             </Link>
                         )}
-                        <Link
+                        {/* <Link
                             href="#"
                             className="flex items-center px-4 py-3 hover:bg-white hover:text-primary rounded-lg transition"
                         >
@@ -834,7 +834,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 className="mr-4 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
                             />
                             Settings
-                        </Link>
+                        </Link> */}
                         <button
                             onClick={handleLogout}
                             className="flex items-center px-4 py-3 text-red-300 hover:bg-white hover:text-red-500 rounded-lg w-full transition"

@@ -76,7 +76,7 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
      *      - Preventive Maintenance
      *      - Compliance and Safety
      */
-    Route::middleware(['auth', 'restrict_external', 'verified', 'hasRole'])->group(function () {
+    Route::middleware(['auth', 'restrict_external', 'restrict_internal', 'verified', 'hasRole'])->group(function () {
     
         // Maintenance Personnel only
         Route::get('/work-orders/assigned-tasks', [WorkOrderController::class, 'assignedWorkOrders'])

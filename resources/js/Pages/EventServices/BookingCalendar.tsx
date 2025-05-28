@@ -214,7 +214,7 @@ export default function EventCalendar() {
                                                 ""
                                         )
                                     }
-                                    className="bg-blue-900 hover:bg-blue-950 text-white rounded-md px-4 py-2 flex items-center gap-2 w-full sm:w-auto"
+                                    className="bg-secondary hover:bg-primary/90 text-white rounded-md px-4 py-2 flex items-center gap-2 w-full sm:w-auto"
                                 >
                                     <Plus size={18} />
                                     Event Services Request
