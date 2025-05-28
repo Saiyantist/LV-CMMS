@@ -182,4 +182,42 @@ public function destroy($id)
     return redirect()->route('event-services.my-bookings')->with('success', 'Booking deleted!');
 }
 
+
+public function dashboardData()
+{
+    $events = EventService::all();
+
+    $bookings = $events->map(function ($event) {
+        return [
+            'id' => $event->id,
+            'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
+            'venue' => is_string($event->venue) && str_starts_with($event->venue, '[')
+                ? json_decode($event->venue, true)
+                : (is_array($event->venue) ? $event->venue : [$event->venue]),
+            'name' => $event->name,
+            'department' => $event->department,
+            'event_start_date' => $event->event_start_date,
+            'event_end_date' => $event->event_end_date,
+            'event_start_time' => $event->event_start_time,
+            'event_end_time' => $event->event_end_time,
+            'status' => $event->status,
+        ];
+    });
+
+    return Inertia::render('EventServices/EventServicesDashboard', [
+        'bookings' => $bookings,
+    ]);
+}
+
+
+public function statusCounts()
+{
+    $counts = EventService::select('status')
+        ->get()
+        ->groupBy('status')
+        ->map(fn($group) => $group->count());
+
+    return response()->json($counts);
+}
+
 }

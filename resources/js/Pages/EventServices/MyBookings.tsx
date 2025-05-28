@@ -254,7 +254,7 @@ export default function MyBookings({
         {
             accessorKey: "date",
             header: "Date Requested",
-            cell: ({ row }) => <div>{row.getValue("date")}</div>,
+            cell: ({ row }) => <div>{formatDate(row.getValue("date"))}</div>,
         },
         {
             accessorKey: "venue",
@@ -426,7 +426,9 @@ export default function MyBookings({
                         <h1 className="text-2xl font-semibold">My Bookings</h1>
                         <Button
                             className="bg-secondary hover:bg-primary text-white"
-                            onClick={() => setShowCreateModal(true)}
+                            onClick={() =>
+                                router.visit("/event-services/request")
+                            }
                         >
                             + Create Booking
                         </Button>

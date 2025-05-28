@@ -7,7 +7,6 @@ import {
     ClipboardList,
     ShieldCheck,
 } from "lucide-react";
-import { galleryItems } from "./Gallery";
 
 interface EventSummaryProps {
     onSubmit: () => void;
@@ -60,8 +59,6 @@ const exampleGalleryItems = [
 ];
 
 const EventSummary: React.FC<EventSummaryProps> = ({
-    onClose,
-    onSubmit,
     data,
     selectedVenueIds, // <-- Add this
 }) => {

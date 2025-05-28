@@ -193,7 +193,7 @@ export default function DateTimeSelection({
             timeOptions.push(`${hour}:${min} PM`);
         }
     }
-    timeOptions.push("11:59 AM");
+    timeOptions.push("11:59 PM");
 
     // Date select handlers
     const handleDateSelect = (day: number, isStart: boolean) => {
@@ -219,9 +219,6 @@ export default function DateTimeSelection({
     // Add this useEffect to sync with parent
     useEffect(() => {
         if (value) {
-            // Parse dateRange and timeRange to set internal state
-            // (You may need to parse the string to set startDate, endDate, etc.)
-            // For now, just keep as is if you want to always use parent state
         }
     }, [value?.dateRange, value?.timeRange]);
 

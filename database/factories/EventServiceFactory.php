@@ -37,6 +37,7 @@ class EventServiceFactory extends Factory
             'event_end_date' => $this->faker->date(),
             'event_start_time' => $this->faker->time(),
             'event_end_time' => $this->faker->time(),
+            'created_at' => $this->faker->dateTimeBetween('-30 days', 'now'),
             // ...other fields
         ];
     }

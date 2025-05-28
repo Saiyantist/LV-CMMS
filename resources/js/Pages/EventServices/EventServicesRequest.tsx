@@ -515,13 +515,13 @@ export default function EventServicesRequest() {
                                 </p>
                             </div>
                             {/* In Step 1, add a warning if file is missing after reload */}
-                            {!file && (
+                            {/* {!file && (
                                 <div className="text-red-500 text-sm mt-2 text-center">
                                     {currentStep === 1
                                         ? "File is required. Please re-upload your proof of approval."
                                         : ""}
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 )}
@@ -604,15 +604,20 @@ export default function EventServicesRequest() {
                 {!showSuccess && (
                     <div className="mt-16 max-w-2xl mx-auto flex flex-col gap-4">
                         <div className="flex flex-row justify-between gap-4">
+                            {/* Hide Back button on step 1 */}
+                            {currentStep !== 1 && (
+                                <button
+                                    className="w-1/2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
+                                    onClick={handleBack}
+                                    disabled={currentStep === 1 && !showSummary}
+                                >
+                                    Back
+                                </button>
+                            )}
                             <button
-                                className="w-1/2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
-                                onClick={handleBack}
-                                disabled={currentStep === 1 && !showSummary}
-                            >
-                                Back
-                            </button>
-                            <button
-                                className="w-1/2 px-4 py-2 bg-secondary hover:bg-primary text-white rounded-md"
+                                className={`${
+                                    currentStep !== 1 ? "w-1/2" : "w-full"
+                                } px-4 py-2 bg-secondary hover:bg-primary text-white rounded-md`}
                                 onClick={handleContinue}
                             >
                                 {currentStep === 5 && !showSummary
@@ -620,21 +625,24 @@ export default function EventServicesRequest() {
                                     : "Continue"}
                             </button>
                         </div>
-                        <button
-                            className="w-full px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md"
-                            onClick={() => {
-                                if (
-                                    window.confirm(
-                                        "Are you sure you want to cancel and clear all your booking data? This action cannot be undone."
-                                    )
-                                ) {
-                                    handleCancelBooking();
-                                }
-                            }}
-                            type="button"
-                        >
-                            Cancel Booking
-                        </button>
+                        {/* Hide Cancel Booking on step 1 */}
+                        {currentStep !== 1 && (
+                            <button
+                                className="w-full px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md"
+                                onClick={() => {
+                                    if (
+                                        window.confirm(
+                                            "Are you sure you want to cancel and clear all your booking data? This action cannot be undone."
+                                        )
+                                    ) {
+                                        handleCancelBooking();
+                                    }
+                                }}
+                                type="button"
+                            >
+                                Cancel Booking
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

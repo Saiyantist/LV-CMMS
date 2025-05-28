@@ -141,7 +141,18 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::post('/event-services', [EventServicesController::class, 'store'])->name('event-services.store');
         Route::delete('/event-services/{id}', [EventServicesController::class, 'destroy'])->name('event-services.destroy');
         Route::put('/event-services/{id}', [EventServicesController::class, 'update'])->name('event-services.update');
+        
+        Route::get('/event-services/dashboard', [EventServicesController::class, 'dashboardData'])
+            ->name('event-services.dashboard');
+
+    Route::get('/api/event-services/statuses', function () {
+    return \App\Models\EventService::select('status')->get();
+})->middleware(['auth', 'verified'])->name('api.event-services.statuses');
     });
 });
+
+Route::get('/api/event-services/status-counts', [EventServicesController::class, 'statusCounts'])
+    ->middleware(['auth', 'verified'])
+    ->name('api.event-services.status-counts');
 
 require __DIR__ . '/auth.php';

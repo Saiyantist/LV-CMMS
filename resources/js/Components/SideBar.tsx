@@ -87,7 +87,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             href: route("work-orders.assigned-tasks") || "",
                             text: "Assigned Tasks",
                             icon: (
-                                <BriefcaseBusiness size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                                <BriefcaseBusiness
+                                    size={16}
+                                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                />
                             ),
                         },
                     ]
@@ -99,7 +102,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             routeName: "work-orders.index",
                             href: route("work-orders.index") || "",
                             text: "My Work Orders",
-                            icon: <ClipboardList size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+                            icon: (
+                                <ClipboardList
+                                    size={16}
+                                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                />
+                            ),
                         },
                     ]
                   : []),
@@ -110,20 +118,35 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             routeName: "booking-calendar",
                             href: route("booking-calendar") || "",
                             text: "Booking Calendar",
-                            icon: <CalendarDays size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+                            icon: (
+                                <CalendarDays
+                                    size={16}
+                                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                />
+                            ),
                         },
                         {
                             // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
                             routeName: "event-services.request",
                             href: route("event-services.request") || "",
                             text: "Event Services Request",
-                            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+                            icon: (
+                                <FileText
+                                    size={16}
+                                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                />
+                            ),
                         },
                         {
                             routeName: "event-services.my-bookings",
                             href: route("event-services.my-bookings") || "",
                             text: "My Bookings",
-                            icon: <Book size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+                            icon: (
+                                <Book
+                                    size={16}
+                                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                />
+                            ),
                         },
                     ]
                   : []),
@@ -139,25 +162,45 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             routeName: "work-orders.index",
             href: route("work-orders.index") || "",
             text: "Work Order Requests",
-            icon: <ClipboardList size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <ClipboardList
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         hasRoute("assets.index") && {
             routeName: "assets.index",
             href: route("assets.index") || "",
             text: "Asset Management",
-            icon: <Wrench size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <Wrench
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         hasRoute("work-orders.preventive-maintenance") && {
             routeName: "work-orders.preventive-maintenance",
             href: route("work-orders.preventive-maintenance") || "",
             text: "Preventive Maintenance",
-            icon: <ShieldCheck size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <ShieldCheck
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         hasRoute("work-orders.compliance-and-safety") && {
             routeName: "work-orders.compliance-and-safety",
             href: route("work-orders.compliance-and-safety") || "",
             text: "Compliance and Safety",
-            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <FileText
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
     ].filter(Boolean);
 
@@ -167,32 +210,57 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             routeName: "booking-calendar",
             href: route("booking-calendar") || "",
             text: "Booking Calendar",
-            icon: <CalendarDays size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <CalendarDays
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             // Exclude this from side bar, include this and the 'work-orders.submit-request' in the Breadcrumbs component
             routeName: "event-services.request",
             href: route("event-services.request") || "",
             text: "Event Services Request",
-            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <FileText
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             routeName: "event-services.my-bookings",
             href: route("event-services.my-bookings") || "",
             text: "My Bookings",
-            icon: <Book size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <Book
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             routeName: "",
             href: "",
             text: "Requests Management",
-            icon: <CalendarCog size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <CalendarCog
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             routeName: "",
             href: "",
             text: "Venue Management",
-            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <FileText
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
     ];
 
@@ -200,7 +268,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         hasRoute("admin.manage-roles") && {
             routeName: "admin.manage-roles",
             href: route("admin.manage-roles") || "",
-            icon: <UsersRound size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <UsersRound
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
             text: "User Management",
         },
     ];
@@ -223,25 +296,45 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             routeName: "work-orders.index",
             href: route("work-orders.index") || "",
             text: "Work Order Requests",
-            icon: <ClipboardList size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <ClipboardList
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             routeName: "assets.index",
             href: route("assets.index") || "",
             text: "Asset Management",
-            icon: <Wrench size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <Wrench
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             routeName: "work-orders.preventive-maintenance",
             href: route("work-orders.preventive-maintenance") || "",
             text: "Preventive Maintenance",
-            icon: <ShieldCheck size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <ShieldCheck
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             routeName: "work-orders.compliance-and-safety",
             href: route("work-orders.compliance-and-safety") || "",
             text: "Compliance and Safety",
-            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <FileText
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
     ].filter((item) => item.href);
 
@@ -251,31 +344,56 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             routeName: "booking-calendar",
             href: route("booking-calendar") || "",
             text: "Booking Calendar",
-            icon: <CalendarDays size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <CalendarDays
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             routeName: "event-services.request",
             href: route("event-services.request") || "",
             text: "Event Services Request",
-            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <FileText
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             routeName: "event-services.my-bookings",
             href: route("event-services.my-bookings") || "",
             text: "My Bookings",
-            icon: <Book size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <Book
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             routeName: "",
             href: "",
             text: "Requests Management",
-            icon: <CalendarCog size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <CalendarCog
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
         {
             routeName: "",
             href: "",
             text: "Venue Management",
-            icon: <FileText size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+            icon: (
+                <FileText
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
         },
     ];
 
@@ -285,7 +403,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             ? {
                   routeName: "admin.manage-roles",
                   href: route("admin.manage-roles") || "",
-                  icon: <UsersRound size={16} className="mr-4 md:mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />,
+                  icon: (
+                      <UsersRound
+                          size={16}
+                          className="mr-4 md:mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                      />
+                  ),
                   text: "User Management",
               }
             : null;
@@ -369,7 +492,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     : "text-white"
                             }`}
                         >
-                            <LayoutDashboard size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                            <LayoutDashboard
+                                size={16}
+                                className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                            />
                             Dashboard
                         </Link>
                     </li>
@@ -389,7 +515,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     }
                                     className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
                                 >
-                                    <Building size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                                    <Building
+                                        size={16}
+                                        className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                    />
                                     Work Orders
                                     <span className="ml-auto">
                                         {openDropdown === "workOrders" ? (
@@ -418,7 +547,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                     }
                                     className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80 focus:outline-none"
                                 >
-                                    <CalendarCog size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                                    <CalendarCog
+                                        size={16}
+                                        className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                    />
                                     Event Services
                                     <span className="ml-auto">
                                         {openDropdown === "eventServices" ? (
@@ -438,9 +570,16 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             </li>
                         </>
                     ) : (
+                        // <>
+                        //     {menuItems.map(renderMenuItem)}
+                        //     {adminItems.map(renderMenuItem)}
+                        // </>
+
+                        // Fixes the duplicated items for comms officer
                         <>
-                            {menuItems.map(renderMenuItem)}
-                            {adminItems.map(renderMenuItem)}
+                            {adminItems.length > 0
+                                ? adminItems.map(renderMenuItem)
+                                : menuItems.map(renderMenuItem)}
                         </>
                     )}
                 </ul>
@@ -475,7 +614,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             href="#"
                             className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80"
                         >
-                            <Settings size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                            <Settings
+                                size={16}
+                                className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                            />
                             <span>Settings</span>
                         </Link>
                     </li>
@@ -484,7 +626,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             onClick={handleLogout}
                             className="flex items-center w-full h-12 pl-4 pr-2 text-white text-sm hover:text-opacity-80"
                         >
-                            <LogOut size={16} className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                            <LogOut
+                                size={16}
+                                className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                            />
                             <span>Logout</span>
                         </button>
                     </li>
@@ -513,7 +658,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 : "text-white hover:text-opacity-80"
                         }`}
                     >
-                        <LayoutDashboard size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
+                        <LayoutDashboard
+                            size={16}
+                            className="w-6 h-6 xs:w-7 xs:h-7"
+                        />
                         Dashboard
                     </Link>
                     <Link
@@ -535,7 +683,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 : "text-white hover:text-opacity-80"
                         }`}
                     >
-                        <UserCircle size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
+                        <UserCircle
+                            size={16}
+                            className="w-6 h-6 xs:w-7 xs:h-7"
+                        />
                         Profile
                     </Link>
                 </div>
@@ -551,14 +702,18 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="absolute left-0 top-0 flex items-center text-white hover:text-opacity-80"
                             >
-                                <ArrowLeft size={16} className="w-6 h-6 xs:w-7 xs:h-7 mr-4" />
+                                <ArrowLeft
+                                    size={16}
+                                    className="w-6 h-6 xs:w-7 xs:h-7 mr-4"
+                                />
                                 Back
                             </button>
 
-
-                            
-                            <hr className="absolute mt-12 w-full" /> 
-                            <Link href={route("dashboard")} className="flex justify-center pt-20 py-4">
+                            <hr className="absolute mt-12 w-full" />
+                            <Link
+                                href={route("dashboard")}
+                                className="flex justify-center pt-20 py-4"
+                            >
                                 <img
                                     src="/images/Lvlogo.jpg"
                                     alt="Logo"
@@ -674,14 +829,20 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             href="#"
                             className="flex items-center px-4 py-3 hover:bg-white hover:text-primary rounded-lg transition"
                         >
-                            <Settings size={16} className="mr-4 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                            <Settings
+                                size={16}
+                                className="mr-4 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                            />
                             Settings
                         </Link>
                         <button
                             onClick={handleLogout}
                             className="flex items-center px-4 py-3 text-red-300 hover:bg-white hover:text-red-500 rounded-lg w-full transition"
                         >
-                            <LogOut size={16} className="mr-4 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4" />
+                            <LogOut
+                                size={16}
+                                className="mr-4 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                            />
                             Logout
                         </button>
                     </div>
