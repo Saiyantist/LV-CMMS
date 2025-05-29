@@ -42,6 +42,12 @@ const participantPlaceholders = [
     "Guests",
 ];
 
+const MAX_EVENT_NAME = 100;
+const MAX_DEPARTMENT = 100;
+const MAX_EVENT_PURPOSE = 250;
+const MAX_PARTICIPANTS = 100;
+const MAX_PARTICIPANT_COUNT = 9999;
+
 const EventDetails: React.FC<EventDetailsProps> = ({
     value,
     onChange,
@@ -61,6 +67,21 @@ const EventDetails: React.FC<EventDetailsProps> = ({
     const [deptInput, setDeptInput] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null); // NEW
+
+    // State for showing limit indicators
+    const [showEventNameLimit, setShowEventNameLimit] = useState(false);
+    const [showDepartmentLimit, setShowDepartmentLimit] = useState(false);
+    const [showEventPurposeLimit, setShowEventPurposeLimit] = useState(false);
+    const [showParticipantsLimit, setShowParticipantsLimit] = useState(false);
+    const [showParticipantCountLimit, setShowParticipantCountLimit] =
+        useState(false);
+
+    // Add these refs at the top of your component (after useState declarations)
+    const eventNameTimeout = useRef<NodeJS.Timeout | null>(null);
+    const departmentTimeout = useRef<NodeJS.Timeout | null>(null);
+    const eventPurposeTimeout = useRef<NodeJS.Timeout | null>(null);
+    const participantsTimeout = useRef<NodeJS.Timeout | null>(null);
+    const participantCountTimeout = useRef<NodeJS.Timeout | null>(null);
 
     // Fetch department options from backend
     useEffect(() => {
@@ -157,11 +178,54 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                         name="eventName"
                         placeholder={eventPlaceholders[eventPHIndex]}
                         value={value.eventName}
-                        onChange={(e) =>
-                            onChange({ ...value, eventName: e.target.value })
-                        }
+                        maxLength={MAX_EVENT_NAME}
+                        onChange={(e) => {
+                            let val = e.target.value;
+                            // Only show indicator if user tries to type past the limit
+                            if (val.length > MAX_EVENT_NAME) {
+                                val = val.slice(0, MAX_EVENT_NAME);
+                                setShowEventNameLimit(true);
+                            } else {
+                                setShowEventNameLimit(false);
+                            }
+                            onChange({ ...value, eventName: val });
+                        }}
+                        onKeyDown={(e) => {
+                            if (
+                                value.eventName.length === MAX_EVENT_NAME &&
+                                e.key.length === 1 && // Only for character input, not control keys
+                                !e.ctrlKey &&
+                                !e.metaKey &&
+                                !e.altKey
+                            ) {
+                                setShowEventNameLimit(true);
+                                if (eventNameTimeout.current)
+                                    clearTimeout(eventNameTimeout.current);
+                                eventNameTimeout.current = setTimeout(
+                                    () => setShowEventNameLimit(false),
+                                    3000
+                                );
+                            }
+                        }}
                         className="w-full bg-white rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-6 transition-colors duration-200 ease-in-out"
                     />
+                    {/* Event Name Limit Indicator */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-1 gap-1">
+                        <span className="text-xs text-gray-500">
+                            {value.eventName.length}/{MAX_EVENT_NAME}
+                        </span>
+                        <span
+                            className={`text-xs text-red-500 font-medium w-full sm:w-auto transition-opacity duration-300 ${
+                                showEventNameLimit
+                                    ? "opacity-100"
+                                    : "opacity-0 pointer-events-none select-none"
+                            }`}
+                            aria-live="polite"
+                        >
+                            The event name cannot exceed {MAX_EVENT_NAME}{" "}
+                            characters. Please shorten your input.
+                        </span>
+                    </div>
                 </div>
 
                 <div className="relative">
@@ -187,9 +251,20 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                             name="department"
                             autoComplete="off"
                             value={deptInput}
+                            maxLength={MAX_DEPARTMENT}
                             onFocus={handleInputFocus}
                             onBlur={handleInputBlur}
-                            onChange={handleInputChange}
+                            onChange={(e) => {
+                                let val = e.target.value;
+                                if (val.length > MAX_DEPARTMENT) {
+                                    val = val.slice(0, MAX_DEPARTMENT);
+                                    setShowDepartmentLimit(true);
+                                } else {
+                                    setShowDepartmentLimit(false);
+                                }
+                                setDeptInput(val);
+                                setShowSuggestions(true);
+                            }}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                     e.preventDefault();
@@ -208,6 +283,22 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                                         });
                                     }
                                     setDeptInput(""); // Always clear input after Enter
+                                    setShowDepartmentLimit(false);
+                                }
+                                if (
+                                    deptInput.length === MAX_DEPARTMENT &&
+                                    e.key.length === 1 &&
+                                    !e.ctrlKey &&
+                                    !e.metaKey &&
+                                    !e.altKey
+                                ) {
+                                    setShowDepartmentLimit(true);
+                                    if (departmentTimeout.current)
+                                        clearTimeout(departmentTimeout.current);
+                                    departmentTimeout.current = setTimeout(
+                                        () => setShowDepartmentLimit(false),
+                                        3000
+                                    );
                                 }
                             }}
                             className="w-full bg-white rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 text-base text-gray-700 py-2 px-3 outline-none pr-10"
@@ -236,12 +327,30 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                                         department: newSelected,
                                     });
                                     setDeptInput("");
+                                    setShowDepartmentLimit(false);
                                 }
                             }}
                             tabIndex={-1}
                         >
                             <ArrowRightCircle className="w-6 h-6" />
                         </button>
+                    </div>
+                    {/* Department Limit Indicator */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-1 gap-1">
+                        <span className="text-xs text-gray-500">
+                            {deptInput.length}/{MAX_DEPARTMENT}
+                        </span>
+                        <span
+                            className={`text-xs text-red-500 font-medium w-full sm:w-auto transition-opacity duration-300 ${
+                                showDepartmentLimit
+                                    ? "opacity-100"
+                                    : "opacity-0 pointer-events-none select-none"
+                            }`}
+                            aria-live="polite"
+                        >
+                            The department name cannot exceed {MAX_DEPARTMENT}{" "}
+                            characters. Please shorten your input.
+                        </span>
                     </div>
                     {/* Typing hint */}
                     {deptInput && (
@@ -321,11 +430,53 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                     name="eventPurpose"
                     placeholder="Purpose of the event"
                     value={value.eventPurpose}
-                    onChange={(e) =>
-                        onChange({ ...value, eventPurpose: e.target.value })
-                    }
+                    maxLength={MAX_EVENT_PURPOSE}
+                    onChange={(e) => {
+                        let val = e.target.value;
+                        if (val.length > MAX_EVENT_PURPOSE) {
+                            val = val.slice(0, MAX_EVENT_PURPOSE);
+                            setShowEventPurposeLimit(true);
+                        } else {
+                            setShowEventPurposeLimit(false);
+                        }
+                        onChange({ ...value, eventPurpose: val });
+                    }}
+                    onKeyDown={(e) => {
+                        if (
+                            value.eventPurpose.length === MAX_EVENT_PURPOSE &&
+                            e.key.length === 1 &&
+                            !e.ctrlKey &&
+                            !e.metaKey &&
+                            !e.altKey
+                        ) {
+                            setShowEventPurposeLimit(true);
+                            if (eventPurposeTimeout.current)
+                                clearTimeout(eventPurposeTimeout.current);
+                            eventPurposeTimeout.current = setTimeout(
+                                () => setShowEventPurposeLimit(false),
+                                3000
+                            );
+                        }
+                    }}
                     className="w-full bg-white rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 h-28 text-base outline-none text-gray-700 py-2 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"
                 ></textarea>
+                {/* Event Purpose Limit Indicator */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-1 gap-1">
+                    <span className="text-xs text-gray-500">
+                        {value.eventPurpose.length}/{MAX_EVENT_PURPOSE}
+                    </span>
+                    <span
+                        className={`text-xs text-red-500 font-medium w-full sm:w-auto transition-opacity duration-300 ${
+                            showEventPurposeLimit
+                                ? "opacity-100"
+                                : "opacity-0 pointer-events-none select-none"
+                        }`}
+                        aria-live="polite"
+                    >
+                        The event purpose cannot exceed {MAX_EVENT_PURPOSE}{" "}
+                        characters. Please shorten your input.
+                    </span>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -345,11 +496,55 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                             participantPlaceholders[participantPHIndex]
                         }
                         value={value.participants}
-                        onChange={(e) =>
-                            onChange({ ...value, participants: e.target.value })
-                        }
+                        maxLength={MAX_PARTICIPANTS}
+                        onChange={(e) => {
+                            let val = e.target.value;
+                            if (val.length > MAX_PARTICIPANTS) {
+                                val = val.slice(0, MAX_PARTICIPANTS);
+                                setShowParticipantsLimit(true);
+                            } else {
+                                setShowParticipantsLimit(false);
+                            }
+                            onChange({ ...value, participants: val });
+                        }}
+                        onKeyDown={(e) => {
+                            if (
+                                value.participants.length ===
+                                    MAX_PARTICIPANTS &&
+                                e.key.length === 1 &&
+                                !e.ctrlKey &&
+                                !e.metaKey &&
+                                !e.altKey
+                            ) {
+                                setShowParticipantsLimit(true);
+                                if (participantsTimeout.current)
+                                    clearTimeout(participantsTimeout.current);
+                                participantsTimeout.current = setTimeout(
+                                    () => setShowParticipantsLimit(false),
+                                    3000
+                                );
+                            }
+                        }}
                         className="w-full bg-white rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-6 transition-colors duration-200 ease-in-out"
                     />
+                    {/* Participants Limit Indicator */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-1 gap-1">
+                        <span className="text-xs text-gray-500">
+                            {value.participants.length}/{MAX_PARTICIPANTS}
+                        </span>
+                        <span
+                            className={`text-xs text-red-500 font-medium w-full sm:w-auto transition-opacity duration-300 ${
+                                showParticipantsLimit
+                                    ? "opacity-100"
+                                    : "opacity-0 pointer-events-none select-none"
+                            }`}
+                            aria-live="polite"
+                        >
+                            The participants field cannot exceed{" "}
+                            {MAX_PARTICIPANTS} characters. Please shorten your
+                            input.
+                        </span>
+                    </div>
                 </div>
 
                 <div className="relative">
@@ -368,24 +563,77 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                         onChange={(e) => {
                             const raw = e.target.value;
                             if (/^\d*$/.test(raw)) {
-                                const num = Number(raw);
+                                let num = Number(raw);
                                 if (raw === "") {
                                     onChange({
                                         ...value,
                                         participantCount: "",
                                     });
-                                } else if (num >= 1 && num <= 9999) {
+                                    setShowParticipantCountLimit(false);
+                                } else if (
+                                    num >= 1 &&
+                                    num <= MAX_PARTICIPANT_COUNT
+                                ) {
                                     onChange({
                                         ...value,
                                         participantCount: raw,
                                     });
+                                    setShowParticipantCountLimit(false);
+                                } else if (num > MAX_PARTICIPANT_COUNT) {
+                                    onChange({
+                                        ...value,
+                                        participantCount:
+                                            MAX_PARTICIPANT_COUNT.toString(),
+                                    });
+                                    setShowParticipantCountLimit(true);
                                 }
+                            }
+                        }}
+                        onKeyDown={(e) => {
+                            if (
+                                value.participantCount.length === 4 &&
+                                Number(value.participantCount) ===
+                                    MAX_PARTICIPANT_COUNT &&
+                                e.key.length === 1 &&
+                                !e.ctrlKey &&
+                                !e.metaKey &&
+                                !e.altKey
+                            ) {
+                                setShowParticipantCountLimit(true);
+                                if (participantCountTimeout.current)
+                                    clearTimeout(
+                                        participantCountTimeout.current
+                                    );
+                                participantCountTimeout.current = setTimeout(
+                                    () => setShowParticipantCountLimit(false),
+                                    3000
+                                );
                             }
                         }}
                         inputMode="numeric"
                         pattern="[0-9]*"
                         className="w-full bg-white rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-6 transition-colors duration-200 ease-in-out"
                     />
+                    {/* Number of Participants Limit Indicator */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-1 gap-1">
+                        <span className="text-xs text-gray-500">
+                            {value.participantCount.length > 0
+                                ? value.participantCount
+                                : 0}
+                            /{MAX_PARTICIPANT_COUNT}
+                        </span>
+                        <span
+                            className={`text-xs text-red-500 font-medium w-full sm:w-auto transition-opacity duration-300 ${
+                                showParticipantCountLimit
+                                    ? "opacity-100"
+                                    : "opacity-0 pointer-events-none select-none"
+                            }`}
+                            aria-live="polite"
+                        >
+                            The number of participants cannot exceed{" "}
+                            {MAX_PARTICIPANT_COUNT}.
+                        </span>
+                    </div>
                 </div>
             </div>
 

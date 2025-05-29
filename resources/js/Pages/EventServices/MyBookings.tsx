@@ -419,11 +419,16 @@ export default function MyBookings({
 
     return (
         <AuthenticatedLayout>
-            <Head title="My Bookings" />
+            <Head title="Bookings" />
             <div className="container mx-auto py-6">
                 <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
-                        <h1 className="text-2xl font-semibold">My Bookings</h1>
+                        <h1 className="text-2xl font-semibold">
+                            {isAdmin &&
+                            userRoles.includes("communications_officer")
+                                ? "Requests Management"
+                                : "My Bookings"}
+                        </h1>
                         <Button
                             className="bg-secondary hover:bg-primary text-white"
                             onClick={() =>

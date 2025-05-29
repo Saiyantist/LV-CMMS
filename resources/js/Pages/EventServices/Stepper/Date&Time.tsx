@@ -70,6 +70,20 @@ export default function DateTimeSelection({
                 }
             }
 
+            // For Start Date: Only allow dates that are 3 days from today and onwards
+            if (isStart) {
+                // Only allow dates that are 3 days from today (i.e., today + 3, today + 4, today + 5)
+                const minDate = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate() + 3
+                );
+                const thisDay = new Date(year, month, i);
+                if (thisDay < minDate) {
+                    isDisabled = true;
+                }
+            }
+
             days.push({
                 day: i,
                 isCurrentMonth: true,
@@ -320,6 +334,12 @@ export default function DateTimeSelection({
                                         </div>
                                     ))}
                                 </div>
+                                {/* 3-day rule indicator */}
+                                <div className="mt-2 text-xs text-blue-700 font-medium text-center">
+                                    Please note: You may only select a start
+                                    date that is at least 3 days from today.
+                                    Earlier dates are unavailable for booking.
+                                </div>
                             </div>
                         )}
                     </div>
@@ -477,26 +497,18 @@ export default function DateTimeSelection({
                             <option value="" disabled>
                                 Select time
                             </option>
-                            {timeOptions.map((t) => {
-                                // Disable end times that are less than or equal to the selected start time
-                                let isDisabled = false;
-                                if (
-                                    startTime &&
-                                    timeOptions.indexOf(t) <=
-                                        timeOptions.indexOf(startTime)
-                                ) {
-                                    isDisabled = true;
-                                }
-                                return (
-                                    <option
-                                        key={t}
-                                        value={t}
-                                        disabled={isDisabled}
-                                    >
+                            {timeOptions
+                                .filter((t) =>
+                                    !startTime
+                                        ? true
+                                        : timeOptions.indexOf(t) >
+                                          timeOptions.indexOf(startTime)
+                                )
+                                .map((t) => (
+                                    <option key={t} value={t}>
                                         {t}
                                     </option>
-                                );
-                            })}
+                                ))}
                         </select>
 
                         <div className="mt-2 w-full text-left">

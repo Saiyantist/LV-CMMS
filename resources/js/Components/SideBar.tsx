@@ -10,7 +10,7 @@ import {
     LogOut,
     Menu,
     UserCircle,
-    Settings,
+    // Settings,
     BriefcaseBusiness,
     Calendar,
     Book,
@@ -140,8 +140,19 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         {
                             routeName: "event-services.my-bookings",
                             href: route("event-services.my-bookings") || "",
-                            text: "My Bookings",
-                            icon: (
+                            text: user.roles.some(
+                                (r) => r.name === "communications_officer"
+                            )
+                                ? "Requests Management"
+                                : "My Bookings",
+                            icon: user.roles.some(
+                                (r) => r.name === "communications_officer"
+                            ) ? (
+                                <CalendarCog
+                                    size={16}
+                                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                                />
+                            ) : (
                                 <Book
                                     size={16}
                                     className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
@@ -232,36 +243,45 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         {
             routeName: "event-services.my-bookings",
             href: route("event-services.my-bookings") || "",
-            text: "My Bookings",
-            icon: (
+            text: user.roles.some((r) => r.name === "communications_officer")
+                ? "Requests Management"
+                : "My Bookings",
+            icon: user.roles.some(
+                (r) => r.name === "communications_officer"
+            ) ? (
+                <CalendarCog
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ) : (
                 <Book
                     size={16}
                     className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
                 />
             ),
         },
-        {
-            routeName: "",
-            href: "",
-            text: "Requests Management",
-            icon: (
-                <CalendarCog
-                    size={16}
-                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
-                />
-            ),
-        },
-        {
-            routeName: "",
-            href: "",
-            text: "Venue Management",
-            icon: (
-                <FileText
-                    size={16}
-                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
-                />
-            ),
-        },
+        // {
+        //     routeName: "",
+        //     href: "",
+        //     text: "Requests Management",
+        //     icon: (
+        //         <CalendarCog
+        //             size={16}
+        //             className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+        //         />
+        //     ),
+        // },
+        // {
+        //     routeName: "",
+        //     href: "",
+        //     text: "Venue Management",
+        //     icon: (
+        //         <FileText
+        //             size={16}
+        //             className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+        //         />
+        //     ),
+        // },
     ];
 
     const superAdminItems = [
@@ -365,36 +385,45 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         {
             routeName: "event-services.my-bookings",
             href: route("event-services.my-bookings") || "",
-            text: "My Bookings",
-            icon: (
+            text: user.roles.some((r) => r.name === "communications_officer")
+                ? "Requests Management"
+                : "My Bookings",
+            icon: user.roles.some(
+                (r) => r.name === "communications_officer"
+            ) ? (
+                <CalendarCog
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ) : (
                 <Book
                     size={16}
                     className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
                 />
             ),
         },
-        {
-            routeName: "",
-            href: "",
-            text: "Requests Management",
-            icon: (
-                <CalendarCog
-                    size={16}
-                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
-                />
-            ),
-        },
-        {
-            routeName: "",
-            href: "",
-            text: "Venue Management",
-            icon: (
-                <FileText
-                    size={16}
-                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
-                />
-            ),
-        },
+        // {
+        //     routeName: "",
+        //     href: "",
+        //     text: "Requests Management",
+        //     icon: (
+        //         <CalendarCog
+        //             size={16}
+        //             className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+        //         />
+        //     ),
+        // },
+        // {
+        //     routeName: "",
+        //     href: "",
+        //     text: "Venue Management",
+        //     icon: (
+        //         <FileText
+        //             size={16}
+        //             className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+        //         />
+        //     ),
+        // },
     ];
 
     // User Management tab for super admin
