@@ -308,25 +308,34 @@ export default function EventServicesDashboard({
         };
     }, [statuses]);
 
-    const columns: ColumnDef<Booking, any>[] = [
-        {
-            accessorKey: "date",
-            header: "Date Requested",
-            cell: ({ row }) => <div>{row.getValue("date")}</div>,
-        },
-        {
-            accessorKey: "venue",
-            header: "Requested Venue",
-            cell: ({ row }) => (
-                <div>
-                    {Array.isArray(row.original.venue)
-                        ? row.original.venue.join(", ")
-                        : row.getValue("venue")}
-                </div>
-            ),
-        },
-        // ...other columns as needed
-    ];
+    // Calculate total bookings for percentage
+    const totalStatuses = statuses.length;
+    const statusPercentages: Record<string, number> = {};
+    allStatuses.forEach((status) => {
+        const count = statuses.filter((s) => s === status).length;
+        statusPercentages[status] =
+            totalStatuses > 0 ? Math.round((count / totalStatuses) * 100) : 0;
+    });
+
+    // const columns: ColumnDef<Booking, any>[] = [
+    //     {
+    //         accessorKey: "date",
+    //         header: "Date Requested",
+    //         cell: ({ row }) => <div>{row.getValue("date")}</div>,
+    //     },
+    //     {
+    //         accessorKey: "venue",
+    //         header: "Requested Venue",
+    //         cell: ({ row }) => (
+    //             <div>
+    //                 {Array.isArray(row.original.venue)
+    //                     ? row.original.venue.join(", ")
+    //                     : row.getValue("venue")}
+    //             </div>
+    //         ),
+    //     },
+    //     // ...other columns as needed
+    // ];
 
     return (
         <div className="min-h-screen bg-white p-6">
@@ -445,16 +454,22 @@ export default function EventServicesDashboard({
                                             <span className="text-sm text-gray-700">
                                                 {status}
                                             </span>
+                                            <span className="text-xs text-gray-500">
+                                                {statusPercentages[status]}%
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            <CardTitle className="text-lg font-semibold">
-                                Frequently Booked venues
-                            </CardTitle>
 
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between h-auto sm:h-64 gap-4">
+                            {/* Bar Graph,  might do this later. */}
+
+                            {/* <CardTitle className="text-lg font-semibold">
+                                Frequently Booked venues
+                            </CardTitle> */}
+
+                            {/* <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between h-auto sm:h-64 gap-4">
                                 {recentVenues.map((venue, index) => (
                                     <div
                                         key={index}
@@ -481,16 +496,16 @@ export default function EventServicesDashboard({
                                         </span>
                                     </div>
                                 ))}
-                            </div>
+                            </div> */}
 
-                            <div className="flex justify-between text-xs text-gray-500 mt-2">
+                            {/* <div className="flex justify-between text-xs text-gray-500 mt-2">
                                 <span>0</span>
                                 <span>2</span>
                                 <span>4</span>
                                 <span>6</span>
                                 <span>8</span>
                                 <span>10+</span>
-                            </div>
+                            </div> */}
                         </CardContent>
                     </Card>
                 </div>
@@ -521,14 +536,101 @@ export default function EventServicesDashboard({
                                 {bookingActivity.map((booking, index) => (
                                     <TableRow key={index}>
                                         <TableCell>
-                                            {booking.dateRequested}
+                                            {/* Format: Month {day}, Year */}
+                                            {booking.dateRequested
+                                                ? new Date(
+                                                      booking.dateRequested
+                                                  ).toLocaleDateString(
+                                                      "en-US",
+                                                      {
+                                                          year: "numeric",
+                                                          month: "long",
+                                                          day: "numeric",
+                                                      }
+                                                  )
+                                                : ""}
                                         </TableCell>
                                         <TableCell>{booking.venue}</TableCell>
                                         <TableCell>
-                                            {booking.eventDate}
+                                            {/* Format: Month {day}, Year to Month {day}, Year */}
+                                            {booking.eventDate &&
+                                            booking.eventDate !== "N/A"
+                                                ? (() => {
+                                                      const [start, end] =
+                                                          booking.eventDate.split(
+                                                              " to "
+                                                          );
+                                                      const format = (
+                                                          dateStr: string
+                                                      ) =>
+                                                          new Date(
+                                                              dateStr
+                                                          ).toLocaleDateString(
+                                                              "en-US",
+                                                              {
+                                                                  year: "numeric",
+                                                                  month: "long",
+                                                                  day: "numeric",
+                                                              }
+                                                          );
+                                                      return `${format(
+                                                          start
+                                                      )} - ${format(end)}`;
+                                                  })()
+                                                : "N/A"}
                                         </TableCell>
                                         <TableCell>
-                                            {booking.eventTime}
+                                            {/* Format: h:mm am/pm to h:mm am/pm */}
+                                            {booking.eventTime &&
+                                            booking.eventTime !== "N/A"
+                                                ? (() => {
+                                                      const [start, end] =
+                                                          booking.eventTime.split(
+                                                              " to "
+                                                          );
+                                                      const format = (
+                                                          timeStr: string
+                                                      ) => {
+                                                          // If timeStr is already in 12hr format, just return
+                                                          if (
+                                                              timeStr
+                                                                  .toLowerCase()
+                                                                  .includes(
+                                                                      "am"
+                                                                  ) ||
+                                                              timeStr
+                                                                  .toLowerCase()
+                                                                  .includes(
+                                                                      "pm"
+                                                                  )
+                                                          ) {
+                                                              return timeStr;
+                                                          }
+                                                          // Otherwise, parse and format
+                                                          const [h, m] =
+                                                              timeStr.split(
+                                                                  ":"
+                                                              );
+                                                          const date =
+                                                              new Date();
+                                                          date.setHours(
+                                                              Number(h),
+                                                              Number(m)
+                                                          );
+                                                          return date.toLocaleTimeString(
+                                                              "en-US",
+                                                              {
+                                                                  hour: "numeric",
+                                                                  minute: "2-digit",
+                                                                  hour12: true,
+                                                              }
+                                                          );
+                                                      };
+                                                      return `${format(
+                                                          start
+                                                      )} - ${format(end)}`;
+                                                  })()
+                                                : "N/A"}
                                         </TableCell>
                                         <TableCell>
                                             {booking.eventName}
