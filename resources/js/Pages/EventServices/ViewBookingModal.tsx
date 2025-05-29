@@ -236,17 +236,16 @@ const ViewBookingModal: React.FC<Props> = ({
                                 <Button
                                     onClick={() => setShowEdit(true)}
                                     variant="outline"
-                                    className="min-w-[100px]"
+                                    className="sm:min-w-[120px]"
                                 >
                                     Edit
                                 </Button>
                             )}
                             <Button
-                                variant="secondary"
-                                className="w-full sm:w-auto text-sm text-white"
                                 onClick={onClose}
+                                className="w-full sm:w-auto sm:min-w-[120px] bg-secondary text-sm text-white hover:bg-primary hover:text-white"
                             >
-                                ❌ Close
+                                Close
                             </Button>
                         </div>
 

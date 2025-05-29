@@ -43,7 +43,7 @@ function getToday() {
 }
 
 // Add a palette of nice Tailwind background colors
-const EVENT_COLORS = ["bg-orange-500", "bg-red-600"];
+const EVENT_COLORS = ["bg-destructive", "bg-secondary"];
 
 // Helper to get a random color based on event index and day (so it's stable per render)
 function getRandomColor(day: number, idx: number) {
@@ -52,11 +52,25 @@ function getRandomColor(day: number, idx: number) {
     return EVENT_COLORS[hash];
 }
 
+// Helper to get date string in YYYY-MM-DD
+function getDateKey(year: number, month: number, day: number) {
+    return `${year}-${String(month + 1).padStart(2, "0")}-${String(
+        day
+    ).padStart(2, "0")}`;
+}
+
 export default function EventCalendar() {
     // Get data from Inertia props
     const { calendarEvents, listEvents } = usePage().props as unknown as {
         calendarEvents: {
-            [key: number]: { title: string; time: string; status: string }[];
+            [key: string]: {
+                dateRequested: React.ReactNode;
+                venue: React.ReactNode;
+                eventDate: React.ReactNode;
+                title: string;
+                time: string;
+                status: string;
+            }[];
         };
         listEvents: {
             id: string;
@@ -181,28 +195,9 @@ export default function EventCalendar() {
                     <div className="container mx-auto px-4 py-2">
                         <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
                             <div className="flex space-x-2">
-                                <h1 className="text-2xl font-semibold">Booking Calendar</h1>
-                                {/* <button
-                                    className={`px-4 py-2 rounded-md ${
-                                        view === "calendar"
-                                            ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                            : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-                                    }`}
-                                    onClick={() => setView("calendar")}
-                                >
-                                    Calendar
-                                </button> */}
-                                {/* Hide the "View" button */}
-                                {/* <button
-                                    className={`px-4 py-2 rounded-md ${
-                                        view === "list"
-                                            ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                            : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-                                    }`}
-                                    onClick={() => setView("list")}
-                                >
-                                    List
-                                </button> */}
+                                <h1 className="text-2xl font-semibold">
+                                    Booking Calendar
+                                </h1>
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
@@ -337,64 +332,86 @@ export default function EventCalendar() {
                                 {/* Calendar Grid */}
                                 <div className="grid grid-cols-7">
                                     {weeks.map((week, weekIndex) =>
-                                        week.map((day, dayIndex) => (
-                                            <div
-                                                key={`${weekIndex}-${dayIndex}`}
-                                                className={`min-h-[80px] sm:min-h-[150px] p-1 sm:p-2 border-r border-b relative ${
-                                                    day
-                                                        ? isToday(day)
-                                                            ? "border-2 border-blue-600"
-                                                            : "text-black"
-                                                        : "bg-gray-50"
-                                                } ${
-                                                    dayIndex === 6
-                                                        ? "border-r-0"
-                                                        : ""
-                                                }`}
-                                            >
-                                                <div className="text-base sm:text-xl font-medium mb-1 sm:mb-2">
-                                                    {day || ""}
-                                                    {day && isToday(day) && (
-                                                        <span className="ml-1 text-xs text-blue-600 font-bold">
-                                                            (Today)
-                                                        </span>
-                                                    )}
+                                        week.map((day, dayIndex) => {
+                                            const dateKey = day
+                                                ? getDateKey(
+                                                      currentYear,
+                                                      currentMonth,
+                                                      day
+                                                  )
+                                                : null;
+                                            const events = dateKey
+                                                ? calendarEvents[dateKey] || []
+                                                : [];
+                                            return (
+                                                <div
+                                                    key={`${weekIndex}-${dayIndex}`}
+                                                    className={`min-h-[80px] sm:min-h-[150px] p-1 sm:p-2 border-r border-b relative ${
+                                                        day
+                                                            ? isToday(day)
+                                                                ? "border-2 border-blue-600"
+                                                                : "text-black"
+                                                            : "bg-gray-50"
+                                                    } ${
+                                                        dayIndex === 6
+                                                            ? "border-r-0"
+                                                            : ""
+                                                    }`}
+                                                >
+                                                    <div className="text-base sm:text-xl font-medium mb-1 sm:mb-2">
+                                                        {day || ""}
+                                                        {day &&
+                                                            isToday(day) && (
+                                                                <span className="ml-1 text-xs text-blue-600 font-bold">
+                                                                    (Today)
+                                                                </span>
+                                                            )}
+                                                    </div>
+
+                                                    {/* This is the event time */}
+                                                    <div className="space-y-1 text-center">
+                                                        {events.length > 0 ? (
+                                                            events.map(
+                                                                (
+                                                                    event,
+                                                                    idx
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            idx
+                                                                        }
+                                                                        className={`${
+                                                                            day !==
+                                                                            null
+                                                                                ? getRandomColor(
+                                                                                      day,
+                                                                                      idx
+                                                                                  )
+                                                                                : ""
+                                                                        } p-1 rounded text-xs text-white`}
+                                                                    >
+                                                                        <div>
+                                                                            {
+                                                                                event.title
+                                                                            }
+                                                                        </div>
+                                                                        <div>
+                                                                            {
+                                                                                event.time
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            )
+                                                        ) : (
+                                                            <span className="text-gray-400 text-xs">
+                                                                No events
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-1">
-                                                    {day &&
-                                                    calendarEvents[day]?.length
-                                                        ? calendarEvents[
-                                                              day
-                                                          ].map(
-                                                              (event, idx) => (
-                                                                  <div
-                                                                      key={idx}
-                                                                      className={`${getRandomColor(
-                                                                          day,
-                                                                          idx
-                                                                      )} p-1 rounded text-xs text-white`}
-                                                                  >
-                                                                      <div>
-                                                                          {
-                                                                              event.title
-                                                                          }
-                                                                      </div>
-                                                                      <div>
-                                                                          {
-                                                                              event.time
-                                                                          }
-                                                                      </div>
-                                                                  </div>
-                                                              )
-                                                          )
-                                                        : day && (
-                                                              <span className="text-gray-400 text-xs">
-                                                                  No events
-                                                              </span>
-                                                          )}
-                                                </div>
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     )}
                                 </div>
                             </div>

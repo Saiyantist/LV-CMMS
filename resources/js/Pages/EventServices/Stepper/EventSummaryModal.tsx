@@ -41,21 +41,21 @@ function shortenFileName(name?: string, maxLen = 30) {
 // Example galleryItems array; replace with your actual data source or import as needed
 const exampleGalleryItems = [
     { id: 1, title: "Auditorium" },
-    { id: 2, title: "Conference Room" },
-    { id: 3, title: "Gymnasium" },
+    { id: 2, title: "Auditorium Lobby" },
+    { id: 3, title: "College Library", subtitle: "Capacities: " },
     { id: 4, title: "Meeting Room", subtitle: "Capacities: " },
-    { id: 5, title: "Training Room A", subtitle: "Capacities: " },
-    { id: 6, title: "Computer Laboratory A", subtitle: "Capacities: " },
-    { id: 7, title: "Computer Laboratory B", subtitle: "Capacities: " },
-    { id: 8, title: "EFS Classroom(s) Room #:", subtitle: "Capacities: " },
-    { id: 9, title: "LVCC Grounds", subtitle: "Capacities: 700 " },
-    { id: 10, title: "LVCC  Main Lobby", subtitle: "Capacities: " },
+    { id: 5, title: "Computer Laboratory A", subtitle: "Capacities: " },
+    { id: 6, title: "Computer Laboratory B", subtitle: "Capacities: " },
+    { id: 7, title: "EFS Classroom(s) Room #:", subtitle: "Capacities: " },
+    { id: 8, title: "LVCC Grounds:", subtitle: "Capacities: " },
+    { id: 9, title: "LVCC Main Lobby", subtitle: "Capacities: 700 " },
     {
-        id: 11,
+        id: 10,
         title: "Elementary & High School Library",
         subtitle: "Capacities: ",
     },
-    { id: 12, title: "Basketball Court", subtitle: "Capacities: " },
+
+    { id: 11, title: "Basketball Court", subtitle: "Capacities: " },
 ];
 
 const EventSummary: React.FC<EventSummaryProps> = ({

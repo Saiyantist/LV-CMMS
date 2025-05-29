@@ -542,18 +542,18 @@ const EditBookingsModal = ({
                             </div>
                         )}
                     </div>
-                    <div className="flex justify-end gap-2 mt-6">
+                    <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={onClose}
-                            className="min-w-[100px]"
+                            className="w-full sm:w-auto sm:min-w-[120px]"
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
-                            className="bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
+                            className="w-full sm:w-auto sm:min-w-[120px] bg-secondary hover:bg-primary text-white"
                         >
                             Save
                         </Button>

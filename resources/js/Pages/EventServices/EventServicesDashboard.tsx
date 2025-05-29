@@ -317,25 +317,27 @@ export default function EventServicesDashboard({
             totalStatuses > 0 ? Math.round((count / totalStatuses) * 100) : 0;
     });
 
-    // const columns: ColumnDef<Booking, any>[] = [
-    //     {
-    //         accessorKey: "date",
-    //         header: "Date Requested",
-    //         cell: ({ row }) => <div>{row.getValue("date")}</div>,
-    //     },
-    //     {
-    //         accessorKey: "venue",
-    //         header: "Requested Venue",
-    //         cell: ({ row }) => (
-    //             <div>
-    //                 {Array.isArray(row.original.venue)
-    //                     ? row.original.venue.join(", ")
-    //                     : row.getValue("venue")}
-    //             </div>
-    //         ),
-    //     },
-    //     // ...other columns as needed
-    // ];
+    function truncateText(text: string, maxLength = 20) {
+        if (!text) return "";
+        return text.length > maxLength
+            ? text.slice(0, maxLength) + "..."
+            : text;
+    }
+
+    // Add these handlers inside your component (for now, just alert or log)
+    const handleViewBooking = (booking: any) => {
+        alert(`View booking: ${booking.eventName}`);
+    };
+    const handleDeleteBooking = (booking: any) => {
+        if (window.confirm("Are you sure you want to delete this booking?")) {
+            alert(`Delete booking: ${booking.eventName}`);
+        }
+    };
+    const handleCancelBooking = (booking: any) => {
+        if (window.confirm("Are you sure you want to cancel this booking?")) {
+            alert(`Cancel booking: ${booking.eventName}`);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-white p-6">
@@ -462,7 +464,6 @@ export default function EventServicesDashboard({
                                 </div>
                             </div>
 
-
                             {/* Bar Graph,  might do this later. */}
 
                             {/* <CardTitle className="text-lg font-semibold">
@@ -524,18 +525,34 @@ export default function EventServicesDashboard({
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Date Requested</TableHead>
-                                    <TableHead>Requested Venue</TableHead>
-                                    <TableHead>Event Date</TableHead>
-                                    <TableHead>Event Time</TableHead>
-                                    <TableHead>Event Name</TableHead>
-                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-center">
+                                        {" "}
+                                        Date Requested
+                                    </TableHead>
+                                    <TableHead className="text-center">
+                                        Requested Venue
+                                    </TableHead>
+                                    <TableHead className="text-center">
+                                        Event Date
+                                    </TableHead>
+                                    <TableHead className="text-center">
+                                        Event Time
+                                    </TableHead>
+                                    <TableHead className="text-center">
+                                        Event Name
+                                    </TableHead>
+                                    <TableHead className="text-center">
+                                        Status
+                                    </TableHead>
+                                    <TableHead className="text-center">
+                                        Action
+                                    </TableHead>{" "}
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {bookingActivity.map((booking, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>
+                                        <TableCell className="text-center">
                                             {/* Format: Month {day}, Year */}
                                             {booking.dateRequested
                                                 ? new Date(
@@ -551,7 +568,7 @@ export default function EventServicesDashboard({
                                                 : ""}
                                         </TableCell>
                                         <TableCell>{booking.venue}</TableCell>
-                                        <TableCell>
+                                        <TableCell className="text-center">
                                             {/* Format: Month {day}, Year to Month {day}, Year */}
                                             {booking.eventDate &&
                                             booking.eventDate !== "N/A"
@@ -579,7 +596,7 @@ export default function EventServicesDashboard({
                                                   })()
                                                 : "N/A"}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="text-center" >
                                             {/* Format: h:mm am/pm to h:mm am/pm */}
                                             {booking.eventTime &&
                                             booking.eventTime !== "N/A"
@@ -633,10 +650,40 @@ export default function EventServicesDashboard({
                                                 : "N/A"}
                                         </TableCell>
                                         <TableCell>
-                                            {booking.eventName}
+                                            <span title={booking.eventName}>
+                                                {truncateText(
+                                                    booking.eventName
+                                                )}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-center" >
+                                            {getStatusBadge(booking.status)}
                                         </TableCell>
                                         <TableCell>
-                                            {getStatusBadge(booking.status)}
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-secondary hover:bg-primary text-white"
+                                                    onClick={() =>
+                                                        handleViewBooking(
+                                                            booking
+                                                        )
+                                                    }
+                                                >
+                                                    View
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-destructive hover:bg-red-700 text-white"
+                                                    onClick={() =>
+                                                        handleDeleteBooking(
+                                                            booking
+                                                        )
+                                                    }
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}

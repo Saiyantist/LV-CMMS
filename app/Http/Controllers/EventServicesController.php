@@ -15,12 +15,20 @@ class EventServicesController extends Controller
     // Map events for calendar view
     $calendarEvents = [];
     foreach ($events as $event) {
-        $day = date('j', strtotime($event->event_start_date)); // day of month (1-31)
-        $calendarEvents[$day][] = [
-            'title' => $event->event_name,
-            'time' => date('H:i', strtotime($event->event_start_date)),
-            'status' => $event->status,
-        ];
+        // Use the "Date Requested" (created_at) as the key in YYYY-MM-DD format
+        $dateKey = $event->created_at ? date('Y-m-d', strtotime($event->created_at)) : null;
+        if ($dateKey) {
+            $calendarEvents[$dateKey][] = [
+                'title' => $event->event_name,
+                // Combine start and end time
+                'time' => $event->event_start_time && $event->event_end_time
+                    ? date('h:i A', strtotime($event->event_start_time)) . ' - ' . date('h:i A', strtotime($event->event_end_time))
+                    : ($event->event_start_time ? date('h:i A', strtotime($event->event_start_time)) : ''),
+                'status' => $event->status,
+                'eventDate' => $event->event_start_date, // <-- add this
+                'dateRequested' => $dateKey, // for clarity
+            ];
+        }
     }
 
     // Map events for list view
@@ -30,7 +38,10 @@ class EventServicesController extends Controller
             'date' => $event->created_at->format('Y-m-d'),
             'venue' => $event->location,
             'eventDate' => $event->event_start_date,
-            'time' => $event->event_start_time,
+            // Combine start and end time
+            'time' => $event->event_start_time && $event->event_end_time
+                ? date('h:i A', strtotime($event->event_start_time)) . ' - ' . date('h:i A', strtotime($event->event_end_time))
+                : ($event->event_start_time ? date('h:i A', strtotime($event->event_start_time)) : ''),
             'name' => $event->event_name,
             'status' => $event->status,
         ];
