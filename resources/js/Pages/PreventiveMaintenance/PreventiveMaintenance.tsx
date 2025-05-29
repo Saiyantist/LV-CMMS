@@ -95,15 +95,11 @@ const PreventiveMaintenance: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
 
-    // console.log(workOrders[0]);
-    // console.log(maintenanceSchedules[0]);
-    // console.log(workOrders[0].asset?.maintenance_schedule);
-
     const PMSWorkOrdersColumns: ColumnDef<WorkOrders>[] = [
     {
-        id: "id",
-        header: "ID",
         accessorKey: "id",
+        header: "ID",
+        cell: ({ row }) => <div>{row.getValue("id")}</div>,
         meta: {
             cellClassName: "w-12",
             searchable: true,
@@ -172,7 +168,7 @@ const PreventiveMaintenance: React.FC = () => {
         header: "Status",
         accessorKey: "status",
         cell: ({ row }) => {
-            return <StatusCell value={row.original.status} user={user} row={row.original} />;
+            return <StatusCell value={row.original.status} user={user} row={row} />;
         },
         enableSorting: false,
         meta: {
