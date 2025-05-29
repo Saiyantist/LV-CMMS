@@ -605,8 +605,7 @@ export default function IndexLayout({
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
                         <TabsList className="bg-gray-200 text-black rounded-md mb-6">
                             <TabsTrigger value="Pending">Pending</TabsTrigger>
-                            <TabsTrigger value="Assigned">Assigned</TabsTrigger>
-                            <TabsTrigger value="Scheduled">Scheduled</TabsTrigger>
+                            <TabsTrigger value="Accepted">Accepted</TabsTrigger>
                             <TabsTrigger value="For Budget Request">
                                 For Budget Request
                             </TabsTrigger>
@@ -822,9 +821,9 @@ export default function IndexLayout({
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="mt-4 flex justify-end gap-2"
+                            {/* <div className="mt-4 flex justify-end gap-2"
                                 onClick={(e) => {e.stopPropagation();}}
-                            >
+                            > */}
                                 {/* <Button
                                     className="bg-secondary self-center text-white px-4 h-8 xs:h-10 xs:px-6 text-xs xs:text-[1rem] rounded-md hover:bg-secondary/80 hover:text-white transition-all duration-200"
                                     onClick={() =>
@@ -833,7 +832,7 @@ export default function IndexLayout({
                                 >
                                     View
                                 </Button> */}
-                                { workOrder.status === "Pending" && (
+                                {/* { workOrder.status === "Pending" && (
                                 <div className="flex gap-2 items-center justify-center">
                                     <Button
                                         variant={"outline"}
@@ -851,7 +850,7 @@ export default function IndexLayout({
                                     </Button>
                                 </div>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                     );
                 })}

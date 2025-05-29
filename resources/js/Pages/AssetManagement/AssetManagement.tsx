@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import FlashToast from "@/Components/FlashToast";
 import { Button } from "@/Components/shadcnui/button";
 import { Trash } from "lucide-react";
+import ScrollToTopButton from "@/Components/ScrollToTopButton";
 
 interface Asset {
     id: number;
@@ -56,9 +57,21 @@ const AssetManagement: React.FC = () => {
     const maintenancePersonnel = props.maintenancePersonnel as MaintenancePersonnel[];
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [isCreating, setIsCreating] = useState(false);
-    const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(
-        null
-    );
+    const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(null);
+    const [showScrollUpButton, setShowScrollUpButton] = useState(false);
+
+    const handleScroll = () => {
+        setShowScrollUpButton(window.scrollY > 300);
+    };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     const handleCheckboxChange = (assetId: number) => {
         setSelectedAssets((prev) =>
@@ -335,6 +348,11 @@ const AssetManagement: React.FC = () => {
             )}
 
             <FlashToast />
+            {/* Scroll to Top Button */}
+            <ScrollToTopButton
+                showScrollUpButton={showScrollUpButton}
+                scrollToTop={scrollToTop}
+            />
         </Authenticated>
     );
 };
