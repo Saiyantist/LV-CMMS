@@ -139,8 +139,7 @@ export default function CreateWorkOrderModal({
         if (isWorkOrderManager) {
             formData.append("work_order_type", data.work_order_type || "Work Order");
             formData.append("label", data.label || "");
-            if (date)
-                formData.append("scheduled_at", format(date, "yyyy-MM-dd"));
+            if (date) formData.append("scheduled_at", format(date, "yyyy-MM-dd"));
             formData.append("priority", data.priority || "");
             formData.append("status", data.status || "");
             formData.append("assigned_to", data.assigned_to || "");
@@ -149,10 +148,10 @@ export default function CreateWorkOrderModal({
         }
 
         // For Debugging
-        // console.log("=== Form Data ===:");
-        // for (const [key, value] of formData.entries()) {
-        //     console.log(`${key}:`, value);
-        // }
+        console.log("=== Form Data ===:");
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
 
         router.post("/work-orders", formData, {
             forceFormData: true,
@@ -697,16 +696,18 @@ export default function CreateWorkOrderModal({
 
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <Button variant="outline" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        type="submit"
-                        onClick={submit}
-                        className="bg-primary hover:bg-primary/90 text-white"
-                    >
-                        Create
-                    </Button>
+                    <div className="flex gap-2 xs:flex-row flex-col">
+                        <Button variant="outline" onClick={onClose}>
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            onClick={submit}
+                            className="bg-primary hover:bg-primary/90 text-white"
+                        >
+                            Create
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

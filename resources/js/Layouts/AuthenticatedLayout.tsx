@@ -16,17 +16,19 @@ export default function AuthenticatedLayout({
             <Sidebar user={{ ...user, permissions: user.permissions ?? [] }} />
 
             {/* Wrapper for main content */}
-            <div className="flex flex-col md:ml-56 pt-[104px] md:pt-0">
+            <div className="flex flex-col md:ml-56 md:pt-0 pb-20">
                 {/* Top Navbar (Desktop Only) */}
                 <nav className="hidden md:flex justify-end space-x-1 h-12 px-4 bg-white shadow-sm sticky top-0 z-10">
                     {/* Josh: Make this into a component if you keep seeing it. 👀 */}
-                    <Button
+
+                    {/* Hide Notification for DEMO */}
+                    {/* <Button
                         variant={"ghost"}
                         size={"icon"}
                         className="self-center rounded-md text-sm font-medium text-gray-500 hover:text-gray-700"
                         onClick={(e) => {console.log("open notifications")}}>
                     <Bell />
-                    </Button>
+                    </Button> */}
 
                     <Link
                         href={route("profile.edit")}

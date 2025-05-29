@@ -90,7 +90,6 @@ export default function AssignWorkOrderModal({
         approved_by: workOrder.approved_by ?? "",
     });
 
-    console.log(workOrder);
     const validateForm = () => {
         const newErrors: Record<string, string> = {}
 

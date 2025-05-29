@@ -21,18 +21,26 @@ class WorkOrderFactory extends Factory
     public function definition(): array
     {
         $status = fake()->randomElement(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined']);
+        $workOrderType = fake()->randomElement(['Work Order', 'Preventive Maintenance', 'Compliance']);
         
         $data = [
             'report_description' => fake()->sentence(),
             'location_id' => Location::inRandomOrder()->first()?->id ?? Location::factory(),
             'status' => $status,
-            'work_order_type' => fake()->randomElement(['Work Order', 'Preventive Maintenance', 'Compliance']),
+            'work_order_type' => $workOrderType,
             'requested_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'requested_at' => fake()->dateTimeBetween('-2 month', 'now')->format('Y-m-d H:i:s'),
-        ];  //asset shall only have if !pending
-        
-        // Only add priority, label, and remarks if status is not Pending
-        if ($status !== 'Pending') {
+        ];
+
+        // If work order type is Preventive Maintenance, always assign an asset
+        if ($workOrderType === 'Preventive Maintenance') {
+            $data['asset_id'] = Asset::inRandomOrder()->first()?->id ?? Asset::factory();
+            $data['priority'] = fake()->randomElement(['Low', 'Medium', 'High', 'Critical']);
+            $data['label'] = fake()->randomElement(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label']);
+            $data['remarks'] = fake()->optional()->sentence();
+        }
+        // For other work order types, only add priority, label, and remarks if status is not Pending
+        else if ($status !== 'Pending') {
             $data['priority'] = fake()->randomElement(['Low', 'Medium', 'High', 'Critical']);
             $data['label'] = fake()->randomElement(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label']);
             $data['remarks'] = fake()->optional()->sentence();

@@ -14,14 +14,17 @@ import { getPriorityColor } from "@/utils/getPriorityColor";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import AssignWorkOrderModal from "./components/AssignWorkOrderModal";
 import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
-import { BookX, SquarePen, Trash } from "lucide-react";
+import { BookX, Search, SlidersHorizontal, SquarePen, Trash } from "lucide-react";
 import DeclineWorkOrderModal from "./components/DeclineWorkOrderModal";
 import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
 import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
 import DeleteWorkOrderModal from "./components/DeleteWorkOrderModal";
+import { Input } from "@/Components/shadcnui/input";
+import FilterModal from "./components/FilterModal";
+import { clearLine } from "readline";
 interface Props {
     user: {
         id: number;
@@ -72,7 +75,7 @@ interface WorkOrders {
         id: number;
         name: string;
     };
-    images: string;
+    images: string[];
     asset: {
         id: number;
         name: string;
@@ -104,6 +107,7 @@ export default function IndexLayout({
 }: Props) {
     const isRequesterOrPersonnel =
     user.roles[0].name === "internal_requester" ||
+    user.roles[0].name === "department_head" ||
     user.roles[0].name === "maintenance_personnel";
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
@@ -113,10 +117,12 @@ export default function IndexLayout({
     const [decliningWorkOrder, setDecliningWorkOrder] = useState<any>(null);
     const [cancellingWorkOrder, setCancellingWorkOrder] = useState<any>(null);
     const [deletingWorkOrder, setDeletingWorkOrder] = useState<any>(null);
-    const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>(
-        []
-    );
-
+    const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>([]);
+    const [mobileSearchQuery, setMobileSearchQuery] = useState("");
+    const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
+    const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, any>>({});
+    const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
+    
     const toggleDescription = (id: number) => {
         setExpandedDescriptions((prev) =>
             prev.includes(id)
@@ -124,6 +130,65 @@ export default function IndexLayout({
                 : [...prev, id]
         );
     };
+
+    // const filteredMobileWorkOrders = useMemo(() => {
+    //     return filteredWorkOrders.filter((workOrder) => {
+    //         const searchLower = mobileSearchQuery.toLowerCase();
+    //         return (
+    //             workOrder.report_description?.toLowerCase().includes(searchLower) ||
+    //             workOrder.location?.name?.toLowerCase().includes(searchLower)
+    //         );
+    //     });
+    // }, [filteredWorkOrders, mobileSearchQuery]);
+
+    const filteredMobileWorkOrders = useMemo(() => {
+        let filtered = filteredWorkOrders;
+    
+        // Apply column filters
+        if (Object.keys(mobileColumnFilters).length > 0) {
+            filtered = filtered.filter((row) => {
+                return Object.entries(mobileColumnFilters).every(([key, filterValue]) => {
+                    if (!filterValue || filterValue === "all") return true;
+                    const keys = key.split(".");
+                    const value = keys.reduce((obj, k) => obj?.[k], row as any);
+                    return value === filterValue;
+                });
+            });
+        }
+    
+        // Apply search query
+        if (mobileSearchQuery) {
+            filtered = filtered.filter((workOrder) => {
+                const searchLower = mobileSearchQuery.toLowerCase();
+                return (
+                    workOrder.report_description?.toLowerCase().includes(searchLower) ||
+                    workOrder.location?.name?.toLowerCase().includes(searchLower)
+                );
+            });
+        }
+    
+        return filtered;
+    }, [filteredWorkOrders, mobileSearchQuery, mobileColumnFilters]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isMobileFilterModalOpen && mobileFilterButtonRef.current && !mobileFilterButtonRef.current.contains(event.target as Node)) {
+                const modalElement = document.querySelector('[data-filter-modal="true"]');
+                if (
+                    modalElement &&
+                    !modalElement.contains(event.target as Node) &&
+                    !mobileFilterButtonRef.current.contains(event.target as Node)
+                ) {
+                    setIsMobileFilterModalOpen(false);
+                }
+            }
+        };
+    
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isMobileFilterModalOpen]);
 
     const requesterOrPersonnelColumns: ColumnDef<WorkOrders>[] = [
         {
@@ -177,7 +242,7 @@ export default function IndexLayout({
             cell: ({ row }) => (
                     <div className="flex gap-2 justify-start px-2">
                         <Button
-                            className="bg-primary h-6 text-xs rounded-sm"
+                            className="bg-secondary h-6 text-xs rounded-sm"
                             onClick={() => setIsViewingWorkOrder(row.original)}
                         >
                             View
@@ -187,7 +252,7 @@ export default function IndexLayout({
                             <Button
                                 variant={"outline"}
                                 size={"icon"}
-                                className="h-6 text-xs rounded-sm"
+                                className="h-6 text-xs text-secondary rounded-sm"
                                 onClick={() => setEditingWorkOrder(row.original)}
                             ><SquarePen />
                             </Button>
@@ -215,7 +280,7 @@ export default function IndexLayout({
             header: "ID",
             cell: ({ row }) => <div>{row.getValue("id")}</div>,
             meta: {
-                headerClassName: "w-12",
+                cellClassName: "w-12",
                 searchable: true,
             },
         },
@@ -224,7 +289,7 @@ export default function IndexLayout({
             header: "Date Requested",
             cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
             meta: { 
-                cellClassName: "min-w-[7.5rem] max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                cellClassName: "w-[8.5rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
             },
         },
         {
@@ -233,7 +298,7 @@ export default function IndexLayout({
             cell: ({ row }) => <div>{row.original.location.name}</div>,
             enableSorting: false,
             meta: {
-                cellClassName: "min-w-[7.5rem] max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                cellClassName: "max-w-[6rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
                 filterable: true,
             },
@@ -246,7 +311,7 @@ export default function IndexLayout({
             ),
             enableSorting: false,
             meta: {
-                cellClassName: "max-w-[15rem] px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                cellClassName: "min-w-[9rem] max-w-[11.5rem] px-1 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
             },
         },
@@ -326,7 +391,7 @@ export default function IndexLayout({
                     cell: ({ row }: { row: Row<WorkOrders> }) => (
                         <div className="flex gap-2 justify-center">
                             <Button
-                                className="bg-primary h-6 text-xs rounded-sm"
+                                className="bg-secondary h-6 text-xs rounded-sm hover:bg-secondary/80 hover:text-white transition-all duration-200"
                                 onClick={() => setEditingWorkOrder(row.original)}
                             >
                                 Edit
@@ -355,21 +420,57 @@ export default function IndexLayout({
                         <div>{row.original.requested_by?.name || "N/A"}</div>
                     ),
                     enableSorting: false,
+                    meta: {
+                        cellClassName: "max-w-[8rem] text-center",
+                        searchable: true,
+                        filterable: true,
+                    },
                 },
+                ...(activeTab === "For Budget Request" ? [
+                    {
+                        accessorKey: "label",
+                        header: "Label",
+                        cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("label")}</div>,
+                        enableSorting: false,
+                        meta: {
+                            cellClassName: "text-center",
+                            searchable: true,
+                        }
+                    },
+                    // {
+                    //     accessorKey: "priority",
+                    //     header: "Priority",
+                    //     cell: ({ row }: { row: Row<WorkOrders> }) => (
+                    //         <div
+                    //             className={`px-2 py-1 rounded ${getPriorityColor(
+                    //                 row.getValue("priority")
+                    //             )}`}
+                    //         >
+                    //             {row.getValue("priority")}
+                    //         </div>
+                    //     ),
+                    //     sortingFn: prioritySorting,
+                    //     meta: {
+                    //         headerClassName: "max-w-10",
+                    //         cellClassName: "text-center",
+                    //         filterable: true,
+                    //     },
+                    // },
+                ] : []),
                 {
                     id: "actions",
                     header: "Action",
                     cell: ({ row }: { row: Row<WorkOrders> }) => (
                         <div className="flex gap-2 justify-center">
                             <Button
-                                className="bg-primary h-6 text-xs text-white rounded-sm !border-none hover:bg-primary/85 hover:text-white transition-all duration-200"
+                                className="bg-secondary h-6 text-xs text-white rounded-sm !border-none hover:bg-secondary/80 hover:text-white transition-all duration-200"
                                 onClick={() => setAcceptingWorkOrder(row.original)}
                             >
                                 Accept
                             </Button>
                             {activeTab === "Pending" && (
                                 <Button
-                                    className="h-6 text-xs text-white rounded-sm !border-none bg-secondary/60 hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                    className="h-6 text-xs text-white rounded-sm !border-none bg-secondary/65 hover:bg-secondary/80 hover:text-white transition-all duration-200"
                                     onClick={() => setForBudgetRequest(row.original)}
                                 >
                                     Budget Request
@@ -386,7 +487,7 @@ export default function IndexLayout({
                     ),
                     enableSorting: false,
                     meta: {
-                        cellClassName: "max-w-[10rem] text-center",
+                        cellClassName: "min-w-[7.5rem] max-w-[8rem] text-center",
                     },
                 }
             ]
@@ -491,7 +592,7 @@ export default function IndexLayout({
                     </h1>
                     <PrimaryButton
                         onClick={() => setIsCreating(true)}
-                        className="bg-secondary text-white hover:bg-primary transition-all duration-200 text-sm sm:text-base px-5 py-2 rounded-md w-full sm:w-auto text-center justify-center"
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-200 !text-lg sm:text-base px-5 py-3 sm:py-2 rounded-md w-[95%] sm:w-auto text-center self-center justify-center"
                     >
                         + Add Work Order
                     </PrimaryButton>
@@ -536,7 +637,7 @@ export default function IndexLayout({
             <div
                 className={`hidden md:block overflow-x-auto rounded-md -mt-[4.1rem] ${
                     !user.permissions.includes("manage work orders")
-                        ? "!-mt-[0.7rem]"
+                        ? "-mt-[3.8rem]"
                         : ""
                 }`}
             >
@@ -549,7 +650,49 @@ export default function IndexLayout({
 
             {/* Mobile Card View */}
             <div className="md:hidden flex flex-col gap-4 mt-4 px-4">
-                {filteredWorkOrders.map((workOrder) => {
+
+                {/* Search and Filter Controls */}
+                <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search description or location"
+                            value={mobileSearchQuery}
+                            onChange={(event) => setMobileSearchQuery(event.target.value)}
+                            className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
+                        />
+                    </div>
+                    <Button
+                        ref={mobileFilterButtonRef}
+                        variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
+                        size="sm"
+                        className={`h-10 gap-1 border rounded-md ${
+                            Object.keys(mobileColumnFilters).length > 0 ? "bg-primary text-white" : ""
+                        }`}
+                        onClick={() => setIsMobileFilterModalOpen(!isMobileFilterModalOpen)}
+                    >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        Filter
+                        {Object.keys(mobileColumnFilters).length > 0 && (
+                            <span className="ml-1 rounded-full bg-white text-primary w-5 h-5 flex items-center justify-center text-xs">
+                                {Object.values(mobileColumnFilters).filter((value) => value !== "" && value !== "all").length}
+                            </span>
+                        )}
+                    </Button>
+                </div>
+
+                {/* Filter Modal */}
+                <FilterModal
+                    isOpen={isMobileFilterModalOpen}
+                    onClose={() => setIsMobileFilterModalOpen(false)}
+                    columns={columns}
+                    columnFilters={mobileColumnFilters}
+                    setColumnFilters={setMobileColumnFilters}
+                    data={filteredWorkOrders}
+                    buttonRef={mobileFilterButtonRef as React.RefObject<HTMLButtonElement>}
+                />
+
+                {filteredMobileWorkOrders.map((workOrder) => {
                     const description = workOrder.report_description || "";
                     const shouldTruncate = description.length > 25;
                     const priorities = ["Low", "Medium", "High", "Critical"];
@@ -563,16 +706,19 @@ export default function IndexLayout({
                     return (
                         <div
                             key={workOrder.id}
-                            className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
+                            className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"
+                            onClick={() => {
+                                setIsViewingWorkOrder(workOrder);
+                            }}
                         >
                             {/* Top row: ID and Status aligned horizontally */}
-                            <div className="flex justify-between items-start text-sm text-gray-800 mb-1">
+                            <div className="flex justify-between items-start text-gray-800 mb-1">
                                 <p>
-                                    <span className="font-medium">ID:</span>{" "}
+                                    <span className="font-bold text-primary">ID:</span>{" "}
                                     {workOrder.id}
                                 </p>
                                 <span
-                                    className={`text-xs font-semibold px-3 py-1 rounded-full ${getStatusColor(
+                                    className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
                                         workOrder.status
                                     )}`}
                                 >
@@ -581,84 +727,93 @@ export default function IndexLayout({
                             </div>
 
                             {/* Info Section */}
-                            <div className="space-y-1 pr-8 text-sm text-gray-800">
+                            <div className="space-y-1 pr-8 text-gray-800">
+
+                                {/* Description */}
                                 <p>
-                                    <span className="font-medium">
+                                    <span className="font-bold text-primary">
                                         Description:
                                     </span>{" "}
                                     {shouldTruncate
                                         ? `${description.slice(0, 25)}...`
                                         : description}
                                 </p>
+
+                                {/* Location */}
                                 <p>
-                                    <span className="font-medium">
+                                    <span className="font-bold text-primary">
                                         Location:
                                     </span>{" "}
                                     {workOrder.location?.name || "N/A"}
                                 </p>
-                                <p className="flex items-center text-sm">
-                                    <span className="font-medium mr-1">
-                                        Priority:
-                                    </span>
-                                    <span className="flex gap-1">
-                                        {["low", "med", "high", "crit"].map(
-                                            (level) => {
-                                                const normalizedPriority =
-                                                    workOrder.priority
-                                                        ?.toLowerCase()
-                                                        .trim();
 
-                                                // Mapping for alternate values like "medium" -> "med"
-                                                const priorityAliases: Record<
-                                                    string,
-                                                    string
-                                                > = {
-                                                    low: "low",
-                                                    medium: "med",
-                                                    med: "med",
-                                                    high: "high",
-                                                    critical: "crit",
-                                                    crit: "crit",
-                                                };
+                                {/* Priority */}
+                                {isWorkOrderManager && (
+                                    <p className="flex items-center text-sm">
+                                        <span className="font-bold text-primary mr-1">
+                                            Priority:
+                                        </span>
+                                        <span className="flex gap-1">
+                                            {["low", "med", "high", "crit"].map(
+                                                (level) => {
+                                                    const normalizedPriority =
+                                                        workOrder.priority
+                                                            ?.toLowerCase()
+                                                            .trim();
 
-                                                const current =
-                                                    priorityAliases[
-                                                        normalizedPriority || ""
-                                                    ] || "";
+                                                    // Mapping for alternate values like "medium" -> "med"
+                                                    const priorityAliases: Record<
+                                                        string,
+                                                        string
+                                                    > = {
+                                                        low: "low",
+                                                        medium: "med",
+                                                        med: "med",
+                                                        high: "high",
+                                                        critical: "crit",
+                                                        crit: "crit",
+                                                    };
 
-                                                const isActive =
-                                                    current === level;
+                                                    const current =
+                                                        priorityAliases[
+                                                            normalizedPriority || ""
+                                                        ] || "";
 
-                                                const bgColorMap: Record<
-                                                    string,
-                                                    string
-                                                > = {
-                                                    low: "bg-green-100 text-green-800",
-                                                    med: "bg-yellow-100 text-yellow-800",
-                                                    high: "bg-orange-100 text-orange-800",
-                                                    crit: "bg-red-100 text-red-800",
-                                                };
+                                                    const isActive =
+                                                        current === level;
 
-                                                return (
-                                                    <span
-                                                        key={level}
-                                                        className={`px-2 py-1 text-xs font-semibold border ${
-                                                            isActive
-                                                                ? `${bgColorMap[level]} border-transparent`
-                                                                : "bg-gray-100 text-gray-400 border-gray-300"
-                                                        }`}
-                                                    >
-                                                        {level}
-                                                    </span>
-                                                );
-                                            }
-                                        )}
-                                    </span>
-                                </p>
+                                                    const bgColorMap: Record<
+                                                        string,
+                                                        string
+                                                    > = {
+                                                        low: "bg-green-100 text-green-800",
+                                                        med: "bg-yellow-100 text-yellow-800",
+                                                        high: "bg-orange-100 text-orange-800",
+                                                        crit: "bg-red-100 text-red-800",
+                                                    };
 
+                                                    return (
+                                                        <span
+                                                            key={level}
+                                                            className={`px-2 py-1 text-xs font-semibold border ${
+                                                                isActive
+                                                                    ? `${bgColorMap[level]} border-transparent`
+                                                                    : "bg-gray-100 text-gray-400 border-gray-300"
+                                                            }`}
+                                                        >
+                                                            {level}
+                                                        </span>
+                                                    );
+                                                }
+                                            )}
+                                        </span>
+                                    </p>
+                                )}
+
+                                {/* Date Requested */}
                                 <p>
-                                    <span className="font-medium">
-                                        Requested At:
+                                    <span className="font-bold text-primary">
+                                        Date Requested:
                                     </span>{" "}
                                     {new Date(
                                         workOrder.requested_at
@@ -667,15 +822,35 @@ export default function IndexLayout({
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="mt-4 flex justify-end gap-2">
-                                <PrimaryButton
-                                    className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:bg-blue-700 transition"
+                            <div className="mt-4 flex justify-end gap-2"
+                                onClick={(e) => {e.stopPropagation();}}
+                            >
+                                {/* <Button
+                                    className="bg-secondary self-center text-white px-4 h-8 xs:h-10 xs:px-6 text-xs xs:text-[1rem] rounded-md hover:bg-secondary/80 hover:text-white transition-all duration-200"
                                     onClick={() =>
-                                        setEditingWorkOrder(workOrder)
+                                        setIsViewingWorkOrder(workOrder)
                                     }
                                 >
                                     View
-                                </PrimaryButton>
+                                </Button> */}
+                                { workOrder.status === "Pending" && (
+                                <div className="flex gap-2 items-center justify-center">
+                                    <Button
+                                        variant={"outline"}
+                                        size={"icon"}
+                                        className="h-8 xs:h-10 w-12 text-white rounded bg-secondary hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                        onClick={() => setEditingWorkOrder(workOrder)}
+                                    ><SquarePen />
+                                    </Button>
+                                    <Button
+                                        variant={"outline"}
+                                        size={"icon"}
+                                        className="h-8 xs:h-10 w-12 text-white rounded bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
+                                        onClick={() => setCancellingWorkOrder(workOrder)}
+                                    ><BookX />
+                                    </Button>
+                                </div>
+                                )}
                             </div>
                         </div>
                     );

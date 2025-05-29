@@ -11,6 +11,10 @@ import { Datatable } from "../WorkOrders/components/Datatable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import FlashToast from "@/Components/FlashToast";
+import { Button } from "@/Components/shadcnui/button";
+import { Trash } from "lucide-react";
 
 interface Asset {
     id: number;
@@ -32,6 +36,13 @@ interface Asset {
     };
 }
 
+interface MaintenancePersonnel {
+    id: number;
+    first_name: string;
+    last_name: string;
+    roles: { id: number; name: string };
+}[];
+
 interface Location {
     id: number;
     name: string;
@@ -40,9 +51,9 @@ interface Location {
 const AssetManagement: React.FC = () => {
     const { props } = usePage();
 
-    const assets = props.assets as Asset[]; // Gotten from the controller
-    const locations = props.locations as Location[]; // Gotten from the controller
-
+    const assets = props.assets as Asset[];
+    const locations = props.locations as Location[];
+    const maintenancePersonnel = props.maintenancePersonnel as MaintenancePersonnel[];
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [isCreating, setIsCreating] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(
@@ -92,8 +103,9 @@ const AssetManagement: React.FC = () => {
             accessorKey: "name",
             header: "Asset Name",
             cell: ({ row }) => <div>{row.getValue("name")}</div>,
+            enableSorting: false,
             meta: {
-                headerClassName: "w-[15%]",
+                headerClassName: "w-[12%]",
                 searchable: true,
             },
         },
@@ -110,6 +122,7 @@ const AssetManagement: React.FC = () => {
                     </div>
                 );
             },
+            enableSorting: false,
             meta: {
                 headerClassName: "w-[20%]",
                 searchable: true,
@@ -120,6 +133,7 @@ const AssetManagement: React.FC = () => {
             accessorKey: "location.name",
             header: "Location",
             cell: ({ row }) => <div>{row.original.location.name}</div>,
+            enableSorting: false,
             meta: {
                 headerClassName: "w-[15%]",
                 searchable: true,
@@ -139,8 +153,8 @@ const AssetManagement: React.FC = () => {
                 </div>
             ),
             meta: {
-                headerClassName: "w-[10%]",
-                cellClassName: "text-center",
+                headerClassName: "w-[30rem]",
+                cellClassName: "flex justify-center",
                 filterable: true,
             },
         },
@@ -166,19 +180,20 @@ const AssetManagement: React.FC = () => {
             id: "actions",
             header: "Action",
             cell: ({ row }) => (
-                <div className="flex justify-center gap-2">
-                    <button
+                <div className="flex justify-start gap-2 px-2">
+                    <Button
                         onClick={() => setViewingAsset(row.original)}
-                        className="bg-secondary text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-700 transition"
+                        className="bg-secondary h-6 text-xs rounded-sm"
                     >
                         View
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant={"outline"}
+                        size={"icon"}
+                        className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
                         onClick={() => handleDelete(row.original.id)}
-                        className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
-                    >
-                        Delete
-                    </button>
+                    ><Trash />
+                    </Button>
                 </div>
             ),
             enableSorting: false,
@@ -188,14 +203,14 @@ const AssetManagement: React.FC = () => {
     // Helper function to get status color
     const getStatusColor = (status: string) => {
         switch (status) {
-            case "Scheduled":
+            case "Functional":
                 return "bg-green-100 text-green-700 border border-green-300";
+            case "Failed":
+                return "bg-red-100 text-red-700 border border-red-300";
             case "Under Maintenance":
                 return "bg-blue-100 text-blue-700 border border-blue-300";
             case "End of Useful Life":
                 return "bg-yellow-100 text-yellow-700 border border-yellow-300";
-            case "Failed":
-                return "bg-red-100 text-red-700 border border-red-300";
             default:
                 return "bg-gray-100 text-gray-700 border border-gray-300";
         }
@@ -223,9 +238,9 @@ const AssetManagement: React.FC = () => {
             </div>
 
             {/* Main content below header */}
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 mx-auto">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 mx-auto ">
                 {/* Desktop Table View */}
-                <div className="hidden md:block w-full overflow-x-auto rounded-md">
+                <div className="hidden md:block w-full overflow-x-auto rounded-md -mt-[6.5rem]">
                     <Datatable
                         columns={columns}
                         data={assets}
@@ -306,18 +321,20 @@ const AssetManagement: React.FC = () => {
             {isCreating && (
                 <CreateAssetModal
                     locations={locations}
-                    isOpen={isCreating}
+                    maintenancePersonnel={maintenancePersonnel}
                     onClose={() => setIsCreating(false)}
-                    onSave={() => setIsCreating(false)}
                 />
             )}
 
             {viewingAsset && (
                 <ViewAssetModal
-                    data={viewingAsset}
-                    onClose={() => setViewingAsset(null)}
+                    asset={viewingAsset}
+                    onClose={() => setViewingAsset(null)}   
+                    locations={locations}
                 />
             )}
+
+            <FlashToast />
         </Authenticated>
     );
 };

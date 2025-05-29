@@ -13,17 +13,33 @@ const getDateLimits = () => {
 
     return { minDate, maxDate };
 };
+
+interface Department {
+    id: number;
+    name: string;
+    type: string;
+}
+
+interface WorkGroup {
+    id: number;
+    name: string;
+}
+
+interface UpdateProfileInformationProps {
+    mustVerifyEmail: boolean;
+    status?: string;
+    className?: string;
+    departments?: Department[];
+    work_groups?: WorkGroup[];
+}
+
 export default function UpdateProfileInformation({
     mustVerifyEmail,
     status,
     className = '',
     departments = [],
-}: {
-    mustVerifyEmail: boolean;
-    status?: string;
-    className?: string;
-    departments?: { id:number; name:string;}[];
-}) {
+    work_groups = [],
+}: UpdateProfileInformationProps) {
 
     const { minDate, maxDate } = getDateLimits();
     const user = usePage().props.auth.user;
@@ -37,6 +53,7 @@ export default function UpdateProfileInformation({
             gender: user.gender || '',
             staff_type: user.staff_type || '',
             department_id: user.department_id || '', // Fetch department ID
+            work_group_id: user.work_group_id || '', // Fetch work group ID
             email: user.email,
         });
 
@@ -144,42 +161,118 @@ export default function UpdateProfileInformation({
                     <InputError className="mt-2" message={errors.gender} />
                 </div>
 
-                {/* Staff Type */}
-                <div>
-                    <InputLabel htmlFor="staff_type" value="Staff Type" />
+                {/* Staff type */}
+                <div className="w-full">
+                    <div className="flex">
+                        <InputLabel
+                            htmlFor="staff_type"
+                            value="Type of Staff"
+                        />
+                    </div>
                     <select
                         id="staff_type"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                        name="staff_type"
                         value={data.staff_type}
-                        onChange={(e) => setData('staff_type', e.target.value)}
-                        required
-                    >
-                        <option value="">Select Staff Type</option>
-                        <option value="teaching">Teaching</option>
-                        <option value="non-teaching">Non-Teaching</option>
-                    </select>
-                    <InputError className="mt-2" message={errors.staff_type} />
-                </div>
-
-                {/* Department */}
-                <div>
-                    <InputLabel htmlFor="department_id" value="Department" />
-                    <select
-                        id="department_id"
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-                        value={data.department_id}
-                        onChange={(e) => setData('department_id', e.target.value)}
+                        onChange={(e) =>
+                            setData("staff_type", e.target.value)
+                        }
                         required
                     >
-                        <option value="">Select Department</option>
-                        {departments.map((dept: { id: number; name: string }) => (
-                            <option key={dept.id} value={dept.id}>
-                                {dept.name}
-                            </option>
-                        ))}
+                        <option value="">Select Type</option>
+                        <option value="teaching">Teaching</option>
+                        <option value="non-teaching">
+                            Non-teaching
+                        </option>
+                        {data.staff_type === "maintenance_personnel" && (
+                            <>
+                                <option value="maintenance_personnel">
+                                    Maintenance Personnel
+                                </option>
+                            </>
+                        )}
                     </select>
-                    <InputError className="mt-2" message={errors.department_id} />
+                    <InputError
+                        message={errors.staff_type}
+                        className="mt-2"
+                    />
                 </div>
+                {/* Department */}
+                {["teaching", "non-teaching"].includes(
+                    data.staff_type
+                ) && (
+                    <div className="w-full mt-4 md:mt-0">
+                        <div className="flex">
+                            <InputLabel
+                                htmlFor="department"
+                                value="Department"
+                            />
+                        </div>
+                        <select
+                            id="department_id"
+                            name="department_id"
+                            value={data.department_id}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                            onChange={(e) =>
+                                setData("department_id", e.target.value)
+                            }
+                            required
+                        >
+                            <option value="">Select Department</option>
+                            {departments?.map(
+                                (dept) =>
+                                    dept.type === data.staff_type && (
+                                        <option
+                                            key={dept.id}
+                                            value={dept.id}
+                                        >
+                                            {dept.name}
+                                        </option>
+                                    )
+                            )}
+                        </select>
+                        <InputError
+                            message={errors.department_id}
+                            className="mt-2"
+                        />
+                    </div>
+                )}
+                {/* Work Group */}
+                {data.staff_type === "maintenance_personnel" && (
+                    <div className="w-full mt-4 md:mt-0">
+                        <div className="flex">
+                            <InputLabel
+                                htmlFor="work_group_id"
+                                value="Work Group"
+                            />
+                            <span className="text-red-500 ml-1">*</span>
+                        </div>
+                        <select
+                            id="work_group_id"
+                            name="work_group_id"
+                            value={data.work_group_id}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                            onChange={(e) => {
+                                setData(
+                                    "work_group_id",
+                                    e.target.value
+                                );
+                            }}
+                            required
+                        >
+                            <option value="">Select Work Group</option>
+                            {work_groups?.map((group) => (
+                                <option key={group.id} value={group.id}>
+                                    {group.name}
+                                </option>
+                            ))}
+                        </select>
+                        <InputError
+                            message={errors.work_group_id}
+                            className="mt-2"
+                        />
+                    </div>
+                )}
 
                 {/* Email */}
                 <div>

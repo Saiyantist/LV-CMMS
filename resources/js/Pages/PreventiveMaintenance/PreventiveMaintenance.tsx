@@ -3,122 +3,236 @@ import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Datatable } from "@/Pages/WorkOrders/components/Datatable";
 import { ColumnDef } from "@tanstack/react-table";
+import { format, parseISO } from "date-fns";
+import { StatusCell } from "../WorkOrders/components/StatusCell";
+import { Button } from "@/Components/shadcnui/button";
+import ViewWorkOrderModal from "../WorkOrders/components/ViewWorkOrderModal";
 
-interface Asset {
+interface WorkOrders {
     id: number;
-    name: string;
-    specification_details: string;
-    location: { id: number; name: string };
+    report_description: string;
+    work_order_type: string;
+    label: string;
+    priority: string;
+    remarks: string;
     status: string;
-    date_acquired: string;
-    last_maintained_at: string;
-    has_preventive_maintenance: boolean;
+    requested_by: {
+        id: number;
+        name: string;
+    };
+    requested_at: string;
+    scheduled_at: string;
+    approved_at: string;
+    approved_by: string;
+    location: {
+        id: number;
+        name: string;
+    };
+    images: string[];
+    asset: {
+        id: number;
+        name: string;
+        specification_details: string;
+        status: string;
+        location: {
+            id: number;
+            name: string;
+        };
+        last_maintained_at: string;
+        maintenance_schedule: {
+            id: number;
+            asset_id: number;
+            interval_unit: string;
+            interval_value: number | null;
+            month_week: number | null;
+            month_weekday: string | null;
+            year_day: number | null;
+            year_month: number | null;
+            last_run_at: string;
+            is_active: boolean;
+        } | null;
+    } | null;
+    assigned_to: {
+        id: number;
+        first_name: string;
+        last_name: string;
+    } | null;
 }
 
+interface User {
+    id: number;
+    name: string;
+    roles: { name: string }[];
+    permissions: string[];
+}
+interface MaintenanceSchedule {
+    id: number;
+    asset_id: number;
+    interval_unit: string;
+    interval_value: number | null;
+    month_week: number | null;
+    month_weekday: string | null;
+    year_day: number | null;
+    year_month: number | null;
+    last_run_at: string;
+    is_active: boolean;
+}
+
+interface Locations {
+    id: number;
+    name: string;
+}[]
+
 const PreventiveMaintenance: React.FC = () => {
-    // Get assets from Inertia props (provided by backend/controller)
     const { props } = usePage();
-    const assets = (props.assets as Asset[]) || [];
+    // const assets = (props.assets as Asset[]) || [];
+    const workOrders = (props.workOrders as WorkOrders[]) || [];
+    const maintenanceSchedules = (props.maintenanceSchedules as MaintenanceSchedule[]) || [];
+    const user = (props.user as User) || {};
+    const locations = (props.locations as Locations[]) || [];
 
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
 
-    const handleCheckboxChange = (assetId: number) => {
-        setSelectedAssets((prevSelected) =>
-            prevSelected.includes(assetId)
-                ? prevSelected.filter((id) => id !== assetId)
-                : [...prevSelected, assetId]
-        );
-    };
+    // console.log(workOrders[0]);
+    // console.log(maintenanceSchedules[0]);
+    // console.log(workOrders[0].asset?.maintenance_schedule);
 
-    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.checked) {
-            setSelectedAssets(assets.map((asset) => asset.id));
-        } else {
-            setSelectedAssets([]);
+    const PMSWorkOrdersColumns: ColumnDef<WorkOrders>[] = [
+    {
+        id: "id",
+        header: "ID",
+        accessorKey: "id",
+        meta: {
+            cellClassName: "w-12",
+            searchable: true,
+        },
+    },
+    {
+        id: "asset",
+        header: "Asset Name",
+        accessorFn: (row) => {
+            if (!row.asset) return "-";
+            return `${row.asset?.name}`;
+        },
+        enableSorting: false,
+        meta: {
+            cellClassName: "max-w-[7rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+            searchable: true,
+            filterable: true,
+        },
+    },
+    {
+        id: "location",
+        header: "Location",
+        accessorFn: (row) => {
+            if (!row.location) return "-";
+            return `${row.location?.name || "No Location"}`;
+        },
+        enableSorting: false,
+        meta: {
+            cellClassName: "max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+            searchable: true,
+            filterable: true,
+        },
+    },
+    // {
+    //     id: "report_description",
+    //     header: "Description",
+    //     accessorKey: "report_description",
+    // },
+    {
+        id: "label",
+        header: "Label",
+        accessorKey: "label",
+        enableSorting: false,
+        meta: {
+            cellClassName: "max-w-[4.2rem]",
+            searchable: true,
+            filterable: true,
+        },
+    },
+    {
+        id: "assigned_to",
+        header: "Assigned To",
+        accessorFn: (row) => {
+            if (!row.assigned_to) return "Unassigned";
+            return row.assigned_to?.first_name + " " + row.assigned_to?.last_name;
+        },
+        enableSorting: false,
+        meta: {
+            cellClassName: "max-w-[10rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+            searchable: true,
+            filterable: true,
+        },
+    },
+    {
+        id: "status",
+        header: "Status",
+        accessorKey: "status",
+        cell: ({ row }) => {
+            return <StatusCell value={row.original.status} user={user} row={row.original} />;
+        },
+        enableSorting: false,
+        meta: {
+            headerClassName: "w-20",
+            cellClassName: "flex justify-center",
+            filterable: true,
+        },
+    },
+    {
+        id: "scheduled_at",
+        header: "Scheduled Date",
+        accessorFn: (row) => {
+            if (!row.scheduled_at) return "-";
+            return format(parseISO(row.scheduled_at), "MMM dd, yyyy");
+        },
+        meta: {
+            cellClassName: "max-w-[5rem]",
+        },
+    },
+    {
+        id: "last_maintained_at",
+        header: "Last Maintained",
+        accessorFn: (row) => {
+            if (!row.asset?.last_maintained_at) return "-";
+            return format(parseISO(row.asset.last_maintained_at), "MMM dd, yyyy");
+        },
+        meta: {
+            cellClassName: "max-w-[5rem]",
+        },
+    },
+    {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => {
+            return <div className="flex gap-2 justify-center px-2">
+                <Button
+                    className="bg-secondary h-6 text-xs rounded-sm"
+                    onClick={() => setIsViewingWorkOrder(row.original)}
+                >
+                    View
+                </Button>
+            </div>
         }
-    };
+    }
 
-    const filteredAssets = assets
-        .filter(asset => asset.has_preventive_maintenance) // Only those with PMS
-        .filter(
-            (asset) =>
-                asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                asset.specification_details
-                    .toLowerCase()
-                    .includes(searchQuery.toLowerCase()) ||
-                asset.location.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-
-    const columns: ColumnDef<Asset>[] = [
-        {
-            accessorKey: "id",
-            header: "ID",
-            cell: ({ row }) => <div>{row.getValue("id")}</div>,
-            meta: { headerClassName: "w-12" },
-        },
-        {
-            accessorKey: "date_acquired",
-            header: "Date Acquired",
-            cell: ({ row }) => <div>{row.getValue("date_acquired")}</div>,
-            meta: { headerClassName: "w-[8rem]" },
-        },
-        {
-            accessorKey: "name",
-            header: "Asset Name",
-            cell: ({ row }) => <div>{row.getValue("name")}</div>,
-            meta: { headerClassName: "w-[10rem]" },
-        },
-        {
-            accessorKey: "specification_details",
-            header: "Specification",
-            cell: ({ row }) => <div>{row.getValue("specification_details")}</div>,
-            meta: { headerClassName: "w-[23%]" },
-        },
-        {
-            accessorKey: "location.name",
-            header: "Location",
-            cell: ({ row }) => <div>{row.original.location.name}</div>,
-            meta: { headerClassName: "w-[10rem]" },
-        },
-        {
-            accessorKey: "status",
-            header: "Condition",
-            cell: ({ row }) => <div>{row.getValue("status")}</div>,
-            meta: { headerClassName: "w-[10rem]" },
-        },
-        {
-            accessorKey: "nextSchedule",
-            header: "Next Schedule",
-            cell: () => <div>TBD</div>,
-            meta: { headerClassName: "w-[10rem]" },
-        },
-        {
-            accessorKey: "last_maintained_at",
-            header: "Last Maintenance",
-            cell: ({ row }) => <div>{row.getValue("last_maintained_at")}</div>,
-            meta: { headerClassName: "w-[10rem]" },
-        },
-        {
-            id: "actions",
-            header: "Action",
-            cell: () => (
-                <div className="flex gap-2 justify-center">
-                    <button className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
-                        Edit
-                    </button>
-                    <button className="bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
-                        Delete
-                    </button>
-                </div>
-            ),
-            enableSorting: false,
-        },
     ];
+
 
     return (
         <Authenticated>
             <Head title="Preventive Maintenance" />
+
+            {isViewingWorkOrder && (
+                <ViewWorkOrderModal
+                    workOrder={isViewingWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setIsViewingWorkOrder(null)}
+                />
+            )}
 
             <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
@@ -130,10 +244,12 @@ const PreventiveMaintenance: React.FC = () => {
 
             <div className="p-4">
                 {/* Desktop Table */}
-                <div className="hidden sm:block overflow-x-auto">
+                <div className="hidden sm:block overflow-x-auto -mt-[4.7rem]">
+
+                    {/* Preventive Maintenance Work Orders Datatable */}
                     <Datatable
-                        columns={columns}
-                        data={filteredAssets}
+                        columns={PMSWorkOrdersColumns}
+                        data={workOrders}
                         placeholder="Search here"
                     />
                 </div>
@@ -151,77 +267,7 @@ const PreventiveMaintenance: React.FC = () => {
 
                 {/* Mobile Cards */}
                 <div className="sm:hidden flex flex-col gap-4 mt-4">
-                    {filteredAssets.map((asset) => (
-                        <div
-                            key={asset.id}
-                            className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
-                        >
-                            {/* Top row: ID and Status aligned horizontally */}
-                            <div className="flex justify-between items-start text-sm text-gray-800 mb-1">
-                                <p>
-                                    <span className="font-medium">ID:</span>{" "}
-                                    {asset.id}
-                                </p>
-                                <span
-                                    className={`text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-800`}
-                                >
-                                    {asset.status}
-                                </span>
-                            </div>
 
-                            {/* Info Section */}
-                            <div className="space-y-1 pr-8 text-sm text-gray-800">
-                                <p>
-                                    <span className="font-medium">
-                                        Asset Name:
-                                    </span>{" "}
-                                    {asset.name}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Specification:
-                                    </span>{" "}
-                                    {asset.specification_details}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Location:
-                                    </span>{" "}
-                                    {asset.location.name}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Date Acquired:
-                                    </span>{" "}
-                                    {asset.date_acquired}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Next Schedule:
-                                    </span>{" "}
-                                    TBD
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Last Maintenance:
-                                    </span>{" "}
-                                    {asset.last_maintained_at}
-                                </p>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="mt-4 w-full">
-                                <div className="flex gap-2">
-                                    <button className="w-1/2 bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
-                                        Edit
-                                    </button>
-                                    <button className="w-1/2 bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition">
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
                 </div>
             </div>
         </Authenticated>

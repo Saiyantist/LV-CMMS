@@ -17,7 +17,7 @@ export default function UserProfileCard({
 }) {
     return (
         <div
-            className={`bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-6 w-full ${className}`}
+            className={`bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md flex flex-col 2xs:flex-row items-center justify-between gap-6 w-full ${className}`}
         >
             {/* Profile Info */}
             <div className="flex items-center gap-5">
@@ -42,7 +42,7 @@ export default function UserProfileCard({
             {/* Toggle Edit Button */}
             <button
                 onClick={() => setIsEditing(!isEditing)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition
                     ${
                         isEditing
                             ? "bg-gray-100 text-gray-800 hover:bg-gray-200"

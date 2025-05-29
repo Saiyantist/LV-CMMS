@@ -73,6 +73,7 @@ useEffect(() => {
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
+          className="text-xs sm:text-base"
         />
         {isOpen && (
           <div className="text-xs absolute z-10 bg-white border w-full rounded shadow max-h-60 overflow-y-auto mt-1">

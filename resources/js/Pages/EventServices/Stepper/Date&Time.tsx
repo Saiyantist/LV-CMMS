@@ -15,8 +15,13 @@ export default function DateTimeSelection({
     onChange?: (val: { dateRange: string; timeRange: string }) => void;
 }) {
     const now = new Date();
-    const [currentMonth, setCurrentMonth] = useState<number>(now.getMonth());
-    const [currentYear, setCurrentYear] = useState<number>(now.getFullYear());
+
+    // Separate state for each calendar
+    const [startMonth, setStartMonth] = useState<number>(now.getMonth());
+    const [startYear, setStartYear] = useState<number>(now.getFullYear());
+    const [endMonth, setEndMonth] = useState<number>(now.getMonth());
+    const [endYear, setEndYear] = useState<number>(now.getFullYear());
+
     const [startDate, setStartDate] = useState<number | null>(null);
     const [endDate, setEndDate] = useState<number | null>(null);
     const [showStartCalendar, setShowStartCalendar] = useState(false);
@@ -24,63 +29,47 @@ export default function DateTimeSelection({
     const [startTime, setStartTime] = useState<string | null>(null);
     const [endTime, setEndTime] = useState<string | null>(null);
     const [endDatePrompt, setEndDatePrompt] = useState<string | null>(null);
-    const [showStartClock, setShowStartClock] = useState(false);
-    const [showEndClock, setShowEndClock] = useState(false);
-    const [startTimeObj, setStartTimeObj] = useState<Date | null>(null);
-    const [endTimeObj, setEndTimeObj] = useState<Date | null>(null);
 
-    const generateCalendarDays = (isStart: boolean) => {
-        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-        const daysInMonth = new Date(
-            currentYear,
-            currentMonth + 1,
-            0
-        ).getDate();
-        const daysInPrevMonth = new Date(
-            currentYear,
-            currentMonth,
-            0
-        ).getDate();
+    // Generate calendar days for each calendar
+    const generateCalendarDays = (
+        isStart: boolean,
+        month: number,
+        year: number
+    ) => {
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
         const days = [];
         for (let i = firstDay - 1; i >= 0; i--) {
             days.push({
                 day: daysInPrevMonth - i,
                 isCurrentMonth: false,
                 isPrevMonth: true,
+                isDisabled: true,
             });
         }
         for (let i = 1; i <= daysInMonth; i++) {
-            // For start date, disable days before today if current month/year
             let isDisabled = false;
-            if (isStart) {
-                if (
-                    currentYear === now.getFullYear() &&
-                    currentMonth === now.getMonth() &&
-                    i < now.getDate()
-                ) {
-                    isDisabled = true;
-                }
-            } else {
-                // For end date, disable if before startDate or before today
-                if (
-                    startDate &&
-                    i < startDate &&
-                    currentYear === now.getFullYear() &&
-                    currentMonth === now.getMonth()
-                ) {
-                    isDisabled = true;
-                }
-                if (
-                    currentYear === now.getFullYear() &&
-                    currentMonth === now.getMonth() &&
-                    i < now.getDate()
-                ) {
-                    isDisabled = true;
-                }
-                if (startDate && i < startDate) {
+            // Disable days before today (for all previous months)
+            if (
+                year < now.getFullYear() ||
+                (year === now.getFullYear() && month < now.getMonth()) ||
+                (year === now.getFullYear() &&
+                    month === now.getMonth() &&
+                    i < now.getDate())
+            ) {
+                isDisabled = true;
+            }
+
+            // For END calendar: Disable days before the selected start date
+            if (!isStart && startDate !== null) {
+                const start = new Date(startYear, startMonth, startDate);
+                const thisDay = new Date(year, month, i);
+                if (thisDay < start) {
                     isDisabled = true;
                 }
             }
+
             days.push({
                 day: i,
                 isCurrentMonth: true,
@@ -94,48 +83,16 @@ export default function DateTimeSelection({
                 day: i,
                 isCurrentMonth: false,
                 isPrevMonth: false,
+                isDisabled: true,
             });
         }
         return days;
     };
 
-    const handleDateSelect = (day: number, isStart: boolean) => {
-        if (isStart) {
-            setStartDate(day);
-            setEndDate(null);
-            setShowStartCalendar(false);
-        } else {
-            setEndDate(day);
-            setShowEndCalendar(false);
-        }
-    };
-
-    const isInRange = (day: number) => {
-        if (!startDate || !endDate) return false;
-        return day > startDate && day < endDate;
-    };
-
-    const formatMonthYear = () => {
-        const months = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-        ];
-        return `${months[currentMonth]} ${currentYear}`;
-    };
-
-    const navigateMonth = (increment: number) => {
-        let newMonth = currentMonth + increment;
-        let newYear = currentYear;
+    // Navigation for each calendar
+    const navigateStartMonth = (increment: number) => {
+        let newMonth = startMonth + increment;
+        let newYear = startYear;
         if (newMonth > 11) {
             newMonth = 0;
             newYear += 1;
@@ -143,32 +100,45 @@ export default function DateTimeSelection({
             newMonth = 11;
             newYear -= 1;
         }
-        setCurrentMonth(newMonth);
-        setCurrentYear(newYear);
+        setStartMonth(newMonth);
+        setStartYear(newYear);
+    };
+    const navigateEndMonth = (increment: number) => {
+        let newMonth = endMonth + increment;
+        let newYear = endYear;
+        if (newMonth > 11) {
+            newMonth = 0;
+            newYear += 1;
+        } else if (newMonth < 0) {
+            newMonth = 11;
+            newYear -= 1;
+        }
+        setEndMonth(newMonth);
+        setEndYear(newYear);
     };
 
     const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-    const calendarDaysStart = generateCalendarDays(true);
-    const calendarDaysEnd = generateCalendarDays(false);
+    const calendarDaysStart = generateCalendarDays(true, startMonth, startYear);
+    const calendarDaysEnd = generateCalendarDays(false, endMonth, endYear);
 
     // Compose dateRange and timeRange for parent
+    const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
     const getDateRangeString = () => {
         if (!startDate || !endDate) return "";
-        const months = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-        ];
-        return `${months[currentMonth]} ${startDate} - ${endDate}, ${currentYear}`;
+        return `${months[startMonth]} ${startDate} - ${months[endMonth]} ${endDate}, ${endYear}`;
     };
     const getTimeRangeString = () => {
         return startTime && endTime ? `${startTime} - ${endTime}` : "";
@@ -183,7 +153,16 @@ export default function DateTimeSelection({
             });
         }
         // eslint-disable-next-line
-    }, [startDate, endDate, startTime, endTime, currentMonth, currentYear]);
+    }, [
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        startMonth,
+        startYear,
+        endMonth,
+        endYear,
+    ]);
 
     // End date calendar prompt logic
     useEffect(() => {
@@ -195,28 +174,11 @@ export default function DateTimeSelection({
     }, [startDate]);
 
     // Format date as "Month Day, Year"
-    const formatDate = (month: number, day: number, year: number) => {
-        const months = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-        ];
-        return `${months[month]} ${day}, ${year}`;
-    };
+    const formatDate = (month: number, day: number, year: number) =>
+        `${months[month]} ${day}, ${year}`;
 
     // Dropdown options for time (12-hour format with AM/PM)
     const timeOptions: string[] = [];
-
-    // AM times: 6:00 AM to 11:30 AM
     for (let h = 6; h < 12; h++) {
         for (let m = 0; m < 60; m += 30) {
             const hour = h.toString().padStart(2, "0");
@@ -224,8 +186,6 @@ export default function DateTimeSelection({
             timeOptions.push(`${hour}:${min} AM`);
         }
     }
-
-    // PM times: 12:00 PM to 11:30 PM
     for (let h = 12; h < 24; h++) {
         for (let m = 0; m < 60; m += 30) {
             const hour = (h > 12 ? h - 12 : h).toString().padStart(2, "0");
@@ -233,19 +193,42 @@ export default function DateTimeSelection({
             timeOptions.push(`${hour}:${min} PM`);
         }
     }
+    timeOptions.push("11:59 PM");
 
-    // Add 12:00 AM as the last time
-    timeOptions.push("12:00 AM");
+    // Date select handlers
+    const handleDateSelect = (day: number, isStart: boolean) => {
+        if (isStart) {
+            setStartDate(day);
+            setEndDate(null);
+            setShowStartCalendar(false);
+        } else {
+            setEndDate(day);
+            setShowEndCalendar(false);
+        }
+    };
+
+    const isInRange = (day: number) => {
+        if (!startDate || !endDate) return false;
+        // Only highlight if in the same month/year
+        if (startYear === endYear && startMonth === endMonth) {
+            return day > startDate && day < endDate;
+        }
+        return false;
+    };
+
+    // Add this useEffect to sync with parent
+    useEffect(() => {
+        if (value) {
+        }
+    }, [value?.dateRange, value?.timeRange]);
 
     return (
-        // <div className="max-w-5xl mx-auto p-2 sm:p-4 md:p-6">
         <div className="w-full">
             <div className="mb-8">
                 <h2 className="text-2xl font-medium mb-2 text-center md:text-left">
                     Select Dates
                 </h2>
             </div>
-
             {/* Date Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-12">
                 {/* Start Date Picker */}
@@ -262,9 +245,9 @@ export default function DateTimeSelection({
                             <span>
                                 {startDate !== null
                                     ? formatDate(
-                                          currentMonth,
+                                          startMonth,
                                           startDate,
-                                          currentYear
+                                          startYear
                                       )
                                     : "Select start date"}
                             </span>
@@ -274,16 +257,16 @@ export default function DateTimeSelection({
                             <div className="absolute z-10 bg-white border rounded shadow-md mt-2 w-full p-4">
                                 <div className="flex items-center justify-between mb-4">
                                     <button
-                                        onClick={() => navigateMonth(-1)}
+                                        onClick={() => navigateStartMonth(-1)}
                                         className="p-1 rounded-full hover:bg-gray-100"
                                     >
                                         <ChevronLeft className="h-5 w-5" />
                                     </button>
                                     <div className="font-medium">
-                                        {formatMonthYear()}
+                                        {months[startMonth]} {startYear}
                                     </div>
                                     <button
-                                        onClick={() => navigateMonth(1)}
+                                        onClick={() => navigateStartMonth(1)}
                                         className="p-1 rounded-full hover:bg-gray-100"
                                     >
                                         <ChevronRight className="h-5 w-5" />
@@ -362,11 +345,7 @@ export default function DateTimeSelection({
                         >
                             <span>
                                 {endDate !== null
-                                    ? formatDate(
-                                          currentMonth,
-                                          endDate,
-                                          currentYear
-                                      )
+                                    ? formatDate(endMonth, endDate, endYear)
                                     : "Select end date"}
                             </span>
                             <CalendarIcon className="h-5 w-5 ml-2" />
@@ -380,16 +359,16 @@ export default function DateTimeSelection({
                             <div className="absolute z-10 bg-white border rounded shadow-md mt-2 w-full p-4">
                                 <div className="flex items-center justify-between mb-4">
                                     <button
-                                        onClick={() => navigateMonth(-1)}
+                                        onClick={() => navigateEndMonth(-1)}
                                         className="p-1 rounded-full hover:bg-gray-100"
                                     >
                                         <ChevronLeft className="h-5 w-5" />
                                     </button>
                                     <div className="font-medium">
-                                        {formatMonthYear()}
+                                        {months[endMonth]} {endYear}
                                     </div>
                                     <button
-                                        onClick={() => navigateMonth(1)}
+                                        onClick={() => navigateEndMonth(1)}
                                         className="p-1 rounded-full hover:bg-gray-100"
                                     >
                                         <ChevronRight className="h-5 w-5" />
@@ -460,14 +439,13 @@ export default function DateTimeSelection({
             <br />
 
             {/* Time Selection */}
-            <div className="mb-12">
-                <h2 className="text-2xl font-medium mb-2">Select Time Slot</h2>
-                <p className="text-gray-600 mb-6">
-                    Choose your start and end times
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8 mb-8">
+            <div className="w-full">
+                <h2 className="text-2xl font-medium mb-2 text-center sm:text-left">
+                    Select Time Slot
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 mb-8">
                     <div className="bg-transparent p-4 rounded-md">
-                        <label className="block text-center text-lg font-medium mb-2">
+                        <label className="block text-left text-lg font-medium mb-2">
                             Start Time <span className="text-red-500">*</span>
                         </label>
                         <select
@@ -486,23 +464,49 @@ export default function DateTimeSelection({
                         </select>
                     </div>
                     <div className="bg-transparent-50 p-4 rounded-md">
-                        <label className="block text-center text-lg font-medium mb-2">
+                        <label className="block text-left text-lg font-medium mb-2">
                             End Time <span className="text-red-500">*</span>
                         </label>
+
                         <select
                             className="w-full border rounded-md px-3 py-2 text-base"
                             value={endTime || ""}
                             onChange={(e) => setEndTime(e.target.value)}
+                            disabled={!startTime}
                         >
                             <option value="" disabled>
                                 Select time
                             </option>
-                            {timeOptions.map((t) => (
-                                <option key={t} value={t}>
-                                    {t}
-                                </option>
-                            ))}
+                            {timeOptions.map((t) => {
+                                // Disable end times that are less than or equal to the selected start time
+                                let isDisabled = false;
+                                if (
+                                    startTime &&
+                                    timeOptions.indexOf(t) <=
+                                        timeOptions.indexOf(startTime)
+                                ) {
+                                    isDisabled = true;
+                                }
+                                return (
+                                    <option
+                                        key={t}
+                                        value={t}
+                                        disabled={isDisabled}
+                                    >
+                                        {t}
+                                    </option>
+                                );
+                            })}
                         </select>
+
+                        <div className="mt-2 w-full text-left">
+                            {!startTime && (
+                                <div className="text-red-500 text-xs mb-2 text-left">
+                                    Please select a Start Time before choosing
+                                    an End Time.
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
                 <hr />

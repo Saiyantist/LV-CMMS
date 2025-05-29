@@ -86,7 +86,7 @@ export default function EditWorkOrderModal({
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
-    const isInternalRequesterOrMaintenancePersonnel = user.roles.some(role => role.name === "internal_requester" || role.name === "maintenance_personnel");
+    const isDepartmentHeadOrMaintenancePersonnel = user.roles.some(role => role.name === "department_head" || role.name === "maintenance_personnel");
 
     const { data, setData, errors, processing } = useForm({
         location_id: "",
@@ -345,7 +345,7 @@ export default function EditWorkOrderModal({
                     )}
 
                     {/* Show editable fields to IR or MP */}
-                    { isInternalRequesterOrMaintenancePersonnel && (
+                    { isDepartmentHeadOrMaintenancePersonnel && (
                         <form onSubmit={submit}>
                             <div className="py-1 flex flex-col space-y-4">
 
@@ -388,6 +388,7 @@ export default function EditWorkOrderModal({
                                     }
                                     placeholder="Describe your report here..."
                                     required
+                                    className="h-[7rem] text-xs sm:text-sm"
                                 />
                                 {localErrors.report_description && (
                                     <p className="text-red-500 text-xs">
@@ -684,11 +685,13 @@ export default function EditWorkOrderModal({
                 </div>
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" onClick={submit}
-                        className="bg-primary hover:bg-primary/90 text-white">
-                            {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
+                    <div className="flex gap-2 xs:flex-row flex-col">
+                        <Button variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="submit" onClick={submit}
+                            className="bg-primary hover:bg-primary/90 text-white">
+                                {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
                         </Button>
+                    </div>
                 </DialogFooter>
 
             {activeImageIndex !== null && (
