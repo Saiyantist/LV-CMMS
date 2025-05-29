@@ -1,15 +1,81 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, X, FileText, Check } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import Gallery from "./Gallery";
-// import DateTimeSelection from "./Date&Time";
-import EventDetails from "./EventDetails";
-import RequestedServices from "./RequestedServices";
-import ComplianceAndConsent from "./Compliance&Consent";
-import EventSummaryModal from "./EventSummaryModal";
+import Gallery, { galleryItems } from "./Stepper/Gallery"; // <-- Add this import
+import EventDetails from "./Stepper/EventDetails";
+import RequestedServices from "./Stepper/RequestedServices";
+import ComplianceAndConsent from "./Stepper/Compliance&Consent";
+import EventSummaryModal from "./Stepper/EventSummaryModal";
+import { Head, usePage, router } from "@inertiajs/react";
+
+const STORAGE_KEY = "eventServicesStepperState";
+
+function saveStepperState(state: any) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadStepperState() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return null;
+    }
+}
+
+function clearStepperState() {
+    localStorage.removeItem(STORAGE_KEY);
+}
+
+function parseDateRange(dateRange: string): { start: string; end: string } {
+    if (!dateRange) return { start: "", end: "" };
+    const match = dateRange.match(
+        /^([A-Za-z]+) (\d{1,2}) - ([A-Za-z]+) (\d{1,2}), (\d{4})$/
+    );
+    if (!match) return { start: "", end: "" };
+    const months = {
+        January: "01",
+        February: "02",
+        March: "03",
+        April: "04",
+        May: "05",
+        June: "06",
+        July: "07",
+        August: "08",
+        September: "09",
+        October: "10",
+        November: "11",
+        December: "12",
+    } as Record<string, string>;
+    const [, startMonth, startDay, endMonth, endDay, year] = match;
+    const start = `${year}-${months[startMonth]}-${startDay.padStart(2, "0")}`;
+    const end = `${year}-${months[endMonth]}-${endDay.padStart(2, "0")}`;
+    return { start, end };
+}
+
+function parseTimeRange(timeRange: string): { start: string; end: string } {
+    // Example: "08:00 AM - 10:00 AM"
+    // Should return { start: "08:00", end: "10:00" }
+    if (!timeRange) return { start: "", end: "" };
+    const match = timeRange.match(
+        /^(\d{2}:\d{2} [AP]M) - (\d{2}:\d{2} [AP]M)$/
+    );
+    if (!match) return { start: "", end: "" };
+    const [start, end] = [match[1], match[2]].map((t) => {
+        let [time, meridian] = t.split(" ");
+        let [hour, minute] = time.split(":").map(Number);
+        if (meridian === "PM" && hour !== 12) hour += 12;
+        if (meridian === "AM" && hour === 12) hour = 0;
+        return `${hour.toString().padStart(2, "0")}:${minute
+            .toString()
+            .padStart(2, "0")}`;
+    });
+    return { start, end };
+}
 
 export default function EventServicesRequest() {
     // Step state
@@ -18,6 +84,7 @@ export default function EventServicesRequest() {
     const [showSummary, setShowSummary] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [showConsentModal, setShowConsentModal] = useState(false);
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
     // Step 1: File
     const [file, setFile] = useState<File | null>(null);
@@ -25,34 +92,34 @@ export default function EventServicesRequest() {
 
     // Step 2: Venue
     const [selectedGalleryItem, setSelectedGalleryItem] = useState<
-        number | null
+        number[] | null
     >(null);
 
-    // Step 3: Date & Time
-    const [dateRange, setDateRange] = useState<string>("");
-    const [timeRange, setTimeRange] = useState<string>("");
-
-    // Step 4: Event Details
+    // Step 3   : Event Details
     const [eventDetails, setEventDetails] = useState<{
         eventName: string;
-        department: string;
+        department: string[]; // <-- Change to array
         eventPurpose: string;
         participants: string;
         participantCount: string;
     }>({
         eventName: "",
-        department: "",
+        department: [], // <-- Initialize as empty array
         eventPurpose: "",
         participants: "",
         participantCount: "",
     });
 
-    // Step 5: Requested Services
+    //  Date & Time
+    const [dateRange, setDateRange] = useState<string>("");
+    const [timeRange, setTimeRange] = useState<string>("");
+
+    // Step 4: Requested Services
     const [requestedServices, setRequestedServices] = useState<
         Record<string, string[]>
     >({});
 
-    // Step 6: Compliance & Consent
+    // Compliance & Consent Modal
     const [dataPrivacyAgreed, setDataPrivacyAgreed] = useState(false);
     const [equipmentPolicyAgreed, setEquipmentPolicyAgreed] = useState(false);
     const [consentChoice, setConsentChoice] = useState("");
@@ -139,8 +206,175 @@ export default function EventServicesRequest() {
         if (currentStep > 1) setCurrentStep(currentStep - 1);
     };
 
+    const handleBookingSubmit = () => {
+        setError(null);
+        if (!file) {
+            setError(
+                "File is required. Please re-upload your proof of approval."
+            );
+            return;
+        }
+        if (
+            !dataPrivacyAgreed ||
+            !equipmentPolicyAgreed ||
+            consentChoice !== "agree"
+        ) {
+            setError("You must agree to all terms and consent to proceed.");
+            return;
+        }
+
+        // Parse date and time
+        const { start: event_start_date, end: event_end_date } =
+            parseDateRange(dateRange);
+        const { start: event_start_time, end: event_end_time } =
+            parseTimeRange(timeRange);
+
+        // Map selected venue IDs to names
+        const selectedVenueNames =
+            selectedGalleryItem && selectedGalleryItem.length > 0
+                ? galleryItems
+                      .filter((item) => selectedGalleryItem.includes(item.id))
+                      .map((item) => item.title)
+                : [];
+
+        // Flatten requested services
+        const requestedServicesFlat = Object.values(requestedServices).flat();
+
+        // Build FormData
+        const formData = new FormData();
+        if (file) formData.append("proof_of_approval", file);
+
+        // Venue (array of names)
+        selectedVenueNames.forEach((venue, i) => {
+            formData.append(`venue[${i}]`, venue);
+        });
+
+        // Event Details
+        formData.append("name", eventDetails.eventName);
+        formData.append("department", eventDetails.department.join(", ")); // or just eventDetails.department[0]
+        formData.append("description", eventDetails.eventPurpose);
+        formData.append("participants", eventDetails.participants);
+        formData.append(
+            "number_of_participants",
+            eventDetails.participantCount
+        );
+
+        // Date & Time (now in correct format)
+        formData.append("event_start_date", event_start_date);
+        formData.append("event_end_date", event_end_date);
+        formData.append("event_start_time", event_start_time);
+        formData.append("event_end_time", event_end_time);
+
+        // Requested Services (flat array)
+        requestedServicesFlat.forEach((service, i) => {
+            formData.append(`requested_services[${i}]`, service);
+        });
+
+        router.post("/event-services", formData, {
+            forceFormData: true,
+            onError: (errors) =>
+                setError("Submission failed. Please check your inputs."),
+            onSuccess: () => {
+                setShowConsentModal(false);
+                setShowSuccess(true);
+                clearStepperState(); // <-- Add this line
+            },
+        });
+    };
+
+    // Get user from Inertia page props
+    const user = usePage().props.auth.user;
+
+    // Use a Set for easy role checking (like in Dashboard)
+    const roleNames = new Set(
+        user.roles?.map((role: { name: string }) => role.name)
+    );
+
+    // Determine userType based on roles
+    const userType = roleNames.has("external_requester")
+        ? "external_requester"
+        : "internal_requester";
+
+    // Map selected IDs to names
+    const selectedVenueNames =
+        selectedGalleryItem && selectedGalleryItem.length > 0
+            ? galleryItems
+                  .filter((item) => selectedGalleryItem.includes(item.id))
+                  .map((item) => item.title)
+            : [];
+
+    // Flatten requested services for easier display
+    const requestedServicesFlat = Object.values(requestedServices).flat();
+
+    // Load state on mount
+    useEffect(() => {
+        const saved = loadStepperState();
+        if (saved) {
+            setCurrentStep(saved.currentStep || 1);
+            setFile(null);
+            setSelectedGalleryItem(saved.selectedGalleryItem || null);
+            setEventDetails(
+                saved.eventDetails || {
+                    eventName: "",
+                    department: [],
+                    eventPurpose: "",
+                    participants: "",
+                    participantCount: "",
+                }
+            );
+            setDateRange(saved.dateRange || "");
+            setTimeRange(saved.timeRange || "");
+            setRequestedServices(saved.requestedServices || {});
+        }
+    }, []);
+
+    useEffect(() => {
+        saveStepperState({
+            currentStep,
+            file,
+            selectedGalleryItem,
+            eventDetails,
+            dateRange,
+            timeRange,
+            requestedServices,
+        });
+    }, [
+        currentStep,
+        file,
+        selectedGalleryItem,
+        eventDetails,
+        dateRange,
+        timeRange,
+        requestedServices,
+    ]);
+
+    function handleCancelBooking() {
+        clearStepperState();
+        setCurrentStep(1);
+        setFile(null);
+        setSelectedGalleryItem(null);
+        setEventDetails({
+            eventName: "",
+            department: [],
+            eventPurpose: "",
+            participants: "",
+            participantCount: "",
+        });
+        setDateRange("");
+        setTimeRange("");
+        setRequestedServices({});
+        setDataPrivacyAgreed(false);
+        setEquipmentPolicyAgreed(false);
+        setConsentChoice("");
+        setError(null);
+        setShowSummary(false);
+        setShowSuccess(false);
+        setShowConsentModal(false);
+    }
+
     return (
         <AuthenticatedLayout>
+            <Head title="Event Services" />
             <div className="w-[99%] mx-auto p-4 md:p-6 bg-white min-h-screen">
                 {/* Progress Steps */}
                 <div className="text-center">
@@ -280,6 +514,14 @@ export default function EventServicesRequest() {
                                     Example: 112424_EnglishMonth
                                 </p>
                             </div>
+                            {/* In Step 1, add a warning if file is missing after reload */}
+                            {/* {!file && (
+                                <div className="text-red-500 text-sm mt-2 text-center">
+                                    {currentStep === 1
+                                        ? "File is required. Please re-upload your proof of approval."
+                                        : ""}
+                                </div>
+                            )} */}
                         </div>
                     </div>
                 )}
@@ -287,7 +529,7 @@ export default function EventServicesRequest() {
                 {currentStep === 2 && (
                     <Gallery
                         selectedId={selectedGalleryItem}
-                        onSelect={(id: number | null) => {
+                        onSelect={(id: number[] | null) => {
                             setSelectedGalleryItem(id);
                             setError(null);
                         }}
@@ -303,6 +545,7 @@ export default function EventServicesRequest() {
                             setDateRange(dateRange);
                             setTimeRange(timeRange);
                         }}
+                        userType={userType}
                     />
                 )}
                 {/* Step 4: Requested Services */}
@@ -315,12 +558,11 @@ export default function EventServicesRequest() {
                 {/* Step 5: Summary */}
                 {currentStep === 5 && (
                     <EventSummaryModal
-                        // open={true}
                         onClose={handleBack}
                         onSubmit={() => setShowConsentModal(true)}
                         data={{
                             file,
-                            venue: selectedGalleryItem ? "Auditorium" : "",
+                            venue: "", // Not needed anymore, handled by selectedVenueIds
                             dateRange,
                             timeRange,
                             eventDetails,
@@ -330,6 +572,7 @@ export default function EventServicesRequest() {
                             consentChoice,
                             showSuccess,
                         }}
+                        selectedVenueIds={selectedGalleryItem}
                     />
                 )}
 
@@ -348,20 +591,7 @@ export default function EventServicesRequest() {
                             setConsentChoice(e.target.value)
                         }
                         onClose={() => setShowConsentModal(false)}
-                        onSubmit={() => {
-                            if (
-                                !dataPrivacyAgreed ||
-                                !equipmentPolicyAgreed ||
-                                consentChoice !== "agree"
-                            ) {
-                                setError(
-                                    "You must agree to all terms and consent to proceed."
-                                );
-                                return;
-                            }
-                            setShowConsentModal(false);
-                            setShowSuccess(true); // or your actual submit logic
-                        }}
+                        onSubmit={handleBookingSubmit}
                         isModal
                     />
                 )}
@@ -372,25 +602,80 @@ export default function EventServicesRequest() {
                 )}
                 {/* Navigation Buttons */}
                 {!showSuccess && (
-                    <div className="mt-16 max-w-2xl mx-auto flex flex-row justify-between gap-4">
-                        <button
-                            className="w-1/2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
-                            onClick={handleBack}
-                            disabled={currentStep === 1 && !showSummary}
-                        >
-                            Back
-                        </button>
-                        <button
-                            className="w-1/2 px-4 py-2 bg-secondary hover:bg-primary text-white rounded-md"
-                            onClick={handleContinue}
-                        >
-                            {currentStep === 5 && !showSummary
-                                ? "Continue"
-                                : "Continue"}
-                        </button>
+                    <div className="mt-16 max-w-2xl mx-auto flex flex-col gap-4">
+                        <div className="flex flex-row justify-between gap-4">
+                            {/* Hide Back button on step 1 */}
+                            {currentStep !== 1 && (
+                                <button
+                                    className="w-1/2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
+                                    onClick={handleBack}
+                                    disabled={currentStep === 1 && !showSummary}
+                                >
+                                    Back
+                                </button>
+                            )}
+                            <button
+                                className={`${
+                                    currentStep !== 1 ? "w-1/2" : "w-full"
+                                } px-4 py-2 bg-secondary hover:bg-primary text-white rounded-md`}
+                                onClick={handleContinue}
+                            >
+                                {currentStep === 5 && !showSummary
+                                    ? "Continue"
+                                    : "Continue"}
+                            </button>
+                        </div>
+                        {/* Hide Cancel Booking on step 1 */}
+                        {currentStep !== 1 && (
+                            <button
+                                className="w-full px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md"
+                                onClick={() => {
+                                    if (
+                                        window.confirm(
+                                            "Are you sure you want to cancel and clear all your booking data? This action cannot be undone."
+                                        )
+                                    ) {
+                                        handleCancelBooking();
+                                    }
+                                }}
+                                type="button"
+                            >
+                                Cancel Booking
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
+            {showCancelConfirm && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
+                        <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                            Cancel Booking?
+                        </h2>
+                        <p className="mb-6 text-gray-600">
+                            Are you sure you want to cancel and clear all your
+                            booking data? This action cannot be undone.
+                        </p>
+                        <div className="flex justify-center gap-4">
+                            <button
+                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-700"
+                                onClick={() => setShowCancelConfirm(false)}
+                            >
+                                No, Go Back
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded text-white"
+                                onClick={() => {
+                                    setShowCancelConfirm(false);
+                                    handleCancelBooking();
+                                }}
+                            >
+                                Yes, Cancel Booking
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

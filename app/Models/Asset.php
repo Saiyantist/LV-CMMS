@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Asset extends Model
@@ -32,6 +31,11 @@ class Asset extends Model
     public function maintenanceHistories()
     {
         return $this->hasMany(AssetMaintenanceHistory::class);
+    }
+
+    public function maintenanceSchedule()
+    {
+        return $this->hasOne(PreventiveMaintenance::class);
     }
 
     /**

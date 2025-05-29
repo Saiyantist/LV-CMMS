@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Filter, ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/Components/shadcnui/button";
-import { Input } from "@/Components/shadcnui/input";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import { Datatable } from "@/Pages/WorkOrders/components/Datatable";
@@ -16,16 +15,24 @@ import {
     DialogHeader,
 } from "@/Components/shadcnui/dialog";
 import { createPortal } from "react-dom";
+import { router, usePage } from "@inertiajs/react";
+import CreateBookingModal from "./CreateBookingModal";
+import ViewBookingModal from "./ViewBookingModal";
 
 // Define the booking type
-interface Booking {
+export interface Booking {
     id: number | string;
     date: string;
     venue: string;
     name: string;
     eventDate: string;
     time: string;
-    status: "Completed" | "In Progress" | "Cancelled" | "Not Started";
+    status:
+        | "Completed"
+        | "In Progress"
+        | "Cancelled"
+        | "Not Started"
+        | "Pending";
     // Additional fields for view modal
     email?: string;
     type?: string;
@@ -51,17 +58,43 @@ interface Booking {
     [key: string]: any;
 }
 
-export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
+export default function MyBookings({
+    bookings = [],
+    venueNames = [],
+}: {
+    bookings?: any[];
+    venueNames?: string[];
+}) {
+    const { props } = usePage();
+    const user = props.auth?.user || {};
+    const userRoles = user.roles?.map((r: any) => r.name) || [];
+    const isAdmin =
+        userRoles.includes("super_admin") ||
+        userRoles.includes("communications_officer");
+
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(
         null
     );
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    // const [isFilterOpen, setIsFilterOpen] = useState(false);
+    // ‼️ Heyya JOSH, you can refer sa nagawa kong search and filter (for MOBILE) sa IndexLayout.tsx
+    // Kasi dito, inayos ko na 'yung search and filter for desktop (datatable).
+    // Sa desktop, just add meta { filterable: true } in the column definition of desired column.
+
     const [searchQuery, setSearchQuery] = useState("");
     const [filteredBookings, setFilteredBookings] = useState<any[]>(bookings);
     const [currentPage, setCurrentPage] = useState(1);
     const [filterVenue, setFilterVenue] = useState<string>("");
     const [filterStatus, setFilterStatus] = useState<string>("");
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [form, setForm] = useState({
+        name: "",
+        venue: "",
+        event_date: "",
+        time: "",
+    });
+    const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
     const itemsPerPage = 5;
     const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
@@ -70,6 +103,13 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
     const uniqueVenues = Array.from(
         new Set(bookings.map((booking) => booking.venue))
     );
+
+    const handleBookingUpdate = (updatedBooking: Booking) => {
+        setFilteredBookings((prev) =>
+            prev.map((b) => (b.id === updatedBooking.id ? updatedBooking : b))
+        );
+        setSelectedBooking(updatedBooking); // This updates the modal instantly!
+    };
 
     // Get unique statuses for filter dropdown
     const uniqueStatuses = Array.from(
@@ -108,6 +148,24 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
         setFilteredBookings(result);
         setCurrentPage(1); // Reset to first page when filters change
     }, [searchQuery, filterVenue, filterStatus, bookings]);
+
+    useEffect(() => {
+        // Parse venue/requested_services if needed
+        const parsed = bookings.map((booking) => ({
+            ...booking,
+            venue: Array.isArray(booking.venue)
+                ? booking.venue
+                : booking.venue
+                ? JSON.parse(booking.venue)
+                : [],
+            requestedServices: Array.isArray(booking.requested_services)
+                ? booking.requested_services
+                : booking.requested_services
+                ? JSON.parse(booking.requested_services)
+                : [],
+        }));
+        setFilteredBookings(parsed);
+    }, [bookings]);
 
     const handleViewBooking = (booking: Booking) => {
         setSelectedBooking(booking);
@@ -179,7 +237,6 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                                   {selectedBooking?.name}
                               </DialogTitle>
                           </DialogHeader>
-                          {/* ...modal content... */}
                       </div>
                   </div>,
                   document.body
@@ -197,120 +254,212 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
         {
             accessorKey: "date",
             header: "Date Requested",
-            cell: ({ row }) => <div>{row.getValue("date")}</div>,
+            cell: ({ row }) => <div>{formatDate(row.getValue("date"))}</div>,
         },
         {
             accessorKey: "venue",
             header: "Requested Venue",
-            cell: ({ row }) => <div>{row.getValue("venue")}</div>,
+            cell: ({ row }) => (
+                <div>
+                    {Array.isArray(row.original.venue)
+                        ? row.original.venue.join(", ")
+                        : row.getValue("venue")}
+                </div>
+            ),
+            meta: { searchable: true },
         },
         {
             accessorKey: "name",
             header: "Event Name",
             cell: ({ row }) => <div>{row.getValue("name")}</div>,
+            meta: {
+                searchable: true,
+            },
         },
         {
             accessorKey: "eventDate",
             header: "Event Date",
-            cell: ({ row }) => <div>{row.getValue("eventDate")}</div>,
+            cell: ({ row }) => {
+                const start = row.original.event_start_date;
+                const end = row.original.event_end_date;
+                return (
+                    <div>
+                        {start && end
+                            ? `${formatDate(start)} to ${formatDate(end)}`
+                            : "N/A"}
+                    </div>
+                );
+            },
         },
         {
             accessorKey: "time",
             header: "Event Time",
-            cell: ({ row }) => <div>{row.getValue("time")}</div>,
+            cell: ({ row }) => {
+                const start = row.original.event_start_time;
+                const end = row.original.event_end_time;
+                return (
+                    <div>
+                        {start && end
+                            ? `${formatTime(start)} to ${formatTime(end)}`
+                            : "N/A"}
+                    </div>
+                );
+            },
         },
         {
             accessorKey: "status",
             header: "Status",
             cell: ({ row }) => getStatusBadge(row.getValue("status")),
+            meta: {
+                filterable: true,
+            },
         },
         {
             id: "actions",
             header: "Action",
-            cell: ({ row }) => (
-                <div className="flex justify-center">
-                    <Button
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                        onClick={() => handleViewBooking(row.original)}
-                    >
-                        View
-                    </Button>
-                </div>
-            ),
+            cell: ({ row }) => {
+                const booking = row.original;
+                const canEdit = isAdmin || booking.status === "Pending";
+                return (
+                    <div className="flex justify-center space-x-2">
+                        <Button
+                            className="bg-secondary hover:bg-primary text-white"
+                            onClick={() => handleViewBooking(booking)}
+                            disabled={!canEdit}
+                        >
+                            View
+                        </Button>
+                        {isAdmin ? (
+                            <Button
+                                className="bg-destructive hover:bg-red-700 text-white"
+                                onClick={() => handleDeleteBooking(booking)}
+                            >
+                                Delete
+                            </Button>
+                        ) : (
+                            <Button
+                                className="bg-orange-500 hover:bg-orange-600 text-white"
+                                onClick={() => handleCancelBooking(booking)}
+                                disabled={booking.status !== "Pending"}
+                            >
+                                Cancel
+                            </Button>
+                        )}
+                    </div>
+                );
+            },
             enableSorting: false,
         },
     ];
 
+    // Handle form input change
+    const handleFormChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    // Handle form submit
+    const handleFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setFormErrors({});
+        router.post("/event-services", form, {
+            onError: (errors) => setFormErrors(errors),
+            onSuccess: () => {
+                setShowCreateModal(false);
+                setForm({ name: "", venue: "", event_date: "", time: "" });
+            },
+        });
+    };
+
+    // Delete handler
+    const handleDeleteBooking = (booking: Booking) => {
+        if (confirm("Are you sure you want to delete this booking?")) {
+            router.delete(`/event-services/${booking.id}`);
+        }
+    };
+
+    // Cancel handler
+    const handleCancelBooking = (booking: Booking) => {
+        if (window.confirm("Are you sure you want to cancel this booking?")) {
+            router.put(
+                `/event-services/${booking.id}`,
+                { status: "Cancelled" },
+                {
+                    preserveScroll: true,
+                    preserveState: true,
+                }
+            );
+        }
+    };
+
+    // Format date as "Month Day, Year"
+    function formatDate(dateString: string) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+    }
+
+    // Format time as "hh:mm AM/PM"
+    function formatTime(timeString: string) {
+        if (!timeString) return "";
+        const [hour, minute] = timeString.split(":");
+        const date = new Date();
+        date.setHours(Number(hour), Number(minute));
+        return date.toLocaleTimeString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        });
+    }
+
     return (
         <AuthenticatedLayout>
+            <Head title="My Bookings" />
             <div className="container mx-auto py-6">
-                <Head title="My Bookings" />
-
                 <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                         <h1 className="text-2xl font-semibold">My Bookings</h1>
+                        <Button
+                            className="bg-secondary hover:bg-primary text-white"
+                            onClick={() =>
+                                router.visit("/event-services/request")
+                            }
+                        >
+                            + Create Booking
+                        </Button>
                     </div>
                 </header>
 
-                {/* Filter Dropdown */}
-                {isFilterOpen && (
-                    <div className="border rounded-md p-4 mb-6 shadow-md w-full max-w-md ml-auto">
-                        <h3 className="font-semibold text-lg mb-4">Filter</h3>
-
-                        <div className="mb-4">
-                            <p className="mb-2">Requested Venue</p>
-                            <select
-                                className="w-full border rounded-md px-3 py-2"
-                                value={filterVenue}
-                                onChange={(e) => setFilterVenue(e.target.value)}
-                            >
-                                <option value="">All Venues</option>
-                                {uniqueVenues.map((venue) => (
-                                    <option key={venue} value={venue}>
-                                        {venue}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="mb-4">
-                            <p className="mb-2">Status</p>
-                            <select
-                                className="w-full border rounded-md px-3 py-2"
-                                value={filterStatus}
-                                onChange={(e) =>
-                                    setFilterStatus(e.target.value)
-                                }
-                            >
-                                <option value="">All Statuses</option>
-                                {uniqueStatuses.map((status) => (
-                                    <option key={status} value={status}>
-                                        {status}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="flex gap-2 mt-6">
-                            <Button
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                                onClick={() => setIsFilterOpen(false)}
-                            >
-                                Apply
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="flex-1"
-                                onClick={handleClearFilters}
-                            >
-                                Clear
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                <CreateBookingModal
+                    open={showCreateModal}
+                    onClose={() => setShowCreateModal(false)}
+                    venueNames={
+                        venueNames.length
+                            ? venueNames
+                            : [
+                                  "Auditorium",
+                                  "Auditorium Lobby",
+                                  "College Library",
+                                  "Meeting Room",
+                                  "Training Room A",
+                                  "Computer Laboratory A",
+                                  "Computer Laboratory B",
+                                  "EFS Classroom(s) Room #:",
+                                  "LVCC Grounds",
+                                  "LVCC  Main Lobby",
+                                  "Elementary & High School Library",
+                                  "Basketball Court",
+                              ]
+                    }
+                />
 
                 {/* Desktop Table View (Datatable) */}
-                <div className="hidden md:block border rounded-md overflow-hidden">
+                <div className="hidden md:block -mt-16 overflow-hidden">
                     <Datatable
                         columns={columns as any}
                         data={filteredBookings}
@@ -337,7 +486,7 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
 
                                 <div>
                                     <strong>Date Requested:</strong>{" "}
-                                    {booking.date}
+                                    {formatDate(booking.date)}
                                 </div>
                                 <div>
                                     <strong>Requested Venue:</strong>{" "}
@@ -348,93 +497,64 @@ export default function MyBookings({ bookings = [] }: { bookings?: any[] }) {
                                 </div>
                                 <div>
                                     <strong>Event Date:</strong>{" "}
-                                    {booking.eventDate}
+                                    {formatDate(booking.eventDate)}
                                 </div>
                                 <div>
-                                    <strong>Event Time:</strong> {booking.time}
+                                    <strong>Event Time:</strong>{" "}
+                                    {formatTime(booking.time)}
                                 </div>
 
                                 <div className="flex justify-end mt-2 w-full">
-                                    <div className="w-1/3">
+                                    <div className="flex w-full space-x-2">
                                         <Button
-                                            className="w-full bg-secondary hover:bg-blue-700 text-white"
+                                            className="w-1/2 bg-secondary hover:bg-primary text-white"
                                             onClick={() =>
                                                 handleViewBooking(booking)
+                                            }
+                                            disabled={
+                                                !isAdmin &&
+                                                booking.status !== "Pending"
                                             }
                                         >
                                             View
                                         </Button>
+                                        {isAdmin ? (
+                                            <Button
+                                                className="w-1/2 bg-destructive hover:bg-red-700 text-white"
+                                                onClick={() =>
+                                                    handleDeleteBooking(booking)
+                                                }
+                                            >
+                                                Delete
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                className="w-1/2 bg-orange-500 hover:bg-orange-600 text-white"
+                                                onClick={() =>
+                                                    handleCancelBooking(booking)
+                                                }
+                                                disabled={
+                                                    booking.status !== "Pending"
+                                                }
+                                            >
+                                                Cancel
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
-
-                            
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Pagination */}
-                <div className="mt-6">
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            className="flex items-center gap-2"
-                            onClick={() =>
-                                setCurrentPage((prev) => Math.max(prev - 1, 1))
-                            }
-                            disabled={currentPage === 1}
-                        >
-                            <ArrowLeft size={16} />
-                            Previous
-                        </Button>
-
-                        {Array.from(
-                            { length: Math.min(totalPages, 5) },
-                            (_, i) => {
-                                const pageNumber = i + 1;
-                                return (
-                                    <Button
-                                        key={pageNumber}
-                                        variant={
-                                            currentPage === pageNumber
-                                                ? "default"
-                                                : "outline"
-                                        }
-                                        className={`w-8 h-8 p-0 ${
-                                            currentPage === pageNumber
-                                                ? "bg-blue-600"
-                                                : ""
-                                        }`}
-                                        onClick={() =>
-                                            setCurrentPage(pageNumber)
-                                        }
-                                    >
-                                        {pageNumber}
-                                    </Button>
-                                );
-                            }
-                        )}
-
-                        {totalPages > 5 && <span>...</span>}
-
-                        <Button
-                            variant="outline"
-                            className="flex items-center gap-2"
-                            onClick={() =>
-                                setCurrentPage((prev) =>
-                                    Math.min(prev + 1, totalPages)
-                                )
-                            }
-                            disabled={currentPage === totalPages}
-                        >
-                            Next
-                            <ArrowLeft size={16} className="rotate-180" />
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Booking Details Modal */}
-                <BookingDetailsModal />
+                <ViewBookingModal
+                    open={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    booking={selectedBooking}
+                    venueNames={venueNames}
+                    canEdit={isAdmin || selectedBooking?.status === "Pending"}
+                    // onBookingUpdate={handleBookingUpdate}
+                />
             </div>
         </AuthenticatedLayout>
     );

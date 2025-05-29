@@ -3,12 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AssetMaintenanceHistory extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'downtime_reason',
         'status',

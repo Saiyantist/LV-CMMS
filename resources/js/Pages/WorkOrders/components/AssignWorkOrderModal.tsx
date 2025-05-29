@@ -90,7 +90,6 @@ export default function AssignWorkOrderModal({
         approved_by: workOrder.approved_by ?? "",
     });
 
-    console.log(workOrder);
     const validateForm = () => {
         const newErrors: Record<string, string> = {}
 
@@ -440,7 +439,7 @@ export default function AssignWorkOrderModal({
 
 
                                     {/* Asset */}
-                                    <div className="flex-[3] space-y-2 -mt-1.5">
+                                    <div className="flex-[3] space-y-2">
                                         <SmartDropdown
                                             label="Asset"
                                             placeholder={assetDetails ? `${assetDetails.name} - ${assetDetails.location_name}` : "Select Asset (scroll down here)"}

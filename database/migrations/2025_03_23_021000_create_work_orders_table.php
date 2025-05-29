@@ -30,6 +30,7 @@ return new class extends Migration
             $table->timestamp('completed_at')->nullable();
             $table->text('remarks')->nullable();
             $table->foreignId('asset_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('maintenance_schedule_id')->nullable()->constrained()->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });      

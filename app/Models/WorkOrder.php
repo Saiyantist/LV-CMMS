@@ -28,6 +28,7 @@ class WorkOrder extends Model
         'completed_at',
         'remarks',
         'asset_id',
+        'maintenance_schedule_id',
     ];
 
     public function location()
@@ -50,6 +51,11 @@ class WorkOrder extends Model
             'asset_id',   // Foreign key on WorkOrder: References the Asset model
             'id'          // Local key on Asset: Primary key on Asset used to join with WorkOrder
         );
+    }
+
+    public function maintenanceSchedule()
+    {
+        return $this->belongsTo(PreventiveMaintenance::class, 'maintenance_schedule_id');
     }
 
     public function images()
