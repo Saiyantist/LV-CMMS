@@ -14,6 +14,8 @@ import { Label } from "@/Components/shadcnui/label";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
 import { router } from "@inertiajs/react";
+import { getPriorityColor } from "@/utils/getPriorityColor";
+import { formatDate } from "date-fns";
 
 
 
@@ -28,7 +30,7 @@ interface ViewWorkOrderProps {
         location: { id: number; name: string };
         report_description: string;
         requested_at: string;
-        requested_by: { id: number; name: string};
+        requested_by: { id: number; first_name: string; last_name: string};
         asset: any;
         status: string;
         work_order_type: string;
@@ -59,6 +61,7 @@ export default function ViewWorkOrderModal({
 }: ViewWorkOrderProps) {
     const isMaintenancePersonnel = user.roles.some(role => role.name === 'maintenance_personnel');
     const isDepartmentHead = user.roles.some(role => role.name === 'department_head');
+    const isWorkOrderManager = user.permissions.includes("manage work orders");
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
 
     const getAssetDetails = (workOrder: any) => {
@@ -114,7 +117,7 @@ export default function ViewWorkOrderModal({
                     <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody className="flex flex-col">
 
-                            {isMaintenancePersonnel && (
+                            {isMaintenancePersonnel || isWorkOrderManager && (
                                 <TableRow className="border-none flex flex-row items-center justify-between w-full">
 
                                     {/* Requested By */}
@@ -122,7 +125,7 @@ export default function ViewWorkOrderModal({
                                         <TableHead className="flex flex-[1] items-center">
                                             <Label>Requested By:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[1] items-center">{workOrder.requested_by.name}</TableCell>
+                                        <TableCell className="flex flex-[1] items-center">{workOrder.requested_by.first_name} {workOrder.requested_by.last_name}</TableCell>
                                     </div>
 
                                     {workOrder.assigned_to?.id === user.id ? [
@@ -185,8 +188,6 @@ export default function ViewWorkOrderModal({
                                     </div>
 
                                     ]}
-
-
                                 </TableRow>
                             )}
                     
@@ -197,8 +198,8 @@ export default function ViewWorkOrderModal({
                                     <TableHead className="flex flex-[1] items-center">
                                         <Label>Date Requested:</Label>
                                     </TableHead>
-                                    <TableCell className="flex flex-[1] items-center">{workOrder.requested_at}</TableCell>
-                                </div>
+                                    <TableCell className="flex flex-[1] items-center">{formatDate(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
+                                </div>  
 
                                 {/* Work Order Type */}
                                 {isMaintenancePersonnel && (
@@ -208,6 +209,24 @@ export default function ViewWorkOrderModal({
                                     </TableHead>
                                     <TableCell className="flex flex-[1] items-center">
                                         {workOrder.work_order_type}
+                                    </TableCell>
+                                </div>
+                                )}
+
+                                {/* Priority */}
+                                {isWorkOrderManager && (
+                                <div className="flex-[1] flex">
+                                    <TableHead className="flex flex-[0.7] items-center">
+                                        <Label>Priority:</Label>
+                                    </TableHead>
+                                    <TableCell className="flex flex-[1] items-start">
+                                        <div
+                                            className={`px-2 py-1 rounded bg-muted ${getPriorityColor(
+                                                workOrder.priority
+                                            )}`}
+                                        >
+                                            {workOrder.priority || "No Priority"}
+                                        </div>
                                     </TableCell>
                                 </div>
                                 )}
@@ -232,7 +251,7 @@ export default function ViewWorkOrderModal({
                         </TableBody>
                     </Table>
 
-                    {isMaintenancePersonnel && (
+                    {isMaintenancePersonnel || isWorkOrderManager && (
                         <hr className="my-2" />
                     )}
 
@@ -254,7 +273,7 @@ export default function ViewWorkOrderModal({
                                 <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
-                            {isMaintenancePersonnel && (
+                            {isMaintenancePersonnel || isWorkOrderManager && (
                                 <TableRow className="border-none flex flex-row items-center justify-between w-full">
                                     <TableHead className="flex flex-[1] items-center">
                                         <Label>Remarks:</Label>
@@ -291,7 +310,7 @@ export default function ViewWorkOrderModal({
                                     <Label>Attachment:</Label>
                                 </TableHead>
                                 <TableCell className="flex flex-[3.3] items-center">
-                                    {workOrder.images.length > 0 ? (
+                                    {workOrder.images && workOrder.images.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                             {workOrder.images.map((src, index) => (
                                             <div

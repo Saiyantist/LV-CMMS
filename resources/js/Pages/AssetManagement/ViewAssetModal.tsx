@@ -90,6 +90,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
     const [showCalendar, setShowCalendar] = useState(false);
     const [isPreventiveMaintenance, setIsPreventiveMaintenance] = useState(!!asset.maintenance_schedule);
     const [isActive, setIsActive] = useState(asset.maintenance_schedule?.is_active || false);
+
     // Initialize schedule state based on existing maintenance schedule
     const [schedule, setSchedule] = useState<"Weekly" | "Monthly" | "Yearly">(() => {
         if (!asset.maintenance_schedule) return "Weekly";
@@ -177,6 +178,22 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
         return n + (s[(v - 20) % 10] || s[v] || s[0]);
     };
 
+    // Helper function to get status color
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "Functional":
+                return "bg-green-100 text-green-700 border border-green-300";
+            case "Failed":
+                return "bg-red-100 text-red-700 border border-red-300";
+            case "Under Maintenance":
+                return "bg-blue-100 text-blue-700 border border-blue-300";
+            case "End of Useful Life":
+                return "bg-yellow-100 text-yellow-700 border border-yellow-300";
+            default:
+                return "bg-gray-100 text-gray-700 border border-gray-300";
+        }
+    };
+
     const { data, setData, post, errors } = useForm({
         name: editableData.name,
         specification_details: editableData.specification_details,
@@ -252,7 +269,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                     <div className="px-6 py-2 max-h-[65vh] overflow-y-auto">
                         <div className="px-2 -mt-2 space-y-4">
                             {/* Asset Name and Specification */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
                                 {/* Asset Name */}
                                 <div className="space-y-2">
                                     <Label htmlFor="name" className="flex items-center">
@@ -268,7 +285,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                             })}
                                         />
                                     ) : (
-                                        <p className="text-sm !mt-4">{editableData.name}</p>
+                                        <p className="text-sm text-muted-foreground !mt-4">{editableData.name}</p>
                                     )}
                                 </div>
 
@@ -287,13 +304,13 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                             })}
                                         />
                                     ) : (
-                                        <p className="text-sm !mt-4">{editableData.specification_details}</p>
+                                        <p className="text-sm text-muted-foreground !mt-4">{editableData.specification_details}</p>
                                     )}
                                 </div>
                             </div>
-
+                            <hr className="!my-4"/>
                             {/* Location, Condition, and Date Acquired */}
-                            <div className="flex flex-row gap-4 mt-4">
+                            <div className="flex flex-row gap-4 !my-6">
                                 {/* Location */}
                                 <div className="space-y-2 flex-[1]">
                                     <Label htmlFor="location" className="flex items-center">
@@ -329,7 +346,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                             </Select>
                                         </div>
                                     ) : (
-                                        <p className="text-sm !mt-4">{editableData.location.name}</p>
+                                        <p className="text-sm text-muted-foreground !mt-4">{editableData.location.name}</p>
                                     )}
                                 </div>
 
@@ -359,7 +376,15 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                         </Select>
                                     </div>
                                     ) : (
-                                        <p className="text-sm !mt-4">{editableData.status}</p>
+                                        <p>
+                                        <span
+                                            className={`px-2 py-1 rounded text-xs ${getStatusColor(
+                                                editableData.status
+                                            )}`}
+                                        >
+                                            {editableData.status}
+                                        </span>
+                                    </p>
                                     )}
                                 </div>
 
@@ -405,13 +430,13 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                             )}
                                         </div>
                                     ) : (
-                                        <p className="text-sm !mt-4">
+                                        <p className="text-sm text-muted-foreground !mt-4">
                                             {editableData.date_acquired ? format(parseISO(editableData.date_acquired), "MM/dd/yyyy") : "Not set"}
                                         </p>
                                     )}
                                 </div>
                             </div>
-
+                            <hr />
                             {/* Preventive Maintenance Section - Only show when not editing */}
                             {!isEditing && asset.maintenance_schedule && (
                                 <div className="space-y-4 mt-6">
@@ -420,9 +445,9 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                             Preventive Maintenance Schedule
                                         </Label>
                                     </div>
-                                    <div className="bg-muted p-4 rounded-lg">
+                                    <div className="bg-muted/10 px-4 rounded-lg">
                                         <Table>
-                                            <TableRow>
+                                            <TableRow className="border-none">
                                                 <TableHead>Status</TableHead>
                                                 <TableCell>
                                                     <span className={cn("px-2 py-1 rounded text-sm",
@@ -434,7 +459,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                                     </span>
                                                 </TableCell>
                                             </TableRow>
-                                            <TableRow>
+                                            <TableRow className="border-none">
                                                 <TableHead>Schedule</TableHead>
                                                 <TableCell>
                                                     {formatMaintenanceSchedule(asset.maintenance_schedule)}

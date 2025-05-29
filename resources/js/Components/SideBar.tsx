@@ -641,7 +641,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 <div className="flex items-center justify-between px-2 py-3 h-16 xs:h-[4.2rem]">
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className={`flex flex-col items-center text-xs sm:text-sm px-2 xs:px-8 py-1 transition ${
+                        className={`flex flex-col items-center text-xs sm:text-sm px-4 xs:px-8 py-1 transition ${
                             mobileMenuOpen
                                 ? "bg-white text-primary"
                                 : "text-white hover:text-opacity-80"
@@ -652,7 +652,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     </button>
                     <Link
                         href={route("dashboard")}
-                        className={`flex flex-col items-center text-xs sm:text-sm px-2 xs:px-8 py-1 rounded-md transition ${
+                        className={`flex flex-col items-center text-xs sm:text-sm px-4 xs:px-8 py-1 rounded-md transition ${
                             currentRoute === "dashboard"
                                 ? "bg-white text-primary"
                                 : "text-white hover:text-opacity-80"
@@ -664,20 +664,51 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         />
                         Dashboard
                     </Link>
-                    <Link
-                        href={route("work-orders.index")}
-                        className={`flex flex-col items-center text-xs sm:text-sm text-center px-2 xs:px-8 py-1 rounded-md transition ${
-                            currentRoute === "work-orders.index"
-                                ? "bg-white text-primary"
-                                : "text-white hover:text-opacity-80"
-                        }`}
-                    >
-                        <Building size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
-                        Work Orders
-                    </Link>
+                    {isWorkOrderRequester ? [
+                        <>
+                            <Link
+                                href={route("work-orders.index")}
+                                className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
+                                    currentRoute === "work-orders.index"
+                                        ? "bg-white text-primary"
+                                        : "text-white hover:text-opacity-80"
+                                }`}
+                            >
+                                <Building size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
+                                Work Orders
+                            </Link>
+                            {isEventServiceRequester && (
+                                <Link
+                                    href={route("event-services.my-bookings")}
+                                    className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
+                                        currentRoute === "event-services.my-bookings"
+                                            ? "bg-white text-primary"
+                                            : "text-white hover:text-opacity-80"
+                                    }`}
+                                >
+                                    <Book size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
+                                    Bookings
+                                </Link>
+                            )}
+                        </>
+                    ] : [
+                        <>
+                            <Link
+                                href={route("event-services.my-bookings")}
+                                className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
+                                    currentRoute === "event-services.my-bookings"
+                                        ? "bg-white text-primary"
+                                        : "text-white hover:text-opacity-80"
+                                }`}
+                            >
+                                <Book size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
+                                My Bookings
+                            </Link>
+                        </>
+                    ]}
                     <Link
                         href={route("profile.edit")}
-                        className={`flex flex-col items-center text-xs sm:text-sm px-2 xs:px-8 py-1 rounded-md transition ${
+                        className={`flex flex-col items-center text-xs sm:text-sm px-4 xs:px-8 py-1 rounded-md transition ${
                             currentRoute === "profile.edit"
                                 ? "bg-white text-primary"
                                 : "text-white hover:text-opacity-80"

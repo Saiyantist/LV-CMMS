@@ -207,7 +207,7 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
       />
 
       {/* Datatable */}
-      <div className="rounded-md border bg-white overflow-auto">
+      <div className="rounded-md border bg-white overflow-x-auto">
         <Table className="text-xs">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

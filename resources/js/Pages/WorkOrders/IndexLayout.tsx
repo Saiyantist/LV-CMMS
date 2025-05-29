@@ -311,7 +311,7 @@ export default function IndexLayout({
             ),
             enableSorting: false,
             meta: {
-                cellClassName: "max-w-[14rem] px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                cellClassName: "min-w-[9rem] max-w-[11.5rem] px-1 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
             },
         },
@@ -420,6 +420,11 @@ export default function IndexLayout({
                         <div>{row.original.requested_by?.name || "N/A"}</div>
                     ),
                     enableSorting: false,
+                    meta: {
+                        cellClassName: "max-w-[8rem] text-center",
+                        searchable: true,
+                        filterable: true,
+                    },
                 },
                 ...(activeTab === "For Budget Request" ? [
                     {
@@ -482,7 +487,7 @@ export default function IndexLayout({
                     ),
                     enableSorting: false,
                     meta: {
-                        cellClassName: "max-w-[10rem] text-center",
+                        cellClassName: "min-w-[7.5rem] max-w-[8rem] text-center",
                     },
                 }
             ]

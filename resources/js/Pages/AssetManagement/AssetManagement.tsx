@@ -13,6 +13,8 @@ import { router } from "@inertiajs/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import FlashToast from "@/Components/FlashToast";
+import { Button } from "@/Components/shadcnui/button";
+import { Trash } from "lucide-react";
 
 interface Asset {
     id: number;
@@ -103,7 +105,7 @@ const AssetManagement: React.FC = () => {
             cell: ({ row }) => <div>{row.getValue("name")}</div>,
             enableSorting: false,
             meta: {
-                headerClassName: "w-[15%]",
+                headerClassName: "w-[12%]",
                 searchable: true,
             },
         },
@@ -151,8 +153,8 @@ const AssetManagement: React.FC = () => {
                 </div>
             ),
             meta: {
-                headerClassName: "w-[10%]",
-                cellClassName: "text-center",
+                headerClassName: "w-[30rem]",
+                cellClassName: "flex justify-center",
                 filterable: true,
             },
         },
@@ -178,19 +180,20 @@ const AssetManagement: React.FC = () => {
             id: "actions",
             header: "Action",
             cell: ({ row }) => (
-                <div className="flex justify-center gap-2">
-                    <button
+                <div className="flex justify-start gap-2 px-2">
+                    <Button
                         onClick={() => setViewingAsset(row.original)}
-                        className="bg-secondary text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-700 transition"
+                        className="bg-secondary h-6 text-xs rounded-sm"
                     >
                         View
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant={"outline"}
+                        size={"icon"}
+                        className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
                         onClick={() => handleDelete(row.original.id)}
-                        className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
-                    >
-                        Delete
-                    </button>
+                    ><Trash />
+                    </Button>
                 </div>
             ),
             enableSorting: false,
@@ -200,14 +203,14 @@ const AssetManagement: React.FC = () => {
     // Helper function to get status color
     const getStatusColor = (status: string) => {
         switch (status) {
-            case "Scheduled":
+            case "Functional":
                 return "bg-green-100 text-green-700 border border-green-300";
+            case "Failed":
+                return "bg-red-100 text-red-700 border border-red-300";
             case "Under Maintenance":
                 return "bg-blue-100 text-blue-700 border border-blue-300";
             case "End of Useful Life":
                 return "bg-yellow-100 text-yellow-700 border border-yellow-300";
-            case "Failed":
-                return "bg-red-100 text-red-700 border border-red-300";
             default:
                 return "bg-gray-100 text-gray-700 border border-gray-300";
         }

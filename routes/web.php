@@ -14,7 +14,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\EventServicesController;
 use App\Http\Controllers\DepartmentController;
-
+use App\Http\Controllers\PreventiveMaintenanceController;
 
 /**
  *  Guest Routes
@@ -93,6 +93,12 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
             Route::get('/work-orders/preventive-maintenance', function () { // will change to use a controller
                 return Inertia::render('PreventiveMaintenance/PreventiveMaintenance');
             })->name('work-orders.preventive-maintenance');
+            Route::group(['prefix' => 'work-orders/preventive-maintenance'], function () {
+                Route::get('/', [PreventiveMaintenanceController::class, 'index'])->name('work-orders.preventive-maintenance');
+                Route::post('/', [PreventiveMaintenanceController::class, 'store'])->name('work-orders.preventive-maintenance.store');
+                Route::put('/{id}', [PreventiveMaintenanceController::class, 'update'])->name('work-orders.preventive-maintenance.update');
+                Route::delete('/{id}', [PreventiveMaintenanceController::class, 'destroy'])->name('work-orders.preventive-maintenance.destroy');
+            });
     
             Route::get('/work-orders/compliance-and-safety', function () {
                 return Inertia::render('ComplianceAndSafety/ComplianceAndSafety');
