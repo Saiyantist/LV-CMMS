@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 
 import * as React from "react";
 import { useState } from "react";
@@ -8,6 +8,12 @@ import BookingList from "./BookingList";
 import { Head, usePage } from "@inertiajs/react";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
 import { router } from "@inertiajs/react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/Components/shadcnui/tooltip";
 
 // Helper to get month name and days in month
 const MONTHS = [
@@ -59,11 +65,81 @@ function getDateKey(year: number, month: number, day: number) {
     ).padStart(2, "0")}`;
 }
 
+// Format date helper
+function formatDate(dateString: string) {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+}
+
+// TruncateWithToggle: shows ellipsis if too long, with a "See more"/"See less" toggle
+function TruncateWithToggle({
+    text,
+    max = 30,
+}: {
+    text: string;
+    max?: number;
+}) {
+    const [expanded, setExpanded] = React.useState(false);
+    if (!text) return null;
+    if (text.length <= max) return <>{text}</>;
+    return (
+        <span>
+            {expanded ? text : text.slice(0, max) + "..."}
+            <button
+                type="button"
+                className="ml-1 text-blue-600 underline text-xs"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setExpanded((v) => !v);
+                }}
+            >
+                {expanded ? "See less" : "See more"}
+            </button>
+        </span>
+    );
+}
+
 export default function EventCalendar() {
     // Get data from Inertia props
     const { calendarEvents, listEvents } = usePage().props as unknown as {
         calendarEvents: {
             [key: string]: {
+                department: string;
+                participants: string;
+                number_of_participants: string;
+                eventEndDate:
+                    | string
+                    | number
+                    | bigint
+                    | boolean
+                    | React.ReactElement<
+                          unknown,
+                          string | React.JSXElementConstructor<any>
+                      >
+                    | Iterable<React.ReactNode>
+                    | React.ReactPortal
+                    | Promise<
+                          | string
+                          | number
+                          | bigint
+                          | boolean
+                          | React.ReactPortal
+                          | React.ReactElement<
+                                unknown,
+                                string | React.JSXElementConstructor<any>
+                            >
+                          | Iterable<React.ReactNode>
+                          | null
+                          | undefined
+                      >
+                    | null
+                    | undefined;
+                description: any;
                 eventStartDate:
                     | string
                     | number
@@ -413,35 +489,142 @@ export default function EventCalendar() {
                                                     {/* This is the event time */}
                                                     <div className="space-y-1 text-center">
                                                         {events.length > 0 ? (
-                                                            events.map(
-                                                                (
-                                                                    event,
-                                                                    idx
-                                                                ) => (
-                                                                    <div
-                                                                        key={
-                                                                            idx
-                                                                        }
-                                                                        className={`bg-secondary text-white rounded-lg mx-auto my-1 px-2 py-1 flex flex-col items-center shadow-sm max-w-[95%]`}
-                                                                        style={{
-                                                                            minWidth:
-                                                                                "90px",
-                                                                        }}
-                                                                    >
-                                                                        <div className="font-semibold text-xs text-center mb-0.5 truncate w-full text-green-100">
-                                                                            {
-                                                                                event.title
+                                                            <TooltipProvider>
+                                                                {events.map(
+                                                                    (
+                                                                        event,
+                                                                        idx
+                                                                    ) => (
+                                                                        <Tooltip
+                                                                            key={
+                                                                                idx
                                                                             }
-                                                                        </div>
-                                                                        <div className="w-4/5 border-t border-white/40 my-1"></div>
-                                                                        <div className="font-mono text-xs text-center tracking-wide">
-                                                                            {
-                                                                                event.time
-                                                                            }
-                                                                        </div>
-                                                                    </div>
-                                                                )
-                                                            )
+                                                                        >
+                                                                            <TooltipTrigger
+                                                                                asChild
+                                                                            >
+                                                                                <div
+                                                                                    className={`bg-secondary text-white rounded-lg mx-auto my-1 px-2 py-1 flex flex-col items-center shadow-sm max-w-[95%] cursor-pointer`}
+                                                                                    style={{
+                                                                                        minWidth:
+                                                                                            "90px",
+                                                                                    }}
+                                                                                >
+                                                                                    <div className="font-semibold text-xs text-center mb-0.5 truncate w-full text-green-100">
+                                                                                        {
+                                                                                            event.title
+                                                                                        }
+                                                                                    </div>
+                                                                                    <div className="w-4/5 border-t border-white/40 my-1"></div>
+                                                                                    <div className="font-mono text-xs text-center tracking-wide">
+                                                                                        {
+                                                                                            event.time
+                                                                                        }
+                                                                                    </div>
+                                                                                </div>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent className="z-50 bg-white text-gray-900 rounded-xl shadow-xl p-4 max-w-xs text-xs space-y-2 border border-gray-200">
+                                                                                <div className="font-bold text-base mb-1 text-primary">
+                                                                                    {
+                                                                                        event.title
+                                                                                    }
+                                                                                </div>
+                                                                                <div className="flex flex-col gap-1">
+                                                                                    <div>
+                                                                                        <span className="font-semibold">
+                                                                                            Venue:
+                                                                                        </span>{" "}
+                                                                                        {Array.isArray(
+                                                                                            event.venue
+                                                                                        )
+                                                                                            ? event.venue
+                                                                                                  .filter(
+                                                                                                      Boolean
+                                                                                                  )
+                                                                                                  .join(
+                                                                                                      ", "
+                                                                                                  )
+                                                                                            : typeof event.venue ===
+                                                                                              "string"
+                                                                                            ? event.venue.replace(
+                                                                                                  /[\[\]"]+/g,
+                                                                                                  ""
+                                                                                              )
+                                                                                            : "N/A"}
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <span className="font-semibold">
+                                                                                            Department:
+                                                                                        </span>{" "}
+                                                                                        {event.department ? (
+                                                                                            <TruncateWithToggle
+                                                                                                text={
+                                                                                                    event.department
+                                                                                                }
+                                                                                            />
+                                                                                        ) : (
+                                                                                            "N/A"
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <span className="font-semibold">
+                                                                                            Participants:
+                                                                                        </span>{" "}
+                                                                                        {event.participants ? (
+                                                                                            <TruncateWithToggle
+                                                                                                text={
+                                                                                                    event.participants
+                                                                                                }
+                                                                                            />
+                                                                                        ) : (
+                                                                                            "N/A"
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <span className="font-semibold">
+                                                                                            No.
+                                                                                            of
+                                                                                            Participants:
+                                                                                        </span>{" "}
+                                                                                        {event.number_of_participants !==
+                                                                                            undefined &&
+                                                                                        event.number_of_participants !==
+                                                                                            null ? (
+                                                                                            <TruncateWithToggle
+                                                                                                text={String(
+                                                                                                    event.number_of_participants
+                                                                                                )}
+                                                                                            />
+                                                                                        ) : (
+                                                                                            "N/A"
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="border-t border-gray-200 my-1"></div>
+                                                                                    <div>
+                                                                                        <span className="font-semibold">
+                                                                                            Description:
+                                                                                        </span>
+                                                                                        <div className="whitespace-pre-line break-words text-gray-700 mt-0.5">
+                                                                                            {event.description ? (
+                                                                                                <TruncateWithToggle
+                                                                                                    text={
+                                                                                                        event.description
+                                                                                                    }
+                                                                                                />
+                                                                                            ) : (
+                                                                                                <span className="italic text-gray-400">
+                                                                                                    No
+                                                                                                    description
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
+                                                                    )
+                                                                )}
+                                                            </TooltipProvider>
                                                         ) : (
                                                             <span className="text-gray-400 text-xs">
                                                                 No events

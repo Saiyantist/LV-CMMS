@@ -37,6 +37,11 @@ class EventServicesController extends Controller
                     ? date('h:i A', strtotime($event->event_start_time)) . ' - ' . date('h:i A', strtotime($event->event_end_time))
                     : ($event->event_start_time ? date('h:i A', strtotime($event->event_start_time)) : ''),
                 'status' => $event->status,
+                // Add these fields:
+                'department' => $event->department,
+                'participants' => $event->participants,
+                'number_of_participants' => $event->number_of_participants,
+                'description' => $event->description,
             ];
         }
     }

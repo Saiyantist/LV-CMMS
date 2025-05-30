@@ -42,7 +42,7 @@ class EventServiceFactory extends Factory
             'user_id' => User::factory(),
             'name' => $this->faker->sentence(3),
             'venue' => json_encode([$this->faker->randomElement($venueNames)]),
-            'status' => $this->faker->randomElement(['Completed', 'In Progress', 'Cancelled', 'Not Started']),
+            'status' => $this->faker->randomElement(['Approved', 'Completed', 'In Progress', 'Cancelled', 'Not Started']),
             'event_start_date' => $start->format('Y-m-d'),
             'event_end_date' => $end->format('Y-m-d'),
             'event_start_time' => $startTime,

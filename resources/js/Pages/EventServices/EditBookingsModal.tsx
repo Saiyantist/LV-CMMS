@@ -18,6 +18,11 @@ const serviceOptions = [
     // Add more as needed
 ];
 
+const MAX_EVENT_NAME = 100;
+const MAX_DEPARTMENT = 100;
+const MAX_PARTICIPANTS = 100;
+const MAX_DESCRIPTION = 250;
+
 const EditBookingsModal = ({
     open,
     onClose,
@@ -40,6 +45,10 @@ const EditBookingsModal = ({
     const [venueDropdownOpen, setVenueDropdownOpen] = useState(false);
     const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
     const [previewFile, setPreviewFile] = useState<string | null>(null);
+    const [showEventNameLimit, setShowEventNameLimit] = useState(false);
+    const [showDepartmentLimit, setShowDepartmentLimit] = useState(false);
+    const [showParticipantsLimit, setShowParticipantsLimit] = useState(false);
+    const [showDescriptionLimit, setShowDescriptionLimit] = useState(false);
 
     const venueDropdownRef = useRef<HTMLDivElement>(null);
     const servicesDropdownRef = useRef<HTMLDivElement>(null);
@@ -303,6 +312,7 @@ const EditBookingsModal = ({
                             )}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                            {/* Event Name */}
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
                                     Event Name
@@ -310,16 +320,61 @@ const EditBookingsModal = ({
                                 <Input
                                     name="name"
                                     value={form.name || ""}
-                                    onChange={handleFormChange}
+                                    maxLength={MAX_EVENT_NAME}
+                                    onChange={(e) => {
+                                        let val = e.target.value;
+                                        if (val.length > MAX_EVENT_NAME) {
+                                            val = val.slice(0, MAX_EVENT_NAME);
+                                            setShowEventNameLimit(true);
+                                        } else {
+                                            setShowEventNameLimit(false);
+                                        }
+                                        setForm({ ...form, name: val });
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (
+                                            (form.name?.length || 0) ===
+                                                MAX_EVENT_NAME &&
+                                            e.key.length === 1 &&
+                                            !e.ctrlKey &&
+                                            !e.metaKey &&
+                                            !e.altKey
+                                        ) {
+                                            setShowEventNameLimit(true);
+                                            setTimeout(
+                                                () =>
+                                                    setShowEventNameLimit(
+                                                        false
+                                                    ),
+                                                2000
+                                            );
+                                        }
+                                    }}
                                     className="text-sm"
                                     placeholder="Enter event name"
                                 />
+                                <div className="flex justify-between items-center mt-1">
+                                    <span className="text-xs text-gray-500">
+                                        {form.name?.length || 0}/
+                                        {MAX_EVENT_NAME}
+                                    </span>
+                                    <span
+                                        className={`text-xs text-red-500 font-medium transition-opacity duration-300 ${
+                                            showEventNameLimit
+                                                ? "opacity-100"
+                                                : "opacity-0 pointer-events-none select-none"
+                                        }`}
+                                    >
+                                        Max {MAX_EVENT_NAME} characters.
+                                    </span>
+                                </div>
                                 {formErrors.name && (
                                     <span className="text-red-500 text-xs mt-1">
                                         {formErrors.name}
                                     </span>
                                 )}
                             </div>
+                            {/* Department */}
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
                                     Department
@@ -327,10 +382,54 @@ const EditBookingsModal = ({
                                 <Input
                                     name="department"
                                     value={form.department || ""}
-                                    onChange={handleFormChange}
+                                    maxLength={MAX_DEPARTMENT}
+                                    onChange={(e) => {
+                                        let val = e.target.value;
+                                        if (val.length > MAX_DEPARTMENT) {
+                                            val = val.slice(0, MAX_DEPARTMENT);
+                                            setShowDepartmentLimit(true);
+                                        } else {
+                                            setShowDepartmentLimit(false);
+                                        }
+                                        setForm({ ...form, department: val });
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (
+                                            (form.department?.length || 0) ===
+                                                MAX_DEPARTMENT &&
+                                            e.key.length === 1 &&
+                                            !e.ctrlKey &&
+                                            !e.metaKey &&
+                                            !e.altKey
+                                        ) {
+                                            setShowDepartmentLimit(true);
+                                            setTimeout(
+                                                () =>
+                                                    setShowDepartmentLimit(
+                                                        false
+                                                    ),
+                                                2000
+                                            );
+                                        }
+                                    }}
                                     className="text-sm"
                                     placeholder="Enter department"
                                 />
+                                <div className="flex justify-between items-center mt-1">
+                                    <span className="text-xs text-gray-500">
+                                        {form.department?.length || 0}/
+                                        {MAX_DEPARTMENT}
+                                    </span>
+                                    <span
+                                        className={`text-xs text-red-500 font-medium transition-opacity duration-300 ${
+                                            showDepartmentLimit
+                                                ? "opacity-100"
+                                                : "opacity-0 pointer-events-none select-none"
+                                        }`}
+                                    >
+                                        Max {MAX_DEPARTMENT} characters.
+                                    </span>
+                                </div>
                                 {formErrors.department && (
                                     <span className="text-red-500 text-xs mt-1">
                                         {formErrors.department}
@@ -342,13 +441,55 @@ const EditBookingsModal = ({
                             <label className="mb-1 font-medium text-sm">
                                 Description
                             </label>
-                            <Input
+                            <textarea
                                 name="description"
                                 value={form.description || ""}
-                                onChange={handleFormChange}
-                                className="text-sm h-32"
+                                maxLength={MAX_DESCRIPTION}
+                                onChange={(e) => {
+                                    let val = e.target.value;
+                                    if (val.length > MAX_DESCRIPTION) {
+                                        val = val.slice(0, MAX_DESCRIPTION);
+                                        setShowDescriptionLimit(true);
+                                    } else {
+                                        setShowDescriptionLimit(false);
+                                    }
+                                    setForm({ ...form, description: val });
+                                }}
+                                onKeyDown={(e) => {
+                                    if (
+                                        (form.description?.length || 0) ===
+                                            MAX_DESCRIPTION &&
+                                        e.key.length === 1 &&
+                                        !e.ctrlKey &&
+                                        !e.metaKey &&
+                                        !e.altKey
+                                    ) {
+                                        setShowDescriptionLimit(true);
+                                        setTimeout(
+                                            () =>
+                                                setShowDescriptionLimit(false),
+                                            2000
+                                        );
+                                    }
+                                }}
+                                className="text-sm h-32 rounded border border-gray-300 px-3 py-2"
                                 placeholder="Enter purpose"
                             />
+                            <div className="flex justify-between items-center mt-1">
+                                <span className="text-xs text-gray-500">
+                                    {form.description?.length || 0}/
+                                    {MAX_DESCRIPTION}
+                                </span>
+                                <span
+                                    className={`text-xs text-red-500 font-medium transition-opacity duration-300 ${
+                                        showDescriptionLimit
+                                            ? "opacity-100"
+                                            : "opacity-0 pointer-events-none select-none"
+                                    }`}
+                                >
+                                    Max {MAX_DESCRIPTION} characters.
+                                </span>
+                            </div>
                             {formErrors.description && (
                                 <span className="text-red-500 text-xs mt-1">
                                     {formErrors.description}
@@ -363,10 +504,57 @@ const EditBookingsModal = ({
                                 <Input
                                     name="participants"
                                     value={form.participants || ""}
-                                    onChange={handleFormChange}
+                                    maxLength={MAX_PARTICIPANTS}
+                                    onChange={(e) => {
+                                        let val = e.target.value;
+                                        if (val.length > MAX_PARTICIPANTS) {
+                                            val = val.slice(
+                                                0,
+                                                MAX_PARTICIPANTS
+                                            );
+                                            setShowParticipantsLimit(true);
+                                        } else {
+                                            setShowParticipantsLimit(false);
+                                        }
+                                        setForm({ ...form, participants: val });
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (
+                                            (form.participants?.length || 0) ===
+                                                MAX_PARTICIPANTS &&
+                                            e.key.length === 1 &&
+                                            !e.ctrlKey &&
+                                            !e.metaKey &&
+                                            !e.altKey
+                                        ) {
+                                            setShowParticipantsLimit(true);
+                                            setTimeout(
+                                                () =>
+                                                    setShowParticipantsLimit(
+                                                        false
+                                                    ),
+                                                2000
+                                            );
+                                        }
+                                    }}
                                     className="text-sm"
                                     placeholder="Enter participants"
                                 />
+                                <div className="flex justify-between items-center mt-1">
+                                    <span className="text-xs text-gray-500">
+                                        {form.participants?.length || 0}/
+                                        {MAX_PARTICIPANTS}
+                                    </span>
+                                    <span
+                                        className={`text-xs text-red-500 font-medium transition-opacity duration-300 ${
+                                            showParticipantsLimit
+                                                ? "opacity-100"
+                                                : "opacity-0 pointer-events-none select-none"
+                                        }`}
+                                    >
+                                        Max {MAX_PARTICIPANTS} characters.
+                                    </span>
+                                </div>
                                 {formErrors.participants && (
                                     <span className="text-red-500 text-xs mt-1">
                                         {formErrors.participants}

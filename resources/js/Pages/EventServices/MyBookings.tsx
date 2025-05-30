@@ -245,12 +245,12 @@ export default function MyBookings({
 
     // Datatable columns (UI only)
     const columns: ColumnDef<Booking>[] = [
-        {
-            accessorKey: "id",
-            header: "ID",
-            cell: ({ row }) => <div>{row.getValue("id")}</div>,
-            meta: { headerClassName: "w-[80px]" },
-        },
+        // {
+        //     accessorKey: "id",
+        //     header: "ID",
+        //     cell: ({ row }) => <div>{row.getValue("id")}</div>,
+        //     meta: { headerClassName: "w-[80px]" },
+        // },
         {
             accessorKey: "date",
             header: "Date Requested",
@@ -271,7 +271,16 @@ export default function MyBookings({
         {
             accessorKey: "name",
             header: "Event Name",
-            cell: ({ row }) => <div>{row.getValue("name")}</div>,
+            cell: ({ row }) => {
+                const name = row.getValue("name") as string;
+                return (
+                    <div title={name}>
+                        {name && name.length > 25
+                            ? name.slice(0, 25) + "..."
+                            : name}
+                    </div>
+                );
+            },
             meta: {
                 searchable: true,
             },
