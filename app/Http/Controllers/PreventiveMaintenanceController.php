@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Asset;
 use App\Models\Location;
 use App\Models\WorkOrder;
 use App\Models\PreventiveMaintenance;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -21,6 +23,8 @@ class PreventiveMaintenanceController extends Controller
         return Inertia::render('PreventiveMaintenance/PreventiveMaintenance', [
             'workOrders' => $workOrders,
             'maintenanceSchedules' => $maintenanceSchedules,
+            'assets' => Asset::with(['location:id,name', 'maintenanceHistories'])->get(),
+            'maintenancePersonnel' => User::role('maintenance_personnel')->with('roles')->get(),
             'user' => [
                 'id' => $user->id,
                 'name' => $user->first_name . ' ' . $user->last_name,

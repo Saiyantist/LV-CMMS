@@ -70,9 +70,9 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
 
   const canSeeCriticalOrOverdue = (row: TData) => {
     if (isWorkOrderManager) {
-      return (row.original.priority === "Critical" || row.original.status === "Overdue")
+      return ((row.original.priority === "Critical" || row.original.status === "Overdue") && row.original.status !== "Completed")
     } else if (isMaintenancePersonnel && row.original.assigned_to?.id === user.id) {
-      return (row.original.priority === "Critical" || row.original.status === "Overdue")
+      return ((row.original.priority === "Critical" || row.original.status === "Overdue") && row.original.status !== "Completed")
     }
     return false
   }

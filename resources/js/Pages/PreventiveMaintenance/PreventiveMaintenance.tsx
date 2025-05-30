@@ -7,6 +7,7 @@ import { format, parseISO } from "date-fns";
 import { StatusCell } from "../WorkOrders/components/StatusCell";
 import { Button } from "@/Components/shadcnui/button";
 import ViewWorkOrderModal from "../WorkOrders/components/ViewWorkOrderModal";
+import EditWorkOrderModal from "../WorkOrders/components/EditModal";
 
 interface WorkOrders {
     id: number;
@@ -16,10 +17,7 @@ interface WorkOrders {
     priority: string;
     remarks: string;
     status: string;
-    requested_by: {
-        id: number;
-        name: string;
-    };
+    requested_by: { id: number; first_name: string; last_name: string};
     requested_at: string;
     scheduled_at: string;
     approved_at: string;
@@ -83,9 +81,22 @@ interface Locations {
     name: string;
 }[]
 
+interface MaintenancePersonnel {
+    id: number;
+    first_name: string;
+    last_name: string;
+    roles: { id: number; name: string };
+}
+interface Assets {
+    id: number;
+    name: string;
+    location: { id: number; name: string };
+}
+
 const PreventiveMaintenance: React.FC = () => {
     const { props } = usePage();
-    // const assets = (props.assets as Asset[]) || [];
+    const assets = (props.assets as Assets[]) || [];
+    const maintenancePersonnel = (props.maintenancePersonnel as MaintenancePersonnel[]) || [];
     const workOrders = (props.workOrders as WorkOrders[]) || [];
     const maintenanceSchedules = (props.maintenanceSchedules as MaintenanceSchedule[]) || [];
     const user = (props.user as User) || {};
@@ -94,6 +105,7 @@ const PreventiveMaintenance: React.FC = () => {
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
+    const [isEditingWorkOrder, setIsEditingWorkOrder] = useState<any>(null);
 
     const PMSWorkOrdersColumns: ColumnDef<WorkOrders>[] = [
     {
@@ -210,12 +222,17 @@ const PreventiveMaintenance: React.FC = () => {
                 >
                     View
                 </Button>
+                <Button
+                    className="bg-secondary h-6 text-xs rounded-sm"
+                    onClick={() => setIsEditingWorkOrder(row.original)}
+                >
+                    Edit
+                </Button>
             </div>
         }
     }
 
     ];
-
 
     return (
         <Authenticated>
@@ -227,6 +244,17 @@ const PreventiveMaintenance: React.FC = () => {
                     locations={locations}
                     user={user}
                     onClose={() => setIsViewingWorkOrder(null)}
+                />
+            )}
+
+            {isEditingWorkOrder && (
+                <EditWorkOrderModal
+                    workOrder={isEditingWorkOrder}
+                    locations={locations}
+                    assets={assets}
+                    maintenancePersonnel={maintenancePersonnel}
+                    user={user}
+                    onClose={() => setIsEditingWorkOrder(null)}
                 />
             )}
 
