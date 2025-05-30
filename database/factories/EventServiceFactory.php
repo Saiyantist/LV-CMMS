@@ -26,17 +26,27 @@ class EventServiceFactory extends Factory
             "Basketball Court",
         ];
 
+        // Generate a logical date range
+        $start = $this->faker->dateTimeBetween('now', '+2 months');
+        $duration = rand(0, 3); // event lasts 1-4 days
+        $end = (clone $start)->modify("+$duration days");
+
+        // Generate a logical time range
+        $startTime = $this->faker->time('H:i');
+        // Add 1 to 8 hours to start time for end time
+        $startDateTime = \DateTime::createFromFormat('H:i', $startTime);
+        $endDateTime = (clone $startDateTime)->modify('+' . rand(1, 8) . ' hours');
+        $endTime = $endDateTime->format('H:i');
+
         return [
             'user_id' => User::factory(),
             'name' => $this->faker->sentence(3),
-            // 'venue' => $this->faker->randomElement($venueNames), // Use the correct venue names
             'venue' => json_encode([$this->faker->randomElement($venueNames)]),
             'status' => $this->faker->randomElement(['Completed', 'In Progress', 'Cancelled', 'Not Started']),
-            // 'time' => $this->faker->time(),
-            'event_start_date' => $this->faker->date(),
-            'event_end_date' => $this->faker->date(),
-            'event_start_time' => $this->faker->time(),
-            'event_end_time' => $this->faker->time(),
+            'event_start_date' => $start->format('Y-m-d'),
+            'event_end_date' => $end->format('Y-m-d'),
+            'event_start_time' => $startTime,
+            'event_end_time' => $endTime,
             'created_at' => $this->faker->dateTimeBetween('-30 days', 'now'),
             // ...other fields
         ];

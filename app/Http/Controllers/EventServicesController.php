@@ -15,18 +15,28 @@ class EventServicesController extends Controller
     // Map events for calendar view
     $calendarEvents = [];
     foreach ($events as $event) {
-        // Use the "Date Requested" (created_at) as the key in YYYY-MM-DD format
-        $dateKey = $event->created_at ? date('Y-m-d', strtotime($event->created_at)) : null;
-        if ($dateKey) {
+        $start = strtotime($event->event_start_date);
+        $end = strtotime($event->event_end_date);
+
+        // Ensure logical order
+        if ($end < $start) {
+            [$start, $end] = [$end, $start];
+        }
+
+        for ($d = $start; $d <= $end; $d = strtotime('+1 day', $d)) {
+            $dateKey = date('Y-m-d', $d);
             $calendarEvents[$dateKey][] = [
-                'title' => $event->event_name,
-                // Combine start and end time
+             // 'title' => $event->event_name,
+                'title' => $event->name,
+                'venue' => is_array($event->venue) ? implode(', ', $event->venue) : $event->venue,
+                'dateRequested' => $event->created_at ? date('F j, Y', strtotime($event->created_at)) : null,
+                'eventDate' => date('Y-m-d', $d),
+                'eventStartDate' => $event->event_start_date,
+                'eventEndDate' => $event->event_end_date,
                 'time' => $event->event_start_time && $event->event_end_time
                     ? date('h:i A', strtotime($event->event_start_time)) . ' - ' . date('h:i A', strtotime($event->event_end_time))
                     : ($event->event_start_time ? date('h:i A', strtotime($event->event_start_time)) : ''),
                 'status' => $event->status,
-                'eventDate' => $event->event_start_date, // <-- add this
-                'dateRequested' => $dateKey, // for clarity
             ];
         }
     }

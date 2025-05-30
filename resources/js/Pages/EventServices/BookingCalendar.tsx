@@ -43,7 +43,7 @@ function getToday() {
 }
 
 // Add a palette of nice Tailwind background colors
-const EVENT_COLORS = ["bg-destructive", "bg-secondary"];
+const EVENT_COLORS = ["bg-secondary"];
 
 // Helper to get a random color based on event index and day (so it's stable per render)
 function getRandomColor(day: number, idx: number) {
@@ -64,6 +64,33 @@ export default function EventCalendar() {
     const { calendarEvents, listEvents } = usePage().props as unknown as {
         calendarEvents: {
             [key: string]: {
+                eventStartDate:
+                    | string
+                    | number
+                    | bigint
+                    | boolean
+                    | React.ReactElement<
+                          unknown,
+                          string | React.JSXElementConstructor<any>
+                      >
+                    | Iterable<React.ReactNode>
+                    | React.ReactPortal
+                    | Promise<
+                          | string
+                          | number
+                          | bigint
+                          | boolean
+                          | React.ReactPortal
+                          | React.ReactElement<
+                                unknown,
+                                string | React.JSXElementConstructor<any>
+                            >
+                          | Iterable<React.ReactNode>
+                          | null
+                          | undefined
+                      >
+                    | null
+                    | undefined;
                 dateRequested: React.ReactNode;
                 venue: React.ReactNode;
                 eventDate: React.ReactNode;
@@ -285,9 +312,18 @@ export default function EventCalendar() {
                                                 )}
                                             </div>
                                             <div className="flex flex-col gap-1">
-                                                {calendarEvents[day]?.length ? (
-                                                    calendarEvents[day].map(
-                                                        (event, idx) => (
+                                                {calendarEvents[day]?.filter(
+                                                    (event) =>
+                                                        event.status ===
+                                                        "Approved"
+                                                ).length ? (
+                                                    calendarEvents[day]
+                                                        .filter(
+                                                            (event) =>
+                                                                event.status ===
+                                                                "Approved"
+                                                        )
+                                                        .map((event, idx) => (
                                                             <div
                                                                 key={idx}
                                                                 className={`${getRandomColor(
@@ -304,8 +340,7 @@ export default function EventCalendar() {
                                                                     {event.time}
                                                                 </span>
                                                             </div>
-                                                        )
-                                                    )
+                                                        ))
                                                 ) : (
                                                     <span className="text-gray-400 text-xs">
                                                         No events
@@ -341,7 +376,14 @@ export default function EventCalendar() {
                                                   )
                                                 : null;
                                             const events = dateKey
-                                                ? calendarEvents[dateKey] || []
+                                                ? (
+                                                      calendarEvents[dateKey] ||
+                                                      []
+                                                  ).filter(
+                                                      (event) =>
+                                                          event.status ===
+                                                          "Approved"
+                                                  )
                                                 : [];
                                             return (
                                                 <div
@@ -380,22 +422,19 @@ export default function EventCalendar() {
                                                                         key={
                                                                             idx
                                                                         }
-                                                                        className={`${
-                                                                            day !==
-                                                                            null
-                                                                                ? getRandomColor(
-                                                                                      day,
-                                                                                      idx
-                                                                                  )
-                                                                                : ""
-                                                                        } p-1 rounded text-xs text-white`}
+                                                                        className={`bg-secondary text-white rounded-lg mx-auto my-1 px-2 py-1 flex flex-col items-center shadow-sm max-w-[95%]`}
+                                                                        style={{
+                                                                            minWidth:
+                                                                                "90px",
+                                                                        }}
                                                                     >
-                                                                        <div>
+                                                                        <div className="font-semibold text-xs text-center mb-0.5 truncate w-full text-green-100">
                                                                             {
                                                                                 event.title
                                                                             }
                                                                         </div>
-                                                                        <div>
+                                                                        <div className="w-4/5 border-t border-white/40 my-1"></div>
+                                                                        <div className="font-mono text-xs text-center tracking-wide">
                                                                             {
                                                                                 event.time
                                                                             }
