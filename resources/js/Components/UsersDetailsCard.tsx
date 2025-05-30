@@ -45,12 +45,14 @@ export default function UserDetailsCard({
                     </p>
                     <p className="text-black text-xs sm:text-sm">{user.gender}</p>
                 </div>
-                <div className="flex justify-between">
-                    <p className="text-xs sm:text-sm text-primary dark:text-gray-300">
-                        Type of Staff:
-                    </p>
-                    <p className="text-black text-xs sm:text-sm">{user.staff_type}</p>
-                </div>
+                {user.staff_type && (
+                    <div className="flex justify-between">
+                        <p className="text-xs sm:text-sm text-primary dark:text-gray-300">
+                            Type of Staff:
+                        </p>
+                        <p className="text-black text-xs sm:text-sm">{user.staff_type}</p>
+                    </div>
+                )}
                 <div className="flex justify-between">
                     <p className="text-xs sm:text-sm text-primary dark:text-gray-300">
                         Email:

@@ -241,7 +241,9 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
         router.post("/assets", formData, {
             forceFormData: true,
         });
-        onClose();
+        setTimeout(() => {
+            setIsEditing(false);
+        }, 1000);
     };
 
     return (
@@ -436,7 +438,11 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                     )}
                                 </div>
                             </div>
-                            <hr />
+
+                            {(asset.maintenance_schedule || isEditing) && (
+                                <hr />
+                            )}
+                            
                             {/* Preventive Maintenance Section - Only show when not editing */}
                             {!isEditing && asset.maintenance_schedule && (
                                 <div className="space-y-4 mt-6">

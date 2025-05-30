@@ -27,8 +27,12 @@ class ProfileUpdateRequest extends FormRequest
             // 'birth_date' => 'required|date|max:255',
             'gender' => 'required|string|max:255',
             'contact_number' => 'required|integer|digits:10',
-            'staff_type' => ['required', 'in:teaching,non-teaching'],
-            'department_id' => ['required', 'exists:departments,id'],
+            'staff_type' => [
+                Rule::when(fn() => $this->user()->staff_type !== null, ['required', 'in:teaching,non-teaching']),
+            ],
+            'department_id' => [
+                Rule::when(fn() => $this->user()->staff_type !== null, ['required', 'exists:departments,id']),
+            ],
             'email' => [
                 'required',
                 'string',

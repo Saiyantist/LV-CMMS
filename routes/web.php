@@ -90,9 +90,6 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::middleware(['role_or_permission:super_admin|manage work orders'])->group(function () {
             Route::resource('assets', AssetController::class);
 
-            Route::get('/work-orders/preventive-maintenance', function () { // will change to use a controller
-                return Inertia::render('PreventiveMaintenance/PreventiveMaintenance');
-            })->name('work-orders.preventive-maintenance');
             Route::group(['prefix' => 'work-orders/preventive-maintenance'], function () {
                 Route::get('/', [PreventiveMaintenanceController::class, 'index'])->name('work-orders.preventive-maintenance');
                 Route::post('/', [PreventiveMaintenanceController::class, 'store'])->name('work-orders.preventive-maintenance.store');

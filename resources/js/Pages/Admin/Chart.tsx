@@ -139,7 +139,7 @@ const Chart: React.FC = () => {
     const statusTotals = getStatusCounts(workOrders);
 
     return (
-        <div className="w-full flex flex-col md:flex-row gap-6 md:gap-8 bg-transparent rounded-2xl dark:bg-gray-800 p-4 md:p-8 items-stretch justify-between transition-all duration-300">
+        <div className="w-full flex flex-col xl:flex-row gap-6 md:gap-8 bg-transparent rounded-2xl dark:bg-gray-800 p-4 md:p-8 items-stretch justify-between transition-all duration-300">
             {/* Status Totals */}
             <div className="flex flex-col items-center flex-1">
                 {/* <h6 className="font-semibold text-sm mb-4 text-gray-700 dark:text-gray-200 tracking-wide">

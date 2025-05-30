@@ -162,41 +162,43 @@ export default function UpdateProfileInformation({
                 </div>
 
                 {/* Staff type */}
-                <div className="w-full">
-                    <div className="flex">
-                        <InputLabel
-                            htmlFor="staff_type"
-                            value="Type of Staff"
+                {user.staff_type && (
+                    <div className="w-full">
+                        <div className="flex">
+                            <InputLabel
+                                htmlFor="staff_type"
+                                value="Type of Staff"
+                            />
+                        </div>
+                        <select
+                            id="staff_type"
+                            name="staff_type"
+                            value={data.staff_type}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                            onChange={(e) =>
+                                setData("staff_type", e.target.value)
+                            }
+                            required
+                        >
+                            <option value="">Select Type</option>
+                            <option value="teaching">Teaching</option>
+                            <option value="non-teaching">
+                                Non-teaching
+                            </option>
+                            {data.staff_type === "maintenance_personnel" && (
+                                <>
+                                    <option value="maintenance_personnel">
+                                        Maintenance Personnel
+                                    </option>
+                                </>
+                            )}
+                        </select>
+                        <InputError
+                            message={errors.staff_type}
+                            className="mt-2"
                         />
                     </div>
-                    <select
-                        id="staff_type"
-                        name="staff_type"
-                        value={data.staff_type}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-                        onChange={(e) =>
-                            setData("staff_type", e.target.value)
-                        }
-                        required
-                    >
-                        <option value="">Select Type</option>
-                        <option value="teaching">Teaching</option>
-                        <option value="non-teaching">
-                            Non-teaching
-                        </option>
-                        {data.staff_type === "maintenance_personnel" && (
-                            <>
-                                <option value="maintenance_personnel">
-                                    Maintenance Personnel
-                                </option>
-                            </>
-                        )}
-                    </select>
-                    <InputError
-                        message={errors.staff_type}
-                        className="mt-2"
-                    />
-                </div>
+                )}
                 {/* Department */}
                 {["teaching", "non-teaching"].includes(
                     data.staff_type

@@ -55,7 +55,7 @@ export default function Edit({
                                 contact_number: user.contact_number,
                                 // birth_date: user.birth_date,
                                 gender: toTitleCase(user.gender),
-                                staff_type: toTitleCase(user.staff_type),
+                                staff_type: toTitleCase(user.staff_type || ''),
                             }}
                             className="mx-auto"
                         />
