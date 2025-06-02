@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/Components/shadcnui/button";
@@ -18,6 +16,7 @@ import { createPortal } from "react-dom";
 import { router, usePage } from "@inertiajs/react";
 import CreateBookingModal from "./CreateBookingModal";
 import ViewBookingModal from "./ViewBookingModal";
+import { ChevronDown } from "lucide-react";
 
 // Define the booking type
 export interface Booking {
@@ -31,8 +30,11 @@ export interface Booking {
         | "Completed"
         | "In Progress"
         | "Cancelled"
-        | "Not Started"
-        | "Pending";
+        // | "Not Started"
+        | "Pending"
+        | "Rejected"
+        | "Approved";
+
     // Additional fields for view modal
     email?: string;
     type?: string;
@@ -176,7 +178,7 @@ export default function MyBookings({
         switch (status) {
             case "Completed":
                 return (
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                    <Badge className="bg-green-200 text-green-800 hover:bg-green-200">
                         Completed
                     </Badge>
                 );
@@ -192,14 +194,30 @@ export default function MyBookings({
                         Cancelled
                     </Badge>
                 );
-            case "Not Started":
+            case "Rejected":
                 return (
                     <Badge className="bg-red-500 text-white hover:bg-red-500">
-                        Not Started
+                        Rejected
+                    </Badge>
+                );
+            case "Pending":
+                return (
+                    <Badge className="bg-sky-100 text-sky-700 hover:bg-sky-200">
+                        Pending
+                    </Badge>
+                );
+            case "Approved":
+                return (
+                    <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200">
+                        Approved
                     </Badge>
                 );
             default:
-                return <Badge>{status}</Badge>;
+                return (
+                    <Badge className="bg-gray-200 text-gray-800">
+                        {status}
+                    </Badge>
+                );
         }
     };
 
@@ -318,7 +336,64 @@ export default function MyBookings({
         {
             accessorKey: "status",
             header: "Status",
-            cell: ({ row }) => getStatusBadge(row.getValue("status")),
+            cell: ({ row }) => {
+                const booking = row.original;
+                const statusOptions: Booking["status"][] = [
+                    "Pending",
+                    "Approved",
+                    "Rejected",
+                    "Cancelled",
+                    "Completed",
+                    "In Progress",
+                ];
+                const statusStyles: Record<string, React.CSSProperties> = {
+                    Pending: { background: "#e0f2fe", color: "#0369a1" },
+                    Approved: { background: "#e0e7ff", color: "#4338ca" },
+                    Rejected: { background: "#ef4444", color: "#fff" },
+                    Cancelled: { background: "#f97316", color: "#fff" },
+                    Completed: { background: "#bbf7d0", color: "#166534" },
+                    "In Progress": { background: "#fef9c3", color: "#854d0e" },
+                };
+                return (
+                    <div className="relative inline-flex items-center">
+                        <select
+                            className="rounded px-2 py-1 border text-xs pr-6 appearance-none"
+                            value={booking.status}
+                            onChange={(e) =>
+                                handleStatusChange(
+                                    booking,
+                                    e.target.value as Booking["status"]
+                                )
+                            }
+                            disabled={!isAdmin}
+                            style={
+                                statusStyles[booking.status] || {
+                                    background: "#e5e7eb",
+                                    color: "#374151",
+                                }
+                            }
+                        >
+                            {statusOptions.map((status) => (
+                                <option
+                                    key={status}
+                                    value={status}
+                                    style={
+                                        statusStyles[status] || {
+                                            background: "#e5e7eb",
+                                            color: "#374151",
+                                        }
+                                    }
+                                >
+                                    {status}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 flex items-center ml-1">
+                            <ChevronDown className="w-4 h-4 text-black" />
+                        </span>
+                    </div>
+                );
+            },
             meta: {
                 filterable: true,
             },
@@ -332,7 +407,7 @@ export default function MyBookings({
                 return (
                     <div className="flex justify-center space-x-2">
                         <Button
-                            className="bg-secondary hover:bg-primary text-white"
+                            className="bg-secondary text-xs hover:bg-primary text-white"
                             onClick={() => handleViewBooking(booking)}
                             disabled={!canEdit}
                         >
@@ -340,14 +415,14 @@ export default function MyBookings({
                         </Button>
                         {isAdmin ? (
                             <Button
-                                className="bg-destructive hover:bg-red-700 text-white"
+                                className="bg-destructive text-xs hover:bg-red-700 text-white"
                                 onClick={() => handleDeleteBooking(booking)}
                             >
                                 Delete
                             </Button>
                         ) : (
                             <Button
-                                className="bg-orange-500 hover:bg-orange-600 text-white"
+                                className="bg-orange-500 text-xs hover:bg-orange-600 text-white"
                                 onClick={() => handleCancelBooking(booking)}
                                 disabled={booking.status !== "Pending"}
                             >
@@ -362,24 +437,24 @@ export default function MyBookings({
     ];
 
     // Handle form input change
-    const handleFormChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
+    // const handleFormChange = (
+    //     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    // ) => {
+    //     setForm({ ...form, [e.target.name]: e.target.value });
+    // };
 
-    // Handle form submit
-    const handleFormSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setFormErrors({});
-        router.post("/event-services", form, {
-            onError: (errors) => setFormErrors(errors),
-            onSuccess: () => {
-                setShowCreateModal(false);
-                setForm({ name: "", venue: "", event_date: "", time: "" });
-            },
-        });
-    };
+    // // Handle form submit
+    // const handleFormSubmit = (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     setFormErrors({});
+    //     router.post("/event-services", form, {
+    //         onError: (errors) => setFormErrors(errors),
+    //         onSuccess: () => {
+    //             setShowCreateModal(false);
+    //             setForm({ name: "", venue: "", event_date: "", time: "" });
+    //         },
+    //     });
+    // };
 
     // Delete handler
     const handleDeleteBooking = (booking: Booking) => {
@@ -400,6 +475,25 @@ export default function MyBookings({
                 }
             );
         }
+    };
+
+    // Add this handler in your component:
+    const handleStatusChange = (
+        booking: Booking,
+        newStatus: Booking["status"]
+    ) => {
+        // Optionally, show a loading indicator or optimistic UI update
+        router.put(
+            `/event-services/${booking.id}`,
+            { status: newStatus },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    // Optionally refetch or update local state
+                },
+            }
+        );
     };
 
     // Format date as "Month Day, Year"
@@ -519,7 +613,7 @@ export default function MyBookings({
                                 </div>
 
                                 <div className="flex justify-end mt-2 w-full">
-                                    <div className="flex w-full space-x-2">
+                                    <div className="flex w-full space-x-1">
                                         <Button
                                             className="w-1/2 bg-secondary hover:bg-primary text-white"
                                             onClick={() =>

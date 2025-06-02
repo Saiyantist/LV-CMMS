@@ -22,7 +22,7 @@ import {
     CalendarDays,
     Building,
 } from "lucide-react";
-import { Button } from "./shadcnui/button";
+// import { Button } from "./shadcnui/button";
 
 interface Role {
     name: string;
@@ -142,6 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             href: route("event-services.my-bookings") || "",
                             text: user.roles.some(
                                 (r) => r.name === "communications_officer"
+       
                             )
                                 ? "Requests Management"
                                 : "My Bookings",

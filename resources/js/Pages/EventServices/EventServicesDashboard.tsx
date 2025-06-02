@@ -67,6 +67,17 @@ const statusColors: Record<string, string> = {
     "Not Started": "#64748B",
 };
 
+const statusBadgeClasses: Record<string, string> = {
+    Completed: "bg-green-200 text-green-800 hover:bg-green-200",
+    "In Progress": "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+    Cancelled: "bg-orange-500 text-white hover:bg-orange-500",
+    Rejected: "bg-red-500 text-white hover:bg-red-500",
+    Pending: "bg-sky-100 text-sky-700 hover:bg-sky-200",
+    Approved: "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
+    "Not Started": "bg-gray-300 text-gray-800 hover:bg-gray-400",
+    default: "bg-gray-200 text-gray-800",
+};
+
 const getStatusCounts = (statuses: string[]) => {
     const counts: Record<string, number> = {};
     allStatuses.forEach((status) => (counts[status] = 0));
@@ -236,32 +247,13 @@ export default function EventServicesDashboard({
 
     // For chart (pie or bar), you can use statusCounts
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "Approved":
-                return (
-                    <Badge className="bg-green-100 text-green-800">
-                        {status}
-                    </Badge>
-                );
-            case "Pending":
-                return (
-                    <Badge className="bg-yellow-100 text-yellow-800">
-                        {status}
-                    </Badge>
-                );
-            case "Cancelled":
-                return (
-                    <Badge className="bg-red-100 text-red-800">{status}</Badge>
-                );
-            case "Rejected":
-                return (
-                    <Badge className="bg-gray-400 text-white">{status}</Badge>
-                );
-            default:
-                return <Badge variant="secondary">{status}</Badge>;
-        }
-    };
+    const getStatusBadge = (status: string) => (
+        <Badge
+            className={statusBadgeClasses[status] || statusBadgeClasses.default}
+        >
+            {status}
+        </Badge>
+    );
 
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<ApexCharts | null>(null);
@@ -596,7 +588,7 @@ export default function EventServicesDashboard({
                                                   })()
                                                 : "N/A"}
                                         </TableCell>
-                                        <TableCell className="text-center" >
+                                        <TableCell className="text-center">
                                             {/* Format: h:mm am/pm to h:mm am/pm */}
                                             {booking.eventTime &&
                                             booking.eventTime !== "N/A"
@@ -656,7 +648,7 @@ export default function EventServicesDashboard({
                                                 )}
                                             </span>
                                         </TableCell>
-                                        <TableCell className="text-center" >
+                                        <TableCell className="text-center">
                                             {getStatusBadge(booking.status)}
                                         </TableCell>
                                         <TableCell>

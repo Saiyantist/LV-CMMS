@@ -289,12 +289,24 @@ export default function EventCalendar() {
         currentMonth === today.month &&
         currentYear === today.year;
 
+    // After your calendarEvents and daysInMonth are defined
+    const approvedDays = Array.from(
+        { length: daysInMonth },
+        (_, i) => i + 1
+    ).filter((day) => {
+        const dateKey = getDateKey(currentYear, currentMonth, day);
+        return (
+            calendarEvents[dateKey] &&
+            calendarEvents[dateKey].some((event) => event.status === "Approved")
+        );
+    });
+
     return (
         <AuthenticatedLayout>
             <Head title="Booking Calendar" />
-            <div className="flex flex-col min-h-screen bg-gray-50">
+            <div className="flex flex-col min-h-screen bg-trasparent">
                 {/* Header */}
-                <div className="border-b bg-white">
+                <div className="bg-trasparent">
                     <div className="container mx-auto px-4 py-2">
                         <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
                             <div className="flex space-x-2">
@@ -342,7 +354,7 @@ export default function EventCalendar() {
                 {/* Main Content */}
                 <div className="container mx-auto px-2 sm:px-4 py-4 flex-1 w-full">
                     {/* Search bar for list view */}
-                    {view === "list" && (
+                    {/* {view === "list" && (
                         <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2">
                             <div className="w-full sm:w-80 relative">
                                 <Search
@@ -359,72 +371,77 @@ export default function EventCalendar() {
                                 Filter
                             </button>
                         </div>
-                    )}
+                    )} */}
 
                     {/* Calendar View */}
                     {view === "calendar" && (
                         <>
-                            {/* Mobile: Vertical list of days with events */}
+                            {/* Mobile: List of days with approved events only */}
                             <div className="block md:hidden">
                                 <div className="flex flex-col gap-2">
-                                    {Array.from(
-                                        { length: daysInMonth },
-                                        (_, i) => i + 1
-                                    ).map((day) => (
-                                        <div
-                                            key={day}
-                                            className={`bg-white rounded-lg shadow border p-3 ${
-                                                isToday(day)
-                                                    ? "border-2 border-blue-600"
-                                                    : ""
-                                            }`}
-                                        >
-                                            <div className="font-semibold text-primary mb-1">
-                                                {monthName} {day}, {currentYear}
-                                                {isToday(day) && (
-                                                    <span className="ml-2 text-xs text-blue-600 font-bold">
-                                                        (Today)
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className="flex flex-col gap-1">
-                                                {calendarEvents[day]?.filter(
+                                    {approvedDays.length > 0 ? (
+                                        approvedDays.map((day) => {
+                                            const dateKey = getDateKey(
+                                                currentYear,
+                                                currentMonth,
+                                                day
+                                            );
+                                            const approvedEvents =
+                                                calendarEvents[dateKey].filter(
                                                     (event) =>
                                                         event.status ===
                                                         "Approved"
-                                                ).length ? (
-                                                    calendarEvents[day]
-                                                        .filter(
-                                                            (event) =>
-                                                                event.status ===
-                                                                "Approved"
-                                                        )
-                                                        .map((event, idx) => (
-                                                            <div
-                                                                key={idx}
-                                                                className={`${getRandomColor(
-                                                                    day,
-                                                                    idx
-                                                                )} p-2 rounded text-xs text-white flex flex-col`}
-                                                            >
-                                                                <span className="font-medium">
-                                                                    {
-                                                                        event.title
-                                                                    }
-                                                                </span>
-                                                                <span>
-                                                                    {event.time}
-                                                                </span>
-                                                            </div>
-                                                        ))
-                                                ) : (
-                                                    <span className="text-gray-400 text-xs">
-                                                        No events
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
+                                                );
+                                            return (
+                                                <div
+                                                    key={day}
+                                                    className={`bg-white rounded-lg shadow border p-3 ${
+                                                        isToday(day)
+                                                            ? "border-2 border-blue-600"
+                                                            : ""
+                                                    }`}
+                                                >
+                                                    <div className="font-semibold text-primary mb-1">
+                                                        {monthName} {day},{" "}
+                                                        {currentYear}
+                                                        {isToday(day) && (
+                                                            <span className="ml-2 text-xs text-blue-600 font-bold">
+                                                                (Today)
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col gap-1">
+                                                        {approvedEvents.map(
+                                                            (event, idx) => (
+                                                                <div
+                                                                    key={idx}
+                                                                    className={`${getRandomColor(
+                                                                        day,
+                                                                        idx
+                                                                    )} p-2 rounded text-xs text-white flex flex-col`}
+                                                                >
+                                                                    <span className="font-medium">
+                                                                        {
+                                                                            event.title
+                                                                        }
+                                                                    </span>
+                                                                    <span>
+                                                                        {
+                                                                            event.time
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <span className="text-gray-400 text-xs text-center">
+                                            No approved events this month.
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                             {/* Desktop: 7-column grid calendar */}
