@@ -6,8 +6,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
 import { StatusCell } from "../WorkOrders/components/StatusCell";
 import { Button } from "@/Components/shadcnui/button";
-import ViewWorkOrderModal from "../WorkOrders/components/ViewWorkOrderModal";
-import EditWorkOrderModal from "../WorkOrders/components/EditModal";
+import ViewPMModal from "./components/ViewPMModal";
+import EditPMModal from "./components/EditPMModal";
 
 interface WorkOrders {
     id: number;
@@ -194,7 +194,7 @@ const PreventiveMaintenance: React.FC = () => {
         header: "Scheduled Date",
         accessorFn: (row) => {
             if (!row.scheduled_at) return "-";
-            return format(parseISO(row.scheduled_at), "MMM dd, yyyy");
+            return row.scheduled_at;
         },
         meta: {
             cellClassName: "max-w-[5rem]",
@@ -205,7 +205,7 @@ const PreventiveMaintenance: React.FC = () => {
         header: "Last Maintained",
         accessorFn: (row) => {
             if (!row.asset?.last_maintained_at) return "-";
-            return format(parseISO(row.asset.last_maintained_at), "MMM dd, yyyy");
+            return row.asset.last_maintained_at;
         },
         meta: {
             cellClassName: "max-w-[5rem]",
@@ -239,7 +239,7 @@ const PreventiveMaintenance: React.FC = () => {
             <Head title="Preventive Maintenance" />
 
             {isViewingWorkOrder && (
-                <ViewWorkOrderModal
+                <ViewPMModal
                     workOrder={isViewingWorkOrder}
                     locations={locations}
                     user={user}
@@ -248,7 +248,7 @@ const PreventiveMaintenance: React.FC = () => {
             )}
 
             {isEditingWorkOrder && (
-                <EditWorkOrderModal
+                <EditPMModal
                     workOrder={isEditingWorkOrder}
                     locations={locations}
                     assets={assets}

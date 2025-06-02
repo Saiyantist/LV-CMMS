@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 import { Button } from "@/Components/shadcnui/button";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import CreateWorkOrderModal from "./components/CreateModal";
-import EditWorkOrderModal from "./components/EditModal";
+import EditWorkOrderModal from "./components/EditWorkOrderModal";
 import { StatusCell } from "./components/StatusCell";
 import { Datatable } from "./components/Datatable";
 import { getPriorityColor } from "@/utils/getPriorityColor";
