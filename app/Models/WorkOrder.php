@@ -28,7 +28,7 @@ class WorkOrder extends Model
         'completed_at',
         'remarks',
         'asset_id',
-        'maintenance_schedule_id',
+        // 'maintenance_schedule_id',
     ];
 
     public function location()
@@ -53,10 +53,10 @@ class WorkOrder extends Model
         );
     }
 
-    public function maintenanceSchedule()
-    {
-        return $this->belongsTo(PreventiveMaintenance::class, 'maintenance_schedule_id');
-    }
+    // public function maintenanceSchedule()
+    // {
+    //     return $this->belongsTo(PreventiveMaintenance::class, 'maintenance_schedule_id');
+    // }
 
     public function images()
     {

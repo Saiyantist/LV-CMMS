@@ -4,7 +4,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, usePage } from "@inertiajs/react";
 import { Button } from "@/Components/shadcnui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { Datatable } from "./components/Datatable";
+import { Datatable } from "@/Components/Datatable";
 import { StatusCell } from "./components/StatusCell";
 import { getPriorityColor } from "@/utils/getPriorityColor";
 import { prioritySorting } from "@/utils/prioritySorting";

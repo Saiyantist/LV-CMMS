@@ -115,6 +115,12 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
 
           const keys = key.split(".")
           const value = keys.reduce((obj, k) => obj?.[k], row as any)
+          
+          // Handle nested objects with name property
+          if (value && typeof value === 'object' && 'name' in value) {
+            return value.name === filterValue
+          }
+          
           return value === filterValue
         })
       })
@@ -127,6 +133,12 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
           if (!col.accessorKey) return false;
           const keys = col.accessorKey.split(".")
           const value = keys.reduce((obj, key) => obj?.[key], item as any)
+          
+          // Handle nested objects with name property
+          if (value && typeof value === 'object' && 'name' in value) {
+            return value.name?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+          }
+          
           return value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
         }),
       )

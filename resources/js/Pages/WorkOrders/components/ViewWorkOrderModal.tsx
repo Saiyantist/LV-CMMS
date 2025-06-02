@@ -30,7 +30,7 @@ interface ViewWorkOrderProps {
         location: { id: number; name: string };
         report_description: string;
         requested_at: string;
-        requested_by: { id: number; first_name: string; last_name: string};
+        requested_by: { id: number; name: string};
         asset: any;
         status: string;
         work_order_type: string;
@@ -125,7 +125,7 @@ export default function ViewWorkOrderModal({
                                         <TableHead className="flex flex-[1] items-center">
                                             <Label>Requested By:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[1] items-center">{workOrder.requested_by.first_name} {workOrder.requested_by.last_name}</TableCell>
+                                        <TableCell className="flex flex-[1] items-center">{workOrder.requested_by.name}</TableCell>
                                     </div>
 
                                     {workOrder.assigned_to?.id === user.id ? [

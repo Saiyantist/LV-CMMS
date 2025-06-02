@@ -35,7 +35,7 @@ class Asset extends Model
 
     public function maintenanceSchedule()
     {
-        return $this->hasOne(PreventiveMaintenance::class);
+        return $this->hasOne(PreventiveMaintenance::class, 'asset_id', 'id');
     }
 
     /**

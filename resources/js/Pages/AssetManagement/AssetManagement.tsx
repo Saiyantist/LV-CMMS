@@ -7,7 +7,7 @@ import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
 import CreateAssetModal from "./CreateAssetModal";
 import ViewAssetModal from "./ViewAssetModal";
-import { Datatable } from "../WorkOrders/components/Datatable";
+import { Datatable } from "@/Components/Datatable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";

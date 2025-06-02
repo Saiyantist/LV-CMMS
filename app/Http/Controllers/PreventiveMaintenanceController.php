@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\Location;
 use App\Models\WorkOrder;
-use App\Models\PreventiveMaintenance;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class PreventiveMaintenanceController extends Controller
@@ -16,8 +16,10 @@ class PreventiveMaintenanceController extends Controller
     {
         $user = auth()->user();
         $locations = Location::all();
-        $workOrders = WorkOrder::where('work_order_type', 'Preventive Maintenance')->with('asset', 'location', 'assignedTo', 'maintenanceSchedule', 'requestedBy', 'images')->get();
-        $maintenanceSchedules = PreventiveMaintenance::with('asset')->get();
+        $workOrders = WorkOrder::where('work_order_type', 'Preventive Maintenance')
+            ->with(['asset.maintenanceSchedule', 'location', 'assignedTo', 'requestedBy', 'images'])
+            ->get();
+        $maintenanceSchedules = Asset::whereHas('maintenanceSchedule')->with('maintenanceSchedule')->get();
 
         $formattedWorkOrders = $workOrders->map(function ($wo) {
             return [
@@ -46,25 +48,25 @@ class PreventiveMaintenanceController extends Controller
                     'id' => $wo->location_id,
                     'name' => $wo->location ? $wo->location->name : null,
                 ],
-                'images' => $wo->images->pluck('url')->toArray(), // ✅ important part
+                'images' => $wo->images->pluck('url')->toArray(),
                 'asset' => $wo->asset ? [
                     'id' => $wo->asset->id,
                     'name' => $wo->asset->name,
                     'specification_details' => $wo->asset->specification_details,
                     'status' => $wo->asset->status,
                     'location_id' => $wo->asset->location_id,
-                ] : null,
-                'maintenance_schedule' => $wo->maintenanceSchedule ? [
-                    'id' => $wo->maintenanceSchedule->id,
-                    'asset_id' => $wo->maintenanceSchedule->asset_id,
-                    'interval_unit' => $wo->maintenanceSchedule->interval_unit,
-                    'interval_value' => $wo->maintenanceSchedule->interval_value,
-                    'month_week' => $wo->maintenanceSchedule->month_week,
-                    'month_weekday' => $wo->maintenanceSchedule->month_weekday,
-                    'year_day' => $wo->maintenanceSchedule->year_day,
-                    'year_month' => $wo->maintenanceSchedule->year_month,
-                    'last_run_at' => $wo->maintenanceSchedule->last_run_at,
-                    'is_active' => $wo->maintenanceSchedule->is_active,
+                    'maintenance_schedule' => $wo->asset->maintenanceSchedule ? [
+                        'id' => $wo->asset->maintenanceSchedule->id,
+                        'asset_id' => $wo->asset->maintenanceSchedule->asset_id,
+                        'interval_unit' => $wo->asset->maintenanceSchedule->interval_unit,
+                        'interval_value' => $wo->asset->maintenanceSchedule->interval_value,
+                        'month_week' => $wo->asset->maintenanceSchedule->month_week,
+                        'month_weekday' => $wo->asset->maintenanceSchedule->month_weekday,
+                        'year_day' => $wo->asset->maintenanceSchedule->year_day,
+                        'year_month' => $wo->asset->maintenanceSchedule->year_month,
+                        'last_run_at' => $wo->asset->maintenanceSchedule->last_run_at,
+                        'is_active' => $wo->asset->maintenanceSchedule->is_active,
+                    ] : null,
                 ] : null,
             ];
         });
@@ -93,11 +95,33 @@ class PreventiveMaintenanceController extends Controller
 
     public function update(Request $request, $id)
     {
-        return Inertia::render('PreventiveMaintenance/PreventiveMaintenance');
+        $validated = $request->validate([
+            'work_order_type' => ['required', Rule::in(['Work Order', 'Preventive Maintenance', 'Compliance'])],
+            'report_description' => 'required|string|max:1000',
+            'label' => ['required', Rule::in(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label'])],
+            'scheduled_at' => 'required|date',
+            'priority' => ['nullable', Rule::in(['Low', 'Medium', 'High', 'Critical'])],
+            'assigned_to' => 'required',
+            'status' => ['required', Rule::in(['Pending', 'Assigned', 'Scheduled', 'Ongoing', 'Overdue', 'Completed', 'For Budget Request', 'Cancelled', 'Declined'])],
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            WorkOrder::where('id', $id)->update($validated);
+        } catch (\Exception $e) {
+            return redirect()->route('work-orders.preventive-maintenance')->with('error', 'Failed to update Preventive Maintenance.');
+        }
+        return redirect()->route('work-orders.preventive-maintenance')->with('success', 'Preventive Maintenance updated successfully.');
     }
 
     public function destroy($id)
     {
-        return Inertia::render('PreventiveMaintenance/PreventiveMaintenance');
+        try {
+            WorkOrder::where('id', $id)->update(['status' => 'Deleted']);
+            WorkOrder::where('id', $id)->delete();
+        } catch (\Exception $e) {
+            return redirect()->route('work-orders.preventive-maintenance')->with('error', 'Failed to delete Preventive Maintenance.');
+        }
+        return redirect()->route('work-orders.preventive-maintenance')->with('success', 'Preventive Maintenance deleted successfully.');
     }
 }

@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/Components/shadcnui/button";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
-import { Datatable } from "@/Pages/WorkOrders/components/Datatable";
+import { Datatable } from "@/Components/Datatable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/Components/shadcnui/badge";
 import {

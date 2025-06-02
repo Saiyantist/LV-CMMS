@@ -9,7 +9,7 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import CreateWorkOrderModal from "./components/CreateModal";
 import EditWorkOrderModal from "./components/EditWorkOrderModal";
 import { StatusCell } from "./components/StatusCell";
-import { Datatable } from "./components/Datatable";
+import { Datatable } from "@/Components/Datatable";
 import { getPriorityColor } from "@/utils/getPriorityColor";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { prioritySorting } from "@/utils/prioritySorting";
@@ -23,7 +23,7 @@ import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
 import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
 import DeleteWorkOrderModal from "./components/DeleteWorkOrderModal";
 import { Input } from "@/Components/shadcnui/input";
-import FilterModal from "./components/FilterModal";
+import FilterModal from "@/Components/FilterModal";
 import { clearLine } from "readline";
 interface Props {
     user: {

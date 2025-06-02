@@ -32,7 +32,7 @@ interface EditWorkOrderProps {
         location: { id: number; name: string };
         report_description: string;
         requested_at: string;
-        requested_by: { id: number; first_name: string; last_name: string};
+        requested_by: { id: number; name: string};
         asset: any;
         status: string;
         work_order_type: string;
@@ -266,7 +266,7 @@ export default function EditWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Requested by:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_by.first_name} {workOrder.requested_by.last_name}</TableCell>
+                                <TableCell className="">{workOrder.requested_by.name}</TableCell>
                             </TableRow>
 
                             {/* Location */}

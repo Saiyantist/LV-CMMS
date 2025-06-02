@@ -446,7 +446,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                             {/* Preventive Maintenance Section - Only show when not editing */}
                             {!isEditing && asset.maintenance_schedule && (
                                 <div className="space-y-4 mt-6">
-                                    <div className="flex items-center">
+                                    <div className="flex items-center bg-secondary p-2 text-white">
                                         <Label className="text-lg font-semibold">
                                             Preventive Maintenance Schedule
                                         </Label>

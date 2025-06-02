@@ -12,9 +12,17 @@ import {
 } from "@/Components/shadcnui/table"
 import { Label } from "@/Components/shadcnui/label";
 import { getStatusColor } from "@/utils/getStatusColor";
+import { router } from "@inertiajs/react";
 import { getPriorityColor } from "@/utils/getPriorityColor";
 
-interface ViewPMProps {
+
+
+interface Location {
+    id: number;
+    name: string;
+}
+
+interface DeletePMProps {
     workOrder: {
         id: number;
         location: { id: number; name: string };
@@ -33,23 +41,30 @@ interface ViewPMProps {
         remarks: string;
         images: string[];
     };
-    locations: { id: number; name: string }[];
+    locations: Location[];
     user: {
         id: number;
         name: string;
-        roles: { name: string }[];
         permissions: string[];
     };
     onClose: () => void;
 }
 
-export default function ViewPMModal({
+export default function DeletePMModal({
     workOrder,
     locations,
     user,
     onClose,
-}: ViewPMProps) {
+}: DeletePMProps) {
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
+
+    const submit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        router.delete(`/work-orders/preventive-maintenance/${workOrder.id}`);
+        setTimeout(() => {
+            onClose();
+        }, 600);
+    };
 
     const getAssetDetails = (workOrder: any) => {
         if (workOrder.asset) {
@@ -104,24 +119,24 @@ export default function ViewPMModal({
                 onClose()
                 }
             }}
-        >   
+        >
             <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
-                    <DialogTitle className="text-md sm:text-lg font-semibold text-primary">
+                    <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
-                            <span>Preventive Maintenance Details</span>
+                            <span>Delete Preventive Maintenance</span>
                             <span className="text-muted-foreground">|</span>
                             <span className="text-muted-foreground">ID: {workOrder.id}</span>
                         </div>
-                        </DialogTitle>
+                    </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />
                     </Button>
                 </DialogHeader>
 
-                <div className="px-2 sm:px-6 max-h-[70vh] overflow-y-auto">
+                <div className="px-6 max-h-[70vh] overflow-y-auto">
 
-                    <Table className="w-full rounded-md text-xs xs:text-sm">
+                <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody className="flex flex-col">
                             {/* Row 3 */}
                             <div className="flex items-center justify-start">
@@ -284,7 +299,17 @@ export default function ViewPMModal({
 
                 </div>
 
-                <DialogFooter></DialogFooter>
+                {/* Footer - Buttons */}
+                <DialogFooter className="px-6 py-4 border-t">
+                    <form onSubmit={submit} className="flex gap-2">
+
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button type="submit" onClick={submit}
+                        className="bg-destructive hover:bg-destructive/90 text-white">
+                            Delete
+                        </Button>
+                    </form>
+                </DialogFooter>
 
             {activeImageIndex !== null && (
             <div className={cn("absolute h-[60%] w-[92%] z-[51] bg-black/25 drop-shadow-2xl place-self-center flex items-center justify-center p-4 rounded-lg transition-opacity duration-300 ease-in-out",

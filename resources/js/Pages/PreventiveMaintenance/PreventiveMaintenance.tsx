@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
-import { Datatable } from "@/Pages/WorkOrders/components/Datatable";
+import { Datatable } from "@/Components/Datatable";
 import { ColumnDef } from "@tanstack/react-table";
-import { format, parseISO } from "date-fns";
-import { StatusCell } from "../WorkOrders/components/StatusCell";
 import { Button } from "@/Components/shadcnui/button";
 import ViewPMModal from "./components/ViewPMModal";
 import EditPMModal from "./components/EditPMModal";
+import FlashToast from "@/Components/FlashToast";
+import { getStatusColor } from "@/utils/getStatusColor";
+import { Trash } from "lucide-react";
+import DeletePMModal from "./components/DeletePMModal";
 
 interface WorkOrders {
     id: number;
@@ -104,8 +106,9 @@ const PreventiveMaintenance: React.FC = () => {
 
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
-    const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
-    const [isEditingWorkOrder, setIsEditingWorkOrder] = useState<any>(null);
+    const [isViewingPM, setIsViewPM] = useState<any>(null);
+    const [isEditingPM, setIsEditingPM] = useState<any>(null);
+    const [isDeletingPM, setIsDeletingPM] = useState<any>(null);
 
     const PMSWorkOrdersColumns: ColumnDef<WorkOrders>[] = [
     {
@@ -145,11 +148,6 @@ const PreventiveMaintenance: React.FC = () => {
             filterable: true,
         },
     },
-    // {
-    //     id: "report_description",
-    //     header: "Description",
-    //     accessorKey: "report_description",
-    // },
     {
         id: "label",
         header: "Label",
@@ -180,7 +178,13 @@ const PreventiveMaintenance: React.FC = () => {
         header: "Status",
         accessorKey: "status",
         cell: ({ row }) => {
-            return <StatusCell value={row.original.status} user={user} row={row} />;
+            return (
+                <span
+                    className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(row.original.status)}`}
+                >
+                    {row.original.status}
+                </span>
+            );
         },
         enableSorting: false,
         meta: {
@@ -206,6 +210,7 @@ const PreventiveMaintenance: React.FC = () => {
         accessorFn: (row) => {
             if (!row.asset?.last_maintained_at) return "-";
             return row.asset.last_maintained_at;
+
         },
         meta: {
             cellClassName: "max-w-[5rem]",
@@ -218,15 +223,22 @@ const PreventiveMaintenance: React.FC = () => {
             return <div className="flex gap-2 justify-center px-2">
                 <Button
                     className="bg-secondary h-6 text-xs rounded-sm"
-                    onClick={() => setIsViewingWorkOrder(row.original)}
+                    onClick={() => setIsViewPM(row.original)}
                 >
                     View
                 </Button>
                 <Button
                     className="bg-secondary h-6 text-xs rounded-sm"
-                    onClick={() => setIsEditingWorkOrder(row.original)}
+                    onClick={() => setIsEditingPM(row.original)}
                 >
                     Edit
+                </Button>
+                <Button
+                    variant={"outline"}
+                    size={"icon"}
+                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                    onClick={() => setIsDeletingPM(row.original)}
+                ><Trash />
                 </Button>
             </div>
         }
@@ -238,25 +250,37 @@ const PreventiveMaintenance: React.FC = () => {
         <Authenticated>
             <Head title="Preventive Maintenance" />
 
-            {isViewingWorkOrder && (
+            {isViewingPM && (
                 <ViewPMModal
-                    workOrder={isViewingWorkOrder}
+                    workOrder={isViewingPM}
                     locations={locations}
                     user={user}
-                    onClose={() => setIsViewingWorkOrder(null)}
+                    onClose={() => setIsViewPM(null)}
                 />
             )}
 
-            {isEditingWorkOrder && (
+            {isEditingPM && (
                 <EditPMModal
-                    workOrder={isEditingWorkOrder}
+                    workOrder={isEditingPM}
                     locations={locations}
                     assets={assets}
                     maintenancePersonnel={maintenancePersonnel}
                     user={user}
-                    onClose={() => setIsEditingWorkOrder(null)}
+                    onClose={() => setIsEditingPM(null)}
                 />
             )}
+
+            {isDeletingPM && (
+
+                <DeletePMModal
+                    workOrder={isDeletingPM}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setIsDeletingPM(null)}
+                />
+            )}
+
+            <FlashToast />
 
             <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">

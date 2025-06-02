@@ -28,7 +28,7 @@ import { ChevronDown } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import ApexCharts from "apexcharts";
 import axios from "axios";
-import { ColumnDef } from "../WorkOrders/components/Datatable";
+import { ColumnDef } from "@/Components/Datatable";
 
 interface Booking {
     id: number | string;

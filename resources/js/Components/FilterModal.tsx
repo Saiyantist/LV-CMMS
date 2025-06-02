@@ -63,7 +63,12 @@ export default function FilterModal({
   const getUniqueValues = (accessorKey: string) => {
     const keys = accessorKey.split(".")
     const values = data.map((item) => {
-      return keys.reduce((obj, key) => obj?.[key], item)
+      const value = keys.reduce((obj, key) => obj?.[key], item)
+      // If the value is an object with name property, return the name
+      if (value && typeof value === 'object' && 'name' in value) {
+        return value.name
+      }
+      return value
     })
 
     return Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.toString().localeCompare(b.toString()))
@@ -131,7 +136,7 @@ export default function FilterModal({
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
                     {uniqueValues.map((value) => (
-                      <SelectItem key={value} value={value}>
+                      <SelectItem key={`${accessorKey}-${value}`} value={value}>
                         {value}
                       </SelectItem>
                     ))}

@@ -32,7 +32,7 @@ interface EditPMProps {
         location: { id: number; name: string };
         report_description: string;
         requested_at: string;
-        requested_by: { id: number; first_name: string; last_name: string};
+        requested_by: { id: number; name: string};
         asset: any;
         status: string;
         work_order_type: string;
@@ -64,29 +64,27 @@ interface EditPMProps {
 export default function EditPMModal({
     workOrder,
     locations,
-    assets,
+    // assets,
     maintenancePersonnel,
     user,
     onClose,
 }: EditPMProps) {
-    const initialLocationName = locations.find((loc) =>
-        loc.id === Number(workOrder.location.id))?.name || "";
-    const initialLocationId = locations.find((loc) =>
-        loc.id === Number(workOrder.location.id))?.id || "";
+    // const initialLocationName = locations.find((loc) =>
+    //     loc.id === Number(workOrder.location.id))?.name || "";
+    // const initialLocationId = locations.find((loc) =>
+    //     loc.id === Number(workOrder.location.id))?.id || "";
 
-    const [typedLocation, setTypedLocation] = useState<string>(initialLocationName);
-    const [newLocation, setNewLocation] = useState<string>("");
+    // const [typedLocation, setTypedLocation] = useState<string>(initialLocationName);
+    // const [newLocation, setNewLocation] = useState<string>("");
     const [deletedImages, setDeletedImages] = useState<string[]>([]);
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
     const [date, setDate] = useState<Date>()
     const [showCalendar, setShowCalendar] = useState(false)
-    const [showApprovalCalendar, setShowApprovalCalendar] = useState(false)
-    const [approvedDate, setApprovedDate] = useState<Date>()
+    // const [showApprovalCalendar, setShowApprovalCalendar] = useState(false)
+    // const [approvedDate, setApprovedDate] = useState<Date>()
     const [localErrors, setLocalErrors] = useState<Record<string, string>>({}) // NOT FINISHED
-    const dropdownRef = useRef<HTMLDivElement>(null);
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
-    const isDepartmentHeadOrMaintenancePersonnel = user.roles.some(role => role.name === "department_head" || role.name === "maintenance_personnel");
 
     const { data, setData, errors, processing } = useForm({
         location_id: "",
@@ -100,29 +98,22 @@ export default function EditPMModal({
         priority: workOrder.priority,
         remarks: "",
         scheduled_at: workOrder.scheduled_at ?? "",
-        approved_at: workOrder.approved_at ?? "",
-        approved_by: workOrder.approved_by ?? "",
     });
 
     const validateForm = () => {
 
-        // fix the location and asset errors
         const newErrors: Record<string, string> = {}
 
-        if (!typedLocation.trim()) newErrors["location_id"] = "Location is required."
+        // if (!typedLocation.trim()) newErrors["location_id"] = "Location is required."
         if (!data.report_description.trim()) newErrors["report_description"] = "Description is required."
 
         if (isWorkOrderManager) {
-            if (!data.work_order_type) newErrors["work_order_type"] = "Work order type is required."
+            // if (!data.work_order_type) newErrors["work_order_type"] = "Work order type is required."
             if (!data.label) newErrors["label"] = "Label is required."
-            if (!data.scheduled_at) newErrors["scheduled_at"] = "Target date is required."
+            if (!data.scheduled_at) newErrors["scheduled_at"] = "Scheduled date is required."
             if (!data.priority) newErrors["priority"] = "Priority is required."
             if (!data.status) newErrors["status"] = "Status is required."
             if (!data.assigned_to) newErrors["assigned_to"] = "Assignee is required."
-            if(workOrder.status === "For Budget Request"){
-                if (!data.approved_at) newErrors["approved_at"] = "Approval date is required."
-                if (!data.approved_by) newErrors["approved_by"] = "Approver's name is required."
-            }
         }
 
         setLocalErrors(newErrors)
@@ -135,51 +126,26 @@ export default function EditPMModal({
 
         if (!validateForm()) return
 
-        let locationId;
-
-        // Check the typed location against existing locations
-        const existing = locations.find(
-            (loc) => loc.name.toLowerCase() === typedLocation.toLowerCase()
-        );
-
-        if (existing) {
-            locationId = existing.id.toString();
-        } else if (existing === undefined) {
-            const response = await axios.post("/locations", {
-                name: typedLocation.trim(),
-            });
-
-            locationId = response.data.id;
-        }
-
-        else {
-            locationId = data.location_id;
-        }
-
         const formData = new FormData();
         formData.append("_method", "PUT");
-        formData.append("location_id", String(locationId));
+        formData.append("location_id", String(workOrder.location.id));
         formData.append("report_description", data.report_description);
+        formData.append("work_order_type", data.work_order_type || "Preventive Maintenance");
+        formData.append("label", data.label || "");
+        formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
+        formData.append("assigned_to", data.assigned_to?.id?.toString() || "")
+        formData.append("priority", data.priority || "");
+        formData.append("status", data.status || "");
+        formData.append("asset_id", data.asset_id || "");
+        formData.append("remarks", data.remarks === "" ? workOrder.remarks : data.remarks);
 
         data.images.forEach((image) => formData.append("images[]", image));
         deletedImages.forEach((image) =>
             formData.append("deleted_images[]", image)
         );
 
-        if (isWorkOrderManager) {
-            formData.append("work_order_type", data.work_order_type || "");
-            formData.append("label", data.label || "");
-            formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
-            formData.append("assigned_to", data.assigned_to?.id?.toString() || "")
-            formData.append("priority", data.priority || "");
-            formData.append("status", data.status || "");
-            formData.append("approved_at", approvedDate ? format(approvedDate, "yyyy-MM-dd") : data.approved_at ? format(data.approved_at, "yyyy-MM-dd") : "")
-            formData.append("approved_by", data.approved_by || "");
-            formData.append("asset_id", data.asset_id || "");
-            formData.append("remarks", data.remarks === "" ? workOrder.remarks : data.remarks);
-        }
 
-        router.post(`/work-orders/${workOrder.id}`, formData, {
+        router.post(`/work-orders/preventive-maintenance/${workOrder.id}`, formData, {
             forceFormData: true,
             preserveScroll: true,
         });
@@ -234,7 +200,7 @@ export default function EditPMModal({
                             <span className="text-muted-foreground">|</span>
                             <span className="text-muted-foreground">ID: {workOrder.id}</span>
                         </div>
-                        </DialogTitle>
+                    </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -243,129 +209,106 @@ export default function EditPMModal({
                 <div className="space-y-4 px-6 max-h-[70vh] overflow-y-auto">
 
                     {/* PM Details */}
-                    <Table className="w-full rounded-md">
+                    <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody>
 
-                        {/* Date Requested */}
-                        <TableRow className="border-none">
-                            <TableHead className="w-1/4 ">
-                                <Label>Date Requested:</Label>
-                            </TableHead>
-                            <TableCell className="">{workOrder.requested_at}</TableCell>
-                        </TableRow>
+                            {/* Date Generated */}
+                            <TableRow className="border-none">
+                                <TableHead className="w-1/4 ">
+                                    <Label>Date Generated:</Label>
+                                </TableHead>
+                                <TableCell className="">{workOrder.requested_at}</TableCell>
+                            </TableRow>
 
-                        {/* Location */}
-                        <TableRow className="border-none">
-                            <TableHead className="">
-                                <Label>Location:</Label>
-                            </TableHead>
-                            <TableCell className="">{workOrder.location.name}</TableCell>
-                        </TableRow>
+                            {/* Location */}
+                            <TableRow className="border-none">
+                                <TableHead className="">
+                                    <Label>Location:</Label>
+                                </TableHead>
+                                <TableCell className="">{workOrder.location.name}</TableCell>
+                            </TableRow>
 
-                        {/* Asset Detail */}
-                        {assetDetails && (
-                        <TableRow className="border-none">
-                            <TableHead>
-                            <Label>Asset</Label>
-                            </TableHead>
-                            <TableCell>
-                                {assetDetails ? (
-                                    `${assetDetails?.name} - ${assetDetails?.location_name}`
-                                ) : (
-                                    <span className="text-gray-500 italic">No Asset attached</span>
-                                )}
-                            </TableCell>
-                        </TableRow>
-                        )}
-
-                        {/* Attachment / Images / Photos */}
-                        <TableRow className="border-none">
-                            <TableHead className="">
-                                <Label>Attachment:</Label>
-                            </TableHead>
-                            <TableCell className="">
-                                {workOrder.images?.length > 0 ? (
-                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                        {workOrder.images.map((src, index) => (
-                                        <div
-                                            key={index}
-                                            className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
-                                            onClick={() => setActiveImageIndex(index)}
-                                        >
-                                            <img
-                                            src={src}
-                                            alt={`Attachment ${index + 1}`}
-                                            className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                        ))}
-                                    </div>
+                            {/* Asset Detail */}
+                            {assetDetails && (
+                            <TableRow className="border-none">
+                                <TableHead>
+                                <Label>Asset</Label>
+                                </TableHead>
+                                <TableCell>
+                                    {assetDetails ? (
+                                        `${assetDetails?.name} - ${assetDetails?.location_name}`
                                     ) : (
-                                    <span className="text-gray-500 italic">No attachments</span>
+                                        <span className="text-gray-500 italic">No Asset attached</span>
                                     )}
-                            </TableCell>
-                        </TableRow>
+                                </TableCell>
+                            </TableRow>
+                            )}
+
+                            {/* Attachment / Images / Photos */}
+                            <TableRow className="border-none">
+                                <TableHead className="">
+                                    <Label>Attachment:</Label>
+                                </TableHead>
+                                <TableCell className="">
+                                    {workOrder.images?.length > 0 ? (
+                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                            {workOrder.images.map((src, index) => (
+                                            <div
+                                                key={index}
+                                                className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
+                                                onClick={() => setActiveImageIndex(index)}
+                                            >
+                                                <img
+                                                src={src}
+                                                alt={`Attachment ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            ))}
+                                        </div>
+                                        ) : (
+                                        <span className="text-gray-500 italic">No attachments</span>
+                                        )}
+                                </TableCell>
+                            </TableRow>
                         </TableBody>
                     </Table>
 
+                    <hr/>
+
                     <form onSubmit={submit}>
                         <div className="py-1 flex flex-col space-y-4">
-
-                        {/* Description */}
-                        <div className="space-y-2">
-                            <Label
-                                htmlFor="description"
-                                className="flex items-center"
-                            >
-                                Description{" "}
-                                {/* <span className="text-red-500 ml-1">*</span> */}
-                            </Label>
-                            <Textarea
-                                id="description"
-                                value={data.report_description}
-                                onChange={(e) =>
-                                    setData(
-                                        "report_description",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Describe your report here..."
-                                required
-                                className="h-[7rem] text-xs sm:text-sm"
-                            />
-                            {localErrors.report_description && (
-                                <p className="text-red-500 text-xs">
-                                    {localErrors.report_description}
-                                </p>
-                            )}
-                        </div>
-
-                        { workOrder.images?.length > 0 && (
-                        <div>
-                            <strong>Images:</strong>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                {workOrder.images?.length > 0 ? (
-                                    workOrder.images.map((url, index) => (
-                                        <img
-                                            key={index}
-                                            src={url}
-                                            alt={`Work order image ${index + 1}`}
-                                            className="h-40 object-cover rounded border"
-                                        />
-                                    ))
-                                ) : (
-                                    <span>No images</span>
+                            {/* Description */}
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="description"
+                                    className="flex items-center"
+                                >
+                                    Description{" "}
+                                    {/* <span className="text-red-500 ml-1">*</span> */}
+                                </Label>
+                                <Textarea
+                                    id="description"
+                                    value={data.report_description}
+                                    onChange={(e) =>
+                                        setData(
+                                            "report_description",
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="Describe your report here..."
+                                    required
+                                    className="h-[7rem] text-xs sm:text-sm"
+                                />
+                                {localErrors.report_description && (
+                                    <p className="text-red-500 text-xs">
+                                        {localErrors.report_description}
+                                    </p>
                                 )}
                             </div>
                         </div>
-                            )}
 
-                        </div>
-                    </form>
-
-                    <form onSubmit={submit}>
-                        <hr className="pb-4"/>
-                        <div className="py-2">
+                        <div className="py-4">
 
                             {/* Row 1 */}
                             <div className="flex flex-row justify-between gap-4 ">
@@ -398,10 +341,10 @@ export default function EditPMModal({
                                 )}
                                 </div>
 
-                                {/* Target Date */}
-                                <div className="flex-[2] space-y-2">
+                                {/* Scheduled Date */}
+                                <div className="relative flex-[2] space-y-2">
                                     <Label htmlFor="scheduled_at" className="flex items-center">
-                                    Target Date <span className="text-red-500 ml-1">*</span>
+                                    Scheduled Date <span className="text-red-500 ml-1">*</span>
                                     </Label>
                                     <Button
                                         type="button"
@@ -420,7 +363,7 @@ export default function EditPMModal({
                                     </Button>
                                     {showCalendar && (
                                         <div
-                                            className="absolute z-50 bg-white shadow-md border !-mt-[44vh] -ml-[6.5rem] rounded-md"
+                                            className="absolute z-50 bg-white shadow-md border rounded-md"
                                             onClick={(e) => e.stopPropagation()}
                                         >
                                             <Calendar
@@ -483,7 +426,7 @@ export default function EditPMModal({
                             <div className="flex flex-row justify-between gap-4 !mt-4">
 
                                 {/* Assigned To */}
-                                <div className="flex-[2] space-y-2">
+                                <div className="flex-[1] space-y-2">
                                     <Label htmlFor="assigned_to" className="flex items-center">
                                         Assign to <span className="text-red-500 ml-1">*</span>
                                     </Label>
@@ -520,6 +463,17 @@ export default function EditPMModal({
                                             <SelectValue placeholder="Select Status" />
                                         </SelectTrigger>
                                         <SelectContent>
+                                            {workOrder.status === "Pending" && (
+                                                <>
+                                                    <SelectItem value="Pending">Pending</SelectItem>
+                                                    <SelectItem value="Assigned">Assigned</SelectItem>
+                                                    <SelectItem value="For Budget Request">For Budget Request</SelectItem>
+                                                    <SelectItem value="Scheduled">Scheduled</SelectItem>
+                                                    <SelectItem value="Ongoing">Ongoing</SelectItem>
+                                                    <SelectItem value="Completed">Completed</SelectItem>
+                                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                                </>
+                                            )}
                                             {workOrder.status === "Assigned" && (
                                                 <>
                                                     <SelectItem value="Assigned">Assigned</SelectItem>
@@ -583,22 +537,6 @@ export default function EditPMModal({
                                     )}
                                 </div>
 
-                                {/* Asset */}
-                                <div className="flex-[3] space-y-2">
-                                    <SmartDropdown
-                                        label="Asset"
-                                        placeholder={assetDetails ? `${assetDetails.name} - ${assetDetails.location_name}` : "Select Asset (scroll down here)"}
-                                        items={assets}
-                                        getLabel={(a) =>
-                                            `${a.name} – ${a.location.name}`
-                                        }
-                                        getValue={(a) => a.id.toString()}
-                                        selectedId={data.asset_id || ""}
-                                        onChange={(id) => setData("asset_id", id)}
-                                        error={localErrors.asset_id}
-                                    />
-                                </div>
-                                
                             </div>
 
                             {/* Row 3 - Remarks*/}
