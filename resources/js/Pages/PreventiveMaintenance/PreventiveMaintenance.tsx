@@ -284,39 +284,37 @@ const PreventiveMaintenance: React.FC = () => {
 
             <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
-                    <h1 className="text-2xl font-semibold">
+                    <h1 className="text-2xl font-semibold sm:mb-0">
                         Preventive Maintenance
                     </h1>
                 </div>
             </header>
 
-            <div className="p-4">
-                {/* Desktop Table */}
-                <div className="hidden sm:block overflow-x-auto -mt-[4.7rem]">
+            {/* Desktop Table */}
+            <div className="hidden sm:block overflow-x-auto -mt-[3.5rem]">
 
-                    {/* Preventive Maintenance Work Orders Datatable */}
-                    <Datatable
-                        columns={PMSWorkOrdersColumns}
-                        data={workOrders}
-                        placeholder="Search here"
-                    />
-                </div>
+                {/* Preventive Maintenance Work Orders Datatable */}
+                <Datatable
+                    columns={PMSWorkOrdersColumns}
+                    data={workOrders}
+                    placeholder="Search here"
+                />
+            </div>
 
-                {/* Mobile Search Input */}
-                <div className="sm:hidden mb-4">
-                    <input
-                        type="text"
-                        placeholder="Search here"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                </div>
+            {/* Mobile Search Input */}
+            <div className="sm:hidden mb-4">
+                <input
+                    type="text"
+                    placeholder="Search here"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+            </div>
 
-                {/* Mobile Cards */}
-                <div className="sm:hidden flex flex-col gap-4 mt-4">
+            {/* Mobile Cards */}
+            <div className="sm:hidden flex flex-col gap-4 mt-4">
 
-                </div>
             </div>
         </Authenticated>
     );

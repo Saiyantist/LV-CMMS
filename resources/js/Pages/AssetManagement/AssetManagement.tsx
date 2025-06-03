@@ -125,19 +125,13 @@ const AssetManagement: React.FC = () => {
         {
             accessorKey: "specification_details",
             header: "Specification",
-            cell: ({ row }) => {
-                const spec = row.getValue("specification_details") as string;
-                return (
-                    <div>
-                        {spec.length > 25
-                            ? `${spec.substring(0, 25)}...`
-                            : spec}
-                    </div>
-                );
-            },
+            cell: ({ row }) => (
+                <div>{row.getValue("specification_details")}</div>
+            ),
             enableSorting: false,
             meta: {
                 headerClassName: "w-[20%]",
+                cellClassName: "max-w-16 text-left px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
             },
         },
@@ -234,102 +228,97 @@ const AssetManagement: React.FC = () => {
             <Head title="Asset Management" />
 
             {/* Header section*/}
-            <div>
-                <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4 py-4">
-                        <h1 className="text-2xl font-semibold sm:mb-0 text-black">
+            <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
+                    <h1 className="text-2xl font-semibold sm:mb-0">
                             Asset Management
-                        </h1>
-                        <PrimaryButton
-                            onClick={() => setIsCreating(true)}
-                            className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-base xs:text-lg md:text-base rounded-md w-full sm:w-auto text-center justify-center gap-2"
-                        >
-                            <span>Add</span>
-                            <CirclePlus className="h-5 w-5" />
-                        </PrimaryButton>
-                    </div>
-                </header>
+                    </h1>
+                    <PrimaryButton
+                        onClick={() => setIsCreating(true)}
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-base xs:text-lg md:text-base rounded-md w-full sm:w-auto text-center justify-center gap-2"
+                    >
+                        <span>Add</span>
+                        <CirclePlus className="h-5 w-5" />
+                    </PrimaryButton>
+                </div>
+            </header>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block w-full overflow-x-auto rounded-md -mt-[4.1rem]">
+                <Datatable
+                    columns={columns}
+                    data={assets}
+                    placeholder="Search assets"
+                />
             </div>
 
-            {/* Main content below header */}
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 mx-auto ">
-                {/* Desktop Table View */}
-                <div className="hidden md:block w-full overflow-x-auto rounded-md -mt-[6.5rem]">
-                    <Datatable
-                        columns={columns}
-                        data={assets}
-                        placeholder="Search assets"
-                    />
-                </div>
-
-                {/* Mobile Card View */}
-                <div className="sm:hidden flex flex-col gap-4 mt-4">
-                    {assets.map((asset) => (
-                        <div
-                            key={asset.id}
-                            className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
-                        >
-                            <div className="absolute top-3 right-3">
-                                <p>
-                                    <span
-                                        className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(
-                                            asset.status
-                                        )}`}
-                                    >
-                                        {asset.status}
-                                    </span>
-                                </p>
-                            </div>
-                            <div className="space-y-1 pr-8 text-sm text-gray-800">
-                                <p>
-                                    <span className="font-medium">ID:</span>{" "}
-                                    {asset.id}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Name:</span>{" "}
-                                    {asset.name}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Spec:</span>{" "}
-                                    {asset.specification_details}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Location:
-                                    </span>{" "}
-                                    {asset.location.name}
-                                </p>
-
-                                <p>
-                                    <span className="font-medium">
-                                        Acquired:
-                                    </span>{" "}
-                                    {asset.date_acquired}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Last Maintenance:
-                                    </span>{" "}
-                                    {asset.last_maintained_at}
-                                </p>
-                            </div>
-                            <div className="mt-4 flex justify-between gap-2">
-                                <button
-                                    onClick={() => setViewingAsset(asset)}
-                                    className="flex-1 bg-secondary text-white px-3 py-2 text-sm rounded-md hover:bg-blue-700 transition"
+            {/* Mobile Card View */}
+            <div className="sm:hidden flex flex-col gap-4 mt-4">
+                {assets.map((asset) => (
+                    <div
+                        key={asset.id}
+                        className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
+                    >
+                        <div className="absolute top-3 right-3">
+                            <p>
+                                <span
+                                    className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(
+                                        asset.status
+                                    )}`}
                                 >
-                                    View
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(asset.id)}
-                                    className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
-                                >
-                                    Delete
-                                </button>
-                            </div>
+                                    {asset.status}
+                                </span>
+                            </p>
                         </div>
-                    ))}
-                </div>
+                        <div className="space-y-1 pr-8 text-sm text-gray-800">
+                            <p>
+                                <span className="font-medium">ID:</span>{" "}
+                                {asset.id}
+                            </p>
+                            <p>
+                                <span className="font-medium">Name:</span>{" "}
+                                {asset.name}
+                            </p>
+                            <p>
+                                <span className="font-medium">Spec:</span>{" "}
+                                {asset.specification_details}
+                            </p>
+                            <p>
+                                <span className="font-medium">
+                                    Location:
+                                </span>{" "}
+                                {asset.location.name}
+                            </p>
+
+                            <p>
+                                <span className="font-medium">
+                                    Acquired:
+                                </span>{" "}
+                                {asset.date_acquired}
+                            </p>
+                            <p>
+                                <span className="font-medium">
+                                    Last Maintenance:
+                                </span>{" "}
+                                {asset.last_maintained_at}
+                            </p>
+                        </div>
+                        <div className="mt-4 flex justify-between gap-2">
+                            <button
+                                onClick={() => setViewingAsset(asset)}
+                                className="flex-1 bg-secondary text-white px-3 py-2 text-sm rounded-md hover:bg-blue-700 transition"
+                            >
+                                View
+                            </button>
+                            <button
+                                onClick={() => handleDelete(asset.id)}
+                                className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {isCreating && (
