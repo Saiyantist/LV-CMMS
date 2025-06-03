@@ -15,16 +15,22 @@ import { getStatusColor } from "@/utils/getStatusColor";
 import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import AssignWorkOrderModal from "./components/AssignWorkOrderModal";
+import AssignWorkOrderModal from "./components/AcceptWorkOrderModal";
 import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
-import { BookX, Search, SlidersHorizontal, SquarePen, Trash } from "lucide-react";
+import { BookX, CirclePlus, MoreVertical, Search, SlidersHorizontal, SquarePen, Trash } from "lucide-react";
 import DeclineWorkOrderModal from "./components/DeclineWorkOrderModal";
 import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
 import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
 import DeleteWorkOrderModal from "./components/DeleteWorkOrderModal";
 import { Input } from "@/Components/shadcnui/input";
 import FilterModal from "@/Components/FilterModal";
-import { clearLine } from "readline";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/Components/shadcnui/dropdown-menu";
+
 interface Props {
     user: {
         id: number;
@@ -117,19 +123,19 @@ export default function IndexLayout({
     const [decliningWorkOrder, setDecliningWorkOrder] = useState<any>(null);
     const [cancellingWorkOrder, setCancellingWorkOrder] = useState<any>(null);
     const [deletingWorkOrder, setDeletingWorkOrder] = useState<any>(null);
-    const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>([]);
+    // const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>([]);
     const [mobileSearchQuery, setMobileSearchQuery] = useState("");
     const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
     const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, any>>({});
     const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
     
-    const toggleDescription = (id: number) => {
-        setExpandedDescriptions((prev) =>
-            prev.includes(id)
-                ? prev.filter((item) => item !== id)
-                : [...prev, id]
-        );
-    };
+    // const toggleDescription = (id: number) => {
+    //     setExpandedDescriptions((prev) =>
+    //         prev.includes(id)
+    //             ? prev.filter((item) => item !== id)
+    //             : [...prev, id]
+    //     );
+    // };
 
     // const filteredMobileWorkOrders = useMemo(() => {
     //     return filteredWorkOrders.filter((workOrder) => {
@@ -240,36 +246,96 @@ export default function IndexLayout({
             id: "actions",
             header: "Actions",
             cell: ({ row }) => (
-                    <div className="flex gap-2 justify-start px-2">
+                <div className="flex gap-2 justify-start px-2">
+                    {/* Large screens - visible above md breakpoint */}
+                    <div className="hidden xl:flex gap-2">
                         <Button
                             className="bg-secondary h-6 text-xs rounded-sm"
                             onClick={() => setIsViewingWorkOrder(row.original)}
                         >
                             View
                         </Button>
-                        { row.getValue('status') === "Pending" && (
-                        <>
-                            <Button
-                                variant={"outline"}
-                                size={"icon"}
-                                className="h-6 text-xs text-secondary rounded-sm"
-                                onClick={() => setEditingWorkOrder(row.original)}
-                            ><SquarePen />
-                            </Button>
-                            <Button
-                                variant={"outline"}
-                                size={"icon"}
-                                className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
-                                onClick={() => setCancellingWorkOrder(row.original)}
-                            ><BookX />
-                            </Button>
-                        </>
+                        {row.getValue('status') === "Pending" && (
+                            <>
+                                <Button
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="h-6 text-xs text-secondary rounded-sm"
+                                    onClick={() => setEditingWorkOrder(row.original)}
+                                ><SquarePen />
+                                </Button>
+                                <Button
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
+                                    onClick={() => setCancellingWorkOrder(row.original)}
+                                ><BookX />
+                                </Button>
+                            </>
                         )}
                     </div>
+
+                    {/* Medium screens - visible only on md */}
+                    <div className="hidden lg:flex xl:hidden">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setIsViewingWorkOrder(row.original)}>
+                                    View
+                                </DropdownMenuItem>
+                                {row.getValue('status') === "Pending" && (
+                                    <>
+                                        <DropdownMenuItem onClick={() => setEditingWorkOrder(row.original)}>
+                                            Edit
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                            onClick={() => setCancellingWorkOrder(row.original)}
+                                            className="text-destructive"
+                                        >
+                                            Cancel
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+
+                    {/* Mobile view - visible below md breakpoint */}
+                    <div className="flex lg:hidden xl:hidden gap-2">
+                        <Button
+                            className="bg-secondary h-6 text-xs rounded-sm"
+                            onClick={() => setIsViewingWorkOrder(row.original)}
+                        >
+                            View
+                        </Button>
+                        {row.getValue('status') === "Pending" && (
+                            <>
+                                <Button
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="h-6 text-xs text-secondary rounded-sm"
+                                    onClick={() => setEditingWorkOrder(row.original)}
+                                ><SquarePen />
+                                </Button>
+                                <Button
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
+                                    onClick={() => setCancellingWorkOrder(row.original)}
+                                ><BookX />
+                                </Button>
+                            </>
+                        )}
+                    </div>
+                </div>
             ),
             enableSorting: false,
             meta: {
-                cellClassName: "w-[10rem]",
+                cellClassName: "w-[10rem] md:w-[3rem] lg:w-[10rem]",
             }
         },
     ];
@@ -289,7 +355,8 @@ export default function IndexLayout({
             header: "Date Requested",
             cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
             meta: { 
-                cellClassName: "w-[8.5rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                headerClassName: "w-[8.5rem]",
+                cellClassName: "whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
             },
         },
         {
@@ -390,21 +457,48 @@ export default function IndexLayout({
                     header: "Action",
                     cell: ({ row }: { row: Row<WorkOrders> }) => (
                         <div className="flex gap-2 justify-center">
-                            <Button
-                                className="bg-secondary h-6 text-xs rounded-sm hover:bg-secondary/80 hover:text-white transition-all duration-200"
-                                onClick={() => setEditingWorkOrder(row.original)}
-                            >
-                                Edit
-                            </Button>
-                            {activeTab === "Declined" && (
+                            {/* Large screens - visible above md breakpoint */}
+                            <div className="hidden xl:flex gap-2">
                                 <Button
-                                    variant={"outline"}
-                                    size={"icon"}
-                                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
-                                    onClick={() => setDeletingWorkOrder(row.original)}
-                                ><Trash />
+                                    className="bg-secondary h-6 text-xs rounded-sm hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                    onClick={() => setEditingWorkOrder(row.original)}
+                                >
+                                    Edit
                                 </Button>
-                            )}
+                                {activeTab === "Declined" && (
+                                    <Button
+                                        variant={"outline"}
+                                        size={"icon"}
+                                        className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                                        onClick={() => setDeletingWorkOrder(row.original)}
+                                    ><Trash />
+                                    </Button>
+                                )}
+                            </div>
+
+                            {/* Large screens - visible from md to lg */}
+                            <div className="hidden md:flex xl:hidden">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setEditingWorkOrder(row.original)}>
+                                            Edit
+                                        </DropdownMenuItem>
+                                        {activeTab === "Declined" && (
+                                            <DropdownMenuItem 
+                                                onClick={() => setDeletingWorkOrder(row.original)}
+                                                className="text-destructive"
+                                            >
+                                                Delete
+                                            </DropdownMenuItem>
+                                        )}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
                         </div>
                     ),
                     enableSorting: false,
@@ -421,7 +515,7 @@ export default function IndexLayout({
                     ),
                     enableSorting: false,
                     meta: {
-                        cellClassName: "max-w-[8rem] text-center",
+                        cellClassName: "max-w-[5rem] text-center whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                         searchable: true,
                         filterable: true,
                     },
@@ -462,27 +556,57 @@ export default function IndexLayout({
                     header: "Action",
                     cell: ({ row }: { row: Row<WorkOrders> }) => (
                         <div className="flex gap-2 justify-center">
-                            <Button
-                                className="bg-secondary h-6 text-xs text-white rounded-sm !border-none hover:bg-secondary/80 hover:text-white transition-all duration-200"
-                                onClick={() => setAcceptingWorkOrder(row.original)}
-                            >
-                                Accept
-                            </Button>
-                            {activeTab === "Pending" && (
+                            {/* Extra Large screens - visible above xl breakpoint */}
+                            <div className="hidden xl:flex gap-2">
                                 <Button
-                                    className="h-6 text-xs text-white rounded-sm !border-none bg-secondary/65 hover:bg-secondary/80 hover:text-white transition-all duration-200"
-                                    onClick={() => setForBudgetRequest(row.original)}
+                                    className="bg-secondary h-6 text-xs text-white rounded-sm !border-none hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                    onClick={() => setAcceptingWorkOrder(row.original)}
                                 >
-                                    Budget Request
+                                    Accept
                                 </Button>
-                            )}
-                            <Button
-                                variant={"outline"}
-                                size={"icon"}
-                                className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
-                                onClick={() => setDecliningWorkOrder(row.original)}
-                            ><BookX />
-                            </Button>
+                                {activeTab === "Pending" && (
+                                    <Button
+                                        className="h-6 text-xs text-white rounded-sm !border-none bg-secondary/65 hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                        onClick={() => setForBudgetRequest(row.original)}
+                                    >
+                                        Budget Request
+                                    </Button>
+                                )}
+                                <Button
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                                    onClick={() => setDecliningWorkOrder(row.original)}
+                                ><BookX />
+                                </Button>
+                            </div>
+
+                            {/* Large screens - visible from md to lg */}
+                            <div className="hidden md:flex xl:hidden">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setAcceptingWorkOrder(row.original)}>
+                                            Accept
+                                        </DropdownMenuItem>
+                                        {activeTab === "Pending" && (
+                                            <DropdownMenuItem onClick={() => setForBudgetRequest(row.original)}>
+                                                Budget Request
+                                            </DropdownMenuItem>
+                                        )}
+                                        <DropdownMenuItem 
+                                            onClick={() => setDecliningWorkOrder(row.original)}
+                                            className="text-destructive"
+                                        >
+                                            Decline
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
                         </div>
                     ),
                     enableSorting: false,
@@ -592,9 +716,10 @@ export default function IndexLayout({
                     </h1>
                     <PrimaryButton
                         onClick={() => setIsCreating(true)}
-                        className="bg-secondary text-white hover:bg-primary transition-all duration-200 !text-lg sm:text-base px-5 py-3 sm:py-2 rounded-md w-[95%] sm:w-auto text-center self-center justify-center"
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-200 text-base xs:text-lg md:text-base rounded-md w-[95%] sm:w-auto text-center self-center justify-center gap-2"
                     >
-                        + Add Work Order
+                        <span>Create</span>
+                        <CirclePlus className="h-5 w-5" />
                     </PrimaryButton>
                 </div>
             </header>

@@ -191,7 +191,7 @@ export default function ForBudgetRequestModal({
                                 <TableHead className="">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Asset Detail */}
@@ -321,7 +321,7 @@ export default function ForBudgetRequestModal({
                 <DialogFooter className="px-6 py-4 border-t">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
                     <Button type="submit" onClick={submit}
-                        className="bg-primary hover:bg-primary/90 text-white">Accept Partially</Button>
+                        className="bg-primary hover:bg-primary/90 text-white">Move to Budget Request</Button>
                 </DialogFooter>
 
                 {activeImageIndex !== null && (

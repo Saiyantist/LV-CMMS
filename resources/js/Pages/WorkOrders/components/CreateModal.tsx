@@ -147,11 +147,11 @@ export default function CreateWorkOrderModal({
             formData.append("remarks", data.remarks || "");
         }
 
-        // For Debugging
-        console.log("=== Form Data ===:");
-        for (const [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-        }
+        // // For Debugging
+        // console.log("=== Form Data ===:");
+        // for (const [key, value] of formData.entries()) {
+        //     console.log(`${key}:`, value);
+        // }
 
         router.post("/work-orders", formData, {
             forceFormData: true,

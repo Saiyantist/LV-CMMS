@@ -3,7 +3,6 @@
 import type React from "react";
 import { useEffect, useState } from "react";
 import { Head, usePage } from "@inertiajs/react";
-import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
 import CreateAssetModal from "./CreateAssetModal";
 import ViewAssetModal from "./ViewAssetModal";
@@ -14,8 +13,9 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import FlashToast from "@/Components/FlashToast";
 import { Button } from "@/Components/shadcnui/button";
-import { Trash } from "lucide-react";
+import { CirclePlus, Trash } from "lucide-react";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 interface Asset {
     id: number;
@@ -230,7 +230,7 @@ const AssetManagement: React.FC = () => {
     };
 
     return (
-        <Authenticated>
+        <AuthenticatedLayout>
             <Head title="Asset Management" />
 
             {/* Header section*/}
@@ -242,9 +242,10 @@ const AssetManagement: React.FC = () => {
                         </h1>
                         <PrimaryButton
                             onClick={() => setIsCreating(true)}
-                            className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md w-full sm:w-auto text-center justify-center"
+                            className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-base xs:text-lg md:text-base rounded-md w-full sm:w-auto text-center justify-center gap-2"
                         >
-                            Add an Asset
+                            <span>Add</span>
+                            <CirclePlus className="h-5 w-5" />
                         </PrimaryButton>
                     </div>
                 </header>
@@ -353,7 +354,7 @@ const AssetManagement: React.FC = () => {
                 showScrollUpButton={showScrollUpButton}
                 scrollToTop={scrollToTop}
             />
-        </Authenticated>
+        </AuthenticatedLayout>
     );
 };
 

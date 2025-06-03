@@ -48,7 +48,7 @@ class WorkOrderController extends Controller
                     'id' => $wo->requestedBy->id,
                     'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
                 ],
-                'requested_at' => \Carbon\Carbon::parse($wo->requested_at)->format('m/d/Y'),
+                'requested_at' => \Carbon\Carbon::parse($wo->requested_at)->format('m/d/Y H:i'),
                 'assigned_to' => $wo->assignedTo ? [
                     'id' => $wo->assignedTo->id,
                     'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,

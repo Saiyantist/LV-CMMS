@@ -55,7 +55,7 @@ interface DataTableProps<TData extends { priority?: string; status?: string; [ke
 
 
 export function Datatable<TData extends { priority?: string; status?: string; [key: string]: any }, TValue>({ columns, data, placeholder = "Search" }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'requested_at', desc: true }])
   const [searchQuery, setSearchQuery] = useState("")
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [columnFilters, setColumnFilters] = useState<Record<string, any>>({})

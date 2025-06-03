@@ -25,7 +25,7 @@ interface Location {
     name: string;
 }
 
-interface AssignWorkOrderModalProps {
+interface AcceptWorkOrderModalProps {
     workOrder: {
         id: number;
         location: { id: number; name: string };
@@ -58,14 +58,14 @@ interface AssignWorkOrderModalProps {
     onClose: () => void;
 }
 
-export default function AssignWorkOrderModal({
+export default function AcceptWorkOrderModal({
     workOrder,
     locations,
     assets,
     maintenancePersonnel,
     user,
     onClose,
-}: AssignWorkOrderModalProps) {
+}: AcceptWorkOrderModalProps) {
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
     const [date, setDate] = useState<Date>()
     const [showCalendar, setShowCalendar] = useState(false)
@@ -120,15 +120,22 @@ export default function AssignWorkOrderModal({
             if (isWorkOrderManager) {
                 formData.append("location_id", data.location_id.toString());
                 formData.append("report_description", data.report_description || "");
+                formData.append("asset_id", data.asset_id || "");
+                formData.append("status", data.status || "Assigned");
                 formData.append("label", data.label || "");
-                formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
                 formData.append("assigned_to", data.assigned_to?.id?.toString() || "")
                 formData.append("priority", data.priority || "");
-                formData.append("status", data.status || "Assigned");
+                formData.append("remarks", data.remarks === "" ? workOrder.remarks : data.remarks);
+                formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
                 formData.append("approved_at", approvedDate ? format(approvedDate, "yyyy-MM-dd") : data.approved_at ? format(data.approved_at, "yyyy-MM-dd") : "")
                 formData.append("approved_by", data.approved_by || "");
-                formData.append("remarks", data.remarks === "" ? workOrder.remarks : data.remarks);
             }
+
+            // // For Debugging
+            // console.log("=== Form Data ===:");
+            // for (const [key, value] of formData.entries()) {
+            //     console.log(`${key}:`, value);
+            // }
             
             router.post(`/work-orders/${workOrder.id}`, formData, {
                 forceFormData: true,
@@ -230,7 +237,7 @@ export default function AssignWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Remarks */}
@@ -239,7 +246,7 @@ export default function AssignWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Remarks:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.remarks ? (
+                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
                                         workOrder.remarks
                                     ) : (
                                         <span className="text-gray-500 italic">No Remarks</span>

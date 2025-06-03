@@ -236,14 +236,14 @@ export default function ViewPMModal({
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Label:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.label}</TableCell>
+                                <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2">{workOrder.label}</TableCell>
                             </TableRow>
 
                             <TableRow className="border-none flex flex-row items-center justify-between w-full">
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Remarks:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[3.3] items-center">
+                                <TableCell className="flex flex-[3.3] items-center overflow-y-auto hover:overflow-y-scroll">
                                     {workOrder.remarks ? (
                                         workOrder.remarks
                                     ) : (

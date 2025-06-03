@@ -139,7 +139,7 @@ export default function DeclineWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Asset Detail */}
@@ -197,7 +197,7 @@ export default function DeclineWorkOrderModal({
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
                     <form onSubmit={submit} className="flex gap-2">
-                        <Button variant="outline" onClick={onClose}>Back</Button>
+                        <Button variant="outline" onClick={onClose}>Cancel</Button>
                         <Button variant="destructive" type="submit">Decline</Button>
                     </form>
                 </DialogFooter>

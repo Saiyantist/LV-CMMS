@@ -138,7 +138,7 @@ export default function DeleteWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Remarks */}
@@ -146,7 +146,7 @@ export default function DeleteWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Remarks:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.remarks ? (
+                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
                                         workOrder.remarks
                                     ) : (
                                         <span className="text-gray-500 italic">No Remarks</span>
