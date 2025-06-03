@@ -522,12 +522,12 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                     {isPreventiveMaintenance && (
                                         <>
                                             {asset.maintenance_schedule && (
-                                                <div className="space-y-2 text-sm">
-                                                    <Label className="flex items-center">Toggle Active Status</Label>
+                                                <div className="flex flex-row gap-2 items-center text-sm">
                                                     <Switch
                                                         checked={isActive}
                                                         onCheckedChange={setIsActive}
                                                     />
+                                                    <Label className="flex items-center text-sm font-medium text-gray-700">Toggle Active Status</Label>
                                                 </div>
                                             )}
                                             <div className="flex flex-row w-full gap-4">

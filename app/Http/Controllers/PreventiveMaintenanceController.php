@@ -19,8 +19,7 @@ class PreventiveMaintenanceController extends Controller
         $workOrders = WorkOrder::where('work_order_type', 'Preventive Maintenance')
             ->with(['asset.maintenanceSchedule', 'location', 'assignedTo', 'requestedBy', 'images'])
             ->get();
-        $maintenanceSchedules = Asset::whereHas('maintenanceSchedule')->with('maintenanceSchedule')->get();
-
+        $maintenanceSchedules = Asset::whereHas('maintenanceSchedule')->with('location','maintenanceSchedule')->get();
         $formattedWorkOrders = $workOrders->map(function ($wo) {
             return [
                 'id' => $wo->id,
@@ -74,7 +73,7 @@ class PreventiveMaintenanceController extends Controller
         return Inertia::render('PreventiveMaintenance/PreventiveMaintenance', [
             'workOrders' => $formattedWorkOrders,
             'maintenanceSchedules' => $maintenanceSchedules,
-            'assets' => Asset::with(['location:id,name', 'maintenanceHistories'])->get(),
+            'assets' => Asset::with(['location', 'maintenanceHistories'])->get(),
             'maintenancePersonnel' => User::role('maintenance_personnel')->with('roles')->get(),
             'user' => [
                 'id' => $user->id,
@@ -123,5 +122,43 @@ class PreventiveMaintenanceController extends Controller
             return redirect()->route('work-orders.preventive-maintenance')->with('error', 'Failed to delete Preventive Maintenance.');
         }
         return redirect()->route('work-orders.preventive-maintenance')->with('success', 'Preventive Maintenance deleted successfully.');
+    }
+
+    public function updateSchedule(Request $request, $id)
+    {
+        // dd("Hit", $request->all());
+
+        $validated = $request->validate([
+            'is_active' => 'required|boolean',
+            'schedule' => 'required_if:has_preventive_maintenance,1|in:Weekly,Monthly,Yearly',
+            'weeklyFrequency' => 'required_if:schedule,Weekly',
+            'monthlyFrequency' => 'required_if:schedule,Monthly',
+            'monthlyDay' => 'required_if:schedule,Monthly',
+            'yearlyMonth' => 'required_if:schedule,Yearly',
+            'yearlyDay' => 'required_if:schedule,Yearly',
+        ]);
+        
+        try {
+
+            $asset = Asset::findOrFail($id);
+
+            // Convert schedule data to maintenance schedule format
+            $scheduleData = [
+                'is_active' => $validated['is_active'],
+                'interval_unit' => strtolower($validated['schedule']),
+                'interval_value' => $validated['schedule'] === 'Weekly' ? $validated['weeklyFrequency'] : 1,
+                'month_week' => $validated['schedule'] === 'Monthly' ? $validated['monthlyFrequency'] : null,
+                'month_weekday' => $validated['schedule'] === 'Monthly' ? $validated['monthlyDay'] : null,
+                'year_month' => $validated['schedule'] === 'Yearly' ? 
+                    (new \DateTime($validated['yearlyMonth'] . ' 1, 2000'))->format('n') : null,
+                'year_day' => $validated['schedule'] === 'Yearly' ? $validated['yearlyDay'] : null,
+            ];
+
+            $asset->maintenanceSchedule->update($scheduleData);
+        
+            return redirect()->back()->with('success', 'Maintenance schedule updated successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to update maintenance schedule: ' . $e->getMessage());
+        }
     }
 }

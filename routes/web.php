@@ -94,6 +94,7 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
                 Route::get('/', [PreventiveMaintenanceController::class, 'index'])->name('work-orders.preventive-maintenance');
                 Route::post('/', [PreventiveMaintenanceController::class, 'store'])->name('work-orders.preventive-maintenance.store');
                 Route::put('/{id}', [PreventiveMaintenanceController::class, 'update'])->name('work-orders.preventive-maintenance.update');
+                Route::put('/schedule/{id}', [PreventiveMaintenanceController::class, 'updateSchedule'])->name('work-orders.preventive-maintenance.update-schedule');
                 Route::delete('/{id}', [PreventiveMaintenanceController::class, 'destroy'])->name('work-orders.preventive-maintenance.destroy');
             });
     

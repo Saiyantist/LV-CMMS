@@ -6,10 +6,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/Components/shadcnui/button";
 import ViewPMModal from "./components/ViewPMModal";
 import EditPMModal from "./components/EditPMModal";
+import EditPMScheduleModal from "./components/EditPMScheduleModal";
 import FlashToast from "@/Components/FlashToast";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { Trash } from "lucide-react";
 import DeletePMModal from "./components/DeletePMModal";
+import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 
 interface WorkOrders {
     id: number;
@@ -65,6 +67,20 @@ interface User {
     roles: { name: string }[];
     permissions: string[];
 }
+
+interface AssetWithMaintenanceSchedule {
+    id: number;
+    name: string;
+    specification_details: string;
+    status: string;
+    location: {
+        id: number;
+        name: string;
+    };
+    last_maintained_at: string;
+    maintenance_schedule: MaintenanceSchedule;
+}
+
 interface MaintenanceSchedule {
     id: number;
     asset_id: number;
@@ -95,24 +111,83 @@ interface Assets {
     location: { id: number; name: string };
 }
 
+const getOrdinalSuffix = (n: number): string => {
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
+
+const formatMaintenanceSchedule = (schedule: MaintenanceSchedule | null): string => {
+    if (!schedule) return 'No schedule';
+    
+    const { interval_unit, interval_value, month_week, month_weekday, year_month, year_day } = schedule;
+    
+    if (interval_unit === 'weeks' && interval_value) {
+        return `Every ${interval_value} week${interval_value > 1 ? 's' : ''}`;
+    }
+    
+    if (interval_unit === 'monthly' && month_week && month_weekday) {
+        return `Every ${getOrdinalSuffix(month_week)} ${month_weekday.charAt(0).toUpperCase() + month_weekday.slice(1)} of month`;
+    }
+    
+    if (interval_unit === 'yearly' && year_month && year_day) {
+        const month = new Date(2000, year_month - 1).toLocaleString('default', { month: 'long' });
+        return `Every ${month} ${getOrdinalSuffix(year_day)}`;
+    }
+    
+    return 'No schedule';
+};
+
+const computeNextScheduledDate = (schedule: MaintenanceSchedule | null, lastMaintainedAt: string | null): string => {
+    if (!schedule || !lastMaintainedAt) return "-";
+    
+    try {
+        const lastDate = new Date(lastMaintainedAt);
+        const { interval_unit, interval_value } = schedule;
+        
+        let nextDate = new Date(lastDate);
+        
+        switch (interval_unit) {
+            case "weeks":
+                nextDate.setDate(lastDate.getDate() + ((interval_value || 1) * 7));
+                break;
+            case "monthly":
+                nextDate.setMonth(lastDate.getMonth() + (interval_value || 1));
+                break;
+            case "yearly":
+                nextDate.setFullYear(lastDate.getFullYear() + (interval_value || 1));
+                break;
+            default:
+                return "-";
+        }
+        
+        return nextDate.toLocaleDateString();
+    } catch (error) {
+        console.error("Error computing next scheduled date:", error);
+        return "-";
+    }
+};
+
 const PreventiveMaintenance: React.FC = () => {
     const { props } = usePage();
     const assets = (props.assets as Assets[]) || [];
     const maintenancePersonnel = (props.maintenancePersonnel as MaintenancePersonnel[]) || [];
     const workOrders = (props.workOrders as WorkOrders[]) || [];
-    const maintenanceSchedules = (props.maintenanceSchedules as MaintenanceSchedule[]) || [];
+    const assetMaintenanceSchedules = (props.maintenanceSchedules as AssetWithMaintenanceSchedule[]) || [];
     const user = (props.user as User) || {};
     const locations = (props.locations as Locations[]) || [];
-
+    
     const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isViewingPM, setIsViewPM] = useState<any>(null);
     const [isEditingPM, setIsEditingPM] = useState<any>(null);
     const [isDeletingPM, setIsDeletingPM] = useState<any>(null);
+    const [isEditingPMSchedule, setIsEditingPMSchedule] = useState<any>(null);
+    const [activeTab, setActiveTab] = useState("Work Orders");
 
     const PMSWorkOrdersColumns: ColumnDef<WorkOrders>[] = [
-    {
-        accessorKey: "id",
+        {
+            accessorKey: "id",
         header: "ID",
         cell: ({ row }) => <div>{row.getValue("id")}</div>,
         meta: {
@@ -246,6 +321,97 @@ const PreventiveMaintenance: React.FC = () => {
 
     ];
 
+    const PMSchedulesColumns: ColumnDef<AssetWithMaintenanceSchedule>[] = [
+        {
+            id: "id",
+            accessorKey: "id",
+            header: "ID",
+            cell: ({ row }) => <div>{row.getValue("id")}</div>,
+            meta: {
+                cellClassName: "w-12",
+                searchable: true,
+            },
+            enableSorting: true,
+        },
+        {
+            id: "asset",
+            header: "Asset Name",
+            accessorFn: (row) => row.name,
+            enableSorting: true,
+            meta: {
+                cellClassName: "max-w-[7rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                searchable: true,
+                filterable: true,
+            },
+        },
+        {
+            id: "schedule",
+            header: "Schedule",
+            accessorFn: (row) => formatMaintenanceSchedule(row.maintenance_schedule),
+            enableSorting: true,
+            meta: {
+                cellClassName: "max-w-[12rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                searchable: true,
+            },
+        },
+        {
+            id: "status",
+            header: "Status",
+            accessorFn: (row) => row.maintenance_schedule?.is_active ? "Active" : "Inactive",
+            enableSorting: true,
+            cell: ({ row }) => {
+                const status = row.original.maintenance_schedule?.is_active ? "Active" : "Inactive";
+                return (
+                    <span
+                        className={`px-2 py-1 h-6 border rounded inline-flex items-center ${
+                            status === "Active" ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-800 border-gray-200"
+                        }`}
+                    >
+                        {status}
+                    </span>
+                );
+            },
+            meta: {
+                headerClassName: "w-20",
+                cellClassName: "flex justify-center",
+                filterable: true,
+            },
+        },
+        {
+            id: "scheduled_at",
+            header: "Next Scheduled",
+            accessorFn: (row) => computeNextScheduledDate(row.maintenance_schedule, row.last_maintained_at),
+            enableSorting: true,
+            meta: {
+                cellClassName: "max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+            },
+        },
+        {
+            id: "last_run_at",
+            header: "Last Run",
+            accessorFn: (row) => row.maintenance_schedule?.last_run_at || "-",
+            enableSorting: true,
+            meta: {
+                cellClassName: "max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+            },
+        },
+        {
+            id: "actions",
+            header: "Actions",
+            cell: ({ row }) => {
+                return <div className="flex gap-2 justify-center px-2">
+                    <Button
+                        className="bg-secondary h-6 text-xs rounded-sm"
+                        onClick={() => setIsEditingPMSchedule(row.original)}
+                    >
+                        Edit
+                    </Button>
+                </div>
+            },
+            enableSorting: false,
+        }
+    ];
+
     return (
         <Authenticated>
             <Head title="Preventive Maintenance" />
@@ -271,12 +437,19 @@ const PreventiveMaintenance: React.FC = () => {
             )}
 
             {isDeletingPM && (
-
                 <DeletePMModal
                     workOrder={isDeletingPM}
                     locations={locations}
                     user={user}
                     onClose={() => setIsDeletingPM(null)}
+                />
+            )}
+
+            {isEditingPMSchedule && (
+                <EditPMScheduleModal
+                    schedule={isEditingPMSchedule}
+                    locations={locations}
+                    onClose={() => setIsEditingPMSchedule(null)}
                 />
             )}
 
@@ -290,15 +463,35 @@ const PreventiveMaintenance: React.FC = () => {
                 </div>
             </header>
 
+            <div className="hidden md:flex">
+                    <Tabs value={activeTab} onValueChange={setActiveTab}>
+                        <TabsList className="bg-gray-200 text-black rounded-md mb-6">
+                            <TabsTrigger value="Work Orders">Work Orders</TabsTrigger>
+                            <TabsTrigger value="Schedules">Schedules</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                </div>
+
             {/* Desktop Table */}
-            <div className="hidden sm:block overflow-x-auto -mt-[3.5rem]">
+            <div className="hidden sm:block overflow-x-auto -mt-[3.8rem]">
 
                 {/* Preventive Maintenance Work Orders Datatable */}
+                {activeTab === "Work Orders" && (
                 <Datatable
                     columns={PMSWorkOrdersColumns}
                     data={workOrders}
                     placeholder="Search here"
-                />
+                    />
+                )}
+
+                {/* Preventive Maintenance Schedules Datatable */}
+                {activeTab === "Schedules" && (
+                    <Datatable
+                        columns={PMSchedulesColumns}
+                        data={assetMaintenanceSchedules}
+                        placeholder="Search here"
+                    />
+                )}
             </div>
 
             {/* Mobile Search Input */}
@@ -321,3 +514,5 @@ const PreventiveMaintenance: React.FC = () => {
 };
 
 export default PreventiveMaintenance;
+
+export type { AssetWithMaintenanceSchedule };

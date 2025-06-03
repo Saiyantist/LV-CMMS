@@ -55,7 +55,11 @@ interface DataTableProps<TData extends { priority?: string; status?: string; [ke
 
 
 export function Datatable<TData extends { priority?: string; status?: string; [key: string]: any }, TValue>({ columns, data, placeholder = "Search" }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'requested_at', desc: true }])
+  const [sorting, setSorting] = useState<SortingState>(() => {
+    // Check if requested_at column exists
+    const hasRequestedAt = columns.some(col => col.id === 'requested_at' || col.accessorKey === 'requested_at');
+    return [{ id: hasRequestedAt ? 'requested_at' : 'id', desc: true }];
+  });
   const [searchQuery, setSearchQuery] = useState("")
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [columnFilters, setColumnFilters] = useState<Record<string, any>>({})
