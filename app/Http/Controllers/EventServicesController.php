@@ -72,32 +72,41 @@ public function MyBookings()
 {
     $user = Auth::user();
 
-    // Check if user is super admin or communications officer
     if ($user->hasRole('super_admin') || $user->hasRole('communications_officer')) {
-        $myEvents = EventService::all();
+        $myEvents = EventService::with('user')->get(); // <-- add with('user')
     } else {
-        $myEvents = EventService::where('user_id', $user->id)->get();
+        $myEvents = EventService::with('user')->where('user_id', $user->id)->get();
     }
 
-$bookings = $myEvents->map(function ($event) {
-    return [
-        'id' => $event->id,
-        'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
-        'venue' => $event->venue,
-        'name' => $event->name,
-        'department' => $event->department,
-        'description' => $event->description,
-        'participants' => $event->participants,
-        'number_of_participants' => $event->number_of_participants,
-        'event_start_date' => $event->event_start_date,
-        'event_end_date' => $event->event_end_date,
-        'event_start_time' => $event->event_start_time,
-        'event_end_time' => $event->event_end_time,
-        'requested_services' => $event->requested_services,
-        'proof_of_approval' => $event->proof_of_approval,
-        'status' => $event->status,
-    ];
-});
+    $bookings = $myEvents->map(function ($event) {
+        return [
+            'id' => $event->id,
+            'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
+            'venue' => $event->venue,
+            'name' => $event->name,
+            'department' => $event->department,
+            'description' => $event->description,
+            'participants' => $event->participants,
+            'number_of_participants' => $event->number_of_participants,
+            'event_start_date' => $event->event_start_date,
+            'event_end_date' => $event->event_end_date,
+            'event_start_time' => $event->event_start_time,
+            'event_end_time' => $event->event_end_time,
+            'requested_services' => $event->requested_services,
+            'proof_of_approval' => $event->proof_of_approval,
+            'status' => $event->status,
+            // Add user info for requester
+            'user' => $event->user
+                ? [
+                    'id' => $event->user->id,
+                    'first_name' => $event->user->first_name,
+                    'last_name' => $event->user->last_name,
+                    'name' => $event->user->name ?? null,
+                    'email' => $event->user->email,
+                ]
+                : null,
+        ];
+    });
 
     return Inertia::render('EventServices/MyBookings', [
         'bookings' => $bookings

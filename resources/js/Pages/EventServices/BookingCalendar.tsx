@@ -1,5 +1,3 @@
-// "use client";
-
 import * as React from "react";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
@@ -353,26 +351,6 @@ export default function EventCalendar() {
 
                 {/* Main Content */}
                 <div className="container mx-auto px-2 sm:px-4 py-4 flex-1 w-full">
-                    {/* Search bar for list view */}
-                    {/* {view === "list" && (
-                        <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2">
-                            <div className="w-full sm:w-80 relative">
-                                <Search
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                                    size={18}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Search Description"
-                                    className="w-full pl-10 pr-4 py-2 border rounded-md bg-white"
-                                />
-                            </div>
-                            <button className="px-4 py-2 border rounded-md bg-white hover:bg-gray-50 w-full sm:w-auto mt-2 sm:mt-0">
-                                Filter
-                            </button>
-                        </div>
-                    )} */}
-
                     {/* Calendar View */}
                     {view === "calendar" && (
                         <>
@@ -478,6 +456,25 @@ export default function EventCalendar() {
                                                           "Approved"
                                                   )
                                                 : [];
+
+                                            // Sort events by time (earlier first)
+                                            const sortedEvents = [
+                                                ...events,
+                                            ].sort((a, b) => {
+                                                // Assume event.time is in "HH:mm" format
+                                                if (!a.time || !b.time)
+                                                    return 0;
+                                                const [aHour, aMin] = a.time
+                                                    .split(":")
+                                                    .map(Number);
+                                                const [bHour, bMin] = b.time
+                                                    .split(":")
+                                                    .map(Number);
+                                                return aHour !== bHour
+                                                    ? aHour - bHour
+                                                    : aMin - bMin;
+                                            });
+
                                             return (
                                                 <div
                                                     key={`${weekIndex}-${dayIndex}`}
@@ -505,9 +502,10 @@ export default function EventCalendar() {
 
                                                     {/* This is the event time */}
                                                     <div className="space-y-1 text-center">
-                                                        {events.length > 0 ? (
+                                                        {sortedEvents.length >
+                                                        0 ? (
                                                             <TooltipProvider>
-                                                                {events.map(
+                                                                {sortedEvents.map(
                                                                     (
                                                                         event,
                                                                         idx

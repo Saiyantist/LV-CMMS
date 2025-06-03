@@ -13,6 +13,7 @@ import { router, usePage } from "@inertiajs/react";
 const venueOptions = [
     "Auditorium",
     "Auditorium Lobby",
+    "Basketball Court",
     "College Library",
     "Meeting Room",
     "Computer Laboratory A",
@@ -20,6 +21,7 @@ const venueOptions = [
     "EFS Classroom(s) Room #:",
     "LVCC Grounds",
     "LVCC  Main Lobby",
+    "Elementary & High School Library",
 ];
 
 // Service groups
@@ -162,10 +164,10 @@ const EditBookingsModal = ({
                 !servicesDropdownRef.current.contains(event.target as Node)
             ) {
                 setServicesDropdownOpen(false);
-   
-    // Department field state
-    // (removed duplicate declaration)
-         }
+
+                // Department field state
+                // (removed duplicate declaration)
+            }
         }
         if (venueDropdownOpen || servicesDropdownOpen) {
             document.addEventListener("mousedown", handleClickOutside);

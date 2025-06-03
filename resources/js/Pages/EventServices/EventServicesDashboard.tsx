@@ -53,8 +53,8 @@ const allStatuses = [
     "Rejected",
     "Cancelled",
     "Completed",
-    "In Progress",
-    "Not Started",
+    // "In Progress",
+    // "Not Started",
 ];
 
 const statusColors: Record<string, string> = {
@@ -63,18 +63,18 @@ const statusColors: Record<string, string> = {
     Rejected: "#a3a3a3",
     Cancelled: "#f87171",
     Completed: "#16A34A",
-    "In Progress": "#f59e42",
-    "Not Started": "#64748B",
+    // "In Progress": "#f59e42",
+    // "Not Started": "#64748B",
 };
 
 const statusBadgeClasses: Record<string, string> = {
     Completed: "bg-green-200 text-green-800 hover:bg-green-200",
-    "In Progress": "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+    // "In Progress": "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
     Cancelled: "bg-orange-500 text-white hover:bg-orange-500",
     Rejected: "bg-red-500 text-white hover:bg-red-500",
     Pending: "bg-sky-100 text-sky-700 hover:bg-sky-200",
     Approved: "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
-    "Not Started": "bg-gray-300 text-gray-800 hover:bg-gray-400",
+    // "Not Started": "bg-gray-300 text-gray-800 hover:bg-gray-400",
     default: "bg-gray-200 text-gray-800",
 };
 
@@ -157,9 +157,9 @@ export default function EventServicesDashboard({
     // Status counts
     const statusList = [
         "Completed",
-        "In Progress",
+        // "In Progress",
         "Cancelled",
-        "Not Started",
+        // "Not Started",
         "Pending",
         "Approved",
         "Rejected",

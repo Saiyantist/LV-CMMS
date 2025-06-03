@@ -186,6 +186,21 @@ const ViewBookingModal: React.FC<Props> = ({
                                 value={formatDate(booking.date)}
                                 icon={<CalendarDays size={14} />}
                             />
+                            {/* --- Requester Name Block --- */}
+                            <InfoBlock
+                                label="Requested By"
+                                value={
+                                    booking.user
+                                        ? booking.user.first_name &&
+                                          booking.user.last_name
+                                            ? `${booking.user.first_name} ${booking.user.last_name}`
+                                            : booking.user.name ||
+                                              booking.user.email
+                                        : "N/A"
+                                }
+                                icon={<Users size={14} />}
+                            />
+                            {/* --- End Requester Name Block --- */}
                             <InfoBlock
                                 label="Event Name"
                                 value={booking.name}

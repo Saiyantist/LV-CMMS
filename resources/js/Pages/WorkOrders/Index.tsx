@@ -1,7 +1,7 @@
 // WorkOrders.tsx
 import { useState, useEffect } from "react";
 import { PageProps } from "@/types";
-import { usePage , router } from "@inertiajs/react";
+// import { usePage , router } from "@inertiajs/react";
 import IndexLayout from "./IndexLayout";
 
 export default function WorkOrders({

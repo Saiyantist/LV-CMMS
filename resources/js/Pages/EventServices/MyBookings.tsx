@@ -17,6 +17,7 @@ import { router, usePage } from "@inertiajs/react";
 import CreateBookingModal from "./CreateBookingModal";
 import ViewBookingModal from "./ViewBookingModal";
 import { ChevronDown } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 
 // Define the booking type
 export interface Booking {
@@ -74,86 +75,36 @@ export default function MyBookings({
         userRoles.includes("super_admin") ||
         userRoles.includes("communications_officer");
 
+    // Tabs logic
+    const bookingTabs: Booking["status"][] = [
+        "Pending",
+        "Approved",
+        "Completed",
+        "In Progress",
+        "Cancelled",
+        "Rejected",
+    ];
+    const [activeTab, setActiveTab] = useState<Booking["status"]>("Pending");
+
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(
         null
     );
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // const [isFilterOpen, setIsFilterOpen] = useState(false);
-    // ‼️ Heyya JOSH, you can refer sa nagawa kong search and filter (for MOBILE) sa IndexLayout.tsx
-    // Kasi dito, inayos ko na 'yung search and filter for desktop (datatable).
-    // Sa desktop, just add meta { filterable: true } in the column definition of desired column.
-
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery] = useState("");
     const [filteredBookings, setFilteredBookings] = useState<any[]>(bookings);
     const [currentPage, setCurrentPage] = useState(1);
-    const [filterVenue, setFilterVenue] = useState<string>("");
-    const [filterStatus, setFilterStatus] = useState<string>("");
+    const [filterVenue] = useState<string>("");
+    const [filterStatus] = useState<string>("");
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [form, setForm] = useState({
-        name: "",
-        venue: "",
-        event_date: "",
-        time: "",
-    });
-    const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
     const itemsPerPage = 5;
-    const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
 
-    // Get unique venues for filter dropdown
-    const uniqueVenues = Array.from(
-        new Set(bookings.map((booking) => booking.venue))
-    );
-
-    const handleBookingUpdate = (updatedBooking: Booking) => {
-        setFilteredBookings((prev) =>
-            prev.map((b) => (b.id === updatedBooking.id ? updatedBooking : b))
-        );
-        setSelectedBooking(updatedBooking); // This updates the modal instantly!
-    };
-
-    // Get unique statuses for filter dropdown
-    const uniqueStatuses = Array.from(
-        new Set(bookings.map((booking) => booking.status))
-    );
-
-    // Apply filters and search
     useEffect(() => {
         let result = bookings;
 
-        // Apply search filter
-        if (searchQuery) {
-            result = result.filter(
-                (booking) =>
-                    (booking.name || "")
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                    (booking.venue || "")
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase())
-            );
-        }
-
-        // Apply venue filter
-        if (filterVenue) {
-            result = result.filter((booking) => booking.venue === filterVenue);
-        }
-
-        // Apply status filter
-        if (filterStatus) {
-            result = result.filter(
-                (booking) => booking.status === filterStatus
-            );
-        }
-
-        setFilteredBookings(result);
-        setCurrentPage(1); // Reset to first page when filters change
-    }, [searchQuery, filterVenue, filterStatus, bookings]);
-
-    useEffect(() => {
         // Parse venue/requested_services if needed
-        const parsed = bookings.map((booking) => ({
+        result = result.map((booking) => ({
             ...booking,
             venue: Array.isArray(booking.venue)
                 ? booking.venue
@@ -166,8 +117,47 @@ export default function MyBookings({
                 ? JSON.parse(booking.requested_services)
                 : [],
         }));
-        setFilteredBookings(parsed);
-    }, [bookings]);
+
+        // Filter by tab (status) for admin roles
+        if (isAdmin && activeTab) {
+            result = result.filter((booking) => booking.status === activeTab);
+        }
+
+        // Apply search filter
+        if (searchQuery) {
+            result = result.filter(
+                (booking) =>
+                    (booking.name || "")
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ||
+                    (Array.isArray(booking.venue)
+                        ? booking.venue.join(", ")
+                        : booking.venue || ""
+                    )
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase())
+            );
+        }
+
+        // Apply venue filter
+        if (filterVenue) {
+            result = result.filter((booking) =>
+                Array.isArray(booking.venue)
+                    ? booking.venue.includes(filterVenue)
+                    : booking.venue === filterVenue
+            );
+        }
+
+        // Apply status filter (for non-admins, or if you want to allow further filtering)
+        if (filterStatus) {
+            result = result.filter(
+                (booking) => booking.status === filterStatus
+            );
+        }
+
+        setFilteredBookings(result);
+        setCurrentPage(1); // Reset to first page when filters change
+    }, [searchQuery, filterVenue, filterStatus, bookings, isAdmin, activeTab]);
 
     const handleViewBooking = (booking: Booking) => {
         setSelectedBooking(booking);
@@ -221,11 +211,6 @@ export default function MyBookings({
         }
     };
 
-    const handleClearFilters = () => {
-        setFilterVenue("");
-        setFilterStatus("");
-    };
-
     // Get current page items
     const getCurrentPageItems = () => {
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -234,41 +219,35 @@ export default function MyBookings({
     };
 
     // Modal rendering using portal for overlay effect
-    const BookingDetailsModal = () =>
-        isModalOpen && selectedBooking
-            ? createPortal(
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                      <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
-                          <button
-                              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl"
-                              onClick={() => setIsModalOpen(false)}
-                              aria-label="Close"
-                          >
-                              ×
-                          </button>
-                          <DialogHeader>
-                              <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-                                  <ArrowLeft
-                                      className="cursor-pointer"
-                                      onClick={() => setIsModalOpen(false)}
-                                  />
-                                  {selectedBooking?.name}
-                              </DialogTitle>
-                          </DialogHeader>
-                      </div>
-                  </div>,
-                  document.body
-              )
-            : null;
+    // const BookingDetailsModal = () =>
+    isModalOpen && selectedBooking
+        ? createPortal(
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                  <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
+                      <button
+                          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl"
+                          onClick={() => setIsModalOpen(false)}
+                          aria-label="Close"
+                      >
+                          ×
+                      </button>
+                      <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+                              <ArrowLeft
+                                  className="cursor-pointer"
+                                  onClick={() => setIsModalOpen(false)}
+                              />
+                              {selectedBooking?.name}
+                          </DialogTitle>
+                      </DialogHeader>
+                  </div>
+              </div>,
+              document.body
+          )
+        : null;
 
     // Datatable columns (UI only)
     const columns: ColumnDef<Booking>[] = [
-        // {
-        //     accessorKey: "id",
-        //     header: "ID",
-        //     cell: ({ row }) => <div>{row.getValue("id")}</div>,
-        //     meta: { headerClassName: "w-[80px]" },
-        // },
         {
             accessorKey: "date",
             header: "Date Requested",
@@ -277,13 +256,20 @@ export default function MyBookings({
         {
             accessorKey: "venue",
             header: "Requested Venue",
-            cell: ({ row }) => (
-                <div>
-                    {Array.isArray(row.original.venue)
-                        ? row.original.venue.join(", ")
-                        : row.getValue("venue")}
-                </div>
-            ),
+            cell: ({ row }) => {
+                let venues = Array.isArray(row.original.venue)
+                    ? row.original.venue.join(", ")
+                    : row.getValue("venue");
+                const venuesStr =
+                    typeof venues === "string" ? venues : String(venues ?? "");
+                return (
+                    <div title={venuesStr}>
+                        {venuesStr && venuesStr.length > 25
+                            ? venuesStr.slice(0, 25) + "..."
+                            : venuesStr}
+                    </div>
+                );
+            },
             meta: { searchable: true },
         },
         {
@@ -312,7 +298,7 @@ export default function MyBookings({
                 return (
                     <div>
                         {start && end
-                            ? `${formatDate(start)} to ${formatDate(end)}`
+                            ? `${formatDate(start)} - ${formatDate(end)}`
                             : "N/A"}
                     </div>
                 );
@@ -327,7 +313,7 @@ export default function MyBookings({
                 return (
                     <div>
                         {start && end
-                            ? `${formatTime(start)} to ${formatTime(end)}`
+                            ? `${formatTime(start)} - ${formatTime(end)}`
                             : "N/A"}
                     </div>
                 );
@@ -436,26 +422,6 @@ export default function MyBookings({
         },
     ];
 
-    // Handle form input change
-    // const handleFormChange = (
-    //     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    // ) => {
-    //     setForm({ ...form, [e.target.name]: e.target.value });
-    // };
-
-    // // Handle form submit
-    // const handleFormSubmit = (e: React.FormEvent) => {
-    //     e.preventDefault();
-    //     setFormErrors({});
-    //     router.post("/event-services", form, {
-    //         onError: (errors) => setFormErrors(errors),
-    //         onSuccess: () => {
-    //             setShowCreateModal(false);
-    //             setForm({ name: "", venue: "", event_date: "", time: "" });
-    //         },
-    //     });
-    // };
-
     // Delete handler
     const handleDeleteBooking = (booking: Booking) => {
         if (confirm("Are you sure you want to delete this booking?")) {
@@ -541,6 +507,27 @@ export default function MyBookings({
                             + Create Booking
                         </Button>
                     </div>
+                    {/* Tabs for super admin & communications officer */}
+                    {isAdmin && (
+                        <div className="mt-4">
+                            <Tabs
+                                value={activeTab}
+                                onValueChange={setActiveTab}
+                            >
+                                <TabsList className="bg-transparent text-black rounded-md mb-6 flex flex-wrap justify-start">
+                                    {bookingTabs.map((tab) => (
+                                        <TabsTrigger
+                                            key={tab}
+                                            value={tab}
+                                            className="data-[state=active]:bg-secondary data-[state=active]:text-white"
+                                        >
+                                            {tab}
+                                        </TabsTrigger>
+                                    ))}
+                                </TabsList>
+                            </Tabs>
+                        </div>
+                    )}
                 </header>
 
                 <CreateBookingModal
@@ -661,7 +648,6 @@ export default function MyBookings({
                     booking={selectedBooking}
                     venueNames={venueNames}
                     canEdit={isAdmin || selectedBooking?.status === "Pending"}
-                    // onBookingUpdate={handleBookingUpdate}
                 />
             </div>
         </AuthenticatedLayout>
