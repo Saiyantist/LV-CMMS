@@ -525,13 +525,13 @@ export default function EventServicesDashboard({
                                         Requested Venue
                                     </TableHead>
                                     <TableHead className="text-center">
+                                        Event Name
+                                    </TableHead>
+                                    <TableHead className="text-center">
                                         Event Date
                                     </TableHead>
                                     <TableHead className="text-center">
                                         Event Time
-                                    </TableHead>
-                                    <TableHead className="text-center">
-                                        Event Name
                                     </TableHead>
                                     <TableHead className="text-center">
                                         Status

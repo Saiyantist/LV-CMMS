@@ -94,8 +94,6 @@ minStartDate.setDate(today.getDate() + 3);
 const minStartDateStr = minStartDate.toISOString().split("T")[0];
 
 const MAX_EVENT_NAME = 100;
-// const MAX_DEPARTMENT = 100;
-const MAX_PARTICIPANTS = 100;
 const MAX_DESCRIPTION = 250;
 
 const EditBookingsModal = ({
@@ -121,7 +119,6 @@ const EditBookingsModal = ({
     const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
     const [previewFile, setPreviewFile] = useState<string | null>(null);
     const [showEventNameLimit, setShowEventNameLimit] = useState(false);
-    const [showDepartmentLimit, setShowDepartmentLimit] = useState(false);
     const [showParticipantsLimit, setShowParticipantsLimit] = useState(false);
     const [showDescriptionLimit, setShowDescriptionLimit] = useState(false);
 
@@ -262,49 +259,49 @@ const EditBookingsModal = ({
     if (!booking) return null;
 
     // Helper to render proof preview
-    const renderProofPreview = () => {
-        const file = form.proof_of_approval;
-        const existing = booking.proof_of_approval;
-        if (previewFile && file) {
-            if (file.type && file.type.startsWith("image/")) {
-                return (
-                    <img
-                        src={previewFile}
-                        alt="Proof Preview"
-                        className="mt-2 max-h-40 rounded border"
-                    />
-                );
-            } else if (file.type === "application/pdf") {
-                return (
-                    <iframe
-                        src={previewFile}
-                        title="PDF Preview"
-                        className="mt-2 w-full h-40 border rounded"
-                    />
-                );
-            }
-        } else if (existing) {
-            const ext = existing.split(".").pop().toLowerCase();
-            if (["jpg", "jpeg", "png"].includes(ext)) {
-                return (
-                    <img
-                        src={`/storage/${existing}`}
-                        alt="Proof"
-                        className="mt-2 max-h-40 rounded border"
-                    />
-                );
-            } else if (ext === "pdf") {
-                return (
-                    <iframe
-                        src={`/storage/${existing}`}
-                        title="PDF Proof"
-                        className="mt-2 w-full h-40 border rounded"
-                    />
-                );
-            }
-        }
-        return null;
-    };
+    // const renderProofPreview = () => {
+    //     const file = form.proof_of_approval;
+    //     const existing = booking.proof_of_approval;
+    //     if (previewFile && file) {
+    //         if (file.type && file.type.startsWith("image/")) {
+    //             return (
+    //                 <img
+    //                     src={previewFile}
+    //                     alt="Proof Preview"
+    //                     className="mt-2 max-h-40 rounded border"
+    //                 />
+    //             );
+    //         } else if (file.type === "application/pdf") {
+    //             return (
+    //                 <iframe
+    //                     src={previewFile}
+    //                     title="PDF Preview"
+    //                     className="mt-2 w-full h-40 border rounded"
+    //                 />
+    //             );
+    //         }
+    //     } else if (existing) {
+    //         const ext = existing.split(".").pop().toLowerCase();
+    //         if (["jpg", "jpeg", "png"].includes(ext)) {
+    //             return (
+    //                 <img
+    //                     src={`/storage/${existing}`}
+    //                     alt="Proof"
+    //                     className="mt-2 max-h-40 rounded border"
+    //                 />
+    //             );
+    //         } else if (ext === "pdf") {
+    //             return (
+    //                 <iframe
+    //                     src={`/storage/${existing}`}
+    //                     title="PDF Proof"
+    //                     className="mt-2 w-full h-40 border rounded"
+    //                 />
+    //             );
+    //         }
+    //     }
+    //     return null;
+    // };
 
     // Only super_admin and communications_officer can edit status
     const canEditStatus =
@@ -458,7 +455,7 @@ const EditBookingsModal = ({
                                 )}
                             </button>
                             {venueDropdownOpen && (
-                                <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
+                                <div className="absolute z-10 mt-20 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
                                     {venueOptions.map((venue) => (
                                         <label
                                             key={venue}
@@ -887,7 +884,7 @@ const EditBookingsModal = ({
                                 )}
                             </button>
                             {servicesDropdownOpen && (
-                                <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-60 overflow-y-auto">
+                                <div className="absolute z-10 mt-20 w-full bg-white border rounded shadow max-h-60 overflow-y-auto">
                                     {serviceGroups.map((group) => (
                                         <div key={group.label}>
                                             <div className="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-50">
@@ -924,40 +921,7 @@ const EditBookingsModal = ({
                             )}
                         </div>
                         {/* Status field for super_admin and comms officer */}
-                        {canEditStatus && (
-                            <div className="flex flex-col mt-5">
-                                <label className="mb-1 font-medium text-sm">
-                                    Status
-                                </label>
-                                <select
-                                    name="status"
-                                    value={form.status || ""}
-                                    onChange={handleFormChange}
-                                    className="border rounded-md px-3 py-2 text-sm"
-                                >
-                                    {/* <option value="">Select status</option> */}
-                                    <option value="Pending">Pending</option>
-                                    <option value="Approved">Approve</option>
-                                    <option value="Rejected">Reject</option>
-                                    <option value="Cancelled">Cancel</option>
-                                    <option value="Completed">Completed</option>
-                                    <option
-                                        value="In Progress
-"
-                                    >
-                                        In Progress
-                                    </option>
-                                    <option value="Not Started">
-                                        Not Started
-                                    </option>
-                                </select>
-                                {formErrors.status && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {formErrors.status}
-                                    </span>
-                                )}
-                            </div>
-                        )}
+        
                     </div>
                     <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
                         <Button
@@ -982,6 +946,3 @@ const EditBookingsModal = ({
 };
 
 export default EditBookingsModal;
-// function setDeptOptions(data: any): any {
-//     throw new Error("Function not implemented.");
-// }

@@ -29,7 +29,8 @@ export interface Booking {
     time: string;
     status:
         | "Completed"
-        | "In Progress"
+        // | "In Progress"
+        | "On Going"
         | "Cancelled"
         // | "Not Started"
         | "Pending"
@@ -79,12 +80,16 @@ export default function MyBookings({
     const bookingTabs: Booking["status"][] = [
         "Pending",
         "Approved",
+        "On Going",
         "Completed",
-        "In Progress",
         "Cancelled",
         "Rejected",
     ];
     const [activeTab, setActiveTab] = useState<Booking["status"]>("Pending");
+
+    const handleTabChange = (value: string) => {
+        setActiveTab(value as Booking["status"]);
+    };
 
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(
         null
@@ -101,26 +106,39 @@ export default function MyBookings({
     const itemsPerPage = 5;
 
     useEffect(() => {
-        let result = bookings;
+        let result = bookings.map((booking) => {
+            // Compute if booking is "On Going"
+            const today = new Date();
+            const start = booking.event_start_date
+                ? new Date(booking.event_start_date)
+                : null;
+            const end = booking.event_end_date
+                ? new Date(booking.event_end_date)
+                : null;
+            const isOngoing =
+                booking.status === "Approved" &&
+                start &&
+                end &&
+                today >= start &&
+                today <= end;
 
-        // Parse venue/requested_services if needed
-        result = result.map((booking) => ({
-            ...booking,
-            venue: Array.isArray(booking.venue)
-                ? booking.venue
-                : booking.venue
-                ? JSON.parse(booking.venue)
-                : [],
-            requestedServices: Array.isArray(booking.requested_services)
-                ? booking.requested_services
-                : booking.requested_services
-                ? JSON.parse(booking.requested_services)
-                : [],
-        }));
+            return {
+                ...booking,
+                displayStatus: isOngoing ? "On Going" : booking.status,
+            };
+        });
 
         // Filter by tab (status) for admin roles
         if (isAdmin && activeTab) {
-            result = result.filter((booking) => booking.status === activeTab);
+            if (activeTab === "On Going") {
+                result = result.filter(
+                    (booking) => booking.displayStatus === "On Going"
+                );
+            } else {
+                result = result.filter(
+                    (booking) => booking.displayStatus === activeTab
+                );
+            }
         }
 
         // Apply search filter
@@ -172,10 +190,10 @@ export default function MyBookings({
                         Completed
                     </Badge>
                 );
-            case "In Progress":
+            case "On Going":
                 return (
                     <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-                        In Progress
+                        On Going
                     </Badge>
                 );
             case "Cancelled":
@@ -260,8 +278,12 @@ export default function MyBookings({
                 let venues = Array.isArray(row.original.venue)
                     ? row.original.venue.join(", ")
                     : row.getValue("venue");
-                const venuesStr =
+                // Remove brackets and quotes if present
+                let venuesStr =
                     typeof venues === "string" ? venues : String(venues ?? "");
+                venuesStr = venuesStr
+                    .replace(/^\["|"\]$/g, "")
+                    .replace(/","/g, ", ");
                 return (
                     <div title={venuesStr}>
                         {venuesStr && venuesStr.length > 25
@@ -324,27 +346,77 @@ export default function MyBookings({
             header: "Status",
             cell: ({ row }) => {
                 const booking = row.original;
+
+                // Compute display status for dropdown
+                const today = new Date();
+                const start = booking.event_start_date
+                    ? new Date(booking.event_start_date)
+                    : null;
+                const end = booking.event_end_date
+                    ? new Date(booking.event_end_date)
+                    : null;
+
+                let displayStatus: Booking["status"] = booking.status;
+                if (
+                    booking.status === "Approved" &&
+                    start &&
+                    end &&
+                    today >= start &&
+                    today <= end
+                ) {
+                    displayStatus = "On Going";
+                } else if (
+                    booking.status === "Approved" &&
+                    end &&
+                    today > end
+                ) {
+                    displayStatus = "Completed";
+                }
+
                 const statusOptions: Booking["status"][] = [
                     "Pending",
-                    "Approved",
+                    displayStatus === "On Going" ? "On Going" : "Approved",
                     "Rejected",
                     "Cancelled",
-                    "Completed",
-                    "In Progress",
+                    // "Completed", // <-- Removed from dropdown options
                 ];
+
                 const statusStyles: Record<string, React.CSSProperties> = {
                     Pending: { background: "#e0f2fe", color: "#0369a1" },
                     Approved: { background: "#e0e7ff", color: "#4338ca" },
+                    "On Going": { background: "#fef9c3", color: "#854d0e" },
                     Rejected: { background: "#ef4444", color: "#fff" },
                     Cancelled: { background: "#f97316", color: "#fff" },
                     Completed: { background: "#bbf7d0", color: "#166534" },
-                    "In Progress": { background: "#fef9c3", color: "#854d0e" },
                 };
+
+                // Remove dropdown in "On Going" and "Completed" tab/status
+                if (
+                    activeTab === "On Going" ||
+                    displayStatus === "On Going" ||
+                    activeTab === "Completed" ||
+                    displayStatus === "Completed"
+                ) {
+                    return (
+                        <span
+                            className="px-2 py-1 rounded text-xs font-semibold"
+                            style={
+                                statusStyles[displayStatus] || {
+                                    background: "#e5e7eb",
+                                    color: "#374151",
+                                }
+                            }
+                        >
+                            {displayStatus}
+                        </span>
+                    );
+                }
+
                 return (
                     <div className="relative inline-flex items-center">
                         <select
                             className="rounded px-2 py-1 border text-xs pr-6 appearance-none"
-                            value={booking.status}
+                            value={displayStatus}
                             onChange={(e) =>
                                 handleStatusChange(
                                     booking,
@@ -353,7 +425,7 @@ export default function MyBookings({
                             }
                             disabled={!isAdmin}
                             style={
-                                statusStyles[booking.status] || {
+                                statusStyles[displayStatus] || {
                                     background: "#e5e7eb",
                                     color: "#374151",
                                 }
@@ -512,7 +584,7 @@ export default function MyBookings({
                         <div className="mt-4">
                             <Tabs
                                 value={activeTab}
-                                onValueChange={setActiveTab}
+                                onValueChange={handleTabChange}
                             >
                                 <TabsList className="bg-transparent text-black rounded-md mb-6 flex flex-wrap justify-start">
                                     {bookingTabs.map((tab) => (
@@ -575,7 +647,30 @@ export default function MyBookings({
                                         <strong>ID:</strong> {booking.id}
                                     </div>
                                     <div className="rounded-full">
-                                        {getStatusBadge(booking.status)}
+                                        {getStatusBadge(
+                                            // Use computed displayStatus for badge
+                                            (booking.status === "Approved" &&
+                                                booking.event_start_date &&
+                                                booking.event_end_date &&
+                                                (() => {
+                                                    const today = new Date();
+                                                    const start = new Date(
+                                                        booking.event_start_date
+                                                    );
+                                                    const end = new Date(
+                                                        booking.event_end_date
+                                                    );
+                                                    if (
+                                                        today >= start &&
+                                                        today <= end
+                                                    )
+                                                        return "On Going";
+                                                    if (today > end)
+                                                        return "Completed";
+                                                    return booking.status;
+                                                })()) ||
+                                                booking.status
+                                        )}
                                     </div>
                                 </div>
 

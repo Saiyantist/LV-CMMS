@@ -101,10 +101,28 @@ class EventServiceFactory extends Factory
             "LV DRRT",
         ];
 
-        // Generate a logical date range
-        $start = $this->faker->dateTimeBetween('now', '+2 months');
-        $duration = rand(0, 3); // event lasts 1-4 days
-        $end = (clone $start)->modify("+$duration days");
+        // Always create at least one Approved (On Going) booking for today
+        static $hasOnGoing = false;
+        if (!$hasOnGoing) {
+            $hasOnGoing = true;
+            $status = 'Approved';
+            $start = new \DateTime(); // today
+            $duration = rand(0, 3);
+            $end = (clone $start)->modify("+$duration days");
+        } else {
+            $status = $this->faker->randomElement(['Approved', 'Completed', 'Cancelled', 'Pending', 'Rejected']);
+            if ($status === 'Completed') {
+                // Set start and end in the past
+                $start = $this->faker->dateTimeBetween('-2 months', '-7 days');
+                $duration = rand(0, 3);
+                $end = (clone $start)->modify("+$duration days");
+            } else {
+                // Future or present event
+                $start = $this->faker->dateTimeBetween('now', '+2 months');
+                $duration = rand(0, 3);
+                $end = (clone $start)->modify("+$duration days");
+            }
+        }
 
         // Venue: can be multiple, one, or nullable
         $venueSeedType = rand(1, 3);
@@ -177,7 +195,7 @@ class EventServiceFactory extends Factory
             'number_of_participants' => $this->faker->numberBetween(1, 9999),
             'description' => $this->faker->sentence(10),
             'requested_services' => json_encode($requestedServices),
-            'status' => $this->faker->randomElement(['Approved', 'Completed', 'Cancelled', 'Pending', 'Rejected']),
+            'status' => $status,
             'event_start_date' => $start->format('Y-m-d'),
             'event_end_date' => $end->format('Y-m-d'),
             'event_start_time' => $startTime,

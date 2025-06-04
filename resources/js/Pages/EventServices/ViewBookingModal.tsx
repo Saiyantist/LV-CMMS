@@ -76,6 +76,7 @@ const ViewBookingModal: React.FC<Props> = ({
     onBookingUpdate,
 }) => {
     const [showEdit, setShowEdit] = useState(false);
+    const [showProofModal, setShowProofModal] = useState(false);
 
     // This function will close both modals
     const handleEditSuccess = (updatedBooking: any) => {
@@ -97,18 +98,40 @@ const ViewBookingModal: React.FC<Props> = ({
         ? JSON.parse(booking.requested_services)
         : [];
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
+    const getStatusBadge = (status: string, booking: Booking) => {
+        // Compute "On Going" and "Completed" for display
+        const today = new Date();
+        const start = booking.event_start_date
+            ? new Date(booking.event_start_date)
+            : null;
+        const end = booking.event_end_date
+            ? new Date(booking.event_end_date)
+            : null;
+
+        let displayStatus = status;
+        if (
+            status === "Approved" &&
+            start &&
+            end &&
+            today >= start &&
+            today <= end
+        ) {
+            displayStatus = "On Going";
+        } else if (status === "Approved" && end && today > end) {
+            displayStatus = "Completed";
+        }
+
+        switch (displayStatus) {
             case "Completed":
                 return (
                     <span className="inline-block px-2 py-1 rounded bg-green-100 text-green-800 text-xs font-semibold">
                         Completed
                     </span>
                 );
-            case "In Progress":
+            case "On Going":
                 return (
                     <span className="inline-block px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs font-semibold">
-                        In Progress
+                        On Going
                     </span>
                 );
             case "Cancelled":
@@ -126,7 +149,7 @@ const ViewBookingModal: React.FC<Props> = ({
             default:
                 return (
                     <span className="inline-block px-2 py-1 rounded bg-gray-200 text-gray-800 text-xs font-semibold">
-                        {status}
+                        {displayStatus}
                     </span>
                 );
         }
@@ -168,13 +191,59 @@ const ViewBookingModal: React.FC<Props> = ({
         <>
             <Dialog open={open} onOpenChange={onClose}>
                 <DialogContent className="max-w-2xl w-full rounded-lg shadow-xl border border-gray-200 p-0 overflow-hidden">
-                    <DialogHeader className="bg-blue-50 px-5 py-3 border-b">
-                        <DialogTitle className="text-xl font-semibold text-gray-800 text-center">
-                            Booking Summary
+                    <DialogHeader className="bg-blue-50 px-5 py-3 border-b flex items-center justify-between">
+                        <DialogTitle className="text-xl font-semibold text-gray-800 text-center w-full">
+                            Booking Details
                         </DialogTitle>
+                        <button
+                            onClick={onClose}
+                            className="absolute right-4 top-3 text-gray-500 hover:text-secondary transition-colors"
+                            aria-label="Close"
+                            type="button"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-6 w-6"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </button>
                     </DialogHeader>
 
                     <div className="p-5 space-y-5 max-h-[75vh] overflow-y-auto bg-white text-sm">
+                        {/* Proof of Approval at the top */}
+                        <div className="space-y-0.5 mb-4">
+                            <div className="text-xs text-gray-500 flex items-center gap-1.5">
+                                <BadgeCheck size={14} />
+                                Proof of Approval
+                            </div>
+                            {booking.proof_of_approval && (
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-xs text-gray-700 break-all">
+                                        {booking.proof_of_approval_original_name
+                                            ? booking.proof_of_approval_original_name
+                                            : booking.proof_of_approval
+                                                  .split("/")
+                                                  .pop()}
+                                    </span>
+                                    <button
+                                        className="text-blue-600 underline font-semibold text-sm text-left"
+                                        onClick={() => setShowProofModal(true)}
+                                    >
+                                        View File
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <InfoBlock
                                 label="Booking ID"
@@ -279,32 +348,12 @@ const ViewBookingModal: React.FC<Props> = ({
                                 icon={<Users size={14} />}
                                 multiline
                             />
-                            <div className="space-y-0.5">
-                                <div className="text-xs text-gray-500 flex items-center gap-1.5">
-                                    <BadgeCheck size={14} />
-                                    Proof of Approval
-                                </div>
-                                {booking.proof_of_approval ? (
-                                    <a
-                                        href={`/storage/${booking.proof_of_approval}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 underline font-semibold text-sm break-all"
-                                    >
-                                        View File
-                                    </a>
-                                ) : (
-                                    <div className="text-sm font-medium text-gray-900">
-                                        N/A
-                                    </div>
-                                )}
-                            </div>
                             <div>
                                 <div className="text-xs text-gray-500 flex items-center gap-1.5">
                                     <Badge size={14} />
                                     Status
                                 </div>
-                                {getStatusBadge(booking.status)}
+                                {getStatusBadge(booking.status, booking)}
                             </div>
                         </div>
 
@@ -344,6 +393,124 @@ const ViewBookingModal: React.FC<Props> = ({
                 // Use handleEditSuccess to close both modals and update state
                 onBookingUpdate={handleEditSuccess}
             />
+
+            <Dialog open={showProofModal} onOpenChange={setShowProofModal}>
+                <DialogContent className="max-w-md w-full p-0 rounded-xl shadow-lg bg-white border border-gray-100">
+                    <div className="relative p-5">
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowProofModal(false)}
+                            className="absolute right-4 top-4 text-gray-400 hover:text-red-500 transition-colors z-10"
+                            aria-label="Close"
+                            type="button"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-6 w-6"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </button>
+                        {/* Modal Title */}
+                        <div className="flex flex-col items-center mb-4">
+                            <BadgeCheck
+                                size={22}
+                                className="text-blue-500 mb-1"
+                            />
+                            <span className="font-semibold text-lg text-gray-800">
+                                Proof of Approval
+                            </span>
+                            {booking.proof_of_approval_original_name && (
+                                <span className="text-xs text-gray-500 mt-1 text-center break-all">
+                                    {booking.proof_of_approval_original_name}
+                                </span>
+                            )}
+                        </div>
+                        {/* File Preview */}
+                        <div className="flex justify-center items-center bg-gray-50 rounded-lg border border-gray-100 p-3 min-h-[200px] max-h-[350px]">
+                            {booking.proof_of_approval &&
+                                (/\.(jpg|jpeg|png|gif)$/i.test(
+                                    booking.proof_of_approval
+                                ) ? (
+                                    <img
+                                        src={`/storage/${booking.proof_of_approval}`}
+                                        alt="Proof of Approval"
+                                        className="max-h-72 max-w-full rounded shadow border border-gray-200 object-contain"
+                                    />
+                                ) : (
+                                    <iframe
+                                        src={`/storage/${booking.proof_of_approval}`}
+                                        title="Proof of Approval"
+                                        className="w-full h-72 rounded shadow border border-gray-200 bg-white"
+                                    />
+                                ))}
+                        </div>
+                        {/* Download Button */}
+                        {booking.proof_of_approval && (
+                            <div className="flex justify-center mt-4 gap-2">
+                                <a
+                                    href={`/storage/${booking.proof_of_approval}`}
+                                    download={
+                                        booking.proof_of_approval_original_name ||
+                                        booking.proof_of_approval
+                                            .split("/")
+                                            .pop()
+                                    }
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded bg-secondary hover:bg-primary text-white text-sm font-medium shadow transition w-1/2 justify-center"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"
+                                        />
+                                    </svg>
+                                    Download
+                                </a>
+                                <a
+                                    href={`/storage/${booking.proof_of_approval}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-medium shadow transition w-1/2 justify-center"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M14 3h7v7m0 0L10 21l-7-7 11-11z"
+                                        />
+                                    </svg>
+                                    Open in new tab
+                                </a>
+                            </div>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 };

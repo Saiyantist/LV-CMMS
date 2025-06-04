@@ -188,8 +188,9 @@ export default function EventCalendar() {
     const today = getToday();
     const [currentYear, setCurrentYear] = useState(today.year);
     const [currentMonth, setCurrentMonth] = useState(today.month);
-    const [view, setView] = useState<"calendar" | "list">("calendar");
-    const [showScrollUpButton, setShowScrollUpButton] = useState(false);
+    const [view] = useState<"calendar" | "list">("calendar");
+    const [showScrollUpButton, setShowScrollUpButton] =
+        useState<boolean>(false);
 
     // Scroll to top logic
     React.useEffect(() => {
@@ -236,10 +237,10 @@ export default function EventCalendar() {
                         Completed
                     </span>
                 );
-            case "In Progress":
+            case "On Going":
                 return (
-                    <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                        In Progress
+                    <span className="bg-yellow-00 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                        On Going
                     </span>
                 );
             case "Cancelled":
@@ -357,46 +358,117 @@ export default function EventCalendar() {
                             {/* Mobile: List of days with approved events only */}
                             <div className="block md:hidden">
                                 <div className="flex flex-col gap-2">
-                                    {approvedDays.length > 0 ? (
-                                        approvedDays.map((day) => {
-                                            const dateKey = getDateKey(
-                                                currentYear,
-                                                currentMonth,
-                                                day
-                                            );
-                                            const approvedEvents =
-                                                calendarEvents[dateKey].filter(
-                                                    (event) =>
-                                                        event.status ===
-                                                        "Approved"
-                                                );
-                                            return (
-                                                <div
-                                                    key={day}
-                                                    className={`bg-white rounded-lg shadow border p-3 ${
-                                                        isToday(day)
-                                                            ? "border-2 border-blue-600"
-                                                            : ""
-                                                    }`}
-                                                >
-                                                    <div className="font-semibold text-primary mb-1">
-                                                        {monthName} {day},{" "}
-                                                        {currentYear}
-                                                        {isToday(day) && (
-                                                            <span className="ml-2 text-xs text-blue-600 font-bold">
-                                                                (Today)
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col gap-1">
-                                                        {approvedEvents.map(
-                                                            (event, idx) => (
+                                    {Array.from(
+                                        { length: daysInMonth },
+                                        (_, i) => i + 1
+                                    ).map((day) => {
+                                        const dateKey = getDateKey(
+                                            currentYear,
+                                            currentMonth,
+                                            day
+                                        );
+                                        const events = (
+                                            calendarEvents[dateKey] || []
+                                        ).filter(
+                                            (event) =>
+                                                event.status === "Approved" ||
+                                                event.status === "Completed"
+                                        );
+                                        if (!events.length) return null;
+                                        return (
+                                            <div
+                                                key={day}
+                                                className={`bg-white rounded-lg shadow border p-3 ${
+                                                    isToday(day)
+                                                        ? "border-2 border-blue-600"
+                                                        : ""
+                                                }`}
+                                            >
+                                                <div className="font-semibold text-primary mb-1">
+                                                    {monthName} {day},{" "}
+                                                    {currentYear}
+                                                    {isToday(day) && (
+                                                        <span className="ml-2 text-xs text-blue-600 font-bold">
+                                                            (Today)
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    {events.map(
+                                                        (event, idx) => {
+                                                            // Compute status
+                                                            const todayDate =
+                                                                new Date();
+                                                            let isOnGoing =
+                                                                false;
+                                                            let isNowCompleted =
+                                                                false;
+                                                            let isUpcoming =
+                                                                false;
+                                                            if (
+                                                                event.status ===
+                                                                    "Approved" &&
+                                                                event.eventStartDate &&
+                                                                event.eventEndDate
+                                                            ) {
+                                                                const start =
+                                                                    typeof event.eventStartDate ===
+                                                                        "string" ||
+                                                                    typeof event.eventStartDate ===
+                                                                        "number"
+                                                                        ? new Date(
+                                                                              event.eventStartDate
+                                                                          )
+                                                                        : null;
+                                                                const end =
+                                                                    typeof event.eventEndDate ===
+                                                                        "string" ||
+                                                                    typeof event.eventEndDate ===
+                                                                        "number"
+                                                                        ? new Date(
+                                                                              event.eventEndDate
+                                                                          )
+                                                                        : null;
+                                                                if (
+                                                                    start &&
+                                                                    end
+                                                                ) {
+                                                                    isOnGoing =
+                                                                        todayDate >=
+                                                                            start &&
+                                                                        todayDate <=
+                                                                            end;
+                                                                    isNowCompleted =
+                                                                        todayDate >
+                                                                        end;
+                                                                    isUpcoming =
+                                                                        todayDate <
+                                                                        start;
+                                                                }
+                                                            }
+                                                            const isCompleted =
+                                                                event.status ===
+                                                                    "Completed" ||
+                                                                (event.status ===
+                                                                    "Approved" &&
+                                                                    isNowCompleted);
+
+                                                            const eventBgClass =
+                                                                isCompleted
+                                                                    ? "bg-gray-300 cursor-not-allowed opacity-60"
+                                                                    : isOnGoing
+                                                                    ? "bg-green-500"
+                                                                    : isUpcoming
+                                                                    ? "bg-secondary"
+                                                                    : getRandomColor(
+                                                                          day,
+                                                                          idx
+                                                                      );
+
+                                                            return (
                                                                 <div
                                                                     key={idx}
-                                                                    className={`${getRandomColor(
-                                                                        day,
-                                                                        idx
-                                                                    )} p-2 rounded text-xs text-white flex flex-col`}
+                                                                    className={`${eventBgClass} p-2 rounded text-xs text-white flex flex-col`}
                                                                 >
                                                                     <span className="font-medium">
                                                                         {
@@ -408,18 +480,30 @@ export default function EventCalendar() {
                                                                             event.time
                                                                         }
                                                                     </span>
+                                                                    {isOnGoing && (
+                                                                        <span className="text-xs font-bold text-green-200 mt-1">
+                                                                            On
+                                                                            Going
+                                                                        </span>
+                                                                    )}
+                                                                    {isUpcoming && (
+                                                                        <span className="text-xs font-bold text-blue-100 mt-1">
+                                                                            Upcoming
+                                                                        </span>
+                                                                    )}
+                                                                    {isCompleted && (
+                                                                        <span className="text-xs font-bold text-gray-700 mt-1">
+                                                                            Completed
+                                                                        </span>
+                                                                    )}
                                                                 </div>
-                                                            )
-                                                        )}
-                                                    </div>
+                                                            );
+                                                        }
+                                                    )}
                                                 </div>
-                                            );
-                                        })
-                                    ) : (
-                                        <span className="text-gray-400 text-xs text-center">
-                                            No approved events this month.
-                                        </span>
-                                    )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                             {/* Desktop: 7-column grid calendar */}
@@ -453,7 +537,9 @@ export default function EventCalendar() {
                                                   ).filter(
                                                       (event) =>
                                                           event.status ===
-                                                          "Approved"
+                                                              "Approved" ||
+                                                          event.status ===
+                                                              "Completed"
                                                   )
                                                 : [];
 
@@ -509,135 +595,246 @@ export default function EventCalendar() {
                                                                     (
                                                                         event,
                                                                         idx
-                                                                    ) => (
-                                                                        <Tooltip
-                                                                            key={
-                                                                                idx
+                                                                    ) => {
+                                                                        const todayDate =
+                                                                            new Date();
+
+                                                                        // Compute "On Going" and "Completed" for Approved bookings
+                                                                        let isOnGoing =
+                                                                            false;
+                                                                        let isNowCompleted =
+                                                                            false;
+                                                                        let isUpcoming =
+                                                                            false;
+                                                                        if (
+                                                                            event.status ===
+                                                                                "Approved" &&
+                                                                            event.eventStartDate &&
+                                                                            event.eventEndDate
+                                                                        ) {
+                                                                            const start =
+                                                                                typeof event.eventStartDate ===
+                                                                                    "string" ||
+                                                                                typeof event.eventStartDate ===
+                                                                                    "number"
+                                                                                    ? new Date(
+                                                                                          event.eventStartDate
+                                                                                      )
+                                                                                    : null;
+                                                                            const end =
+                                                                                typeof event.eventEndDate ===
+                                                                                    "string" ||
+                                                                                typeof event.eventEndDate ===
+                                                                                    "number"
+                                                                                    ? new Date(
+                                                                                          event.eventEndDate
+                                                                                      )
+                                                                                    : null;
+                                                                            if (
+                                                                                start &&
+                                                                                end
+                                                                            ) {
+                                                                                isOnGoing =
+                                                                                    todayDate >=
+                                                                                        start &&
+                                                                                    todayDate <=
+                                                                                        end;
+                                                                                isNowCompleted =
+                                                                                    todayDate >
+                                                                                    end;
+                                                                                isUpcoming =
+                                                                                    todayDate <
+                                                                                    start;
                                                                             }
-                                                                        >
-                                                                            <TooltipTrigger
-                                                                                asChild
+                                                                        }
+
+                                                                        // Completed if status is "Completed" or approved but already ended
+                                                                        const isCompleted =
+                                                                            event.status ===
+                                                                                "Completed" ||
+                                                                            (event.status ===
+                                                                                "Approved" &&
+                                                                                isNowCompleted);
+
+                                                                        // Upcoming if approved and start date is in the future
+                                                                        // (isUpcoming already computed above)
+
+                                                                        const eventBgClass =
+                                                                            isCompleted
+                                                                                ? "bg-gray-300 cursor-not-allowed opacity-60"
+                                                                                : isOnGoing
+                                                                                ? "bg-green-500"
+                                                                                : isUpcoming
+                                                                                ? "bg-secondary"
+                                                                                : typeof day ===
+                                                                                  "number"
+                                                                                ? getRandomColor(
+                                                                                      day,
+                                                                                      idx
+                                                                                  )
+                                                                                : "bg-secondary";
+
+                                                                        // Always show pointer cursor for hoverable events (not completed)
+                                                                        const cursorClass =
+                                                                            isCompleted
+                                                                                ? "cursor-not-allowed"
+                                                                                : "cursor-pointer";
+
+                                                                        return (
+                                                                            <Tooltip
+                                                                                key={
+                                                                                    idx
+                                                                                }
                                                                             >
-                                                                                <div
-                                                                                    className={`bg-secondary text-white rounded-lg mx-auto my-1 px-2 py-1 flex flex-col items-center shadow-sm max-w-[95%] cursor-pointer`}
-                                                                                    style={{
-                                                                                        minWidth:
-                                                                                            "90px",
-                                                                                    }}
-                                                                                >
-                                                                                    <div className="font-semibold text-xs text-center mb-0.5 truncate w-full text-green-100">
-                                                                                        {
-                                                                                            event.title
-                                                                                        }
-                                                                                    </div>
-                                                                                    <div className="w-4/5 border-t border-white/40 my-1"></div>
-                                                                                    <div className="font-mono text-xs text-center tracking-wide">
-                                                                                        {
-                                                                                            event.time
-                                                                                        }
-                                                                                    </div>
-                                                                                </div>
-                                                                            </TooltipTrigger>
-                                                                            <TooltipContent className="z-50 bg-white text-gray-900 rounded-xl shadow-xl p-4 max-w-xs text-xs space-y-2 border border-gray-200">
-                                                                                <div className="font-bold text-base mb-1 text-primary">
-                                                                                    {
-                                                                                        event.title
+                                                                                <TooltipTrigger
+                                                                                    asChild
+                                                                                    disabled={
+                                                                                        isCompleted
                                                                                     }
-                                                                                </div>
-                                                                                <div className="flex flex-col gap-1">
-                                                                                    <div>
-                                                                                        <span className="font-semibold">
-                                                                                            Venue:
-                                                                                        </span>{" "}
-                                                                                        {Array.isArray(
-                                                                                            event.venue
-                                                                                        )
-                                                                                            ? event.venue
-                                                                                                  .filter(
-                                                                                                      Boolean
-                                                                                                  )
-                                                                                                  .join(
-                                                                                                      ", "
-                                                                                                  )
-                                                                                            : typeof event.venue ===
-                                                                                              "string"
-                                                                                            ? event.venue.replace(
-                                                                                                  /[\[\]"]+/g,
-                                                                                                  ""
-                                                                                              )
-                                                                                            : "N/A"}
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <span className="font-semibold">
-                                                                                            Department:
-                                                                                        </span>{" "}
-                                                                                        {event.department ? (
-                                                                                            <TruncateWithToggle
-                                                                                                text={
-                                                                                                    event.department
-                                                                                                }
-                                                                                            />
-                                                                                        ) : (
-                                                                                            "N/A"
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <span className="font-semibold">
-                                                                                            Participants:
-                                                                                        </span>{" "}
-                                                                                        {event.participants ? (
-                                                                                            <TruncateWithToggle
-                                                                                                text={
-                                                                                                    event.participants
-                                                                                                }
-                                                                                            />
-                                                                                        ) : (
-                                                                                            "N/A"
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <span className="font-semibold">
-                                                                                            No.
-                                                                                            of
-                                                                                            Participants:
-                                                                                        </span>{" "}
-                                                                                        {event.number_of_participants !==
-                                                                                            undefined &&
-                                                                                        event.number_of_participants !==
-                                                                                            null ? (
-                                                                                            <TruncateWithToggle
-                                                                                                text={String(
-                                                                                                    event.number_of_participants
-                                                                                                )}
-                                                                                            />
-                                                                                        ) : (
-                                                                                            "N/A"
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <div className="border-t border-gray-200 my-1"></div>
-                                                                                    <div>
-                                                                                        <span className="font-semibold">
-                                                                                            Description:
-                                                                                        </span>
-                                                                                        <div className="whitespace-pre-line break-words text-gray-700 mt-0.5">
-                                                                                            {event.description ? (
-                                                                                                <TruncateWithToggle
-                                                                                                    text={
-                                                                                                        event.description
-                                                                                                    }
-                                                                                                />
-                                                                                            ) : (
-                                                                                                <span className="italic text-gray-400">
-                                                                                                    No
-                                                                                                    description
-                                                                                                </span>
-                                                                                            )}
+                                                                                >
+                                                                                    <div
+                                                                                        className={`${eventBgClass} ${cursorClass} text-white rounded-lg mx-auto my-1 px-2 py-1 flex flex-col items-center shadow-sm max-w-[95%]`}
+                                                                                        style={{
+                                                                                            minWidth:
+                                                                                                "90px",
+                                                                                            pointerEvents:
+                                                                                                isCompleted
+                                                                                                    ? "none"
+                                                                                                    : "auto",
+                                                                                        }}
+                                                                                    >
+                                                                                        <div className="font-semibold text-xs text-center mb-0.5 truncate w-full">
+                                                                                            {
+                                                                                                event.title
+                                                                                            }
                                                                                         </div>
+                                                                                        <div className="w-4/5 border-t border-white/40 my-1"></div>
+                                                                                        <div className="font-mono text-xs text-center tracking-wide">
+                                                                                            {
+                                                                                                event.time
+                                                                                            }
+                                                                                        </div>
+                                                                                        {isOnGoing && (
+                                                                                            <span className="text-xs font-bold text-green-200 mt-1">
+                                                                                                On
+                                                                                                Going
+                                                                                            </span>
+                                                                                        )}
+                                                                                        {isUpcoming && (
+                                                                                            <span className="text-xs font-bold text-blue-100 mt-1">
+                                                                                                Upcoming
+                                                                                            </span>
+                                                                                        )}
+                                                                                        {isCompleted && (
+                                                                                            <span className="text-xs font-bold text-gray-700 mt-1">
+                                                                                                Completed
+                                                                                            </span>
+                                                                                        )}
                                                                                     </div>
-                                                                                </div>
-                                                                            </TooltipContent>
-                                                                        </Tooltip>
-                                                                    )
+                                                                                </TooltipTrigger>
+                                                                                {!isCompleted && (
+                                                                                    <TooltipContent className="z-50 bg-white text-gray-900 rounded-xl shadow-xl p-4 max-w-xs text-xs space-y-2 border border-gray-200">
+                                                                                        <div className="font-bold text-base mb-1 text-primary">
+                                                                                            {
+                                                                                                event.title
+                                                                                            }
+                                                                                        </div>
+                                                                                        <div className="flex flex-col gap-1">
+                                                                                            <div>
+                                                                                                <span className="font-semibold">
+                                                                                                    Venue:
+                                                                                                </span>{" "}
+                                                                                                {Array.isArray(
+                                                                                                    event.venue
+                                                                                                )
+                                                                                                    ? event.venue
+                                                                                                          .filter(
+                                                                                                              Boolean
+                                                                                                          )
+                                                                                                          .join(
+                                                                                                              ", "
+                                                                                                          )
+                                                                                                    : typeof event.venue ===
+                                                                                                      "string"
+                                                                                                    ? event.venue.replace(
+                                                                                                          /[\[\]"]+/g,
+                                                                                                          ""
+                                                                                                      )
+                                                                                                    : "N/A"}
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <span className="font-semibold">
+                                                                                                    Department:
+                                                                                                </span>{" "}
+                                                                                                {event.department ? (
+                                                                                                    <TruncateWithToggle
+                                                                                                        text={
+                                                                                                            event.department
+                                                                                                        }
+                                                                                                    />
+                                                                                                ) : (
+                                                                                                    "N/A"
+                                                                                                )}
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <span className="font-semibold">
+                                                                                                    Participants:
+                                                                                                </span>{" "}
+                                                                                                {event.participants ? (
+                                                                                                    <TruncateWithToggle
+                                                                                                        text={
+                                                                                                            event.participants
+                                                                                                        }
+                                                                                                    />
+                                                                                                ) : (
+                                                                                                    "N/A"
+                                                                                                )}
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <span className="font-semibold">
+                                                                                                    No.
+                                                                                                    of
+                                                                                                    Participants:
+                                                                                                </span>{" "}
+                                                                                                {event.number_of_participants !==
+                                                                                                    undefined &&
+                                                                                                event.number_of_participants !==
+                                                                                                    null ? (
+                                                                                                    <TruncateWithToggle
+                                                                                                        text={String(
+                                                                                                            event.number_of_participants
+                                                                                                        )}
+                                                                                                    />
+                                                                                                ) : (
+                                                                                                    "N/A"
+                                                                                                )}
+                                                                                            </div>
+                                                                                            <div className="border-t border-gray-200 my-1"></div>
+                                                                                            <>
+                                                                                                <span className="font-semibold">
+                                                                                                    Description:
+                                                                                                </span>
+                                                                                                <div className="whitespace-pre-line break-words text-gray-700 mt-0.5">
+                                                                                                    {event.description ? (
+                                                                                                        <TruncateWithToggle
+                                                                                                            text={
+                                                                                                                event.description
+                                                                                                            }
+                                                                                                        />
+                                                                                                    ) : (
+                                                                                                        <span className="italic text-gray-400">
+                                                                                                            No
+                                                                                                            description
+                                                                                                        </span>
+                                                                                                    )}
+                                                                                                </div>
+                                                                                            </>
+                                                                                        </div>
+                                                                                    </TooltipContent>
+                                                                                )}
+                                                                            </Tooltip>
+                                                                        );
+                                                                    }
                                                                 )}
                                                             </TooltipProvider>
                                                         ) : (

@@ -156,7 +156,10 @@ public function MyBookings()
         ]);
 
         if ($request->hasFile('proof_of_approval')) {
-            $validated['proof_of_approval'] = $request->file('proof_of_approval')->store('proofs', 'public');
+            $file = $request->file('proof_of_approval');
+            $path = $file->store('proofs', 'public');
+            $validated['proof_of_approval'] = $path;
+            $validated['proof_of_approval_original_name'] = $file->getClientOriginalName(); // <-- Add this
         }
 
         $validated['venue'] = json_encode($validated['venue'] ?? []);
@@ -192,7 +195,10 @@ public function update(Request $request, $id)
     ]);
 
     if ($request->hasFile('proof_of_approval')) {
-        $validated['proof_of_approval'] = $request->file('proof_of_approval')->store('proofs', 'public');
+        $file = $request->file('proof_of_approval');
+        $path = $file->store('proofs', 'public');
+        $validated['proof_of_approval'] = $path;
+        $validated['proof_of_approval_original_name'] = $file->getClientOriginalName(); // <-- Add this
     }
 
     if (isset($validated['venue'])) {
