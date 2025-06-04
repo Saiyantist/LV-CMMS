@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Head } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
-import AddComplianceAndSafetyModal from "./AddComplianceAndSafetyModal";
+import AddComplianceAndSafetyModal from "./components/AddComplianceAndSafetyModal";
 import { Datatable } from "@/Components/Datatable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Trash2 } from "lucide-react";

@@ -8,9 +8,11 @@ interface AddComplianceAndSafetyModalProps {
     onCreate: () => void;
 }
 
-const AddComplianceAndSafetyModal: React.FC<
-    AddComplianceAndSafetyModalProps
-> = ({ isOpen, onClose, onCreate }) => {
+const AddComplianceAndSafetyModal: React.FC<AddComplianceAndSafetyModalProps> = ({
+    isOpen,
+    onClose,
+    onCreate,
+}) => {
     const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
     const [formData, setFormData] = useState({
         complianceArea: "",

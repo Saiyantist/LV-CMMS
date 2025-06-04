@@ -382,6 +382,7 @@ export default function IndexLayout({
                 searchable: true,
             },
         },
+        // Accepted and Declined tabs
         ...(activeTab !== "Pending" && activeTab !== "For Budget Request"
             ? [
                 {
@@ -480,7 +481,7 @@ export default function IndexLayout({
                             <div className="hidden md:flex xl:hidden">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                        <Button variant="ghost" className="h-5 w-5 p-0">
                                             <MoreVertical className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
@@ -505,6 +506,7 @@ export default function IndexLayout({
                 }
               ]
             : []),
+        // Pending and For Budget Request tabs
         ...(activeTab === "Pending" || activeTab === "For Budget Request"
             ? [
                 {
@@ -585,7 +587,7 @@ export default function IndexLayout({
                             <div className="hidden md:flex xl:hidden">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                        <Button variant="ghost" className="h-5 w-5 p-0">
                                             <MoreVertical className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
