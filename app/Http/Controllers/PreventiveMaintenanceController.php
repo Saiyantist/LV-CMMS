@@ -129,7 +129,7 @@ class PreventiveMaintenanceController extends Controller
         // dd("Hit", $request->all());
 
         $validated = $request->validate([
-            'is_active' => 'required|boolean',
+            'is_active' => 'required|in:true,false,1,0',
             'schedule' => 'required_if:has_preventive_maintenance,1|in:Weekly,Monthly,Yearly',
             'weeklyFrequency' => 'required_if:schedule,Weekly',
             'monthlyFrequency' => 'required_if:schedule,Monthly',
@@ -137,16 +137,23 @@ class PreventiveMaintenanceController extends Controller
             'yearlyMonth' => 'required_if:schedule,Yearly',
             'yearlyDay' => 'required_if:schedule,Yearly',
         ]);
+
+        $validated['schedule'] === "Weekly" 
+            ? $validated['schedule'] = "weeks"
+            : $validated['schedule'];
+
+        if (isset($validated['weeklyFrequency']) && $validated['weeklyFrequency'] > 3) {
+            return redirect()->back()->with('error', 'Weekly frequency cannot be greater than 3.');
+        }
         
         try {
-
             $asset = Asset::findOrFail($id);
 
             // Convert schedule data to maintenance schedule format
             $scheduleData = [
-                'is_active' => $validated['is_active'],
+                'is_active' => filter_var($validated['is_active'], FILTER_VALIDATE_BOOLEAN),
                 'interval_unit' => strtolower($validated['schedule']),
-                'interval_value' => $validated['schedule'] === 'Weekly' ? $validated['weeklyFrequency'] : 1,
+                'interval_value' => $validated['schedule'] === 'weeks' ? $validated['weeklyFrequency'] : 1,
                 'month_week' => $validated['schedule'] === 'Monthly' ? $validated['monthlyFrequency'] : null,
                 'month_weekday' => $validated['schedule'] === 'Monthly' ? $validated['monthlyDay'] : null,
                 'year_month' => $validated['schedule'] === 'Yearly' ? 

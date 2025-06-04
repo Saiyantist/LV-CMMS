@@ -204,7 +204,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
         frequency: "",
     });
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const formData = new FormData();
         formData.append("huwag", "1");

@@ -81,6 +81,10 @@ class AssetController extends Controller
                 'date_acquired' => 'required|date',
             ]);
 
+            if (isset($validatedPreventiveMaintenance['weeklyFrequency']) && $validatedPreventiveMaintenance['weeklyFrequency'] > 3) {
+                return redirect()->back()->with('error', 'Weekly frequency cannot be greater than 3.');
+            }
+
 
             $unit = strtolower($validatedPreventiveMaintenance['schedule']); // 'Weeks' -> 'weeks'
             

@@ -41,14 +41,18 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
     });
     const [weeklyFrequency, setWeeklyFrequency] = useState(schedule.maintenance_schedule?.interval_value || 1);
     const [monthlyFrequency, setMonthlyFrequency] = useState(schedule.maintenance_schedule?.month_week || 1);
-    const [monthlyDay, setMonthlyDay] = useState(schedule.maintenance_schedule?.month_weekday || "Monday");
+    const [monthlyDay, setMonthlyDay] = useState<string>(() => {
+        if (!schedule.maintenance_schedule?.month_weekday) return "Monday";
+        return schedule.maintenance_schedule.month_weekday.charAt(0).toUpperCase() + 
+               schedule.maintenance_schedule.month_weekday.slice(1);
+    });
     const [yearlyMonth, setYearlyMonth] = useState(() => {
         if (!schedule.maintenance_schedule?.year_month) return "January";
         return new Date(2000, schedule.maintenance_schedule.year_month - 1).toLocaleString('default', { month: 'long' });
     });
     const [yearlyDay, setYearlyDay] = useState(schedule.maintenance_schedule?.year_day || 1);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
         try {
@@ -76,10 +80,10 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                 console.log(`${key}:`, value);
             }
 
-            await router.put(route("work-orders.preventive-maintenance.update-schedule", schedule.id), formData, {
+            router.post(route("work-orders.preventive-maintenance.update-schedule", schedule.id), formData, {
+                forceFormData: true,
                 preserveScroll: true,
                 onSuccess: () => {
-                    toast.success("Maintenance schedule updated successfully"); // Hmm
                     onClose();
                 },
                 onError: (errors) => {
@@ -197,7 +201,7 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                                     <Input
                                         type="number"
                                         min="1"
-                                        max="99"
+                                        max="3"
                                         required
                                         className="w-16"
                                         value={weeklyFrequency}

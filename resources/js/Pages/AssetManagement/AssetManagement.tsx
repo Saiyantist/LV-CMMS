@@ -143,6 +143,7 @@ const AssetManagement: React.FC = () => {
             enableSorting: false,
             meta: {
                 headerClassName: "w-[15%]",
+                cellClassName: "whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
                 filterable: true,
             },
