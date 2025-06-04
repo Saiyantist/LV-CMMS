@@ -1,6 +1,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, usePage } from "@inertiajs/react";
-import Chart from "./Admin/Chart";
+import { Head, Link, usePage } from "@inertiajs/react";
+import Overview from "./Admin/Overview";
 import {
     Card,
     CardContent,
@@ -11,6 +11,8 @@ import { getStatusColor } from "@/utils/getStatusColor";
 import { useState } from "react";
 import ViewWorkOrderModal from "./WorkOrders/components/ViewWorkOrderModal";
 import EventServicesDashboard from "./EventServices/EventServicesDashboard";
+import { UpcomingWorkOrdersTable } from "@/Components/UpcomingWorkOrdersTable";
+import { UpcomingPreventiveMaintenanceTable } from "@/Components/UpcomingPreventiveMaintenanceTable";
 
 interface DashboardProps {
     workOrderRequests: {
@@ -24,6 +26,8 @@ interface DashboardProps {
     }[];
     pendingWorkOrders: [];
     declinedWorkOrders: [];
+    upcomingWorkOrders: [];
+    upcomingPreventiveMaintenance: [];
     locations: { id: number; name: string }[];
     user: {
         id: number;
@@ -37,10 +41,14 @@ export default function Dashboard({
     workOrderRequests,
     pendingWorkOrders,
     declinedWorkOrders,
+    upcomingWorkOrders,
+    upcomingPreventiveMaintenance,
     locations,
     user,
 }: DashboardProps) {
     const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
+
+    console.log(upcomingPreventiveMaintenance);
 
     // Hide chart for admin, super admin.
     const roleNames = new Set(
@@ -71,9 +79,9 @@ export default function Dashboard({
             {isCommunicationsOfficer ? (
                 <EventServicesDashboard bookings={[]} />
             ) : (
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6 h-full">
+                <div className="space-y-6 h-full">
                     {/* Welcome Card */}
-                    <Card className="overflow-hidden bg-white shadow rounded">
+                    <Card className="overflow-hidden bg-white shadow-sm rounded">
                         <div className="p-4 text-black text-lg sm:text-xl sm:p-6 text-center xs:text-left">
                             Welcome, {user.name}!👋🏻
                         </div>
@@ -81,9 +89,44 @@ export default function Dashboard({
 
                     {/* Chart Section */}
                     {(isSuperAdmin || isGasdCoordinator) && (
-                        <Card className="flex justify-center overflow-hidden bg-green p-6">
-                            <Chart />
-                        </Card>
+                        <>
+                            {/* Overview */}
+                            <Card className="flex justify-center overflow-hidden bg-primary p-6 shadow-sm rounded">
+                                <Overview />
+                            </Card>
+
+                            {/* Upcoming Work Orders and Preventive Maintenance */}
+                            <div className="flex flex-col xl:flex-row gap-4">
+                                {/* Work Orders */}
+                                <Card className="flex justify-start overflow-hidden shadow-sm rounded w-full p-4 max-h-[20rem] overflow-y-auto scrollbar-hide hover:overflow-y-scroll">
+                                    <div className="flex flex-col gap-4 w-full">
+                                        <div className="flex justify-between items-center">
+                                            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Upcoming Work Orders</h1>
+                                            <Link href={route("work-orders.index")} className="text-sm underline text-primary hover:text-primary/80 mr-1">View All</Link>
+                                        </div>
+                                        <UpcomingWorkOrdersTable 
+                                            data={upcomingWorkOrders}
+                                            locations={locations}
+                                            user={user}
+                                        />
+                                    </div>
+                                </Card>
+                                {/* Preventive Maintenance */}
+                                <Card className="flex justify-start overflow-hidden shadow-sm rounded w-full max-h-[20rem]">
+                                    <div className="flex flex-col gap-4 p-4 w-full">
+                                        <div className="flex justify-between items-center">
+                                            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Upcoming Preventive Maintenance</h1>
+                                            <Link href={route("work-orders.preventive-maintenance")} className="text-sm underline text-primary hover:text-primary/80 mr-1">View All</Link>
+                                        </div>
+                                        <UpcomingPreventiveMaintenanceTable 
+                                            data={upcomingPreventiveMaintenance}
+                                            locations={locations}
+                                            user={user}
+                                        />
+                                    </div>
+                                </Card>
+                            </div>
+                        </>
                     )}
 
                     {isDepartmentHead && (

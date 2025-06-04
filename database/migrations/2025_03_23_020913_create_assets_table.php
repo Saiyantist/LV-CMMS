@@ -22,6 +22,7 @@ return new class extends Migration
             // $table->enum('preventive_maintenance_interval_unit', ['day', 'week', 'month', 'year'])->nullable();
             $table->date('last_maintained_at')->nullable();
             // $table->string('qr_code')->unique()->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

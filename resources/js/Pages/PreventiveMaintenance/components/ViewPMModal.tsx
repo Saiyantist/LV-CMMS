@@ -123,10 +123,26 @@ export default function ViewPMModal({
 
                     <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody className="flex flex-col">
-                            {/* Row 3 */}
-                            <div className="flex items-center justify-start">
+                            {/* Row 1 */}
 
-                                {/* Schedule */}
+                            {/* Asset */}
+                            {assetDetails && (
+                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                <TableHead className="flex flex-[1] items-center">
+                                <Label>Asset</Label>
+                                </TableHead>
+                                <TableCell className="flex flex-[3.3] items-center whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll">
+                                    {assetDetails ? (
+                                        `${assetDetails?.name} - ${assetDetails?.location_name}`
+                                    ) : (
+                                        <span className="text-gray-500 italic">No Asset attached</span>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                            )}
+
+                            {/* Schedule */}
+                            <TableRow className="border-none flex items-center justify-start">
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label className="text-primary">Preventive Maintenance Schedule:</Label>
                                 </TableHead>
@@ -135,8 +151,7 @@ export default function ViewPMModal({
                                         {workOrder.asset?.maintenance_schedule ? formatMaintenanceSchedule(workOrder.asset.maintenance_schedule) : "-"}
                                     </span>
                                 </TableCell>
-
-                            </div>
+                            </TableRow>
 
                             <hr className="my-2" />
 
@@ -198,22 +213,6 @@ export default function ViewPMModal({
 
                     <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody className="flex flex-col">
-
-                            {/* Asset */}
-                            {assetDetails && (
-                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                <TableHead className="flex flex-[1] items-center">
-                                <Label>Asset</Label>
-                                </TableHead>
-                                <TableCell className="flex flex-[3.3] items-center whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll">
-                                    {assetDetails ? (
-                                        `${assetDetails?.name} - ${assetDetails?.location_name}`
-                                    ) : (
-                                        <span className="text-gray-500 italic">No Asset attached</span>
-                                    )}
-                                </TableCell>
-                            </TableRow>
-                            )}
 
                             {/* Location */}
                             <TableRow className="border-none flex flex-row items-center justify-between w-full">

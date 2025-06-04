@@ -583,7 +583,7 @@ export default function IndexLayout({
                                 </Button>
                             </div>
 
-                            {/* Large screens - visible from md to lg */}
+                            {/* Medium screens - visible from md to lg */}
                             <div className="hidden md:flex xl:hidden">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -711,7 +711,7 @@ export default function IndexLayout({
             <FlashToast />
 
             {/* Header */}
-            <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+            <header className="mx-auto px-6 md:px-0 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                         Work Orders
@@ -761,7 +761,7 @@ export default function IndexLayout({
 
             {/* Desktop Table View */}
             <div
-                className={`hidden md:block overflow-x-auto rounded-md -mt-[4.1rem] ${
+                className={`hidden md:block overflow-x-auto rounded-md lg:-mt-[4.1rem]  ${
                     !user.permissions.includes("manage work orders")
                         ? "-mt-[3.8rem]"
                         : ""

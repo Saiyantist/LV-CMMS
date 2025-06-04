@@ -13,9 +13,11 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import FlashToast from "@/Components/FlashToast";
 import { Button } from "@/Components/shadcnui/button";
-import { CirclePlus, Trash } from "lucide-react";
+import { CirclePlus, Trash, MoreVertical } from "lucide-react";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
+import DeleteAssetModal from "./components/DeleteAssetModal";
 
 interface Asset {
     id: number;
@@ -59,6 +61,7 @@ const AssetManagement: React.FC = () => {
     const [isCreating, setIsCreating] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(null);
     const [showScrollUpButton, setShowScrollUpButton] = useState(false);
+    const [deletingAsset, setDeletingAsset] = useState<Asset | null>(null);
 
     const handleScroll = () => {
         setShowScrollUpButton(window.scrollY > 300);
@@ -89,16 +92,8 @@ const AssetManagement: React.FC = () => {
         }
     };
 
-    const handleDelete = (assetId: number) => {
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this asset? This action is irreversible and cannot be undone."
-        );
-        if (!confirmed) return;
-
-        router.delete(route("assets.destroy", assetId), {
-            onSuccess: () => toast.success("Asset deleted successfully."),
-            onError: () => toast.error("Failed to delete asset."),
-        });
+    const handleDelete = (asset: Asset) => {
+        setDeletingAsset(asset);
     };
 
     // Define columns for the data table
@@ -135,7 +130,6 @@ const AssetManagement: React.FC = () => {
                 searchable: true,
             },
         },
-
         {
             accessorKey: "location.name",
             header: "Location",
@@ -188,20 +182,45 @@ const AssetManagement: React.FC = () => {
             id: "actions",
             header: "Action",
             cell: ({ row }) => (
-                <div className="flex justify-start gap-2 px-2">
-                    <Button
-                        onClick={() => setViewingAsset(row.original)}
-                        className="bg-secondary h-6 text-xs rounded-sm"
-                    >
-                        View
-                    </Button>
-                    <Button
-                        variant={"outline"}
-                        size={"icon"}
-                        className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
-                        onClick={() => handleDelete(row.original.id)}
-                    ><Trash />
-                    </Button>
+                <div className="flex gap-2 justify-center">
+                    {/* Extra Large screens - visible above xl breakpoint */}
+                    <div className="hidden xl:flex gap-2">
+                        <Button
+                            onClick={() => setViewingAsset(row.original)}
+                            className="bg-secondary h-6 text-xs rounded-sm"
+                        >
+                            View
+                        </Button>
+                        <Button
+                            variant={"outline"}
+                            size={"icon"}
+                            className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                            onClick={() => handleDelete(row.original)}
+                        ><Trash />
+                        </Button>
+                    </div>
+
+                    {/* Medium screens - visible from md to lg */}
+                    <div className="hidden md:flex xl:hidden">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-5 w-5 p-0">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setViewingAsset(row.original)}>
+                                    View
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                    onClick={() => handleDelete(row.original)}
+                                    className="text-destructive"
+                                >
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
             ),
             enableSorting: false,
@@ -229,7 +248,7 @@ const AssetManagement: React.FC = () => {
             <Head title="Asset Management" />
 
             {/* Header section*/}
-            <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+            <header className="mx-auto px-6 md:px-0 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                             Asset Management
@@ -312,7 +331,7 @@ const AssetManagement: React.FC = () => {
                                 View
                             </button>
                             <button
-                                onClick={() => handleDelete(asset.id)}
+                                onClick={() => handleDelete(asset)}
                                 className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
                             >
                                 Delete
@@ -335,6 +354,14 @@ const AssetManagement: React.FC = () => {
                     asset={viewingAsset}
                     onClose={() => setViewingAsset(null)}   
                     locations={locations}
+                />
+            )}
+
+            {deletingAsset && (
+                <DeleteAssetModal
+                    asset={deletingAsset}
+                    locations={locations}
+                    onClose={() => setDeletingAsset(null)}
                 />
             )}
 

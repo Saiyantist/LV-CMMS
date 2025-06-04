@@ -9,9 +9,10 @@ import EditPMModal from "./components/EditPMModal";
 import EditPMScheduleModal from "./components/EditPMScheduleModal";
 import FlashToast from "@/Components/FlashToast";
 import { getStatusColor } from "@/utils/getStatusColor";
-import { Trash } from "lucide-react";
+import { Trash, MoreVertical } from "lucide-react";
 import DeletePMModal from "./components/DeletePMModal";
 import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
 
 interface WorkOrders {
     id: number;
@@ -56,8 +57,7 @@ interface WorkOrders {
     } | null;
     assigned_to: {
         id: number;
-        first_name: string;
-        last_name: string;
+        name: string;
     } | null;
 }
 
@@ -185,6 +185,7 @@ const PreventiveMaintenance: React.FC = () => {
     const [isEditingPMSchedule, setIsEditingPMSchedule] = useState<any>(null);
     const [activeTab, setActiveTab] = useState("Work Orders");
 
+
     const PMSWorkOrdersColumns: ColumnDef<WorkOrders>[] = [
         {
             accessorKey: "id",
@@ -236,10 +237,10 @@ const PreventiveMaintenance: React.FC = () => {
     },
     {
         id: "assigned_to",
-        header: "Assigned To",
+        header: "Assigned to",
         accessorFn: (row) => {
             if (!row.assigned_to) return "Unassigned";
-            return row.assigned_to?.first_name + " " + row.assigned_to?.last_name;
+            return row.assigned_to?.name;
         },
         enableSorting: false,
         meta: {
@@ -295,28 +296,57 @@ const PreventiveMaintenance: React.FC = () => {
         id: "actions",
         header: "Actions",
         cell: ({ row }) => {
-            return <div className="flex gap-2 justify-center px-2">
-                <Button
-                    className="bg-secondary h-6 text-xs rounded-sm"
-                    onClick={() => setIsViewPM(row.original)}
-                >
-                    View
-                </Button>
-                <Button
-                    className="bg-secondary h-6 text-xs rounded-sm"
-                    onClick={() => setIsEditingPM(row.original)}
-                >
-                    Edit
-                </Button>
-                <Button
-                    variant={"outline"}
-                    size={"icon"}
-                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
-                    onClick={() => setIsDeletingPM(row.original)}
-                ><Trash />
-                </Button>
+            return <div className="flex gap-2 justify-center">
+                {/* Extra Large screens - visible above xl breakpoint */}
+                <div className="hidden xl:flex gap-2">
+                    <Button
+                        className="bg-secondary h-6 text-xs rounded-sm"
+                        onClick={() => setIsViewPM(row.original)}
+                    >
+                        View
+                    </Button>
+                    <Button
+                        className="bg-secondary h-6 text-xs rounded-sm"
+                        onClick={() => setIsEditingPM(row.original)}
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        variant={"outline"}
+                        size={"icon"}
+                        className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                        onClick={() => setIsDeletingPM(row.original)}
+                    ><Trash />
+                    </Button>
+                </div>
+
+                {/* Medium screens - visible from md to lg */}
+                <div className="hidden md:flex xl:hidden">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-5 w-5 p-0">
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setIsViewPM(row.original)}>
+                                View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setIsEditingPM(row.original)}>
+                                Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                                onClick={() => setIsDeletingPM(row.original)}
+                                className="text-destructive"
+                            >
+                                Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
-        }
+        },
+        enableSorting: false,
     }
 
     ];
@@ -455,7 +485,7 @@ const PreventiveMaintenance: React.FC = () => {
 
             <FlashToast />
 
-            <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+            <header className="mx-auto px-6 md:px-0 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                         Preventive Maintenance
@@ -473,7 +503,7 @@ const PreventiveMaintenance: React.FC = () => {
                 </div>
 
             {/* Desktop Table */}
-            <div className="hidden sm:block overflow-x-auto -mt-[3.8rem]">
+            <div className="hidden sm:block overflow-x-auto lg:-mt-[3.8rem]">
 
                 {/* Preventive Maintenance Work Orders Datatable */}
                 {activeTab === "Work Orders" && (

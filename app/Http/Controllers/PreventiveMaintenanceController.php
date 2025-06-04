@@ -54,6 +54,7 @@ class PreventiveMaintenanceController extends Controller
                     'specification_details' => $wo->asset->specification_details,
                     'status' => $wo->asset->status,
                     'location_id' => $wo->asset->location_id,
+                    'last_maintained_at' => $wo->asset->last_maintained_at,
                     'maintenance_schedule' => $wo->asset->maintenanceSchedule ? [
                         'id' => $wo->asset->maintenanceSchedule->id,
                         'asset_id' => $wo->asset->maintenanceSchedule->asset_id,

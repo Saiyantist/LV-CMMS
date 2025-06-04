@@ -7,12 +7,19 @@ use App\Models\User;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    protected function user()
+    {
+        return auth()->user();
+    }
+
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         
         $workOrderRequests = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'images')
             ->where('requested_by', $user->id)->get();
@@ -52,7 +59,7 @@ class DashboardController extends Controller
                     'id' => $wo->location_id,
                     'name' => $wo->location ? $wo->location->name : null,
                 ],
-                'images' => $wo->images->pluck('url')->toArray(), // ✅ important part
+                'images' => $wo->images->pluck('url')->toArray(),
                 'asset' => $wo->asset ? [
                     'id' => $wo->asset->id,
                     'name' => $wo->asset->name,
@@ -63,10 +70,88 @@ class DashboardController extends Controller
             ];
         });
 
+        // Get upcoming work orders (excluding preventive maintenance)
+        $upcomingWorkOrders = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo')
+            ->where('scheduled_at', '>=', Carbon::now())
+            ->where('work_order_type', '!=', 'preventive_maintenance')
+            ->where('status', '!=', 'completed')
+            ->orderBy('scheduled_at', 'asc')
+            ->limit(3)
+            ->get()
+            ->map(function ($wo) {
+                return [
+                    'id' => $wo->id,
+                    'report_description' => $wo->report_description,
+                    'status' => $wo->status,
+                    'work_order_type' => $wo->work_order_type,
+                    'priority' => $wo->priority ?: "",
+                    'scheduled_at' => Carbon::parse($wo->scheduled_at)->format('m/d/Y'),
+                    'requested_at' => Carbon::parse($wo->requested_at)->format('m/d/Y'),
+                    'requested_by' => [
+                        'id' => $wo->requestedBy->id,
+                        'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
+                    ],
+                    'location' => [
+                        'id' => $wo->location_id,
+                        'name' => $wo->location ? $wo->location->name : null,
+                    ],
+                    'asset' => $wo->asset,
+                    'assigned_to' => $wo->assignedTo ? [
+                        'id' => $wo->assignedTo->id,
+                        'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
+                    ] : null,
+                    'label' => $wo->label,
+                    'approved_at' => $wo->approved_at ? Carbon::parse($wo->approved_at)->format('m/d/Y') : "",
+                    'approved_by' => $wo->approved_by ?: "",
+                    'remarks' => $wo->remarks ?: "",
+                    'images' => $wo->images->pluck('url')->toArray(),
+                ];
+            });
+
+        // Get upcoming preventive maintenance
+        $upcomingPreventiveMaintenance = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo')
+            ->where('work_order_type', 'Preventive Maintenance')
+            ->where('scheduled_at', '>=', Carbon::now())
+            ->where('status', '!=', 'completed')
+            ->orderBy('scheduled_at', 'asc')
+            ->limit(3)
+            ->get()
+            ->map(function ($wo) {
+                return [
+                    'id' => $wo->id,
+                    'report_description' => $wo->report_description,
+                    'status' => $wo->status,
+                    'work_order_type' => $wo->work_order_type,
+                    'priority' => $wo->priority ?: "",
+                    'scheduled_at' => Carbon::parse($wo->scheduled_at)->format('m/d/Y'),
+                    'requested_at' => Carbon::parse($wo->requested_at)->format('m/d/Y'),
+                    'requested_by' => [
+                        'id' => $wo->requestedBy->id,
+                        'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
+                    ],
+                    'location' => [
+                        'id' => $wo->location_id,
+                        'name' => $wo->location ? $wo->location->name : null,
+                    ],
+                    'asset' => $wo->asset,
+                    'assigned_to' => $wo->assignedTo ? [
+                        'id' => $wo->assignedTo->id,
+                        'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
+                    ] : null,
+                    'label' => $wo->label,
+                    'approved_at' => $wo->approved_at ? Carbon::parse($wo->approved_at)->format('m/d/Y') : "",
+                    'approved_by' => $wo->approved_by ?: "",
+                    'remarks' => $wo->remarks ?: "",
+                    'images' => $wo->images->pluck('url')->toArray(),
+                ];
+            });
+
         return Inertia::render('Dashboard', [
-            'workOrderRequests' => $formattedWorkOrders ,
+            'workOrderRequests' => $formattedWorkOrders,
             'pendingWorkOrders' => $pendingWorkOrders,
             'declinedWorkOrders' => $declinedWorkOrders,
+            'upcomingWorkOrders' => $upcomingWorkOrders,
+            'upcomingPreventiveMaintenance' => $upcomingPreventiveMaintenance,
             'locations' => Location::select('id', 'name')->get(),
             'user' => [
                 'id' => $user->id,
