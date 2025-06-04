@@ -72,7 +72,7 @@ export default function CreateAssetModal({
         e.preventDefault();
         const formData = new FormData();
         formData.append("name", data.name);
-        formData.append("specification_details", data.specification_details);
+        formData.append("specification_details", data.specification_details);``
         formData.append("location_id", data.location_id);
         formData.append("date_acquired", data.date_acquired);
         formData.append("status", "Functional");
