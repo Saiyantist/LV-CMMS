@@ -268,7 +268,7 @@ const AssetManagement: React.FC = () => {
                 <Datatable
                     columns={columns}
                     data={assets}
-                    placeholder="Search assets"
+                    placeholder="Search for ID, Name, Specification, and Location"
                 />
             </div>
 

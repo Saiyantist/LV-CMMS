@@ -185,13 +185,16 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
       <div className="flex justify-end pb-4 mt-1">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={placeholder}
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              className="h-10 w-52 pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
-            />
+            <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
+            <div className="inline-block">
+              <Input
+                placeholder={placeholder}
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="h-10 pl-8 rounded-md border bg-white/70 !text-xs focus-visible:bg-white"
+                style={{ width: `${placeholder.length * 0.4}rem` }}
+              />
+            </div>
           </div>
           <Button
             ref={filterButtonRef}

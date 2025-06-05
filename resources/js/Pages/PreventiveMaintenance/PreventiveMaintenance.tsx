@@ -510,7 +510,7 @@ const PreventiveMaintenance: React.FC = () => {
                 <Datatable
                     columns={PMSWorkOrdersColumns}
                     data={workOrders}
-                    placeholder="Search here"
+                    placeholder="Search for ID, Asset Name, Location, Label, and Assigned to"
                     />
                 )}
 
@@ -519,7 +519,7 @@ const PreventiveMaintenance: React.FC = () => {
                     <Datatable
                         columns={PMSchedulesColumns}
                         data={assetMaintenanceSchedules}
-                        placeholder="Search here"
+                        placeholder="Search for ID, Asset Name, and Schedule"
                     />
                 )}
             </div>

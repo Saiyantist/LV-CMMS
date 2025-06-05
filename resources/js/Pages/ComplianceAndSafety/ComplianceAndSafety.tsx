@@ -252,7 +252,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                 <Datatable
                     columns={columns}
                     data={workOrders}
-                    placeholder="Search here"
+                    placeholder="Search for ID, Compliance Area, Location, and Description"
                 />
             </div>
 

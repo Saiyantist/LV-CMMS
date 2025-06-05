@@ -196,6 +196,22 @@ export default function IndexLayout({
         };
     }, [isMobileFilterModalOpen]);
 
+    const getPlaceholderText = () => {
+        
+        if (!isWorkOrderManager) {
+            return "Search Location or Description";
+        }
+
+        switch (activeTab) {
+            case "Pending":
+                return "Search for ID, Location, Description, and Requested by";
+            case "For Budget Request":
+                return "Search for ID, Location, Description, Requested by, and Label";
+            default:
+                return "Search for ID, Location, Description, Label, and Assignee";
+        }
+    };
+
     const requesterOrPersonnelColumns: ColumnDef<WorkOrders>[] = [
         {
             accessorKey: "requested_at",
@@ -401,7 +417,6 @@ export default function IndexLayout({
                     cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at")}</div>,
                     meta: {
                         cellClassName: "min-w-[7.5rem] max-w-[8rem] text-center",
-                        searchable: true,
                     },
                 },
                 {
@@ -770,7 +785,7 @@ export default function IndexLayout({
                 <Datatable
                     columns={columns}
                     data={filteredWorkOrders}
-                    placeholder="Search here"
+                    placeholder={getPlaceholderText()}
                 />
             </div>
 
