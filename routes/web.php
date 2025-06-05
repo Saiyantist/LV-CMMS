@@ -6,6 +6,7 @@ use App\Http\Controllers\AssetMaintenanceHistoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ComplianceAndSafetyController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
@@ -97,10 +98,14 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
                 Route::put('/schedule/{id}', [PreventiveMaintenanceController::class, 'updateSchedule'])->name('work-orders.preventive-maintenance.update-schedule');
                 Route::delete('/{id}', [PreventiveMaintenanceController::class, 'destroy'])->name('work-orders.preventive-maintenance.destroy');
             });
-    
-            Route::get('/work-orders/compliance-and-safety', function () {
-                return Inertia::render('ComplianceAndSafety/ComplianceAndSafety');
-            })->name('work-orders.compliance-and-safety');
+            
+            Route::group(['prefix' => 'work-orders/compliance-and-safety'], function () {
+                Route::get('/', [ComplianceAndSafetyController::class, 'index'])->name('work-orders.compliance-and-safety');
+                Route::get('/create', [ComplianceAndSafetyController::class, 'create'])->name('work-orders.compliance-and-safety.create');
+                Route::post('/', [ComplianceAndSafetyController::class, 'store'])->name('work-orders.compliance-and-safety.store');
+                Route::put('/{id}', [ComplianceAndSafetyController::class, 'update'])->name('work-orders.compliance-and-safety.update');
+                Route::delete('/{id}', [ComplianceAndSafetyController::class, 'destroy'])->name('work-orders.compliance-and-safety.destroy');
+            });
         });
         
         Route::resource('work-orders', WorkOrderController::class)->except(['create', 'show']); // ALWAYS put this at the end ng mga "/work-orders" routes.

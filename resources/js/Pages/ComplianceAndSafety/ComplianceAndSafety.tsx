@@ -1,191 +1,227 @@
 import React, { useState } from "react";
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
-import AddComplianceAndSafetyModal from "./components/AddComplianceAndSafetyModal";
+import CreateComplianceModal from "./components/CreateComplianceModal";
 import { Datatable } from "@/Components/Datatable";
 import { ColumnDef } from "@tanstack/react-table";
-import { Trash2 } from "lucide-react";
+import { Button } from "@/Components/shadcnui/button";
+import { Trash2, MoreVertical, CirclePlus } from "lucide-react";
+import { getStatusColor } from "@/utils/getStatusColor";
+import { getPriorityColor } from "@/utils/getPriorityColor";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
+import FlashToast from "@/Components/FlashToast";
+import { prioritySorting } from "@/utils/prioritySorting";
+import { format } from "date-fns";
 
-const ComplianceAndSafety: React.FC = () => {
+interface WorkOrder {
+    id: number;
+    compliance_area: string;
+    location: {
+        id: number;
+        name: string;
+    };
+    report_description: string;
+    remarks: string;
+    scheduled_at: string;
+    priority: string;
+    status: string;
+    assigned_to: {
+        id: number;
+        first_name: string;
+        last_name: string;
+    };
+    requested_by: {
+        id: number;
+        first_name: string;
+        last_name: string;
+    };
+    requested_at: string;
+    attachments: {
+        id: number;
+        path: string;
+        file_type: string;
+    }[];
+}
+
+interface Props {
+    workOrders: WorkOrder[];
+    locations: { id: number; name: string }[];
+    maintenancePersonnel: {
+        id: number;
+        first_name: string;
+        last_name: string;
+        roles: { id: number; name: string };
+    }[];
+    user: {
+        id: number;
+        name: string;
+        roles: { name: string }[];
+        permissions: string[];
+    };
+}
+
+const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenancePersonnel, user }) => {
     const [isCreating, setIsCreating] = useState(false);
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
-    const [viewingItem, setViewingItem] = useState<any | null>(null);
+    const [viewingItem, setViewingItem] = useState<WorkOrder | null>(null);
     const [editing, setEditing] = useState(false);
-    const [editableItem, setEditableItem] = useState<any>({});
+    const [editableItem, setEditableItem] = useState<WorkOrder | null>(null);
 
-    // Move complianceData to state for frontend manipulation
-    const [complianceData, setComplianceData] = useState([
-        {
-            id: 1,
-            dateSubmitted: "2024-05-10",
-            complianceArea: "Fire Safety Inspection",
-            location: "Warehouse A",
-            assignedTo: "Joshua Smith",
-            targetDate: "2024-06-01",
-            status: "On Going",
-        },
-        {
-            id: 2,
-            dateSubmitted: "2024-04-22",
-            complianceArea: "Electrical Safety Audit",
-            location: "Main Office",
-            assignedTo: "Maria Garcia",
-            targetDate: "2024-05-15",
-            status: "Completed",
-        },
-        {
-            id: 3,
-            dateSubmitted: "2024-05-01",
-            complianceArea: "Equipment Maintenance Check",
-            location: "Factory Floor 3",
-            assignedTo: "Liam Johnson",
-            targetDate: "2024-06-10",
-            status: "On Going",
-        },
-        {
-            id: 4,
-            dateSubmitted: "2024-04-15",
-            complianceArea: "Chemical Handling Review",
-            location: "Lab 2",
-            assignedTo: "Sophia Lee",
-            targetDate: "2024-05-30",
-            status: "Pending",
-        },
-        {
-            id: 5,
-            dateSubmitted: "2024-03-30",
-            complianceArea: "Emergency Drill Assessment",
-            location: "Headquarters",
-            assignedTo: "Ethan Martinez",
-            targetDate: "2024-04-10",
-            status: "Completed",
-        },
-    ]);
-
-    // Delete function: remove items from state
-    const handleDeleteItems = (idsToDelete: number[]) => {
-        setComplianceData((prev) =>
-            prev.filter((item) => !idsToDelete.includes(item.id))
-        );
-        // Also clear selection and viewing/editing states if affected
-        setSelectedRows([]);
-        if (viewingItem && idsToDelete.includes(viewingItem.id)) {
-            setViewingItem(null);
-            setEditing(false);
-        }
-    };
-
-    // Save edit function: update item in state
-    const handleSaveEdit = () => {
-        setComplianceData((prev) =>
-            prev.map((item) =>
-                item.id === editableItem.id ? editableItem : item
-            )
-        );
-        setViewingItem(editableItem);
-        setEditing(false);
-    };
-
-    const columns: ColumnDef<(typeof complianceData)[0]>[] = [
-        {
-            id: "select",
-            header: ({ table }) => (
-                <input
-                    type="checkbox"
-                    className="cursor-pointer"
-                    onChange={(e) => {
-                        if (e.target.checked) {
-                            setSelectedRows(complianceData.map((d) => d.id));
-                        } else {
-                            setSelectedRows([]);
-                        }
-                    }}
-                    checked={
-                        selectedRows.length > 0 &&
-                        selectedRows.length === complianceData.length
-                    }
-                />
-            ),
-            cell: ({ row }) => {
-                const id = row.original.id;
-                return (
-                    <input
-                        type="checkbox"
-                        className="cursor-pointer"
-                        checked={selectedRows.includes(id)}
-                        onChange={(e) => {
-                            if (e.target.checked) {
-                                setSelectedRows((prev) => [...prev, id]);
-                            } else {
-                                setSelectedRows((prev) =>
-                                    prev.filter((val) => val !== id)
-                                );
-                            }
-                        }}
-                    />
-                );
-            },
-            enableSorting: false,
-            meta: { headerClassName: "w-12 text-center" },
-        },
+    const columns: ColumnDef<WorkOrder>[] = [
         {
             accessorKey: "id",
             header: "ID",
             cell: ({ row }) => <div>{row.getValue("id")}</div>,
-            meta: { headerClassName: "w-12" },
+            meta: {
+                cellClassName: "w-12",
+                searchable: true,
+            },
         },
         {
-            accessorKey: "dateSubmitted",
-            header: "Date Submitted",
-            cell: ({ row }) => <div>{row.getValue("dateSubmitted")}</div>,
-            meta: { headerClassName: "w-[8rem]" },
-        },
-        {
-            accessorKey: "complianceArea",
+            accessorKey: "compliance_area",
             header: "Compliance Area",
-            cell: ({ row }) => <div>{row.getValue("complianceArea")}</div>,
-            meta: { headerClassName: "w-[12rem]" },
+            cell: ({ row }) => <div>{row.getValue("compliance_area")}</div>,
+            meta: {
+                cellClassName: "max-w-[12rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                searchable: true,
+                filterable: true,
+            },
+            enableSorting: false,
         },
         {
-            accessorKey: "location",
+            accessorKey: "location.name",
             header: "Location",
-            cell: ({ row }) => <div>{row.getValue("location")}</div>,
-            meta: { headerClassName: "w-[10rem]" },
+            cell: ({ row }) => <div>{row.original.location.name}</div>,
+            meta: {
+                cellClassName: "max-w-[10rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                searchable: true,
+                filterable: true,
+            },
+            enableSorting: false,
         },
         {
-            accessorKey: "assignedTo",
+            accessorKey: "report_description",
+            header: "Description",
+            cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
+            meta: {
+                cellClassName: "max-w-[16rem] text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                searchable: true,
+            },
+            enableSorting: false,
+        },
+        {
+            accessorKey: "priority",
+            header: "Priority",
+            cell: ({ row }) => (
+                <div className={`px-2 py-1 rounded ${getPriorityColor(row.getValue("priority"))}`}>
+                    {row.getValue("priority")}
+                </div>
+            ),
+            sortingFn: prioritySorting,
+            meta: {
+                cellClassName: "text-center",
+                filterable: true,
+            },
+        },
+        {
+            accessorKey: "assigned_to",
             header: "Assigned To",
-            cell: ({ row }) => <div>{row.getValue("assignedTo")}</div>,
-            meta: { headerClassName: "w-[10rem]" },
+            cell: ({ row }) => {
+                const assignedTo = row.original.assigned_to;
+                return <div>{assignedTo ? `${assignedTo.first_name} ${assignedTo.last_name}` : "Unassigned"}</div>;
+            },
+            meta: {
+                cellClassName: "max-w-[10rem]",
+            },
         },
         {
-            accessorKey: "targetDate",
+            accessorKey: "scheduled_at",
             header: "Target Date",
-            cell: ({ row }) => <div>{row.getValue("targetDate")}</div>,
-            meta: { headerClassName: "w-[8rem]" },
+            cell: ({ row }) => <div>{format(new Date(row.getValue("scheduled_at")), "yyyy-MM-dd")}</div>,
+            meta: {
+                cellClassName: "max-w-[8rem]",
+            },
         },
         {
             accessorKey: "status",
             header: "Status",
-            cell: ({ row }) => <div>{row.getValue("status")}</div>,
-            meta: { headerClassName: "w-[8rem]" },
+            cell: ({ row }) => (
+                <div className={`px-2 py-1 rounded ${getStatusColor(row.getValue("status"))}`}>
+                    {row.getValue("status")}
+                </div>
+            ),
+            meta: {
+                cellClassName: "text-center",
+                filterable: true,
+            },
         },
         {
             id: "actions",
-            header: "Action",
+            header: "Actions",
             cell: ({ row }) => (
-                <div className="flex justify-center items-center gap-2">
-                    <button
-                        className="bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition"
-                        onClick={() => {
-                            setViewingItem(row.original);
-                            setEditableItem(row.original);
-                            setEditing(false);
-                        }}
-                    >
-                        View
-                    </button>
+                <div className="flex gap-2 justify-center">
+                    {/* Extra Large screens - visible above xl breakpoint */}
+                    <div className="hidden xl:flex gap-2">
+                        <Button
+                            className="bg-secondary h-6 text-xs rounded-sm"
+                            onClick={() => {
+                                setViewingItem(row.original);
+                                setEditableItem(row.original);
+                                setEditing(false);
+                            }}
+                        >
+                            View
+                        </Button>
+                        <Button
+                            variant={"outline"}
+                            size={"icon"}
+                            className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                            onClick={() => {
+                                const confirmed = window.confirm(
+                                    `Are you sure you want to delete item ID ${row.original.id}?`
+                                );
+                                if (confirmed) {
+                                    // TODO: Implement delete functionality
+                                }
+                            }}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
+
+                    {/* Medium screens - visible from md to lg */}
+                    <div className="hidden md:flex xl:hidden">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-5 w-5 p-0">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => {
+                                    setViewingItem(row.original);
+                                    setEditableItem(row.original);
+                                    setEditing(false);
+                                }}>
+                                    View
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                    onClick={() => {
+                                        const confirmed = window.confirm(
+                                            `Are you sure you want to delete item ID ${row.original.id}?`
+                                        );
+                                        if (confirmed) {
+                                            // TODO: Implement delete functionality
+                                        }
+                                    }}
+                                    className="text-destructive"
+                                >
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
             ),
             enableSorting: false,
@@ -196,135 +232,122 @@ const ComplianceAndSafety: React.FC = () => {
         <Authenticated>
             <Head title="Compliance and Safety" />
 
-            <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
+            <header className="mx-auto px-6 md:px-0 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
-                    <h1 className="text-2xl font-semibold">
+                    <h1 className="text-2xl font-semibold sm:mb-0">
                         Compliance and Safety
                     </h1>
                     <PrimaryButton
                         onClick={() => setIsCreating(true)}
-                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md text-center justify-center w-full sm:w-auto"
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-base xs:text-lg md:text-base rounded-md w-full sm:w-auto text-center justify-center gap-2"
                     >
-                        + Add
+                        <span>Add</span>
+                        <CirclePlus className="h-5 w-5" />
                     </PrimaryButton>
                 </div>
             </header>
 
-            <div className="p-4">
-                {selectedRows.length > 0 && (
-                    <div className="hidden sm:flex mb-4">
-                        <button
-                            onClick={() => {
-                                const confirmed = window.confirm(
-                                    `Are you sure you want to delete the selected items: ${selectedRows.join(
-                                        ", "
-                                    )}?`
-                                );
-                                if (confirmed) {
-                                    handleDeleteItems(selectedRows);
-                                }
-                            }}
-                            className="flex items-center gap-2 bg-destructive text-white px-4 py-2 rounded-md hover:opacity-90 transition"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </button>
-                    </div>
-                )}
+            {/* Desktop Table */}
+            <div className="hidden sm:block lg:-mt-[4.1rem] overflow-x-auto">
+                <Datatable
+                    columns={columns}
+                    data={workOrders}
+                    placeholder="Search here"
+                />
+            </div>
 
-                {/* Desktop Table */}
-                <div className="hidden sm:block overflow-x-auto">
-                    <Datatable
-                        columns={columns}
-                        data={complianceData}
-                        placeholder="Search here"
-                    />
-                </div>
-
-                {/* Mobile Cards */}
-                <div className="sm:hidden flex flex-col gap-4 mt-4">
-                    {complianceData.map((item) => (
-                        <div
-                            key={item.id}
-                            className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
-                        >
-                            <div className="flex justify-between items-start text-sm text-gray-800 mb-1">
-                                <p>
-                                    <span className="font-medium">ID:</span>{" "}
-                                    {item.id}
-                                </p>
-                                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-800">
-                                    {item.status}
-                                </span>
-                            </div>
-
-                            <div className="space-y-1 pr-8 text-sm text-gray-800">
-                                <p>
-                                    <span className="font-medium">
-                                        Compliance Area:
-                                    </span>{" "}
-                                    {item.complianceArea}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Location:
-                                    </span>{" "}
-                                    {item.location}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Assigned To:
-                                    </span>{" "}
-                                    {item.assignedTo}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Date Submitted:
-                                    </span>{" "}
-                                    {item.dateSubmitted}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Target Date:
-                                    </span>{" "}
-                                    {item.targetDate}
-                                </p>
-                            </div>
-
-                            <div className="mt-4 flex justify-end gap-2">
-                                <button
-                                    className="w-1/2 bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition"
-                                    onClick={() => {
-                                        setViewingItem(item);
-                                        setEditableItem(item);
-                                        setEditing(false);
-                                    }}
-                                >
-                                    View
-                                </button>
-                                <button
-                                    className="w-1/2 bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition"
-                                    onClick={() => {
-                                        const confirmed = window.confirm(
-                                            `Are you sure you want to delete item ID ${item.id}?`
-                                        );
-                                        if (confirmed) {
-                                            handleDeleteItems([item.id]);
-                                        }
-                                    }}
-                                >
-                                    Delete
-                                </button>
-                            </div>
+            {/* Mobile Cards */}
+            <div className="sm:hidden flex flex-col gap-4 mt-4">
+                {Array.isArray(workOrders) && workOrders.map((item) => (
+                    <div
+                        key={item.id}
+                        className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
+                    >
+                        <div className="flex justify-between items-start text-sm text-gray-800 mb-1">
+                            <p>
+                                <span className="font-medium">ID:</span>{" "}
+                                {item.id}
+                            </p>
+                            <span className={`px-2 py-1 rounded ${getStatusColor(item.status)}`}>
+                                {item.status}
+                            </span>
                         </div>
-                    ))}
-                </div>
+
+                        <div className="space-y-1 pr-8 text-sm text-gray-800">
+                            <p>
+                                <span className="font-medium">
+                                    Compliance Area:
+                                </span>{" "}
+                                {item.compliance_area}
+                            </p>
+                            <p>
+                                <span className="font-medium">
+                                    Location:
+                                </span>{" "}
+                                {item.location.name}
+                            </p>
+                            <p>
+                                <span className="font-medium">
+                                    Description:
+                                </span>{" "}
+                                {item.report_description}
+                            </p>
+                            <p>
+                                <span className="font-medium">
+                                    Priority:
+                                </span>{" "}
+                                <span className={`px-2 py-1 rounded ${getPriorityColor(item.priority)}`}>
+                                    {item.priority}
+                                </span>
+                            </p>
+                            <p>
+                                <span className="font-medium">
+                                    Assigned To:
+                                </span>{" "}
+                                {item.assigned_to ? `${item.assigned_to.first_name} ${item.assigned_to.last_name}` : "Unassigned"}
+                            </p>
+                            <p>
+                                <span className="font-medium">
+                                    Target Date:
+                                </span>{" "}
+                                {item.scheduled_at}
+                            </p>
+                        </div>
+
+                        <div className="mt-4 flex justify-end gap-2">
+                            <Button
+                                className="w-1/2 bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition"
+                                onClick={() => {
+                                    setViewingItem(item);
+                                    setEditableItem(item);
+                                    setEditing(false);
+                                }}
+                            >
+                                View
+                            </Button>
+                            <Button
+                                className="w-1/2 bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition"
+                                onClick={() => {
+                                    const confirmed = window.confirm(
+                                        `Are you sure you want to delete item ID ${item.id}?`
+                                    );
+                                    if (confirmed) {
+                                        // TODO: Implement delete functionality
+                                    }
+                                }}
+                            >
+                                Delete
+                            </Button>
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {isCreating && (
-                <AddComplianceAndSafetyModal
-                    isOpen={isCreating}
+                <CreateComplianceModal
+                    locations={locations}
+                    maintenancePersonnel={maintenancePersonnel}
                     onClose={() => setIsCreating(false)}
-                    onCreate={() => setIsCreating(false)}
                 />
             )}
 
@@ -336,39 +359,15 @@ const ComplianceAndSafety: React.FC = () => {
                         </h2>
 
                         <div className="space-y-3 text-gray-800 text-sm">
-                            {/* ID - non-editable even in edit mode */}
                             <div>
                                 <label className="block font-semibold mb-1">
                                     ID
                                 </label>
                                 <input
                                     type="text"
-                                    value={editableItem.id}
+                                    value={editableItem?.id}
                                     disabled
                                     className="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100"
-                                />
-                            </div>
-
-                            {/* Editable fields when editing, else read-only */}
-                            <div>
-                                <label className="block font-semibold mb-1">
-                                    Date Submitted
-                                </label>
-                                <input
-                                    type="date"
-                                    value={editableItem.dateSubmitted}
-                                    disabled={!editing}
-                                    onChange={(e) =>
-                                        setEditableItem((prev: any) => ({
-                                            ...prev,
-                                            dateSubmitted: e.target.value,
-                                        }))
-                                    }
-                                    className={`w-full border rounded-md px-3 py-2 ${
-                                        editing
-                                            ? "border-gray-300"
-                                            : "border-transparent bg-gray-100"
-                                    }`}
                                 />
                             </div>
 
@@ -378,13 +377,13 @@ const ComplianceAndSafety: React.FC = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    value={editableItem.complianceArea}
+                                    value={editableItem?.compliance_area}
                                     disabled={!editing}
                                     onChange={(e) =>
-                                        setEditableItem((prev: any) => ({
+                                        setEditableItem((prev) => prev ? {
                                             ...prev,
-                                            complianceArea: e.target.value,
-                                        }))
+                                            compliance_area: e.target.value,
+                                        } : null)
                                     }
                                     className={`w-full border rounded-md px-3 py-2 ${
                                         editing
@@ -400,13 +399,73 @@ const ComplianceAndSafety: React.FC = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    value={editableItem.location}
+                                    value={editableItem?.location.name}
+                                    disabled={!editing}
+                                    className={`w-full border rounded-md px-3 py-2 ${
+                                        editing
+                                            ? "border-gray-300"
+                                            : "border-transparent bg-gray-100"
+                                    }`}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block font-semibold mb-1">
+                                    Description
+                                </label>
+                                <textarea
+                                    value={editableItem?.report_description}
                                     disabled={!editing}
                                     onChange={(e) =>
-                                        setEditableItem((prev: any) => ({
+                                        setEditableItem((prev) => prev ? {
                                             ...prev,
-                                            location: e.target.value,
-                                        }))
+                                            report_description: e.target.value,
+                                        } : null)
+                                    }
+                                    className={`w-full border rounded-md px-3 py-2 ${
+                                        editing
+                                            ? "border-gray-300"
+                                            : "border-transparent bg-gray-100"
+                                    }`}
+                                    rows={3}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block font-semibold mb-1">
+                                    Safety Protocols
+                                </label>
+                                <textarea
+                                    value={editableItem?.remarks}
+                                    disabled={!editing}
+                                    onChange={(e) =>
+                                        setEditableItem((prev) => prev ? {
+                                            ...prev,
+                                            remarks: e.target.value,
+                                        } : null)
+                                    }
+                                    className={`w-full border rounded-md px-3 py-2 ${
+                                        editing
+                                            ? "border-gray-300"
+                                            : "border-transparent bg-gray-100"
+                                    }`}
+                                    rows={3}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block font-semibold mb-1">
+                                    Priority
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editableItem?.priority}
+                                    disabled={!editing}
+                                    onChange={(e) =>
+                                        setEditableItem((prev) => prev ? {
+                                            ...prev,
+                                            priority: e.target.value,
+                                        } : null)
                                     }
                                     className={`w-full border rounded-md px-3 py-2 ${
                                         editing
@@ -422,14 +481,8 @@ const ComplianceAndSafety: React.FC = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    value={editableItem.assignedTo}
+                                    value={editableItem?.assigned_to ? `${editableItem.assigned_to.first_name} ${editableItem.assigned_to.last_name}` : "Unassigned"}
                                     disabled={!editing}
-                                    onChange={(e) =>
-                                        setEditableItem((prev: any) => ({
-                                            ...prev,
-                                            assignedTo: e.target.value,
-                                        }))
-                                    }
                                     className={`w-full border rounded-md px-3 py-2 ${
                                         editing
                                             ? "border-gray-300"
@@ -444,13 +497,13 @@ const ComplianceAndSafety: React.FC = () => {
                                 </label>
                                 <input
                                     type="date"
-                                    value={editableItem.targetDate}
+                                    value={editableItem?.scheduled_at}
                                     disabled={!editing}
                                     onChange={(e) =>
-                                        setEditableItem((prev: any) => ({
+                                        setEditableItem((prev) => prev ? {
                                             ...prev,
-                                            targetDate: e.target.value,
-                                        }))
+                                            scheduled_at: e.target.value,
+                                        } : null)
                                     }
                                     className={`w-full border rounded-md px-3 py-2 ${
                                         editing
@@ -466,13 +519,13 @@ const ComplianceAndSafety: React.FC = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    value={editableItem.status}
+                                    value={editableItem?.status}
                                     disabled={!editing}
                                     onChange={(e) =>
-                                        setEditableItem((prev: any) => ({
+                                        setEditableItem((prev) => prev ? {
                                             ...prev,
                                             status: e.target.value,
-                                        }))
+                                        } : null)
                                     }
                                     className={`w-full border rounded-md px-3 py-2 ${
                                         editing
@@ -486,34 +539,35 @@ const ComplianceAndSafety: React.FC = () => {
                         <div className="flex justify-end mt-6 gap-3">
                             {!editing && (
                                 <>
-                                    <button
+                                    <Button
                                         onClick={() => {
                                             setEditing(true);
                                         }}
                                         className="px-4 py-2 bg-secondary text-white rounded-md hover:opacity-90 transition"
                                     >
                                         Edit
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
                                         onClick={() => setViewingItem(null)}
                                         className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition"
                                     >
                                         Close
-                                    </button>
+                                    </Button>
                                 </>
                             )}
 
                             {editing && (
                                 <>
-                                    <button
+                                    <Button
                                         onClick={() => {
-                                            handleSaveEdit();
+                                            // TODO: Implement save functionality
+                                            setEditing(false);
                                         }}
                                         className="px-4 py-2 bg-primary text-white rounded-md hover:opacity-90 transition"
                                     >
                                         Save
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
                                         onClick={() => {
                                             setEditing(false);
                                             setEditableItem(viewingItem);
@@ -521,13 +575,15 @@ const ComplianceAndSafety: React.FC = () => {
                                         className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition"
                                     >
                                         Cancel
-                                    </button>
+                                    </Button>
                                 </>
                             )}
                         </div>
                     </div>
                 </div>
             )}
+
+            <FlashToast />
         </Authenticated>
     );
 };

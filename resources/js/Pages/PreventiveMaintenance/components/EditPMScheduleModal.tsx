@@ -74,11 +74,11 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                     formData.append("yearlyDay", yearlyDay.toString());
                     break;
             }
-            // For Debugging
-            console.log("=== Form Data ===:");
-            for (const [key, value] of formData.entries()) {
-                console.log(`${key}:`, value);
-            }
+            // // For Debugging
+            // console.log("=== Form Data ===:");
+            // for (const [key, value] of formData.entries()) {
+            //     console.log(`${key}:`, value);
+            // }
 
             router.post(route("work-orders.preventive-maintenance.update-schedule", schedule.id), formData, {
                 forceFormData: true,

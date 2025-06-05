@@ -127,8 +127,6 @@ class PreventiveMaintenanceController extends Controller
 
     public function updateSchedule(Request $request, $id)
     {
-        // dd("Hit", $request->all());
-
         $validated = $request->validate([
             'is_active' => 'required|in:true,false,1,0',
             'schedule' => 'required_if:has_preventive_maintenance,1|in:Weekly,Monthly,Yearly',
