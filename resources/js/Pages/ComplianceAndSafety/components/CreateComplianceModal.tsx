@@ -65,7 +65,7 @@ export default function CreateComplianceModal({
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
-
+        if (!typedLocation.trim()) newErrors["location_id"] = "Location is required.";
         if (!data.compliance_area) newErrors["compliance_area"] = "Compliance area is required.";
         if (!data.location_id) newErrors["location_id"] = "Location is required.";
         if (!data.report_description) newErrors["report_description"] = "Description is required.";

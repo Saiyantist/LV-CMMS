@@ -293,6 +293,7 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
       {totalFilteredRows > 10 && (
         <div className="flex items-center justify-between space-x-2 py-4">
           <div className="flex items-center gap-2">
+
             {/* Previous Button */}
             <Button
               variant="outline"
@@ -355,9 +356,27 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
                   ))}
                 </SelectContent>
               </Select>
-            </div>
 
+            </div>
           </div>
+          <div className="text-sm text-muted-foreground italic !mr-2">
+            {searchQuery || hasActiveFilters ? (
+              <span>Showing {totalFilteredRows} of {data.length} records</span>
+            ) : (
+              <span>Total Records: {data.length}</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Total Records Counter */}
+      {totalFilteredRows <= 10 && (
+        <div className="flex justify-end text-sm text-muted-foreground italic mt-4 mr-4">
+          {searchQuery || hasActiveFilters ? (
+            <span>Showing {totalFilteredRows} of {data.length} records</span>
+          ) : (
+            <span>Total Records: {data.length}</span>
+          )}
         </div>
       )}
     </>

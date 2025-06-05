@@ -83,7 +83,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
             header: "Compliance Area",
             cell: ({ row }) => <div>{row.getValue("compliance_area")}</div>,
             meta: {
-                cellClassName: "max-w-[12rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                cellClassName: "max-w-[10rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
                 filterable: true,
             },
@@ -94,36 +94,36 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
             header: "Location",
             cell: ({ row }) => <div>{row.original.location.name}</div>,
             meta: {
-                cellClassName: "max-w-[10rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                cellClassName: "max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
                 filterable: true,
             },
             enableSorting: false,
         },
-        {
-            accessorKey: "report_description",
-            header: "Description",
-            cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
-            meta: {
-                cellClassName: "max-w-[16rem] text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
-                searchable: true,
-            },
-            enableSorting: false,
-        },
-        {
-            accessorKey: "priority",
-            header: "Priority",
-            cell: ({ row }) => (
-                <div className={`px-2 py-1 rounded ${getPriorityColor(row.getValue("priority"))}`}>
-                    {row.getValue("priority")}
-                </div>
-            ),
-            sortingFn: prioritySorting,
-            meta: {
-                cellClassName: "text-center",
-                filterable: true,
-            },
-        },
+        // {
+        //     accessorKey: "report_description",
+        //     header: "Description",
+        //     cell: ({ row }) => <div>{row.getValue("report_description")}</div>,
+        //     meta: {
+        //         cellClassName: "max-w-[16rem] text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+        //         searchable: true,
+        //     },
+        //     enableSorting: false,
+        // },
+        // {
+        //     accessorKey: "priority",
+        //     header: "Priority",
+        //     cell: ({ row }) => (
+        //         <div className={`px-2 py-1 rounded ${getPriorityColor(row.getValue("priority"))}`}>
+        //             {row.getValue("priority")}
+        //         </div>
+        //     ),
+        //     sortingFn: prioritySorting,
+        //     meta: {
+        //         cellClassName: "text-center",
+        //         filterable: true,
+        //     },
+        // },
         {
             accessorKey: "assigned_to",
             header: "Assigned To",
@@ -152,7 +152,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                 </div>
             ),
             meta: {
-                cellClassName: "text-center",
+                cellClassName: "max-w-[8rem] text-center",
                 filterable: true,
             },
         },
@@ -252,7 +252,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                 <Datatable
                     columns={columns}
                     data={workOrders}
-                    placeholder="Search for ID, Compliance Area, Location, and Description"
+                    placeholder="Search for ID, Compliance Area, and Location"
                 />
             </div>
 
