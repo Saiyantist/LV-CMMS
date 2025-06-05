@@ -12,6 +12,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/Components/shadcnui/tooltip";
+import { Dialog, DialogContent } from "@/Components/shadcnui/dialog";
 
 // Helper to get month name and days in month
 const MONTHS = [
@@ -192,6 +193,11 @@ export default function EventCalendar() {
     const [showScrollUpButton, setShowScrollUpButton] =
         useState<boolean>(false);
 
+    // State for mobile event details modal
+    const [mobileEventDetails, setMobileEventDetails] = useState<any | null>(
+        null
+    );
+
     // Scroll to top logic
     React.useEffect(() => {
         const handleScroll = () => {
@@ -326,7 +332,7 @@ export default function EventCalendar() {
                                     className="bg-secondary hover:bg-primary/90 text-white rounded-md px-4 py-2 flex items-center gap-2 w-full sm:w-auto"
                                 >
                                     <Plus size={18} />
-                                    Event Services Request
+                                    Request Event Services
                                 </button>
                                 <div className="flex items-center gap-2">
                                     <button
@@ -384,18 +390,113 @@ export default function EventCalendar() {
                                                         : ""
                                                 }`}
                                             >
-                                                <div className="flex items-center mb-2">
-                                                    <span className="text-lg font-bold text-blue-700">
-                                                        {monthName} {day}
-                                                    </span>
-                                                    <span className="ml-2 text-gray-400 text-xs">
-                                                        {currentYear}
-                                                    </span>
-                                                    {isToday(day) && (
-                                                        <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
-                                                            Today
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center">
+                                                        <span className="text-lg font-bold text-blue-700">
+                                                            {monthName} {day}
                                                         </span>
-                                                    )}
+                                                        <span className="ml-2 text-gray-400 text-xs">
+                                                            {currentYear}
+                                                        </span>
+                                                        {isToday(day) && (
+                                                            <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                                                                Today
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    
+                                                    {/* Status badge for the highest priority event of the day */}
+                                                    {(() => {
+                                                        let badge = null;
+                                                        if (
+                                                            events.some((e) => {
+                                                                if (
+                                                                    e.status ===
+                                                                        "Approved" &&
+                                                                    e.eventStartDate &&
+                                                                    e.eventEndDate
+                                                                ) {
+                                                                    const now =
+                                                                        new Date();
+                                                                    const start =
+                                                                        (typeof e.eventStartDate === "string" || typeof e.eventStartDate === "number")
+                                                                            ? new Date(e.eventStartDate)
+                                                                            : null;
+                                                                    const end =
+                                                                        (typeof e.eventEndDate === "string" || typeof e.eventEndDate === "number")
+                                                                            ? new Date(e.eventEndDate)
+                                                                            : null;
+                                                                    if (
+                                                                        start &&
+                                                                        end &&
+                                                                        now >= start &&
+                                                                        now <= end
+                                                                    )
+                                                                        return true;
+                                                                }
+                                                                return false;
+                                                            })
+                                                        ) 
+                                                        {
+                                                            badge = (
+                                                                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold ml-2">
+                                                                    On Going
+                                                                </span>
+                                                            );
+                                                        } else if (
+                                                            events.some((e) => {
+                                                                if (
+                                                                    e.status ===
+                                                                        "Approved" &&
+                                                                    (typeof e.eventStartDate === "string" || typeof e.eventStartDate === "number")
+                                                                ) {
+                                                                    const now =
+                                                                        new Date();
+                                                                    const start =
+                                                                        (typeof e.eventStartDate === "string" || typeof e.eventStartDate === "number")
+                                                                            ? new Date(e.eventStartDate)
+                                                                            : null;
+                                                                    if (
+                                                                        start &&
+                                                                        now < start
+                                                                    )
+                                                                        return true;
+                                                                }
+                                                                return false;
+                                                            })
+                                                        ) {
+                                                            badge = (
+                                                                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold ml-2">
+                                                                    Upcoming
+                                                                </span>
+                                                            );
+                                                        } else if (
+                                                            events.some((e) => {
+                                                                if (
+                                                                    e.status ===
+                                                                        "Completed" ||
+                                                                    (e.status ===
+                                                                        "Approved" &&
+                                                                        e.eventEndDate &&
+                                                                        (typeof e.eventEndDate === "string" || typeof e.eventEndDate === "number") &&
+                                                                        new Date() >
+                                                                            new Date(e.eventEndDate))
+                                                                ) {
+                                                                    return true;
+                                                                }
+                                                                return false;
+                                                            })
+                                                        ) {
+                                                            badge = (
+                                                                <span className="bg-gray-300 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold ml-2">
+                                                                    Completed
+                                                                </span>
+                                                            );
+                                                        }
+                                                        return badge;
+                                                    })()}
+                                                    
                                                 </div>
                                                 <div className="flex flex-col gap-2">
                                                     {events.map(
@@ -466,62 +567,32 @@ export default function EventCalendar() {
                                                                     ? "bg-blue-100 text-blue-700"
                                                                     : "bg-secondary text-white";
 
+                                                            // --- Make event clickable to open details modal ---
                                                             return (
-                                                                <div
+                                                                <button
                                                                     key={idx}
-                                                                    className={`rounded-xl px-4 py-2 flex flex-col shadow-sm ${eventBgClass}`}
+                                                                    type="button"
+                                                                    className={`rounded-xl px-4 py-2 flex flex-col shadow-sm text-left transition hover:scale-[1.01] active:scale-100 focus:outline-none ${eventBgClass}`}
+                                                                    onClick={() =>
+                                                                        setMobileEventDetails(
+                                                                            event
+                                                                        )
+                                                                    }
                                                                 >
-                                                                    <div className="flex items-center justify-between">
-                                                                        <span className="font-semibold text-base truncate">
+                                                                   
+                                                                    <div className="flex flex-col mt-1 gap-0.5">
+                                                                        <span className="text-xs text-gray-500">
                                                                             {
                                                                                 event.title
                                                                             }
                                                                         </span>
-                                                                        {isOnGoing && (
-                                                                            <span className="ml-2 px-2 py-0.5 rounded-full bg-green-200 text-green-800 text-xs font-semibold">
-                                                                                On
-                                                                                Going
-                                                                            </span>
-                                                                        )}
-                                                                        {isUpcoming && (
-                                                                            <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-200 text-blue-800 text-xs font-semibold">
-                                                                                Upcoming
-                                                                            </span>
-                                                                        )}
-                                                                        {isCompleted && (
-                                                                            <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-300 text-gray-700 text-xs font-semibold">
-                                                                                Completed
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="flex flex-col mt-1 gap-0.5">
                                                                         <span className="text-xs text-gray-500">
                                                                             {
                                                                                 event.time
                                                                             }
                                                                         </span>
-                                                                        <span className="text-xs text-gray-500">
-                                                                            Venue:{" "}
-                                                                            {Array.isArray(
-                                                                                event.venue
-                                                                            )
-                                                                                ? event.venue
-                                                                                      .filter(
-                                                                                          Boolean
-                                                                                      )
-                                                                                      .join(
-                                                                                          ", "
-                                                                                      )
-                                                                                : typeof event.venue ===
-                                                                                  "string"
-                                                                                ? event.venue.replace(
-                                                                                      /[\[\]"]+/g,
-                                                                                      ""
-                                                                                  )
-                                                                                : "N/A"}
-                                                                        </span>
                                                                     </div>
-                                                                </div>
+                                                                </button>
                                                             );
                                                         }
                                                     )}
@@ -886,11 +957,83 @@ export default function EventCalendar() {
                     )}
                 </div>
                 {/* Scroll To Top Button */}
-
                 <ScrollToTopButton
                     showScrollUpButton={showScrollUpButton}
                     scrollToTop={scrollToTop}
                 />
+
+                {/* Mobile Event Details Modal */}
+                <Dialog
+                    open={!!mobileEventDetails}
+                    onOpenChange={() => setMobileEventDetails(null)}
+                >
+                    <DialogContent className="max-w-xs w-full rounded-2xl shadow-2xl border border-blue-100 p-0 bg-white/90">
+                        <div className="p-6 space-y-4">
+                            <div className="text-lg font-bold text-blue-700 mb-2">
+                                {mobileEventDetails?.title}
+                            </div>
+                            <div className="space-y-2 text-sm">
+                                <div>
+                                    <span className="font-semibold">
+                                        Venue:
+                                    </span>{" "}
+                                    {Array.isArray(mobileEventDetails?.venue)
+                                        ? mobileEventDetails.venue
+                                              .filter(Boolean)
+                                              .join(", ")
+                                        : typeof mobileEventDetails?.venue ===
+                                          "string"
+                                        ? mobileEventDetails.venue.replace(
+                                              /[\[\]"]+/g,
+                                              ""
+                                          )
+                                        : "N/A"}
+                                </div>
+                                <div>
+                                    <span className="font-semibold">
+                                        Department:
+                                    </span>{" "}
+                                    {mobileEventDetails?.department || "N/A"}
+                                </div>
+                                <div>
+                                    <span className="font-semibold">
+                                        Participants:
+                                    </span>{" "}
+                                    {mobileEventDetails?.participants || "N/A"}
+                                </div>
+                                <div>
+                                    <span className="font-semibold">
+                                        No. of Participants:
+                                    </span>{" "}
+                                    {mobileEventDetails?.number_of_participants !==
+                                        undefined &&
+                                    mobileEventDetails?.number_of_participants !==
+                                        null
+                                        ? String(
+                                              mobileEventDetails.number_of_participants
+                                          )
+                                        : "N/A"}
+                                </div>
+                                <div>
+                                    <span className="font-semibold">
+                                        Description:
+                                    </span>
+                                    <div className="whitespace-pre-line break-words text-gray-700 mt-0.5">
+                                        {mobileEventDetails?.description ? (
+                                            <span>
+                                                {mobileEventDetails.description}
+                                            </span>
+                                        ) : (
+                                            <span className="italic text-gray-400">
+                                                No description
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
         </AuthenticatedLayout>
     );

@@ -638,7 +638,8 @@ export default function MyBookings({
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                         <h1 className="text-2xl font-semibold">
                             {isAdmin &&
-                            userRoles.includes("communications_officer")
+                            userRoles.includes("communications_officer") ||
+                            userRoles.includes("super_admin")
                                 ? "Requests Management"
                                 : "My Bookings"}
                         </h1>

@@ -386,7 +386,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         {
             routeName: "event-services.my-bookings",
             href: route("event-services.my-bookings") || "",
-            text: user.roles.some((r) => r.name === "communications_officer")
+            text: user.roles.some((r) => r.name === "communications_officer" || "super_admin")
                 ? "Requests Management"
                 : "My Bookings",
             icon: user.roles.some(
