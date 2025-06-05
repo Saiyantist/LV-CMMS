@@ -480,8 +480,27 @@ export default function EventServicesRequest() {
                                         <div className="flex items-center">
                                             <FileText className="h-6 w-6 text-gray-500 mr-3" />
                                             <div>
-                                                <p className="font-medium">
-                                                    {file.name}
+                                                <p
+                                                    className="font-medium max-w-[180px] truncate"
+                                                    title={file.name}
+                                                >
+                                                    {(() => {
+                                                        const parts =
+                                                            file.name.split(
+                                                                "."
+                                                            );
+                                                        if (parts.length === 1)
+                                                            return file.name;
+                                                        const ext = parts.pop();
+                                                        const base =
+                                                            parts.join(".");
+                                                        return base.length > 18
+                                                            ? `${base.slice(
+                                                                  0,
+                                                                  18
+                                                              )}... .${ext}`
+                                                            : `${base}.${ext}`;
+                                                    })()}
                                                 </p>
                                                 <p className="text-sm text-gray-500">
                                                     {Math.round(

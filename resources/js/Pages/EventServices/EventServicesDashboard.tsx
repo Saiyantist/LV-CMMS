@@ -683,6 +683,7 @@ export default function EventServicesDashboard({
                         </Table>
                     </CardContent>
                 </Card>
+                
             </div>
             {/* </AuthenticatedLayout> */}
         </div>

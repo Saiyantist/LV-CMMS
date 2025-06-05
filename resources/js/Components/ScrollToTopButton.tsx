@@ -14,7 +14,7 @@ const ScrollToTopButton: React.FC<ScrollToTopButtonProps> = ({
     return (
         <button
             onClick={scrollToTop}
-            className="fixed bottom-6 right-6 z-50 bg-secondary hover:bg-primary text-white p-3 md:p-4 rounded-full shadow-lg dark:bg-blue-600 dark:hover:bg-blue-500"
+            className="fixed bottom-20 right-6 z-50 bg-secondary hover:bg-primary text-white p-3 md:p-4 rounded-full shadow-lg dark:bg-blue-600 dark:hover:bg-blue-500"
         >
             <ChevronUp size={20} />
         </button>

@@ -94,12 +94,12 @@ const EventSummary: React.FC<EventSummaryProps> = ({
     }
 
     return (
-        <div className="w-full mx-auto bg-white rounded-xl p-8 mt-8 space-y-8">
+        <div className="w-full px-0 sm:px-4 py-6 space-y-8 bg-gradient-to-b via-white to-white">
             <div className="text-center">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-1">
+                <h2 className="text-2xl font-bold text-gray-800 mb-1 tracking-tight">
                     Event Services Summary
                 </h2>
-                <p className="text-gray-500">
+                <p className="text-gray-500 text-base">
                     Please review all information before submitting.
                 </p>
             </div>
@@ -107,12 +107,12 @@ const EventSummary: React.FC<EventSummaryProps> = ({
             {/* Step 1: Proof of Approval */}
             <section className="space-y-2">
                 <div className="flex items-center gap-2 text-lg font-semibold text-gray-700">
-                    <FileText className="text-blue-600" size={20} />
+                    <FileText className="text-blue-600" size={22} />
                     Proof of Approval
                 </div>
                 {data.file && data.file.name ? (
-                    <div className="ml-7 flex items-center border rounded px-3 py-2 bg-gray-50 text-sm">
-                        <span className="font-mono font-medium">
+                    <div className="sm:ml-7 flex items-center border border-blue-100 rounded-xl px-4 py-2 bg-blue-50/60 text-sm shadow-sm">
+                        <span className="font-mono font-medium text-blue-900">
                             {shortenFileName(data.file.name)}
                         </span>
                         <span className="ml-2 text-gray-400">
@@ -120,7 +120,7 @@ const EventSummary: React.FC<EventSummaryProps> = ({
                         </span>
                     </div>
                 ) : (
-                    <div className="ml-7 text-gray-400 italic">
+                    <div className="sm:ml-7 text-gray-400 italic">
                         No file uploaded.
                     </div>
                 )}
@@ -129,13 +129,13 @@ const EventSummary: React.FC<EventSummaryProps> = ({
             {/* Step 2: Venue */}
             <section className="space-y-2">
                 <div className="flex items-center gap-2 text-lg font-semibold text-gray-700">
-                    <MapPin className="text-green-600" size={20} />
+                    <MapPin className="text-green-600" size={22} />
                     Requested Venue
                 </div>
                 <div
-                    className={`ml-7 ${
+                    className={`sm:ml-7 rounded-xl px-4 py-2 ${
                         selectedVenueIds && selectedVenueIds.length > 0
-                            ? "text-gray-700"
+                            ? "bg-green-50/60 text-gray-700 border border-green-100"
                             : "text-gray-400 italic"
                     }`}
                 >
@@ -153,10 +153,10 @@ const EventSummary: React.FC<EventSummaryProps> = ({
             {/* Step 3: Event Details */}
             <section className="space-y-2">
                 <div className="flex items-center gap-2 text-lg font-semibold text-gray-700">
-                    <CalendarClock className="text-purple-600" size={20} />
+                    <CalendarClock className="text-purple-600" size={22} />
                     Event Details
                 </div>
-                <div className="ml-7 space-y-1 text-gray-700 text-sm">
+                <div className="sm:ml-7 space-y-1 text-gray-700 text-sm bg-purple-50/60 border border-purple-100 rounded-xl px-4 py-2 shadow-sm">
                     <div>
                         <strong>Event Name:</strong>{" "}
                         {data.eventDetails?.eventName || "N/A"}
@@ -181,7 +181,11 @@ const EventSummary: React.FC<EventSummaryProps> = ({
                     </div>
                     <div>
                         <strong>Date & Time:</strong> {data.dateRange}{" "}
-                        {data.timeRange && `| ${data.timeRange}`}
+                        {data.timeRange && (
+                            <span className="text-gray-500">
+                                | {data.timeRange}
+                            </span>
+                        )}
                     </div>
                 </div>
             </section>
@@ -189,10 +193,10 @@ const EventSummary: React.FC<EventSummaryProps> = ({
             {/* Step 4: Requested Services */}
             <section className="space-y-2">
                 <div className="flex items-center gap-2 text-lg font-semibold text-gray-700">
-                    <ClipboardList className="text-orange-600" size={20} />
+                    <ClipboardList className="text-orange-600" size={22} />
                     Requested Services
                 </div>
-                <div className="ml-7 text-sm text-gray-700 space-y-1">
+                <div className="sm:ml-7 text-sm text-gray-700 space-y-1 bg-orange-50/60 border border-orange-100 rounded-xl px-4 py-2 shadow-sm">
                     {Object.keys(data.requestedServices).length > 0 ? (
                         Object.entries(data.requestedServices).map(
                             ([category, items]) => (

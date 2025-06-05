@@ -18,6 +18,7 @@ import CreateBookingModal from "./CreateBookingModal";
 import ViewBookingModal from "./ViewBookingModal";
 import { ChevronDown } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
+import ScrollToTopButton from "@/Components/ScrollToTopButton";
 
 // Define the booking type
 export interface Booking {
@@ -175,7 +176,16 @@ export default function MyBookings({
 
         setFilteredBookings(result);
         setCurrentPage(1); // Reset to first page when filters change
-    }, [searchQuery, filterVenue, filterStatus, bookings, isAdmin, activeTab]);
+    }, [
+        searchQuery,
+        filterVenue,
+        filterStatus,
+        bookings,
+        isAdmin,
+        activeTab,
+        showCreateModal,
+        isModalOpen,
+    ]);
 
     const handleViewBooking = (booking: Booking) => {
         setSelectedBooking(booking);
@@ -320,7 +330,9 @@ export default function MyBookings({
                 return (
                     <div>
                         {start && end
-                            ? `${formatDate(start)} - ${formatDate(end)}`
+                            ? start === end
+                                ? formatDate(start)
+                                : `${formatDate(start)} - ${formatDate(end)}`
                             : "N/A"}
                     </div>
                 );
@@ -446,9 +458,11 @@ export default function MyBookings({
                                 </option>
                             ))}
                         </select>
-                        <span className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 flex items-center ml-1">
-                            <ChevronDown className="w-4 h-4 text-black" />
-                        </span>
+                        {isAdmin && (
+                            <span className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 flex items-center ml-1">
+                                <ChevronDown className="w-4 h-4 text-black" />
+                            </span>
+                        )}
                     </div>
                 );
             },
@@ -462,6 +476,10 @@ export default function MyBookings({
             cell: ({ row }) => {
                 const booking = row.original;
                 const canEdit = isAdmin || booking.status === "Pending";
+                const hideDelete = ["Pending", "Approved", "On Going"].includes(
+                    activeTab
+                );
+
                 return (
                     <div className="flex justify-center space-x-2">
                         <Button
@@ -471,56 +489,83 @@ export default function MyBookings({
                         >
                             View
                         </Button>
-                        {isAdmin ? (
+                        {isAdmin && !hideDelete ? (
                             <Button
                                 className="bg-destructive text-xs hover:bg-red-700 text-white"
-                                onClick={() => handleDeleteBooking(booking)}
+                                onClick={() =>
+                                    openConfirm(
+                                        "Are you sure you want to delete this booking?",
+                                        () => handleDeleteBooking(booking)
+                                    )
+                                }
                             >
                                 Delete
                             </Button>
-                        ) : (
+                        ) : !isAdmin ? (
                             <Button
                                 className="bg-orange-500 text-xs hover:bg-orange-600 text-white"
-                                onClick={() => handleCancelBooking(booking)}
+                                onClick={() =>
+                                    openConfirm(
+                                        "Are you sure you want to cancel this booking?",
+                                        () => handleCancelBooking(booking)
+                                    )
+                                }
                                 disabled={booking.status !== "Pending"}
                             >
                                 Cancel
                             </Button>
-                        )}
+                        ) : null}
                     </div>
                 );
             },
+
             enableSorting: false,
         },
     ];
 
     // Delete handler
     const handleDeleteBooking = (booking: Booking) => {
-        if (confirm("Are you sure you want to delete this booking?")) {
-            router.delete(`/event-services/${booking.id}`);
-        }
+        router.delete(`/event-services/${booking.id}`, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                setFilteredBookings((prev) =>
+                    prev.filter((b) => b.id !== booking.id)
+                );
+            },
+        });
     };
 
     // Cancel handler
     const handleCancelBooking = (booking: Booking) => {
-        if (window.confirm("Are you sure you want to cancel this booking?")) {
-            router.put(
-                `/event-services/${booking.id}`,
-                { status: "Cancelled" },
-                {
-                    preserveScroll: true,
-                    preserveState: true,
-                }
-            );
-        }
+        router.put(
+            `/event-services/${booking.id}`,
+            { status: "Cancelled" },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setFilteredBookings((prev) =>
+                        prev.map((b) =>
+                            b.id === booking.id
+                                ? {
+                                      ...b,
+                                      status: "Cancelled",
+                                      displayStatus: "Cancelled",
+                                  }
+                                : b
+                        )
+                    );
+                },
+            }
+        );
     };
 
-    // Add this handler in your component:
+    // Status change handler
     const handleStatusChange = (
         booking: Booking,
         newStatus: Booking["status"]
     ) => {
-        // Optionally, show a loading indicator or optimistic UI update
         router.put(
             `/event-services/${booking.id}`,
             { status: newStatus },
@@ -528,7 +573,17 @@ export default function MyBookings({
                 preserveScroll: true,
                 preserveState: true,
                 onSuccess: () => {
-                    // Optionally refetch or update local state
+                    setFilteredBookings((prev) =>
+                        prev.map((b) =>
+                            b.id === booking.id
+                                ? {
+                                      ...b,
+                                      status: newStatus,
+                                      displayStatus: newStatus,
+                                  }
+                                : b
+                        )
+                    );
                 },
             }
         );
@@ -558,6 +613,23 @@ export default function MyBookings({
         });
     }
 
+    // iOS-like confirmation modal state
+    const [confirmModal, setConfirmModal] = useState<{
+        open: boolean;
+        message: string;
+        onConfirm: (() => void) | null;
+    }>({ open: false, message: "", onConfirm: null });
+
+    // Helper to open confirmation modal
+    const openConfirm = (message: string, onConfirm: () => void) => {
+        setConfirmModal({ open: true, message, onConfirm });
+    };
+
+    // Helper to close confirmation modal
+    const closeConfirm = () => {
+        setConfirmModal({ open: false, message: "", onConfirm: null });
+    };
+
     return (
         <AuthenticatedLayout>
             <Head title="Bookings" />
@@ -581,24 +653,43 @@ export default function MyBookings({
                     </div>
                     {/* Tabs for super admin & communications officer */}
                     {isAdmin && (
-                        <div className="mt-4">
-                            <Tabs
-                                value={activeTab}
-                                onValueChange={handleTabChange}
-                            >
-                                <TabsList className="bg-transparent text-black rounded-md mb-6 flex flex-wrap justify-start">
+                        <>
+                            {/* Desktop Tabs */}
+                            <div className="hidden md:block mt-4">
+                                <Tabs
+                                    value={activeTab}
+                                    onValueChange={handleTabChange}
+                                >
+                                    <TabsList className="bg-transparent text-black rounded-md mb-6 flex flex-wrap justify-start">
+                                        {bookingTabs.map((tab) => (
+                                            <TabsTrigger
+                                                key={tab}
+                                                value={tab}
+                                                className="data-[state=active]:bg-secondary data-[state=active]:text-white"
+                                            >
+                                                {tab}
+                                            </TabsTrigger>
+                                        ))}
+                                    </TabsList>
+                                </Tabs>
+                            </div>
+                            {/* Mobile Dropdown */}
+                            <div className="md:hidden flex justify-end px-4 mt-4">
+                                <select
+                                    value={activeTab}
+                                    onChange={(e) =>
+                                        handleTabChange(e.target.value)
+                                    }
+                                    className="border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-secondary focus:border-secondary"
+                                >
                                     {bookingTabs.map((tab) => (
-                                        <TabsTrigger
-                                            key={tab}
-                                            value={tab}
-                                            className="data-[state=active]:bg-secondary data-[state=active]:text-white"
-                                        >
+                                        <option key={tab} value={tab}>
                                             {tab}
-                                        </TabsTrigger>
+                                        </option>
                                     ))}
-                                </TabsList>
-                            </Tabs>
-                        </div>
+                                </select>
+                            </div>
+                        </>
                     )}
                 </header>
 
@@ -625,6 +716,33 @@ export default function MyBookings({
                     }
                 />
 
+                {/* iOS-like Confirmation Modal */}
+                <Dialog open={confirmModal.open} onOpenChange={closeConfirm}>
+                    <DialogContent className="max-w-xs rounded-2xl p-6 bg-white/90 text-center shadow-xl border border-blue-100">
+                        <div className="text-lg font-semibold text-gray-800 mb-4">
+                            {confirmModal.message}
+                        </div>
+                        <div className="flex justify-center gap-3 mt-2">
+                            <Button
+                                className="flex-1 rounded-xl bg-gray-100 text-gray-800 font-semibold shadow-none border border-gray-200"
+                                onClick={closeConfirm}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                className="flex-1 rounded-xl bg-blue-600 text-white font-semibold shadow"
+                                onClick={() => {
+                                    if (confirmModal.onConfirm)
+                                        confirmModal.onConfirm();
+                                    closeConfirm();
+                                }}
+                            >
+                                Confirm
+                            </Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
                 {/* Desktop Table View (Datatable) */}
                 <div className="hidden md:block -mt-16 overflow-hidden">
                     <Datatable
@@ -636,105 +754,318 @@ export default function MyBookings({
 
                 {/* Mobile Card View */}
                 <div className="md:hidden flex flex-col gap-4">
-                    {getCurrentPageItems().map((booking, index) => (
-                        <div
-                            key={index}
-                            className="border rounded-lg p-4 bg-white shadow"
-                        >
-                            <div className="text-sm space-y-2">
-                                <div className="flex justify-between items-center">
+                    {filteredBookings.map((booking, index) => {
+                        // Venue formatting: remove [" "] and ellipsis if > 25 chars
+                        let venues = Array.isArray(booking.venue)
+                            ? booking.venue.join(", ")
+                            : booking.venue;
+                        let venuesStr =
+                            typeof venues === "string"
+                                ? venues
+                                : String(venues ?? "");
+                        venuesStr = venuesStr
+                            .replace(/^\["|"\]$/g, "")
+                            .replace(/","/g, ", ");
+                        if (venuesStr.length > 25) {
+                            venuesStr = venuesStr.slice(0, 25) + "...";
+                        }
+
+                        // Event Date formatting (single or range)
+                        let eventDate = "N/A";
+                        if (
+                            booking.event_start_date &&
+                            booking.event_end_date
+                        ) {
+                            eventDate =
+                                booking.event_start_date ===
+                                booking.event_end_date
+                                    ? formatDate(booking.event_start_date)
+                                    : `${formatDate(
+                                          booking.event_start_date
+                                      )} - ${formatDate(
+                                          booking.event_end_date
+                                      )}`;
+                        }
+
+                        // Event Time formatting (single or range)
+                        let eventTime = "N/A";
+                        if (
+                            booking.event_start_time &&
+                            booking.event_end_time
+                        ) {
+                            eventTime = `${formatTime(
+                                booking.event_start_time
+                            )} - ${formatTime(booking.event_end_time)}`;
+                        }
+
+                        // Hide Delete button for Pending, Approved, On Going tabs
+                        const hideDelete = [
+                            "Pending",
+                            "Approved",
+                            "On Going",
+                        ].includes(activeTab);
+
+                        return (
+                            <div
+                                key={index}
+                                className="rounded-2xl p-4 bg-white/80 backdrop-blur-md shadow-lg border border-blue-100"
+                                style={{
+                                    boxShadow:
+                                        "0 8px 32px 0 rgba(52, 120, 246, 0.10)",
+                                }}
+                            >
+                                <div className="text-sm space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <div className="font-semibold text-blue-700">
+                                            #{booking.id}
+                                        </div>
+                                        <div className="rounded-full">
+                                            {getStatusBadge(
+                                                (booking.status ===
+                                                    "Approved" &&
+                                                    booking.event_start_date &&
+                                                    booking.event_end_date &&
+                                                    (() => {
+                                                        const today =
+                                                            new Date();
+                                                        const start = new Date(
+                                                            booking.event_start_date
+                                                        );
+                                                        const end = new Date(
+                                                            booking.event_end_date
+                                                        );
+                                                        if (
+                                                            today >= start &&
+                                                            today <= end
+                                                        )
+                                                            return "On Going";
+                                                        if (today > end)
+                                                            return "Completed";
+                                                        return booking.status;
+                                                    })()) ||
+                                                    booking.status
+                                            )}
+                                        </div>
+                                    </div>
                                     <div>
-                                        <strong>ID:</strong> {booking.id}
+                                        <span className="text-gray-500">
+                                            Date Requested:
+                                        </span>{" "}
+                                        <span className="font-medium">
+                                            {formatDate(booking.date)}
+                                        </span>
                                     </div>
-                                    <div className="rounded-full">
-                                        {getStatusBadge(
-                                            // Use computed displayStatus for badge
-                                            (booking.status === "Approved" &&
-                                                booking.event_start_date &&
-                                                booking.event_end_date &&
-                                                (() => {
-                                                    const today = new Date();
-                                                    const start = new Date(
-                                                        booking.event_start_date
-                                                    );
-                                                    const end = new Date(
-                                                        booking.event_end_date
-                                                    );
-                                                    if (
-                                                        today >= start &&
-                                                        today <= end
-                                                    )
-                                                        return "On Going";
-                                                    if (today > end)
-                                                        return "Completed";
-                                                    return booking.status;
-                                                })()) ||
-                                                booking.status
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <strong>Date Requested:</strong>{" "}
-                                    {formatDate(booking.date)}
-                                </div>
-                                <div>
-                                    <strong>Requested Venue:</strong>{" "}
-                                    {booking.venue}
-                                </div>
-                                <div>
-                                    <strong>Event Name:</strong> {booking.name}
-                                </div>
-                                <div>
-                                    <strong>Event Date:</strong>{" "}
-                                    {formatDate(booking.eventDate)}
-                                </div>
-                                <div>
-                                    <strong>Event Time:</strong>{" "}
-                                    {formatTime(booking.time)}
-                                </div>
-
-                                <div className="flex justify-end mt-2 w-full">
-                                    <div className="flex w-full space-x-1">
-                                        <Button
-                                            className="w-1/2 bg-secondary hover:bg-primary text-white"
-                                            onClick={() =>
-                                                handleViewBooking(booking)
-                                            }
-                                            disabled={
-                                                !isAdmin &&
-                                                booking.status !== "Pending"
-                                            }
+                                    <div>
+                                        <span className="text-gray-500">
+                                            Venue:
+                                        </span>{" "}
+                                        <span
+                                            className="font-medium"
+                                            title={venuesStr}
                                         >
-                                            View
-                                        </Button>
-                                        {isAdmin ? (
-                                            <Button
-                                                className="w-1/2 bg-destructive hover:bg-red-700 text-white"
-                                                onClick={() =>
-                                                    handleDeleteBooking(booking)
-                                                }
-                                            >
-                                                Delete
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                className="w-1/2 bg-orange-500 hover:bg-orange-600 text-white"
-                                                onClick={() =>
-                                                    handleCancelBooking(booking)
-                                                }
-                                                disabled={
-                                                    booking.status !== "Pending"
-                                                }
-                                            >
-                                                Cancel
-                                            </Button>
-                                        )}
+                                            {venuesStr}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">
+                                            Event:
+                                        </span>{" "}
+                                        <span className="font-medium">
+                                            {booking.name}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">
+                                            Event Date:
+                                        </span>{" "}
+                                        <span className="font-medium">
+                                            {eventDate}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">
+                                            Event Time:
+                                        </span>{" "}
+                                        <span className="font-medium">
+                                            {eventTime}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-end mt-3 w-full">
+                                        <div className="flex w-full space-x-2">
+                                            {/* Pending Tab: [Approved][View][Reject] */}
+                                            {isAdmin &&
+                                            activeTab === "Pending" ? (
+                                                <>
+                                                    <Button
+                                                        className="w-1/3 rounded-md sm:rounded-xl bg-secondary hover:bg-primary text-white font-semibold shadow"
+                                                        onClick={() =>
+                                                            handleViewBooking(
+                                                                booking
+                                                            )
+                                                        }
+                                                    >
+                                                        View
+                                                    </Button>
+                                                    <Button
+                                                        className="w-1/3 rounded-md sm:rounded-xl bg-green-500 hover:bg-green-700 text-white font-semibold shadow"
+                                                        onClick={() =>
+                                                            openConfirm(
+                                                                "Are you sure you want to approve this booking?",
+                                                                () =>
+                                                                    handleStatusChange(
+                                                                        booking,
+                                                                        "Approved"
+                                                                    )
+                                                            )
+                                                        }
+                                                    >
+                                                        Approve
+                                                    </Button>
+                                                    <Button
+                                                        className="w-1/3 rounded-md sm:rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow"
+                                                        onClick={() =>
+                                                            openConfirm(
+                                                                "Are you sure you want to reject this booking?",
+                                                                () =>
+                                                                    handleStatusChange(
+                                                                        booking,
+                                                                        "Rejected"
+                                                                    )
+                                                            )
+                                                        }
+                                                    >
+                                                        Reject
+                                                    </Button>
+                                                </>
+                                            ) : isAdmin &&
+                                              activeTab === "Approved" ? (
+                                                <>
+                                                    <Button
+                                                        className="w-1/2 rounded-md sm:rounded-xl bg-secondary hover:bg-primary text-white font-semibold shadow"
+                                                        onClick={() =>
+                                                            handleViewBooking(
+                                                                booking
+                                                            )
+                                                        }
+                                                    >
+                                                        View
+                                                    </Button>
+                                                    <Button
+                                                        className="w-1/2 rounded-md sm:rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow"
+                                                        onClick={() =>
+                                                            openConfirm(
+                                                                "Are you sure you want to cancel this booking?",
+                                                                () =>
+                                                                    handleStatusChange(
+                                                                        booking,
+                                                                        "Cancelled"
+                                                                    )
+                                                            )
+                                                        }
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </>
+                                            ) : isAdmin &&
+                                              activeTab === "On Going" ? (
+                                                <>
+                                                    <Button
+                                                        className="w-1/2 rounded-md sm:rounded-xl bg-secondary hover:bg-primary text-white font-semibold shadow"
+                                                        onClick={() =>
+                                                            handleViewBooking(
+                                                                booking
+                                                            )
+                                                        }
+                                                    >
+                                                        View
+                                                    </Button>
+                                                    <Button
+                                                        className="w-1/2 rounded-md sm:rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow"
+                                                        onClick={() =>
+                                                            openConfirm(
+                                                                "Are you sure you want to cancel this booking?",
+                                                                () =>
+                                                                    handleStatusChange(
+                                                                        booking,
+                                                                        "Cancelled"
+                                                                    )
+                                                            )
+                                                        }
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                // Default: original logic for other tabs and non-admins
+                                                <>
+                                                    <Button
+                                                        className={`${
+                                                            (isAdmin &&
+                                                                !hideDelete) ||
+                                                            (!isAdmin &&
+                                                                booking.status ===
+                                                                    "Pending")
+                                                                ? "w-1/2"
+                                                                : "w-full"
+                                                        } rounded-md sm:rounded-xl bg-secondary hover:bg-primary text-white font-semibold shadow`}
+                                                        onClick={() =>
+                                                            handleViewBooking(
+                                                                booking
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            !isAdmin &&
+                                                            booking.status !==
+                                                                "Pending"
+                                                        }
+                                                    >
+                                                        View
+                                                    </Button>
+                                                    {isAdmin && !hideDelete ? (
+                                                        <Button
+                                                            className="w-1/2 rounded-md sm:rounded-xl bg-destructive hover:bg-destructive text-white font-semibold shadow"
+                                                            onClick={() =>
+                                                                openConfirm(
+                                                                    "Are you sure you want to delete this booking?",
+                                                                    () =>
+                                                                        handleDeleteBooking(
+                                                                            booking
+                                                                        )
+                                                                )
+                                                            }
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    ) : (
+                                                        !isAdmin && (
+                                                            <Button
+                                                                className="w-1/2 rounded-md sm:rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow"
+                                                                onClick={() =>
+                                                                    openConfirm(
+                                                                        "Are you sure you want to cancel this booking?",
+                                                                        () =>
+                                                                            handleCancelBooking(
+                                                                                booking
+                                                                            )
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    booking.status !==
+                                                                    "Pending"
+                                                                }
+                                                            >
+                                                                Cancel
+                                                            </Button>
+                                                        )
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 <ViewBookingModal

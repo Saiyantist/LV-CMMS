@@ -190,14 +190,14 @@ const ViewBookingModal: React.FC<Props> = ({
     return (
         <>
             <Dialog open={open} onOpenChange={onClose}>
-                <DialogContent className="max-w-2xl w-full rounded-lg shadow-xl border border-gray-200 p-0 overflow-hidden">
-                    <DialogHeader className="bg-blue-50 px-5 py-3 border-b flex items-center justify-between">
-                        <DialogTitle className="text-xl font-semibold text-gray-800 text-center w-full">
+                <DialogContent className="max-w-2xl w-full rounded-2xl shadow-2xl border border-blue-100 p-0 overflow-hidden bg-white/90">
+                    <DialogHeader className="bg-gradient-to-b from-blue-100 via-white to-white px-6 py-4 border-b flex items-center justify-between rounded-t-2xl">
+                        <DialogTitle className="text-xl font-bold text-blue-800 text-center w-full tracking-tight">
                             Booking Details
                         </DialogTitle>
                         <button
                             onClick={onClose}
-                            className="absolute right-4 top-3 text-gray-500 hover:text-secondary transition-colors"
+                            className="absolute right-4 top-4 text-gray-400 hover:text-blue-600 transition-colors"
                             aria-label="Close"
                             type="button"
                         >
@@ -218,16 +218,16 @@ const ViewBookingModal: React.FC<Props> = ({
                         </button>
                     </DialogHeader>
 
-                    <div className="p-5 space-y-5 max-h-[75vh] overflow-y-auto bg-white text-sm">
+                    <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto bg-white/90 text-base">
                         {/* Proof of Approval at the top */}
-                        <div className="space-y-0.5 mb-4">
-                            <div className="text-xs text-gray-500 flex items-center gap-1.5">
-                                <BadgeCheck size={14} />
+                        <div className="space-y-1 mb-4">
+                            <div className="text-xs text-blue-700 flex items-center gap-1.5 font-semibold">
+                                <BadgeCheck size={16} />
                                 Proof of Approval
                             </div>
-                            {booking.proof_of_approval && (
+                            {booking.proof_of_approval ? (
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-xs text-gray-700 break-all">
+                                    <span className="text-xs text-gray-700 break-all font-medium">
                                         {booking.proof_of_approval_original_name
                                             ? booking.proof_of_approval_original_name
                                             : booking.proof_of_approval
@@ -235,12 +235,15 @@ const ViewBookingModal: React.FC<Props> = ({
                                                   .pop()}
                                     </span>
                                     <button
-                                        className="text-blue-600 underline font-semibold text-sm text-left"
+                                        className="text-blue-600 underline font-semibold text-sm text-left hover:cursor-pointer hover:text-blue-800 transition"
                                         onClick={() => setShowProofModal(true)}
+                                        type="button"
                                     >
                                         View File
                                     </button>
                                 </div>
+                            ) : (
+                                <span className="text-xs text-gray-400">N/A</span>
                             )}
                         </div>
 
@@ -248,14 +251,13 @@ const ViewBookingModal: React.FC<Props> = ({
                             <InfoBlock
                                 label="Booking ID"
                                 value={booking.id}
-                                icon={<BadgeCheck size={14} />}
+                                icon={<BadgeCheck size={16} />}
                             />
                             <InfoBlock
                                 label="Date Requested"
                                 value={formatDate(booking.date)}
-                                icon={<CalendarDays size={14} />}
+                                icon={<CalendarDays size={16} />}
                             />
-                            {/* --- Requester Name Block --- */}
                             <InfoBlock
                                 label="Requested By"
                                 value={
@@ -267,45 +269,49 @@ const ViewBookingModal: React.FC<Props> = ({
                                               booking.user.email
                                         : "N/A"
                                 }
-                                icon={<Users size={14} />}
+                                icon={<Users size={16} />}
                             />
-                            {/* --- End Requester Name Block --- */}
                             <InfoBlock
                                 label="Event Name"
                                 value={booking.name}
-                                icon={<FileText size={14} />}
+                                icon={<FileText size={16} />}
                                 justify
                             />
                             <InfoBlock
                                 label="Department"
                                 value={booking.department || "N/A"}
-                                icon={<Building2 size={14} />}
+                                icon={<Building2 size={16} />}
                                 justify
                             />
                             <InfoBlock
                                 label="Participants"
                                 value={booking.participants || "N/A"}
-                                icon={<Users size={14} />}
+                                icon={<Users size={16} />}
                                 justify
                             />
                             <InfoBlock
                                 label="No. of Participants"
                                 value={booking.number_of_participants || "N/A"}
-                                icon={<Users size={14} />}
+                                icon={<Users size={16} />}
                             />
                             <InfoBlock
                                 label="Event Date"
                                 value={
                                     booking.event_start_date &&
                                     booking.event_end_date
-                                        ? `${formatDate(
-                                              booking.event_start_date
-                                          )} to ${formatDate(
-                                              booking.event_end_date
-                                          )}`
+                                        ? booking.event_start_date ===
+                                          booking.event_end_date
+                                            ? formatDate(
+                                                  booking.event_start_date
+                                              )
+                                            : `${formatDate(
+                                                  booking.event_start_date
+                                              )} - ${formatDate(
+                                                  booking.event_end_date
+                                              )}`
                                         : "N/A"
                                 }
-                                icon={<CalendarDays size={14} />}
+                                icon={<CalendarDays size={16} />}
                             />
                             <InfoBlock
                                 label="Event Time"
@@ -319,23 +325,24 @@ const ViewBookingModal: React.FC<Props> = ({
                                           )}`
                                         : "N/A"
                                 }
-                                icon={<Clock size={14} />}
+                                icon={<Clock size={16} />}
                             />
                         </div>
 
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <InfoBlock
                                 label="Description"
                                 value={booking.description || "N/A"}
                                 multiline
                                 justify
                             />
+
                             <InfoBlock
                                 label="Requested Venue"
                                 value={
                                     venues.length ? venues.join(",\n") : "N/A"
                                 }
-                                icon={<Building2 size={14} />}
+                                icon={<Building2 size={16} />}
                                 multiline
                             />
                             <InfoBlock
@@ -345,40 +352,39 @@ const ViewBookingModal: React.FC<Props> = ({
                                         ? requestedServices.join(",\n")
                                         : "N/A"
                                 }
-                                icon={<Users size={14} />}
+                                icon={<Users size={16} />}
                                 multiline
                             />
                             <div>
-                                <div className="text-xs text-gray-500 flex items-center gap-1.5">
-                                    <Badge size={14} />
+                                <div className="text-xs text-blue-700 flex items-center gap-1.5 font-semibold">
+                                    <Badge size={16} />
                                     Status
                                 </div>
                                 {getStatusBadge(booking.status, booking)}
                             </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-blue-100">
                             {canEdit && (
                                 <Button
                                     onClick={() => setShowEdit(true)}
                                     variant="outline"
-                                    className="sm:min-w-[120px]"
+                                    className="sm:min-w-[120px] rounded-xl border-blue-200"
                                 >
                                     Edit
                                 </Button>
                             )}
                             <Button
                                 onClick={onClose}
-                                className="w-full sm:w-auto sm:min-w-[120px] bg-secondary text-sm text-white hover:bg-primary hover:text-white"
+                                className="w-full sm:w-auto sm:min-w-[120px] bg-secondary text-sm text-white hover:bg-primary hover:text-white rounded-xl"
                             >
                                 Close
                             </Button>
                         </div>
 
                         {!canEdit && (
-                            <div className="text-xs text-red-500 mt-2">
-                                You can only edit bookings that are still
-                                pending.
+                            <div className="text-xs text-red-500 mt-2 text-center">
+                                You can only edit bookings that are still pending.
                             </div>
                         )}
                     </div>
@@ -390,17 +396,16 @@ const ViewBookingModal: React.FC<Props> = ({
                 onClose={() => setShowEdit(false)}
                 booking={booking}
                 venueNames={venueNames}
-                // Use handleEditSuccess to close both modals and update state
                 onBookingUpdate={handleEditSuccess}
             />
 
             <Dialog open={showProofModal} onOpenChange={setShowProofModal}>
-                <DialogContent className="max-w-md w-full p-0 rounded-xl shadow-lg bg-white border border-gray-100">
-                    <div className="relative p-5">
+                <DialogContent className="max-w-md w-full p-0 rounded-2xl shadow-2xl bg-white/90 border border-blue-100">
+                    <div className="relative p-6">
                         {/* Close Button */}
                         <button
                             onClick={() => setShowProofModal(false)}
-                            className="absolute right-4 top-4 text-gray-400 hover:text-red-500 transition-colors z-10"
+                            className="absolute right-4 top-4 text-gray-400 hover:text-blue-600 transition-colors z-10"
                             aria-label="Close"
                             type="button"
                         >
@@ -421,11 +426,8 @@ const ViewBookingModal: React.FC<Props> = ({
                         </button>
                         {/* Modal Title */}
                         <div className="flex flex-col items-center mb-4">
-                            <BadgeCheck
-                                size={22}
-                                className="text-blue-500 mb-1"
-                            />
-                            <span className="font-semibold text-lg text-gray-800">
+                            <BadgeCheck size={22} className="text-blue-500 mb-1" />
+                            <span className="font-semibold text-lg text-blue-800">
                                 Proof of Approval
                             </span>
                             {booking.proof_of_approval_original_name && (
@@ -435,7 +437,7 @@ const ViewBookingModal: React.FC<Props> = ({
                             )}
                         </div>
                         {/* File Preview */}
-                        <div className="flex justify-center items-center bg-gray-50 rounded-lg border border-gray-100 p-3 min-h-[200px] max-h-[350px]">
+                        <div className="flex justify-center items-center bg-blue-50 rounded-xl border border-blue-100 p-3 min-h-[200px] max-h-[350px]">
                             {booking.proof_of_approval &&
                                 (/\.(jpg|jpeg|png|gif)$/i.test(
                                     booking.proof_of_approval
@@ -443,13 +445,13 @@ const ViewBookingModal: React.FC<Props> = ({
                                     <img
                                         src={`/storage/${booking.proof_of_approval}`}
                                         alt="Proof of Approval"
-                                        className="max-h-72 max-w-full rounded shadow border border-gray-200 object-contain"
+                                        className="max-h-72 max-w-full rounded shadow border border-blue-100 object-contain"
                                     />
                                 ) : (
                                     <iframe
                                         src={`/storage/${booking.proof_of_approval}`}
                                         title="Proof of Approval"
-                                        className="w-full h-72 rounded shadow border border-gray-200 bg-white"
+                                        className="w-full h-72 rounded shadow border border-blue-100 bg-white"
                                     />
                                 ))}
                         </div>
@@ -460,13 +462,11 @@ const ViewBookingModal: React.FC<Props> = ({
                                     href={`/storage/${booking.proof_of_approval}`}
                                     download={
                                         booking.proof_of_approval_original_name ||
-                                        booking.proof_of_approval
-                                            .split("/")
-                                            .pop()
+                                        booking.proof_of_approval.split("/").pop()
                                     }
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded bg-secondary hover:bg-primary text-white text-sm font-medium shadow transition w-1/2 justify-center"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-primary text-white text-sm font-medium shadow transition w-1/2 justify-center"
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -488,7 +488,7 @@ const ViewBookingModal: React.FC<Props> = ({
                                     href={`/storage/${booking.proof_of_approval}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-medium shadow transition w-1/2 justify-center"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-medium shadow transition w-1/2 justify-center"
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"

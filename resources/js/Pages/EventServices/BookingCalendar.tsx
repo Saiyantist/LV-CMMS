@@ -357,7 +357,7 @@ export default function EventCalendar() {
                         <>
                             {/* Mobile: List of days with approved events only */}
                             <div className="block md:hidden">
-                                <div className="flex flex-col gap-2">
+                                <div className="flex flex-col gap-4">
                                     {Array.from(
                                         { length: daysInMonth },
                                         (_, i) => i + 1
@@ -378,22 +378,26 @@ export default function EventCalendar() {
                                         return (
                                             <div
                                                 key={day}
-                                                className={`bg-white rounded-lg shadow border p-3 ${
+                                                className={`rounded-2xl bg-white/90 border border-blue-100 shadow-lg p-4 ${
                                                     isToday(day)
-                                                        ? "border-2 border-blue-600"
+                                                        ? "border-2 border-blue-500"
                                                         : ""
                                                 }`}
                                             >
-                                                <div className="font-semibold text-primary mb-1">
-                                                    {monthName} {day},{" "}
-                                                    {currentYear}
+                                                <div className="flex items-center mb-2">
+                                                    <span className="text-lg font-bold text-blue-700">
+                                                        {monthName} {day}
+                                                    </span>
+                                                    <span className="ml-2 text-gray-400 text-xs">
+                                                        {currentYear}
+                                                    </span>
                                                     {isToday(day) && (
-                                                        <span className="ml-2 text-xs text-blue-600 font-bold">
-                                                            (Today)
+                                                        <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                                                            Today
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="flex flex-col gap-1">
+                                                <div className="flex flex-col gap-2">
                                                     {events.map(
                                                         (event, idx) => {
                                                             // Compute status
@@ -455,47 +459,68 @@ export default function EventCalendar() {
 
                                                             const eventBgClass =
                                                                 isCompleted
-                                                                    ? "bg-gray-300 cursor-not-allowed opacity-60"
+                                                                    ? "bg-gray-200 text-gray-500"
                                                                     : isOnGoing
-                                                                    ? "bg-green-500"
+                                                                    ? "bg-green-100 text-green-700"
                                                                     : isUpcoming
-                                                                    ? "bg-secondary"
-                                                                    : getRandomColor(
-                                                                          day,
-                                                                          idx
-                                                                      );
+                                                                    ? "bg-blue-100 text-blue-700"
+                                                                    : "bg-secondary text-white";
 
                                                             return (
                                                                 <div
                                                                     key={idx}
-                                                                    className={`${eventBgClass} p-2 rounded text-xs text-white flex flex-col`}
+                                                                    className={`rounded-xl px-4 py-2 flex flex-col shadow-sm ${eventBgClass}`}
                                                                 >
-                                                                    <span className="font-medium">
-                                                                        {
-                                                                            event.title
-                                                                        }
-                                                                    </span>
-                                                                    <span>
-                                                                        {
-                                                                            event.time
-                                                                        }
-                                                                    </span>
-                                                                    {isOnGoing && (
-                                                                        <span className="text-xs font-bold text-green-200 mt-1">
-                                                                            On
-                                                                            Going
+                                                                    <div className="flex items-center justify-between">
+                                                                        <span className="font-semibold text-base truncate">
+                                                                            {
+                                                                                event.title
+                                                                            }
                                                                         </span>
-                                                                    )}
-                                                                    {isUpcoming && (
-                                                                        <span className="text-xs font-bold text-blue-100 mt-1">
-                                                                            Upcoming
+                                                                        {isOnGoing && (
+                                                                            <span className="ml-2 px-2 py-0.5 rounded-full bg-green-200 text-green-800 text-xs font-semibold">
+                                                                                On
+                                                                                Going
+                                                                            </span>
+                                                                        )}
+                                                                        {isUpcoming && (
+                                                                            <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-200 text-blue-800 text-xs font-semibold">
+                                                                                Upcoming
+                                                                            </span>
+                                                                        )}
+                                                                        {isCompleted && (
+                                                                            <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-300 text-gray-700 text-xs font-semibold">
+                                                                                Completed
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex flex-col mt-1 gap-0.5">
+                                                                        <span className="text-xs text-gray-500">
+                                                                            {
+                                                                                event.time
+                                                                            }
                                                                         </span>
-                                                                    )}
-                                                                    {isCompleted && (
-                                                                        <span className="text-xs font-bold text-gray-700 mt-1">
-                                                                            Completed
+                                                                        <span className="text-xs text-gray-500">
+                                                                            Venue:{" "}
+                                                                            {Array.isArray(
+                                                                                event.venue
+                                                                            )
+                                                                                ? event.venue
+                                                                                      .filter(
+                                                                                          Boolean
+                                                                                      )
+                                                                                      .join(
+                                                                                          ", "
+                                                                                      )
+                                                                                : typeof event.venue ===
+                                                                                  "string"
+                                                                                ? event.venue.replace(
+                                                                                      /[\[\]"]+/g,
+                                                                                      ""
+                                                                                  )
+                                                                                : "N/A"}
                                                                         </span>
-                                                                    )}
+                                                                    </div>
                                                                 </div>
                                                             );
                                                         }
@@ -861,6 +886,7 @@ export default function EventCalendar() {
                     )}
                 </div>
                 {/* Scroll To Top Button */}
+
                 <ScrollToTopButton
                     showScrollUpButton={showScrollUpButton}
                     scrollToTop={scrollToTop}
