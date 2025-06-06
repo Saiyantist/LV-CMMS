@@ -18,7 +18,6 @@ import CreateBookingModal from "./CreateBookingModal";
 import ViewBookingModal from "./ViewBookingModal";
 import { ChevronDown } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
-import ScrollToTopButton from "@/Components/ScrollToTopButton";
 
 // Define the booking type
 export interface Booking {
@@ -30,10 +29,8 @@ export interface Booking {
     time: string;
     status:
         | "Completed"
-        // | "In Progress"
         | "On Going"
         | "Cancelled"
-        // | "Not Started"
         | "Pending"
         | "Rejected"
         | "Approved";
@@ -87,7 +84,6 @@ export default function MyBookings({
         "Rejected",
     ];
     const [activeTab, setActiveTab] = useState<Booking["status"]>("Pending");
-
     const handleTabChange = (value: string) => {
         setActiveTab(value as Booking["status"]);
     };
@@ -238,16 +234,7 @@ export default function MyBookings({
                 );
         }
     };
-
-    // Get current page items
-    const getCurrentPageItems = () => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        return filteredBookings.slice(startIndex, endIndex);
-    };
-
-    // Modal rendering using portal for overlay effect
-    // const BookingDetailsModal = () =>
+    
     isModalOpen && selectedBooking
         ? createPortal(
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -302,7 +289,7 @@ export default function MyBookings({
                     </div>
                 );
             },
-            meta: { searchable: true },
+            // meta: { searchable: false, filterable: true }, // Remove
         },
         {
             accessorKey: "name",
@@ -637,8 +624,8 @@ export default function MyBookings({
                 <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                         <h1 className="text-2xl font-semibold">
-                            {isAdmin &&
-                            userRoles.includes("communications_officer") ||
+                            {(isAdmin &&
+                                userRoles.includes("communications_officer")) ||
                             userRoles.includes("super_admin")
                                 ? "Requests Management"
                                 : "My Bookings"}

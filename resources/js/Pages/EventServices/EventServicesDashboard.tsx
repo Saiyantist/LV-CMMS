@@ -1,6 +1,3 @@
-"use client";
-
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import {
     Card,
@@ -25,10 +22,9 @@ import {
     TableRow,
 } from "@/Components/shadcnui/table";
 import { ChevronDown } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ApexCharts from "apexcharts";
 import axios from "axios";
-import { ColumnDef } from "@/Components/Datatable";
 
 interface Booking {
     id: number | string;
@@ -53,8 +49,6 @@ const allStatuses = [
     "Rejected",
     "Cancelled",
     "Completed",
-    // "In Progress",
-    // "Not Started",
 ];
 
 const statusColors: Record<string, string> = {
@@ -63,18 +57,14 @@ const statusColors: Record<string, string> = {
     Rejected: "#a3a3a3",
     Cancelled: "#f87171",
     Completed: "#16A34A",
-    // "In Progress": "#f59e42",
-    // "Not Started": "#64748B",
 };
 
 const statusBadgeClasses: Record<string, string> = {
     Completed: "bg-green-200 text-green-800 hover:bg-green-200",
-    // "In Progress": "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
     Cancelled: "bg-orange-500 text-white hover:bg-orange-500",
     Rejected: "bg-red-500 text-white hover:bg-red-500",
     Pending: "bg-sky-100 text-sky-700 hover:bg-sky-200",
     Approved: "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
-    // "Not Started": "bg-gray-300 text-gray-800 hover:bg-gray-400",
     default: "bg-gray-200 text-gray-800",
 };
 
@@ -154,21 +144,6 @@ export default function EventServicesDashboard({
         }
     }, [initialBookings]);
 
-    // Status counts
-    const statusList = [
-        "Completed",
-        // "In Progress",
-        "Cancelled",
-        // "Not Started",
-        "Pending",
-        "Approved",
-        "Rejected",
-    ];
-    // const statusCounts = statusList.reduce((acc, status) => {
-    //     acc[status] = bookings.filter((b) => b.status === status).length;
-    //     return acc;
-    // }, {} as Record<string, number>);
-
     const [statusCounts, setStatusCounts] = useState<Record<string, number>>(
         {}
     );
@@ -206,7 +181,7 @@ export default function EventServicesDashboard({
     });
     const topDepartments = Object.entries(departmentCounts)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
+        .slice(0, 10)
         .map(([department, bookings], i) => ({
             rank: i + 1,
             department,
@@ -220,32 +195,6 @@ export default function EventServicesDashboard({
             venueCounts[v] = (venueCounts[v] || 0) + 1;
         });
     });
-    const recentVenues = Object.entries(venueCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 7)
-        .map(([name, value]) => ({ name, value }));
-
-    // Recent Booking Activity (last 10)
-    const bookingActivity = bookings
-        .slice()
-        .sort((a, b) => (b.date > a.date ? 1 : -1))
-        .slice(0, 3)
-        .map((b) => ({
-            dateRequested: b.date,
-            venue: b.venue.join(", "),
-            eventDate:
-                b.event_start_date && b.event_end_date
-                    ? `${b.event_start_date} to ${b.event_end_date}`
-                    : "N/A",
-            eventTime:
-                b.event_start_time && b.event_end_time
-                    ? `${b.event_start_time} to ${b.event_end_time}`
-                    : "N/A",
-            eventName: b.name,
-            status: b.status,
-        }));
-
-    // For chart (pie or bar), you can use statusCounts
 
     const getStatusBadge = (status: string) => (
         <Badge
@@ -274,7 +223,6 @@ export default function EventServicesDashboard({
         if (statuses.length === 0) return;
 
         const counts = getStatusCounts(statuses);
-
         const data = allStatuses.map((status) => counts[status]);
 
         if (chartRef.current) {
@@ -316,19 +264,8 @@ export default function EventServicesDashboard({
             : text;
     }
 
-    // Add these handlers inside your component (for now, just alert or log)
     const handleViewBooking = (booking: any) => {
         alert(`View booking: ${booking.eventName}`);
-    };
-    const handleDeleteBooking = (booking: any) => {
-        if (window.confirm("Are you sure you want to delete this booking?")) {
-            alert(`Delete booking: ${booking.eventName}`);
-        }
-    };
-    const handleCancelBooking = (booking: any) => {
-        if (window.confirm("Are you sure you want to cancel this booking?")) {
-            alert(`Cancel booking: ${booking.eventName}`);
-        }
     };
 
     return (
@@ -455,62 +392,18 @@ export default function EventServicesDashboard({
                                     ))}
                                 </div>
                             </div>
-
-                            {/* Bar Graph,  might do this later. */}
-
-                            {/* <CardTitle className="text-lg font-semibold">
-                                Frequently Booked venues
-                            </CardTitle> */}
-
-                            {/* <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between h-auto sm:h-64 gap-4">
-                                {recentVenues.map((venue, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex flex-row sm:flex-col items-center gap-2 flex-1"
-                                    >
-                                        <div
-                                            className="bg-blue-500 rounded w-full sm:w-full"
-                                            style={{
-                                                height: "32px",
-                                                width: `${venue.value * 10}px`,
-                                                // On sm and up, use height for bar, width 100%
-                                                ...(window.innerWidth >= 640
-                                                    ? {
-                                                          height: `${
-                                                              venue.value * 10
-                                                          }px`,
-                                                          width: "100%",
-                                                      }
-                                                    : {}),
-                                            }}
-                                        ></div>
-                                        <span className="text-xs text-gray-600 text-center">
-                                            {venue.name}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div> */}
-
-                            {/* <div className="flex justify-between text-xs text-gray-500 mt-2">
-                                <span>0</span>
-                                <span>2</span>
-                                <span>4</span>
-                                <span>6</span>
-                                <span>8</span>
-                                <span>10+</span>
-                            </div> */}
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Recent Booking Activity */}
+                {/* Upcoming Approved Bookings */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-lg font-semibold">
-                            Recent Booking Activity
+                            Upcoming Approved Bookings
                         </CardTitle>
                         <p className="text-sm text-gray-600">
-                            Recent facility bookings and status
+                            The 5 nearest upcoming approved bookings
                         </p>
                     </CardHeader>
                     <CardContent>
@@ -518,7 +411,6 @@ export default function EventServicesDashboard({
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="text-center">
-                                        {" "}
                                         Date Requested
                                     </TableHead>
                                     <TableHead className="text-center">
@@ -538,152 +430,159 @@ export default function EventServicesDashboard({
                                     </TableHead>
                                     <TableHead className="text-center">
                                         Action
-                                    </TableHead>{" "}
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {bookingActivity.map((booking, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell className="text-center">
-                                            {/* Format: Month {day}, Year */}
-                                            {booking.dateRequested
-                                                ? new Date(
-                                                      booking.dateRequested
-                                                  ).toLocaleDateString(
-                                                      "en-US",
-                                                      {
-                                                          year: "numeric",
-                                                          month: "long",
-                                                          day: "numeric",
-                                                      }
-                                                  )
-                                                : ""}
-                                        </TableCell>
-                                        <TableCell>{booking.venue}</TableCell>
-                                        <TableCell className="text-center">
-                                            {/* Format: Month {day}, Year to Month {day}, Year */}
-                                            {booking.eventDate &&
-                                            booking.eventDate !== "N/A"
-                                                ? (() => {
-                                                      const [start, end] =
-                                                          booking.eventDate.split(
-                                                              " to "
-                                                          );
-                                                      const format = (
-                                                          dateStr: string
-                                                      ) =>
-                                                          new Date(
-                                                              dateStr
-                                                          ).toLocaleDateString(
-                                                              "en-US",
-                                                              {
-                                                                  year: "numeric",
-                                                                  month: "long",
-                                                                  day: "numeric",
-                                                              }
-                                                          );
-                                                      return `${format(
-                                                          start
-                                                      )} - ${format(end)}`;
-                                                  })()
-                                                : "N/A"}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {/* Format: h:mm am/pm to h:mm am/pm */}
-                                            {booking.eventTime &&
-                                            booking.eventTime !== "N/A"
-                                                ? (() => {
-                                                      const [start, end] =
-                                                          booking.eventTime.split(
-                                                              " to "
-                                                          );
-                                                      const format = (
-                                                          timeStr: string
-                                                      ) => {
-                                                          // If timeStr is already in 12hr format, just return
-                                                          if (
-                                                              timeStr
-                                                                  .toLowerCase()
-                                                                  .includes(
-                                                                      "am"
-                                                                  ) ||
-                                                              timeStr
-                                                                  .toLowerCase()
-                                                                  .includes(
-                                                                      "pm"
-                                                                  )
-                                                          ) {
-                                                              return timeStr;
+                                {bookings
+                                    .filter(
+                                        (b) =>
+                                            b.status === "Approved" &&
+                                            b.event_start_date &&
+                                            new Date(b.event_start_date) >=
+                                                new Date()
+                                    )
+                                    .sort(
+                                        (a, b) =>
+                                            new Date(
+                                                a.event_start_date ?? ""
+                                            ).getTime() -
+                                            new Date(
+                                                b.event_start_date ?? ""
+                                            ).getTime()
+                                    )
+                                    .slice(0, 5)
+                                    .map((booking, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell className="text-center">
+                                                {booking.date
+                                                    ? new Date(
+                                                          booking.date
+                                                      ).toLocaleDateString(
+                                                          "en-US",
+                                                          {
+                                                              year: "numeric",
+                                                              month: "long",
+                                                              day: "numeric",
                                                           }
-                                                          // Otherwise, parse and format
-                                                          const [h, m] =
-                                                              timeStr.split(
-                                                                  ":"
+                                                      )
+                                                    : ""}
+                                            </TableCell>
+                                            <TableCell>
+                                                {booking.venue.join(", ")}
+                                            </TableCell>
+                                            <TableCell>
+                                                <span title={booking.name}>
+                                                    {truncateText(booking.name)}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {booking.event_start_date &&
+                                                booking.event_end_date
+                                                    ? (() => {
+                                                          const format = (
+                                                              dateStr: string
+                                                          ) =>
+                                                              new Date(
+                                                                  dateStr
+                                                              ).toLocaleDateString(
+                                                                  "en-US",
+                                                                  {
+                                                                      year: "numeric",
+                                                                      month: "long",
+                                                                      day: "numeric",
+                                                                  }
                                                               );
-                                                          const date =
-                                                              new Date();
-                                                          date.setHours(
-                                                              Number(h),
-                                                              Number(m)
-                                                          );
-                                                          return date.toLocaleTimeString(
-                                                              "en-US",
-                                                              {
-                                                                  hour: "numeric",
-                                                                  minute: "2-digit",
-                                                                  hour12: true,
+                                                          return booking.event_start_date ===
+                                                              booking.event_end_date
+                                                              ? format(
+                                                                    booking.event_start_date
+                                                                )
+                                                              : `${format(
+                                                                    booking.event_start_date
+                                                                )} - ${format(
+                                                                    booking.event_end_date
+                                                                )}`;
+                                                      })()
+                                                    : "N/A"}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {booking.event_start_time &&
+                                                booking.event_end_time
+                                                    ? (() => {
+                                                          const format = (
+                                                              timeStr: string
+                                                          ) => {
+                                                              if (
+                                                                  timeStr
+                                                                      .toLowerCase()
+                                                                      .includes(
+                                                                          "am"
+                                                                      ) ||
+                                                                  timeStr
+                                                                      .toLowerCase()
+                                                                      .includes(
+                                                                          "pm"
+                                                                      )
+                                                              ) {
+                                                                  return timeStr;
                                                               }
-                                                          );
-                                                      };
-                                                      return `${format(
-                                                          start
-                                                      )} - ${format(end)}`;
-                                                  })()
-                                                : "N/A"}
-                                        </TableCell>
-                                        <TableCell>
-                                            <span title={booking.eventName}>
-                                                {truncateText(
-                                                    booking.eventName
-                                                )}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {getStatusBadge(booking.status)}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-secondary hover:bg-primary text-white"
-                                                    onClick={() =>
-                                                        handleViewBooking(
-                                                            booking
-                                                        )
-                                                    }
-                                                >
-                                                    View
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-destructive hover:bg-red-700 text-white"
-                                                    onClick={() =>
-                                                        handleDeleteBooking(
-                                                            booking
-                                                        )
-                                                    }
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                                              const [h, m] =
+                                                                  timeStr.split(
+                                                                      ":"
+                                                                  );
+                                                              const date =
+                                                                  new Date();
+                                                              date.setHours(
+                                                                  Number(h),
+                                                                  Number(m)
+                                                              );
+                                                              return date.toLocaleTimeString(
+                                                                  "en-US",
+                                                                  {
+                                                                      hour: "numeric",
+                                                                      minute: "2-digit",
+                                                                      hour12: true,
+                                                                  }
+                                                              );
+                                                          };
+                                                          return booking.event_start_time ===
+                                                              booking.event_end_time
+                                                              ? format(
+                                                                    booking.event_start_time
+                                                                )
+                                                              : `${format(
+                                                                    booking.event_start_time
+                                                                )} - ${format(
+                                                                    booking.event_end_time
+                                                                )}`;
+                                                      })()
+                                                    : "N/A"}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {getStatusBadge(booking.status)}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        className="bg-secondary hover:bg-primary text-white"
+                                                        onClick={() =>
+                                                            handleViewBooking(
+                                                                booking
+                                                            )
+                                                        }
+                                                    >
+                                                        View
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
                             </TableBody>
                         </Table>
                     </CardContent>
                 </Card>
-                
             </div>
             {/* </AuthenticatedLayout> */}
         </div>

@@ -5,7 +5,6 @@ import {
     MapPin,
     CalendarClock,
     ClipboardList,
-    ShieldCheck,
 } from "lucide-react";
 
 interface EventSummaryProps {

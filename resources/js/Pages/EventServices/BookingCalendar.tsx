@@ -64,17 +64,6 @@ function getDateKey(year: number, month: number, day: number) {
     ).padStart(2, "0")}`;
 }
 
-// Format date helper
-function formatDate(dateString: string) {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-}
-
 // TruncateWithToggle: shows ellipsis if too long, with a "See more"/"See less" toggle
 function TruncateWithToggle({
     text,
@@ -231,15 +220,12 @@ export default function EventCalendar() {
 
     const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-    // Status color mapping (not used for now, replaced by random color)
-    // const statusColor = (status: string) => { ... }
-
     // Status badge for list view
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "Completed":
                 return (
-                    <span className="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                    <span className="bg-green-200 text-green-500 px-3 py-1 rounded-full text-sm font-medium">
                         Completed
                     </span>
                 );
@@ -295,16 +281,16 @@ export default function EventCalendar() {
         currentYear === today.year;
 
     // After your calendarEvents and daysInMonth are defined
-    const approvedDays = Array.from(
-        { length: daysInMonth },
-        (_, i) => i + 1
-    ).filter((day) => {
-        const dateKey = getDateKey(currentYear, currentMonth, day);
-        return (
-            calendarEvents[dateKey] &&
-            calendarEvents[dateKey].some((event) => event.status === "Approved")
-        );
-    });
+    // const approvedDays = Array.from(
+    //     { length: daysInMonth },
+    //     (_, i) => i + 1
+    // ).filter((day) => {
+    //     const dateKey = getDateKey(currentYear, currentMonth, day);
+    //     return (
+    //         calendarEvents[dateKey] &&
+    //         calendarEvents[dateKey].some((event) => event.status === "Approved")
+    //     );
+    // });
 
     return (
         <AuthenticatedLayout>
@@ -405,7 +391,6 @@ export default function EventCalendar() {
                                                         )}
                                                     </div>
 
-                                                    
                                                     {/* Status badge for the highest priority event of the day */}
                                                     {(() => {
                                                         let badge = null;
@@ -420,25 +405,36 @@ export default function EventCalendar() {
                                                                     const now =
                                                                         new Date();
                                                                     const start =
-                                                                        (typeof e.eventStartDate === "string" || typeof e.eventStartDate === "number")
-                                                                            ? new Date(e.eventStartDate)
+                                                                        typeof e.eventStartDate ===
+                                                                            "string" ||
+                                                                        typeof e.eventStartDate ===
+                                                                            "number"
+                                                                            ? new Date(
+                                                                                  e.eventStartDate
+                                                                              )
                                                                             : null;
                                                                     const end =
-                                                                        (typeof e.eventEndDate === "string" || typeof e.eventEndDate === "number")
-                                                                            ? new Date(e.eventEndDate)
+                                                                        typeof e.eventEndDate ===
+                                                                            "string" ||
+                                                                        typeof e.eventEndDate ===
+                                                                            "number"
+                                                                            ? new Date(
+                                                                                  e.eventEndDate
+                                                                              )
                                                                             : null;
                                                                     if (
                                                                         start &&
                                                                         end &&
-                                                                        now >= start &&
-                                                                        now <= end
+                                                                        now >=
+                                                                            start &&
+                                                                        now <=
+                                                                            end
                                                                     )
                                                                         return true;
                                                                 }
                                                                 return false;
                                                             })
-                                                        ) 
-                                                        {
+                                                        ) {
                                                             badge = (
                                                                 <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold ml-2">
                                                                     On Going
@@ -449,17 +445,26 @@ export default function EventCalendar() {
                                                                 if (
                                                                     e.status ===
                                                                         "Approved" &&
-                                                                    (typeof e.eventStartDate === "string" || typeof e.eventStartDate === "number")
+                                                                    (typeof e.eventStartDate ===
+                                                                        "string" ||
+                                                                        typeof e.eventStartDate ===
+                                                                            "number")
                                                                 ) {
                                                                     const now =
                                                                         new Date();
                                                                     const start =
-                                                                        (typeof e.eventStartDate === "string" || typeof e.eventStartDate === "number")
-                                                                            ? new Date(e.eventStartDate)
+                                                                        typeof e.eventStartDate ===
+                                                                            "string" ||
+                                                                        typeof e.eventStartDate ===
+                                                                            "number"
+                                                                            ? new Date(
+                                                                                  e.eventStartDate
+                                                                              )
                                                                             : null;
                                                                     if (
                                                                         start &&
-                                                                        now < start
+                                                                        now <
+                                                                            start
                                                                     )
                                                                         return true;
                                                                 }
@@ -479,9 +484,14 @@ export default function EventCalendar() {
                                                                     (e.status ===
                                                                         "Approved" &&
                                                                         e.eventEndDate &&
-                                                                        (typeof e.eventEndDate === "string" || typeof e.eventEndDate === "number") &&
+                                                                        (typeof e.eventEndDate ===
+                                                                            "string" ||
+                                                                            typeof e.eventEndDate ===
+                                                                                "number") &&
                                                                         new Date() >
-                                                                            new Date(e.eventEndDate))
+                                                                            new Date(
+                                                                                e.eventEndDate
+                                                                            ))
                                                                 ) {
                                                                     return true;
                                                                 }
@@ -496,7 +506,6 @@ export default function EventCalendar() {
                                                         }
                                                         return badge;
                                                     })()}
-                                                    
                                                 </div>
                                                 <div className="flex flex-col gap-2">
                                                     {events.map(
@@ -565,7 +574,7 @@ export default function EventCalendar() {
                                                                     ? "bg-green-100 text-green-700"
                                                                     : isUpcoming
                                                                     ? "bg-blue-100 text-blue-700"
-                                                                    : "bg-secondary text-white";
+                                                                    : "bg-secondary text-gray-500";
 
                                                             // --- Make event clickable to open details modal ---
                                                             return (
@@ -579,7 +588,6 @@ export default function EventCalendar() {
                                                                         )
                                                                     }
                                                                 >
-                                                                   
                                                                     <div className="flex flex-col mt-1 gap-0.5">
                                                                         <span className="text-xs text-gray-500">
                                                                             {
@@ -660,23 +668,23 @@ export default function EventCalendar() {
                                             return (
                                                 <div
                                                     key={`${weekIndex}-${dayIndex}`}
-                                                    className={`min-h-[80px] sm:min-h-[150px] p-1 sm:p-2 border-r border-b relative ${
-                                                        day
-                                                            ? isToday(day)
-                                                                ? "border-2 border-blue-600"
-                                                                : "text-black"
-                                                            : "bg-gray-50"
-                                                    } ${
-                                                        dayIndex === 6
-                                                            ? "border-r-0"
-                                                            : ""
-                                                    }`}
+                                                    className={`min-h-[80px] sm:min-h-[150px] p-1 sm:p-2 relative
+    ${
+        day
+            ? isToday(day)
+                ? "border-2 border-blue-500 rounded-2xl bg-white/90 shadow-lg"
+                : `border border-blue-100 bg-white/90${
+                      dayIndex === 6 ? " border-r-0" : ""
+                  }`
+            : "bg-gray-50"
+    }
+`}
                                                 >
                                                     <div className="text-base sm:text-xl font-medium mb-1 sm:mb-2">
                                                         {day || ""}
                                                         {day &&
                                                             isToday(day) && (
-                                                                <span className="ml-1 text-xs text-blue-600 font-bold">
+                                                                <span className="ml-1 text-xs text-blue-500 font-bold">
                                                                     (Today)
                                                                 </span>
                                                             )}
@@ -757,11 +765,11 @@ export default function EventCalendar() {
 
                                                                         const eventBgClass =
                                                                             isCompleted
-                                                                                ? "bg-gray-300 cursor-not-allowed opacity-60"
+                                                                                ? "bg-gray-200 cursor-not-allowed opacity-60"
                                                                                 : isOnGoing
-                                                                                ? "bg-green-500"
+                                                                                ? "bg-green-100"
                                                                                 : isUpcoming
-                                                                                ? "bg-secondary"
+                                                                                ? "bg-blue-100"
                                                                                 : typeof day ===
                                                                                   "number"
                                                                                 ? getRandomColor(
@@ -789,7 +797,7 @@ export default function EventCalendar() {
                                                                                     }
                                                                                 >
                                                                                     <div
-                                                                                        className={`${eventBgClass} ${cursorClass} text-white rounded-lg mx-auto my-1 px-2 py-1 flex flex-col items-center shadow-sm max-w-[95%]`}
+                                                                                        className={`${eventBgClass} ${cursorClass} text-black rounded-lg mx-auto my-1 px-2 py-1 flex flex-col items-center shadow-sm max-w-[95%]`}
                                                                                         style={{
                                                                                             minWidth:
                                                                                                 "90px",
@@ -804,20 +812,20 @@ export default function EventCalendar() {
                                                                                                 event.title
                                                                                             }
                                                                                         </div>
-                                                                                        <div className="w-4/5 border-t border-white/40 my-1"></div>
+                                                                                        <div className="w-4/5 border-t border-black/40 my-1"></div>
                                                                                         <div className="font-mono text-xs text-center tracking-wide">
                                                                                             {
                                                                                                 event.time
                                                                                             }
                                                                                         </div>
                                                                                         {isOnGoing && (
-                                                                                            <span className="text-xs font-bold text-green-200 mt-1">
+                                                                                            <span className="text-xs font-bold text-gray-500 mt-1">
                                                                                                 On
                                                                                                 Going
                                                                                             </span>
                                                                                         )}
                                                                                         {isUpcoming && (
-                                                                                            <span className="text-xs font-bold text-blue-100 mt-1">
+                                                                                            <span className="text-xs font-bold text-gray-500 mt-1">
                                                                                                 Upcoming
                                                                                             </span>
                                                                                         )}
