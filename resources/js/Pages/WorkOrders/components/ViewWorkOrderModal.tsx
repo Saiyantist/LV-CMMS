@@ -257,6 +257,14 @@ export default function ViewWorkOrderModal({
 
                     <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody className="flex flex-col">
+                            {/* Target Date */}
+                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                <TableHead className="flex flex-[1] items-center">
+                                    <Label>Target Date:</Label>
+                                </TableHead>
+                                <TableCell className="flex flex-[3.3] items-center">{formatDate(workOrder.scheduled_at, "MM/dd/yyyy")}</TableCell>
+                            </TableRow>
+
                             {/* Location */}
                             <TableRow className="border-none flex flex-row items-center justify-between w-full">
                                 <TableHead className="flex flex-[1] items-center">

@@ -4,6 +4,7 @@ import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
 import CreateComplianceModal from "./components/CreateComplianceModal";
 import ViewComplianceModal from "./components/ViewComplianceModal";
+import DeleteComplianceModal from "./components/DeleteComplianceModal";
 import { Datatable } from "@/Components/Datatable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/Components/shadcnui/button";
@@ -68,6 +69,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
     const [viewingItem, setViewingItem] = useState<WorkOrder | null>(null);
     const [editing, setEditing] = useState(false);
     const [editableItem, setEditableItem] = useState<WorkOrder | null>(null);
+    const [deletingItem, setDeletingItem] = useState<WorkOrder | null>(null);
 
     const columns: ColumnDef<WorkOrder>[] = [
         {
@@ -179,12 +181,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                             size={"icon"}
                             className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
                             onClick={() => {
-                                const confirmed = window.confirm(
-                                    `Are you sure you want to delete item ID ${row.original.id}?`
-                                );
-                                if (confirmed) {
-                                    // TODO: Implement delete functionality
-                                }
+                                setDeletingItem(row.original);
                             }}
                         >
                             <Trash2 className="h-4 w-4" />
@@ -209,12 +206,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                     onClick={() => {
-                                        const confirmed = window.confirm(
-                                            `Are you sure you want to delete item ID ${row.original.id}?`
-                                        );
-                                        if (confirmed) {
-                                            // TODO: Implement delete functionality
-                                        }
+                                        setDeletingItem(row.original);
                                     }}
                                     className="text-destructive"
                                 >
@@ -253,7 +245,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                 <Datatable
                     columns={columns}
                     data={workOrders}
-                    placeholder="Search for ID, Compliance Area, and Location"
+                    placeholder="Search for ID, Compliance Area, or Location"
                 />
             </div>
 
@@ -329,12 +321,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                             <Button
                                 className="w-1/2 bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition"
                                 onClick={() => {
-                                    const confirmed = window.confirm(
-                                        `Are you sure you want to delete item ID ${item.id}?`
-                                    );
-                                    if (confirmed) {
-                                        // TODO: Implement delete functionality
-                                    }
+                                    setDeletingItem(item);
                                 }}
                             >
                                 Delete
@@ -362,6 +349,13 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                         setEditableItem(null);
                         setEditing(false);
                     }}
+                />
+            )}
+
+            {deletingItem && (
+                <DeleteComplianceModal
+                    workOrder={deletingItem}
+                    onClose={() => setDeletingItem(null)}
                 />
             )}
 

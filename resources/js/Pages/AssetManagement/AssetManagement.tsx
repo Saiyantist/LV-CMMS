@@ -18,6 +18,7 @@ import ScrollToTopButton from "@/Components/ScrollToTopButton";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
 import DeleteAssetModal from "./components/DeleteAssetModal";
+import { formatDate } from "date-fns";
 
 interface Asset {
     id: number;
@@ -163,7 +164,7 @@ const AssetManagement: React.FC = () => {
         {
             accessorKey: "date_acquired",
             header: "Date Acquired",
-            cell: ({ row }) => <div>{row.getValue("date_acquired")}</div>,
+            cell: ({ row }) => <div>{formatDate(row.getValue("date_acquired"), "MM/dd/yyyy")}</div>,
             meta: {
                 headerClassName: "w-[12%]",
                 cellClassName: "text-center",
@@ -172,7 +173,7 @@ const AssetManagement: React.FC = () => {
         {
             accessorKey: "last_maintained_at",
             header: "Last Maintenance",
-            cell: ({ row }) => <div>{row.getValue("last_maintained_at")}</div>,
+            cell: ({ row }) => <div>{formatDate(row.getValue("last_maintained_at"), "MM/dd/yyyy")}</div>,
             meta: {
                 headerClassName: "w-[12%]",
                 cellClassName: "text-center",
@@ -268,7 +269,7 @@ const AssetManagement: React.FC = () => {
                 <Datatable
                     columns={columns}
                     data={assets}
-                    placeholder="Search for ID, Name, Specification, and Location"
+                    placeholder="Search for ID, Name, Specification, or Location"
                 />
             </div>
 

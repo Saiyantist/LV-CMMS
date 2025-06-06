@@ -241,7 +241,7 @@ export default function AcceptWorkOrderModal({
                             </TableRow>
 
                             {/* Remarks */}
-                            {workOrder.remarks && (
+                            {/* {workOrder.remarks && (
                             <TableRow className="border-none">
                                 <TableHead className="">
                                     <Label>Remarks:</Label>
@@ -252,7 +252,7 @@ export default function AcceptWorkOrderModal({
                                         <span className="text-gray-500 italic">No Remarks</span>
                                     )}</TableCell>
                             </TableRow>
-                            )}
+                            )} */}
 
                             {/* Asset Detail */}
                             {assetDetails && (

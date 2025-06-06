@@ -120,15 +120,36 @@ class ComplianceAndSafetyController extends Controller
             'assigned_to' => $request->assigned_to,
         ]);
 
-        return redirect()->route('work-orders.compliance-and-safety')
-            ->with('success', 'Compliance work order updated successfully.');
+        return redirect()->route('work-orders.compliance-and-safety')->with('success', 'Compliance work order updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        try {
+            $workOrder = WorkOrder::findOrFail($id);
+            // Delete any associated attachments
+            if ($workOrder->attachments) {
+                foreach ($workOrder->attachments as $attachment) {
+                    // Delete the file from storage
+                    if (Storage::exists($attachment->path)) {
+                        Storage::delete($attachment->path);
+                    }
+                    // Delete the attachment record
+                    $attachment->delete();
+                }
+            }
+    
+            // Delete the work order
+            $workOrder->update(['status' => 'Deleted']);
+            $workOrder->delete();
+    
+            return redirect()->back()->with('success', 'Compliance and safety work order has been deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to delete compliance and safety work order.' . $e->getMessage());
+        }
+
     }
 }

@@ -16,6 +16,7 @@ import {
 } from "@/Components/shadcnui/table"
 import { router } from "@inertiajs/react";
 import { toast } from "sonner"; // hmm
+import { getStatusColor } from "@/utils/getStatusColor";
 
 interface Location {
     id: number;
@@ -51,6 +52,22 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
         return new Date(2000, schedule.maintenance_schedule.year_month - 1).toLocaleString('default', { month: 'long' });
     });
     const [yearlyDay, setYearlyDay] = useState(schedule.maintenance_schedule?.year_day || 1);
+
+    // Helper function to get status color
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "Functional":
+                return "bg-green-100 text-green-700 border border-green-300";
+            case "Failed":
+                return "bg-red-100 text-red-700 border border-red-300";
+            case "Under Maintenance":
+                return "bg-blue-100 text-blue-700 border border-blue-300";
+            case "End of Useful Life":
+                return "bg-yellow-100 text-yellow-700 border border-yellow-300";
+            default:
+                return "bg-gray-100 text-gray-700 border border-gray-300";
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -149,9 +166,19 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                             {/* Status */}
                             <TableRow className="border-none">
                                 <TableHead>
-                                    <Label>Status:</Label>
+                                    <Label>Condition:</Label>
                                 </TableHead>
-                                <TableCell>{schedule.status}</TableCell>
+                                <TableCell>
+                                    <p>
+                                        <span
+                                            className={`px-2 py-1 rounded text-xs ${getStatusColor(
+                                                schedule.status
+                                            )}`}
+                                        >
+                                            {schedule.status}
+                                        </span>
+                                    </p>
+                                </TableCell>
                             </TableRow>
 
                             {/* Last Maintained */}
@@ -174,7 +201,7 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                                 checked={isActive}
                                 onCheckedChange={setIsActive}
                             />
-                            <Label className="flex items-center text-sm font-medium text-gray-700">Toggle Active Status</Label>
+                            <Label className="flex items-center text-sm font-medium">Toggle Active Status</Label>
                         </div>
 
                         {/* Schedule Type Selection */}
@@ -196,8 +223,8 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
 
                             {/* Schedule-specific fields */}
                             {scheduleType === "Weekly" && (
-                                <div className="flex items-center gap-2 !mt-4">
-                                    <span>Every</span>
+                                <div className="flex items-center gap-2 !mt-4 text-sm">
+                                    <span className="text-muted-foreground">Every</span>
                                     <Input
                                         type="number"
                                         min="1"
@@ -217,13 +244,13 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                                             }
                                         }}
                                     />
-                                    <span>Week(s)</span>
+                                    <span className="text-muted-foreground">Week(s)</span>
                                 </div>
                             )}
 
                             {scheduleType === "Monthly" && (
-                                <div className="flex items-center gap-2 !mt-4 flex-wrap">
-                                    <span>On the</span>
+                                <div className="flex items-center gap-2 !mt-4 flex-wrap text-sm">
+                                    <span className="text-muted-foreground">On the</span>
                                     <Select
                                         value={monthlyFrequency.toString()}
                                         onValueChange={(value) => setMonthlyFrequency(Number(value))}
@@ -241,7 +268,7 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                                         </SelectContent>
                                     </Select>
 
-                                    <span>Of</span>
+                                    <span className="text-muted-foreground">Of</span>
 
                                     <Select
                                         value={monthlyDay}
@@ -262,8 +289,8 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                             )}
 
                             {scheduleType === "Yearly" && (
-                                <div className="flex items-center gap-2 !mt-4 flex-wrap">
-                                    <span>Every</span>
+                                <div className="flex items-center gap-2 !mt-4 flex-wrap text-sm">
+                                    <span className="text-muted-foreground">Every</span>
                                     <Select
                                         value={yearlyMonth}
                                         onValueChange={setYearlyMonth}
@@ -282,7 +309,7 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <span>on day</span>
+                                    <span className="text-muted-foreground">on day</span>
                                     <Input
                                         type="number"
                                         min="1"

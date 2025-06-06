@@ -22,6 +22,7 @@ import {
 } from "@/Components/shadcnui/table";
 import ViewPMModal from "@/Pages/PreventiveMaintenance/components/ViewPMModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/shadcnui/card";
+import { formatDate } from "date-fns";
 
 interface PreventiveMaintenance {
     id: number;
@@ -99,13 +100,22 @@ export function UpcomingPreventiveMaintenanceTable({ data, locations, user }: Up
         {
             accessorKey: "scheduled_at",
             header: "Scheduled Date",
+            cell: ({ row }) => {
+                const date = row.original.scheduled_at;
+                return date ? formatDate(date, "MM/dd/yyyy") : "N/A";
+            },
             meta: {
                 headerClassName: "w-[25%]",
             } as ColumnMeta,
         },
         {
-            accessorKey: "asset.last_maintained_at",
+            id: "last_maintained_at",
             header: "Last Maintained",
+            accessorFn: (row) => row.asset?.last_maintained_at,
+            cell: ({ row }) => {
+                const date = row.original.asset?.last_maintained_at;
+                return date ? formatDate(date, "MM/dd/yyyy") : "N/A";
+            },
             meta: {
                 headerClassName: "w-[25%]",
             } as ColumnMeta,
@@ -224,7 +234,7 @@ export function UpcomingPreventiveMaintenanceTable({ data, locations, user }: Up
                                     </p>
                                     <p>
                                         <span className="font-bold text-primary">Last Maintained:</span>{" "}
-                                        {pm.asset?.last_maintained_at ? new Date(pm.asset.last_maintained_at).toLocaleDateString() : "N/A"}
+                                        {pm.asset?.last_maintained_at ? formatDate(pm.asset.last_maintained_at, "MM/dd/yyyy") : "N/A"}
                                     </p>
                                     <p>
                                         <span className="font-bold text-primary">Assigned to:</span>{" "}

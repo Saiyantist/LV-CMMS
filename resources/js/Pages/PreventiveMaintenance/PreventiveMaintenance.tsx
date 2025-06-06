@@ -13,6 +13,7 @@ import { Trash2, MoreVertical } from "lucide-react";
 import DeletePMModal from "./components/DeletePMModal";
 import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
+import { formatDate } from "date-fns";
 
 interface WorkOrders {
     id: number;
@@ -187,8 +188,8 @@ const PreventiveMaintenance: React.FC = () => {
 
 
     const PMSWorkOrdersColumns: ColumnDef<WorkOrders>[] = [
-        {
-            accessorKey: "id",
+    {
+        accessorKey: "id",
         header: "ID",
         cell: ({ row }) => <div>{row.getValue("id")}</div>,
         meta: {
@@ -207,7 +208,6 @@ const PreventiveMaintenance: React.FC = () => {
         meta: {
             cellClassName: "max-w-[7rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
             searchable: true,
-            filterable: true,
         },
     },
     {
@@ -221,7 +221,6 @@ const PreventiveMaintenance: React.FC = () => {
         meta: {
             cellClassName: "max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
             searchable: true,
-            filterable: true,
         },
     },
     {
@@ -246,7 +245,6 @@ const PreventiveMaintenance: React.FC = () => {
         meta: {
             cellClassName: "max-w-[10rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
             searchable: true,
-            filterable: true,
         },
     },
     {
@@ -285,7 +283,7 @@ const PreventiveMaintenance: React.FC = () => {
         header: "Last Maintained",
         accessorFn: (row) => {
             if (!row.asset?.last_maintained_at) return "-";
-            return row.asset.last_maintained_at;
+            return formatDate(row.asset.last_maintained_at, "MM/dd/yyyy");
 
         },
         meta: {
@@ -354,7 +352,7 @@ const PreventiveMaintenance: React.FC = () => {
     const PMSchedulesColumns: ColumnDef<AssetWithMaintenanceSchedule>[] = [
         {
             id: "id",
-            accessorKey: "id",
+            accessorKey: "maintenance_schedule.id",
             header: "ID",
             cell: ({ row }) => <div>{row.getValue("id")}</div>,
             meta: {
@@ -366,12 +364,12 @@ const PreventiveMaintenance: React.FC = () => {
         {
             id: "asset",
             header: "Asset Name",
+            accessorKey: "name",
             accessorFn: (row) => row.name,
             enableSorting: true,
             meta: {
                 cellClassName: "max-w-[7rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
-                filterable: true,
             },
         },
         {
@@ -385,9 +383,9 @@ const PreventiveMaintenance: React.FC = () => {
             },
         },
         {
-            id: "status",
+            id: "maintenance_schedule.is_active",
             header: "Status",
-            accessorFn: (row) => row.maintenance_schedule?.is_active ? "Active" : "Inactive",
+            accessorKey: "maintenance_schedule.is_active",
             enableSorting: true,
             cell: ({ row }) => {
                 const status = row.original.maintenance_schedule?.is_active ? "Active" : "Inactive";
@@ -404,7 +402,6 @@ const PreventiveMaintenance: React.FC = () => {
             meta: {
                 headerClassName: "w-20",
                 cellClassName: "flex justify-center",
-                filterable: true,
             },
         },
         {
@@ -419,7 +416,11 @@ const PreventiveMaintenance: React.FC = () => {
         {
             id: "last_run_at",
             header: "Last Run",
-            accessorFn: (row) => row.maintenance_schedule?.last_run_at || "-",
+            accessorFn: (row) => {
+                if (!row.maintenance_schedule?.last_run_at) return "-";
+                return formatDate(row.maintenance_schedule.last_run_at, "MM/dd/yyyy");
+    
+            },
             enableSorting: true,
             meta: {
                 cellClassName: "max-w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
@@ -510,7 +511,7 @@ const PreventiveMaintenance: React.FC = () => {
                 <Datatable
                     columns={PMSWorkOrdersColumns}
                     data={workOrders}
-                    placeholder="Search for ID, Asset Name, Location, Label, and Assigned to"
+                    placeholder="Search for ID, Asset Name, Location, Label, or Assigned to"
                     />
                 )}
 
@@ -519,7 +520,7 @@ const PreventiveMaintenance: React.FC = () => {
                     <Datatable
                         columns={PMSchedulesColumns}
                         data={assetMaintenanceSchedules}
-                        placeholder="Search for ID, Asset Name, and Schedule"
+                        placeholder="Search for ID or Asset Name"
                     />
                 )}
             </div>

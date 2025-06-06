@@ -302,7 +302,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                     </Label>
                                     {isEditing ? (
                                         <Input
-                                            id="specification"
+                                            id="specifipcation"
                                             value={editableData.specification_details}
                                             onChange={(e) => setEditableData({
                                                 ...editableData,
@@ -382,7 +382,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                         </Select>
                                     </div>
                                     ) : (
-                                        <p>
+                                    <p>
                                         <span
                                             className={`px-2 py-1 rounded text-xs ${getStatusColor(
                                                 editableData.status

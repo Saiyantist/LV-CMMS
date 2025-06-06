@@ -48,8 +48,6 @@ export default function Dashboard({
 }: DashboardProps) {
     const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
 
-    console.log(upcomingPreventiveMaintenance);
-
     // Hide chart for admin, super admin.
     const roleNames = new Set(
         user.roles?.map((role: { name: string }) => role.name)

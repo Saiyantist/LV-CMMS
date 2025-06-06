@@ -33,6 +33,7 @@ import {
 } from "@/Components/shadcnui/table";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { getPriorityColor } from "@/utils/getPriorityColor";
+import axios from "axios";
 
 interface ViewComplianceModalProps {
     workOrder: {
@@ -82,6 +83,8 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
     const [isEditing, setIsEditing] = useState(false);
     const [editableData, setEditableData] = useState({ ...workOrder });
     const [showCalendar, setShowCalendar] = useState(false);
+    const [typedLocation, setTypedLocation] = useState(workOrder.location.name.toString());
+    const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
 
     const handleChange = (field: string, value: any) => {
         setEditableData((prev) => ({
@@ -100,14 +103,68 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
         assigned_to: editableData.assigned_to?.id?.toString() || "",
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const validateForm = () => {
+        const newErrors: Record<string, string> = {};
+
+        if (!editableData.compliance_area.trim())
+            newErrors["compliance_area"] = "Compliance area is required.";
+        if (!editableData.report_description.trim())
+            newErrors["report_description"] = "Description is required.";
+        if (!editableData.scheduled_at)
+            newErrors["scheduled_at"] = "Target date is required.";
+        if (!editableData.priority)
+            newErrors["priority"] = "Priority is required.";
+        if (!editableData.assigned_to?.id)
+            newErrors["assigned_to"] = "Assigned personnel is required.";
+        if (!editableData.status)
+            newErrors["status"] = "Status is required.";
+        if (!typedLocation.trim())
+            newErrors["location_id"] = "Location is required.";
+
+        setLocalErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validateForm()) return;
+
+        let locationId = editableData.location.id.toString();
+
+        // Check the typed location against existing locations
+        const existing = locations.find(
+            (loc) => loc.name.toLowerCase() === typedLocation.toLowerCase()
+        );
+
+        if (existing) {
+            locationId = existing.id.toString();
+        } else if (existing === undefined) {
+            const response = await axios.post("/locations", {
+                name: typedLocation.trim(),
+            });
+
+            locationId = response.data.id;
+        }
+        
+        const formData = {
+            compliance_area: editableData.compliance_area,
+            location_id: locationId,
+            report_description: editableData.report_description,
+            remarks: editableData.remarks,
+            scheduled_at: editableData.scheduled_at,
+            priority: editableData.priority,
+            assigned_to: editableData.assigned_to?.id?.toString() || "",
+            status: editableData.status
+        };
+
         router.put(
             route("work-orders.compliance-and-safety.update", workOrder.id),
-            data,
+            formData,
             {
                 onSuccess: () => {
                     setIsEditing(false);
+                    onClose();
                 },
             }
         );
@@ -120,9 +177,9 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
                             {isEditing ? (
-                                <span>Editing Compliance Details</span>
+                                <span>Editing Compliance and Safety</span>
                             ) : (
-                                <span>Compliance Details</span>
+                                <span>Compliance and Safety</span>
                             )}
                             <span className="text-muted-foreground">|</span>
                             <span className="text-muted-foreground">ID: {workOrder.id}</span>
@@ -165,6 +222,9 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                                 <SelectItem value="Accessibility Compliance">Accessibility Compliance</SelectItem>
                                             </SelectContent>
                                         </Select>
+                                        {localErrors.compliance_area && (
+                                            <p className="text-red-500 text-xs">{localErrors.compliance_area}</p>
+                                        )}
                                     </div>
 
                                     {/* Status */}
@@ -237,6 +297,9 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                                 )}
                                             </SelectContent>
                                         </Select>
+                                        {localErrors.status && (
+                                            <p className="text-red-500 text-xs">{localErrors.status}</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -253,13 +316,11 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         const selectedLocation = locations.find(
                                             (loc) => loc.id.toString() === id
                                         );
-                                        if (selectedLocation) {
-                                            handleChange("location", {
-                                                id: selectedLocation.id,
-                                                name: selectedLocation.name,
-                                            });
-                                        }
+                                        setTypedLocation(selectedLocation?.name || ""); // Show readable name in input
+                                        setData("location_id", id); // Submit actual ID
                                     }}
+                                    onTextChange={(text) => setTypedLocation(text)}
+                                    error={localErrors.location_id}
                                 />
 
                                 {/* Description */}
@@ -274,6 +335,9 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         placeholder="Describe the compliance issue..."
                                         required
                                     />
+                                    {localErrors.report_description && (
+                                        <p className="text-red-500 text-xs">{localErrors.report_description}</p>
+                                    )}
                                 </div>
 
                                 {/* Safety Protocols */}
@@ -324,6 +388,9 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                                 />
                                             </div>
                                         )}
+                                        {localErrors.scheduled_at && (
+                                            <p className="text-red-500 text-xs">{localErrors.scheduled_at}</p>
+                                        )}
                                     </div>
 
                                     {/* Priority */}
@@ -345,6 +412,9 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                                 <SelectItem value="Critical">Critical</SelectItem>
                                             </SelectContent>
                                         </Select>
+                                        {localErrors.priority && (
+                                            <p className="text-red-500 text-xs">{localErrors.priority}</p>
+                                        )}
                                     </div>
 
                                     {/* Assigned To */}
@@ -378,6 +448,9 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                                 ))}
                                             </SelectContent>
                                         </Select>
+                                        {localErrors.assigned_to && (
+                                            <p className="text-red-500 text-xs">{localErrors.assigned_to}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -396,7 +469,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                                 <Label>Date Requested:</Label>
                                             </TableHead>
                                             <TableCell className="flex flex-[2] items-center">
-                                                {format(parseISO(workOrder.requested_at), "MM/dd/yyyy")}
+                                                {format(parseISO(editableData.requested_at), "MM/dd/yyyy")}
                                             </TableCell>
                                         </div>
 
@@ -407,9 +480,9 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                             </TableHead>
                                             <TableCell className="flex flex-[2] items-center">
                                                 <span
-                                                    className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(workOrder.status)}`}
+                                                    className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(editableData.status)}`}
                                                 >
-                                                    {workOrder.status}
+                                                    {editableData.status}
                                                 </span>
                                             </TableCell>
                                         </div>
@@ -424,8 +497,8 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                                 <Label>Target Date:</Label>
                                             </TableHead>
                                             <TableCell className="flex flex-[2] items-center">
-                                                {workOrder.scheduled_at
-                                                    ? format(parseISO(workOrder.scheduled_at), "MM/dd/yyyy")
+                                                {editableData.scheduled_at
+                                                    ? format(parseISO(editableData.scheduled_at), "MM/dd/yyyy")
                                                     : "Not set"}
                                             </TableCell>
                                         </div>
@@ -438,10 +511,10 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                             <TableCell className="flex flex-[2] items-center">
                                                 <div
                                                     className={`px-2 py-1 rounded bg-muted ${getPriorityColor(
-                                                        workOrder.priority
+                                                        editableData.priority
                                                     )}`}
                                                 >
-                                                    {workOrder.priority}
+                                                    {editableData.priority}
                                                 </div>
                                             </TableCell>
                                         </div>
@@ -456,7 +529,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                                 <Label>Compliance Area:</Label>
                                             </TableHead>
                                             <TableCell className="flex flex-[2] items-center">
-                                                {workOrder.compliance_area}
+                                                {editableData.compliance_area}
                                             </TableCell>
                                         </div>
 
@@ -466,7 +539,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                                 <Label>Location:</Label>
                                             </TableHead>
                                             <TableCell className="flex flex-[2] items-center">
-                                                {workOrder.location.name}
+                                                {editableData.location.name}
                                             </TableCell>
                                         </div>
                                     </TableRow>
@@ -477,8 +550,8 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                             <Label>Assigned To:</Label>
                                         </TableHead>
                                         <TableCell className="flex flex-[4.4] items-center">
-                                            {workOrder.assigned_to
-                                                ? `${workOrder.assigned_to.first_name} ${workOrder.assigned_to.last_name}`
+                                            {editableData.assigned_to
+                                                ? `${editableData.assigned_to.first_name} ${editableData.assigned_to.last_name}`
                                                 : "Unassigned"}
                                         </TableCell>
                                     </TableRow>
@@ -490,8 +563,8 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         <TableHead className="flex flex-[1] items-center">
                                             <Label>Description:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
-                                            {workOrder.report_description}
+                                        <TableCell className="flex flex-[4.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                            {editableData.report_description}
                                         </TableCell>
                                     </TableRow>
 
@@ -500,8 +573,8 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         <TableHead className="flex flex-[1] items-center">
                                             <Label>Safety Protocols:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
-                                            {workOrder.remarks || <span className="text-gray-500 italic">No safety protocols specified</span>}
+                                        <TableCell className="flex flex-[4.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                            {editableData.remarks || <span className="text-gray-500 italic">No safety protocols specified</span>}
                                         </TableCell>
                                     </TableRow>
 

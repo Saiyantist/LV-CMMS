@@ -119,39 +119,47 @@ export default function FilterModal({
         </div>
 
         <div className="space-y-4 p-4 max-h-[60vh] overflow-y-auto">
-          {filterableColumns.map((column) => {
-            const accessorKey = column.accessorKey as string
-            const uniqueValues = getUniqueValues(accessorKey)
+          {filterableColumns.length === 0 ? (
+            <div className="text-center text-muted-foreground py-4">
+              <span className="text-sm italic">
+                No available filters for this table
+              </span>
+            </div>
+          ) : (
+            filterableColumns.map((column) => {
+              const accessorKey = column.accessorKey as string
+              const uniqueValues = getUniqueValues(accessorKey)
 
-            return (
-              <div key={accessorKey} className="space-y-2">
-                <label className="text-sm font-medium">{column.header?.toString() || accessorKey}</label>
-                <Select
-                  value={localFilters[accessorKey] || ""}
-                  onValueChange={(value) => handleFilterChange(accessorKey, value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {uniqueValues.map((value) => (
-                      <SelectItem key={`${accessorKey}-${value}`} value={value}>
-                        {value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )
-          })}
+              return (
+                <div key={accessorKey} className="space-y-2">
+                  <label className="text-sm font-medium">{column.header?.toString() || accessorKey}</label>
+                  <Select
+                    value={localFilters[accessorKey] || ""}
+                    onValueChange={(value) => handleFilterChange(accessorKey, value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      {uniqueValues.map((value) => (
+                        <SelectItem key={`${accessorKey}-${value}`} value={value}>
+                          {value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )
+            })
+          )}
         </div>
 
         <div className="flex justify-between p-4 border-t">
-          <Button size="sm" className="w-full bg-primary text-white hover:bg-primary/90 mr-2" onClick={applyFilters}>
+          <Button size="sm" className="w-full bg-primary text-white hover:bg-primary/90 mr-2" onClick={applyFilters} disabled={filterableColumns.length === 0}>
             Apply
           </Button>
-          <Button size="sm" variant="outline" className="w-full" onClick={clearFilters}>
+          <Button size="sm" variant="outline" className="w-full" onClick={clearFilters} disabled={filterableColumns.length === 0}>
             Clear
           </Button>
         </div>
