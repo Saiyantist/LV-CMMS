@@ -20,43 +20,25 @@ import {
     TableHeader,
     TableRow,
 } from "@/Components/shadcnui/table";
-import ViewPMModal from "@/Pages/PreventiveMaintenance/components/ViewPMModal";
+import ViewComplianceModal from "@/Pages/ComplianceAndSafety/components/ViewComplianceModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/shadcnui/card";
 import { formatDate } from "date-fns";
 
-interface PreventiveMaintenance {
+interface ComplianceWorkOrder {
     id: number;
-    asset: {
-        id: number;
-        name: string;
-        last_maintained_at: string;
-        maintenance_schedule?: {
-            id: number;
-            asset_id: number;
-            interval_unit: string;
-            interval_value: number | null;
-            month_week: number | null;
-            month_weekday: string | null;
-            year_day: number | null;
-            year_month: number | null;
-            last_run_at: string;
-            is_active: boolean;
-        };
-    };
-    assigned_to: { id: number; name: string };
     scheduled_at: string;
+    compliance_area: string;
     location: { id: number; name: string };
+    assigned_to: { id: number; first_name: string; last_name: string };
+    status: string;
     report_description: string;
     requested_at: string;
-    requested_by: { id: number; name: string };
-    status: string;
-    work_order_type: string;
-    label: string;
-    priority: string;
+    requested_by: { id: number; first_name: string; last_name: string };
     approved_at: string;
     approved_by: string;
     remarks: string;
     images: string[];
+    priority: string;
 }
 
 interface ColumnMeta {
@@ -64,8 +46,8 @@ interface ColumnMeta {
     cellClassName?: string;
 }
 
-interface UpcomingPreventiveMaintenanceTableProps {
-    data: PreventiveMaintenance[];
+interface UpcomingCompliancesTableProps {
+    data: ComplianceWorkOrder[];
     locations: { id: number; name: string }[];
     user: {
         id: number;
@@ -73,52 +55,60 @@ interface UpcomingPreventiveMaintenanceTableProps {
         roles: { name: string }[];
         permissions: string[];
     };
+    maintenancePersonnel: {
+        id: number;
+        first_name: string;
+        last_name: string;
+        roles: { id: number; name: string };
+    }[];
 }
 
-export function UpcomingPreventiveMaintenanceTable({ data, locations, user }: UpcomingPreventiveMaintenanceTableProps) {
+export function UpcomingCompliancesTable({ data, locations, user, maintenancePersonnel }: UpcomingCompliancesTableProps) {
     const [sorting, setSorting] = useState<SortingState>([{ id: 'scheduled_at', desc: false }]);
-    const [selectedPM, setSelectedPM] = useState<PreventiveMaintenance | null>(null);
+    const [selectedCompliance, setSelectedCompliance] = useState<ComplianceWorkOrder | null>(null);
 
-    const columns = useMemo<ColumnDef<PreventiveMaintenance, any>[]>(() => [
+    const columns = useMemo<ColumnDef<ComplianceWorkOrder, any>[]>(() => [
         {
             accessorKey: "scheduled_at",
-            header: "Scheduled Date",
+            header: "Target Date",
             cell: ({ row }) => {
                 const date = row.original.scheduled_at;
-                return date ? formatDate(date, "MM/dd/yyyy") : "N/A";
+                return date ? formatDate(date, "MM/dd/yyyy") : "No date set";
             },
             meta: {
                 headerClassName: "w-[25%]",
             } as ColumnMeta,
         },
         {
-            accessorKey: "asset.name",
-            header: "Asset",
+            accessorKey: "compliance_area",
+            header: "Compliance Area",
             meta: {
-                headerClassName: "w-[20%]",
+                headerClassName: "w-[25%]",
                 cellClassName: "whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
             } as ColumnMeta,
             enableSorting: false,
         },
         {
-            accessorKey: "assigned_to.name",
-            header: "Assigned to",
+            accessorKey: "location.name",
+            header: "Location",
             meta: {
                 headerClassName: "w-[25%]",
+                cellClassName: "whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
             } as ColumnMeta,
             enableSorting: false,
         },
         {
-            id: "last_maintained_at",
-            header: "Last Maintained",
-            accessorFn: (row) => row.asset?.last_maintained_at,
+            accessorKey: "assigned_to",
+            header: "Assigned to",
             cell: ({ row }) => {
-                const date = row.original.asset?.last_maintained_at;
-                return date ? formatDate(date, "MM/dd/yyyy") : "N/A";
+                const assignedTo = row.original.assigned_to;
+                return assignedTo ? `${assignedTo.first_name} ${assignedTo.last_name}` : "N/A";
             },
             meta: {
                 headerClassName: "w-[25%]",
+                cellClassName: "whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
             } as ColumnMeta,
+            enableSorting: false,
         },
     ], []);
 
@@ -135,12 +125,12 @@ export function UpcomingPreventiveMaintenanceTable({ data, locations, user }: Up
 
     return (
         <>
-            {selectedPM && (
-                <ViewPMModal
-                    workOrder={selectedPM}
+            {selectedCompliance && (
+                <ViewComplianceModal
+                    workOrder={selectedCompliance}
                     locations={locations}
-                    user={user}
-                    onClose={() => setSelectedPM(null)}
+                    maintenancePersonnel={maintenancePersonnel}
+                    onClose={() => setSelectedCompliance(null)}
                 />
             )}
             {/* Table View - Hidden on md screens */}
@@ -182,7 +172,7 @@ export function UpcomingPreventiveMaintenanceTable({ data, locations, user }: Up
                                         key={row.id} 
                                         data-state={row.getIsSelected() && "selected"} 
                                         className="h-6 hover:font-medium cursor-pointer"
-                                        onClick={() => setSelectedPM(row.original)}
+                                        onClick={() => setSelectedCompliance(row.original)}
                                     >
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell
@@ -197,7 +187,7 @@ export function UpcomingPreventiveMaintenanceTable({ data, locations, user }: Up
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={columns.length} className="h-24 text-md text-center">
-                                        No upcoming preventive maintenance found.
+                                        No upcoming compliances found.
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -209,36 +199,36 @@ export function UpcomingPreventiveMaintenanceTable({ data, locations, user }: Up
             {/* Card View - Shown on md screens */}
             <div className="md:hidden space-y-4 max-h-[20rem] overflow-y-auto scrollbar-hide hover:overflow-y-scroll">
                 {data.length > 0 ? (
-                    data.map((pm) => (
+                    data.map((compliance) => (
                         <Card
-                            key={pm.id}
-                            onClick={() => setSelectedPM(pm)}
+                            key={compliance.id}
+                            onClick={() => setSelectedCompliance(compliance)}
                             className="hover:bg-muted hover:shadow-lg transition-all duration-300 cursor-pointer"
                         >
                             <CardHeader>
                                 <CardTitle className="flex justify-between items-start text-xs sm:text-base">
                                     <p className="bg-primary rounded-md px-2 py-1 text-xs sm:text-sm text-white">
-                                        <span className="font-bold">ID:</span> {pm.id}
+                                        <span className="font-bold">ID:</span> {compliance.id}
                                     </p>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-2 pr-8 text-gray-800">
                                     <p>
-                                        <span className="font-bold text-primary">Scheduled:</span>{" "}
-                                        {new Date(pm.scheduled_at).toLocaleDateString()}
+                                        <span className="font-bold text-primary">Target Date:</span>{" "}
+                                        {compliance.scheduled_at ? formatDate(compliance.scheduled_at, "MM/dd/yyyy") : "N/A"}
                                     </p>
                                     <p>
-                                        <span className="font-bold text-primary">Asset:</span>{" "}
-                                        {pm.asset?.name || "N/A"}
+                                        <span className="font-bold text-primary">Compliance Area:</span>{" "}
+                                        {compliance.compliance_area || "N/A"}
                                     </p>
                                     <p>
-                                        <span className="font-bold text-primary">Last Maintained:</span>{" "}
-                                        {pm.asset?.last_maintained_at ? formatDate(pm.asset.last_maintained_at, "MM/dd/yyyy") : "N/A"}
+                                        <span className="font-bold text-primary">Location:</span>{" "}
+                                        {compliance.location?.name || "N/A"}
                                     </p>
                                     <p>
                                         <span className="font-bold text-primary">Assigned to:</span>{" "}
-                                        {pm.assigned_to?.name || "N/A"}
+                                        {compliance.assigned_to ? `${compliance.assigned_to.first_name} ${compliance.assigned_to.last_name}` : "N/A"}
                                     </p>
                                 </div>
                             </CardContent>
@@ -246,7 +236,7 @@ export function UpcomingPreventiveMaintenanceTable({ data, locations, user }: Up
                     ))
                 ) : (
                     <div className="text-center text-muted-foreground py-4">
-                        No upcoming preventive maintenance found.
+                        No upcoming compliances found.
                     </div>
                 )}
             </div>

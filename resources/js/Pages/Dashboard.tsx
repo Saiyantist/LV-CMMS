@@ -13,6 +13,7 @@ import ViewWorkOrderModal from "./WorkOrders/components/ViewWorkOrderModal";
 import EventServicesDashboard from "./EventServices/EventServicesDashboard";
 import { UpcomingWorkOrdersTable } from "@/Components/UpcomingWorkOrdersTable";
 import { UpcomingPreventiveMaintenanceTable } from "@/Components/UpcomingPreventiveMaintenanceTable";
+import { UpcomingCompliancesTable } from "@/Components/UpcomingCompliancesTable";
 
 interface DashboardProps {
     workOrderRequests: {
@@ -35,6 +36,25 @@ interface DashboardProps {
         roles: { name: string }[];
         permissions: string[];
     };
+    maintenancePersonnel: { id: number; first_name: string; last_name: string; roles: { id: number; name: string } }[];
+    assets: any[];
+    workOrders: any[];
+    maintenanceSchedules: any[];
+    upcomingCompliances: {
+        id: number;
+        target_date: string;
+        compliance_area: string;
+        location: { id: number; name: string };
+        assigned_to: { id: number; name: string };
+        status: string;
+        report_description: string;
+        requested_at: string;
+        requested_by: { id: number; name: string };
+        approved_at: string;
+        approved_by: string;
+        remarks: string;
+        images: string[];
+    }[];
 }
 
 export default function Dashboard({
@@ -43,6 +63,7 @@ export default function Dashboard({
     declinedWorkOrders,
     upcomingWorkOrders,
     upcomingPreventiveMaintenance,
+    upcomingCompliances,
     locations,
     user,
 }: DashboardProps) {
@@ -118,6 +139,23 @@ export default function Dashboard({
                                         </div>
                                         <UpcomingPreventiveMaintenanceTable 
                                             data={upcomingPreventiveMaintenance}
+                                            locations={locations}
+                                            user={user}
+                                        />
+                                    </div>
+                                </Card>
+                            </div>
+
+                            {/* Upcoming Compliances */}
+                            <div>
+                                <Card className="flex justify-start overflow-hidden shadow-sm rounded w-full max-h-[20rem]">
+                                    <div className="flex flex-col gap-4 p-4 w-full">
+                                        <div className="flex justify-between items-center">
+                                            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Upcoming Compliances</h1>
+                                            <Link href={route("work-orders.compliance-and-safety")} className="text-sm underline text-primary hover:text-primary/80 mr-1">View All</Link>
+                                        </div>
+                                        <UpcomingCompliancesTable
+                                            data={upcomingCompliances}
                                             locations={locations}
                                             user={user}
                                         />

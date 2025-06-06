@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Location;
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Models\Asset;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -20,7 +21,9 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
+        $locations = Location::all();
+
         $workOrderRequests = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'images')
             ->where('requested_by', $user->id)->get();
 
@@ -73,7 +76,8 @@ class DashboardController extends Controller
         // Get upcoming work orders (excluding preventive maintenance)
         $upcomingWorkOrders = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo')
             ->where('scheduled_at', '>=', Carbon::now())
-            ->where('work_order_type', '!=', 'preventive_maintenance')
+            ->where('work_order_type', '!=', 'Preventive Maintenance')
+            ->where('work_order_type', '!=', 'Compliance')
             ->where('status', '!=', 'completed')
             ->orderBy('scheduled_at', 'asc')
             ->limit(3)
@@ -145,6 +149,44 @@ class DashboardController extends Controller
                     'images' => $wo->images->pluck('url')->toArray(),
                 ];
             });
+        
+        // Get upcoming compliances
+        $upcomingCompliances = WorkOrder::with(['location', 'assignedTo', 'requestedBy'])
+        ->where('work_order_type', 'Compliance')
+        ->whereIn('status', ['Assigned', 'Ongoing', 'For Budget Request'])
+        ->orderBy('scheduled_at', 'asc')
+        ->take(3)
+        ->get()
+        ->map(function ($wo) {
+            return [
+                'id' => $wo->id,
+                'compliance_area' => $wo->compliance_area,
+                'report_description' => $wo->report_description,
+                'status' => $wo->status,
+                'work_order_type' => $wo->work_order_type,
+                'priority' => $wo->priority ?: "",
+                'scheduled_at' => $wo->scheduled_at,
+                'requested_at' => $wo->requested_at,
+                'requested_by' => [
+                    'id' => $wo->requestedBy->id,
+                    'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
+                ],
+                'location' => [
+                    'id' => $wo->location_id,
+                    'name' => $wo->location ? $wo->location->name : null,
+                ],
+                'assigned_to' => $wo->assignedTo ? [
+                    'id' => $wo->assignedTo->id,
+                    'first_name' => $wo->assignedTo->first_name,
+                    'last_name' => $wo->assignedTo->last_name,
+                ] : null,
+                'label' => $wo->label,
+                'approved_at' => $wo->approved_at ? Carbon::parse($wo->approved_at)->format('m/d/Y') : "",
+                'approved_by' => $wo->approved_by ?: "",
+                'remarks' => $wo->remarks ?: "",
+                'images' => $wo->images->pluck('url')->toArray(),
+            ];
+        });
 
         return Inertia::render('Dashboard', [
             'workOrderRequests' => $formattedWorkOrders,
@@ -152,7 +194,7 @@ class DashboardController extends Controller
             'declinedWorkOrders' => $declinedWorkOrders,
             'upcomingWorkOrders' => $upcomingWorkOrders,
             'upcomingPreventiveMaintenance' => $upcomingPreventiveMaintenance,
-            'locations' => Location::select('id', 'name')->get(),
+            'upcomingCompliances' => $upcomingCompliances,
             'user' => [
                 'id' => $user->id,
                 'name' => $user->first_name . ' ' . $user->last_name,
@@ -161,6 +203,7 @@ class DashboardController extends Controller
                 }),
                 'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
             ],
+            'locations' => $locations,
         ]);
     }
 }

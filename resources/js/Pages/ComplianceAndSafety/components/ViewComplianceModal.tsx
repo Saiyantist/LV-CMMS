@@ -195,7 +195,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                     </Button>
                 </DialogHeader>
 
-                <div className="px-6 py-2 max-h-[65vh] overflow-y-auto">
+                <div className="px-6 pt-2 pb-4 max-h-[65vh] overflow-y-auto">
                     {isEditing ? (
                         // Editing Section
                         <form onSubmit={handleSubmit} className="space-y-6">
@@ -585,38 +585,40 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                     )}
                 </div>
 
-                <DialogFooter className="px-6 py-4 border-t">
-                    <div className="flex justify-end gap-2">
-                        {isEditing ? (
-                            <>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setEditableData(workOrder);
-                                        setIsEditing(false);
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
+                {!window.location.pathname.includes('/') && (
+                    <DialogFooter className="px-6 pt-2 pb-4 border-t">
+                        <div className="flex justify-end gap-2">
+                            {isEditing ? (
+                                <>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setEditableData(workOrder);
+                                            setIsEditing(false);
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="bg-primary text-white hover:bg-primary/90 hover:text-white"
+                                        onClick={handleSubmit}
+                                    >
+                                        Save Changes
+                                    </Button>
+                                </>
+                            ) : (
                                 <Button
                                     variant="outline"
                                     className="bg-primary text-white hover:bg-primary/90 hover:text-white"
-                                    onClick={handleSubmit}
+                                    onClick={() => setIsEditing(true)}
                                 >
-                                    Save Changes
+                                    Edit
                                 </Button>
-                            </>
-                        ) : (
-                            <Button
-                                variant="outline"
-                                className="bg-primary text-white hover:bg-primary/90 hover:text-white"
-                                onClick={() => setIsEditing(true)}
-                            >
-                                Edit
-                            </Button>
-                        )}
-                    </div>
-                </DialogFooter>
+                            )}
+                        </div>
+                    </DialogFooter>
+                )}
             </DialogContent>
         </Dialog>
     );
