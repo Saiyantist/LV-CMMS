@@ -258,4 +258,49 @@ public function statusCounts()
     return response()->json($counts);
 }
 
+public function checkConflict(Request $request)
+{
+    $venues = $request->venues ?? [];
+    $startDate = $request->startDate;
+    $endDate = $request->endDate;
+    $startTime = $request->startTime;
+    $endTime = $request->endTime;
+
+    // Only consider bookings that are Pending, Approved, or On Going
+    $conflicts = EventService::whereIn('status', ['Pending', 'Approved', 'On Going'])
+        ->where(function ($q) use ($venues) {
+            foreach ($venues as $venue) {
+                $q->orWhereJsonContains('venue', $venue);
+            }
+        })
+        ->where(function ($q) use ($startDate, $endDate) {
+            $q->where(function ($q2) use ($startDate, $endDate) {
+                $q2->where('event_start_date', '<=', $endDate)
+                   ->where('event_end_date', '>=', $startDate);
+            });
+        })
+        ->where(function ($q) use ($startTime, $endTime) {
+            $q->where(function ($q2) use ($startTime, $endTime) {
+                $q2->where('event_start_time', '<', $endTime)
+                   ->where('event_end_time', '>', $startTime);
+            });
+        })
+        ->get();
+
+    if ($conflicts->count()) {
+        return response()->json([
+            'conflict' => true,
+            'conflicts' => $conflicts->map(function ($c) {
+                return [
+                    'venue' => is_array($c->venue) ? implode(', ', $c->venue) : $c->venue,
+                    'date' => $c->event_start_date . ' to ' . $c->event_end_date,
+                    'time' => $c->event_start_time . ' to ' . $c->event_end_time,
+                    'status' => $c->status,
+                ];
+            }),
+        ]);
+    }
+
+    return response()->json(['conflict' => false]);
+}
 }

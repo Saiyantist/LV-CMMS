@@ -147,6 +147,7 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::delete('/event-services/{id}', [EventServicesController::class, 'destroy'])->name('event-services.destroy');
         Route::put('/event-services/{id}', [EventServicesController::class, 'update'])->name('event-services.update');
         
+        Route::post('/event-services/check-conflict', [EventServicesController::class, 'checkConflict']);
    
 
 // Route to fetch the Booking Statistics (Donut Chart = COMMS Officer's Dashboard)
