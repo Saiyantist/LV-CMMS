@@ -318,7 +318,7 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
                   variant={pageIndex === page ? "default" : "outline"}
                   size="sm"
                   onClick={() => table.setPageIndex(page)}
-                  className={pageIndex === page ? "bg-primary" : ""}
+                  className={pageIndex === page ? "bg-secondary" : ""}
                 >
                   {page + 1}
                 </Button>

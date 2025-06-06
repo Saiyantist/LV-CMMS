@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ApexCharts from "apexcharts";
 import axios from "axios";
+import { Link } from "@inertiajs/react";
 
 interface WorkOrder {
     status: string;
@@ -160,15 +161,17 @@ const Overview: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Total Work Orders Card */}
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div className="text-sm font-medium text-secondary dark:text-gray-400 mb-1">Total Work Orders</div>
-                    <div className="text-3xl md:text-4xl font-bold text-primary dark:text-white">{totalWorkOrders}</div>
+                        <div className="text-sm font-medium text-secondary dark:text-gray-400 mb-1">Total Work Orders</div>
+                        <div className="text-3xl md:text-4xl font-bold text-primary dark:text-white">{totalWorkOrders}</div>
                     </div>
 
                     {/* Pending Requests Card */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div className="text-sm font-medium text-secondary dark:text-gray-400 mb-1">Pending Requests</div>
-                    <div className="text-3xl md:text-4xl font-bold text-primary dark:text-white">{pendingRequests}</div>
-                    </div>
+                    <Link href={route("work-orders.index")} className="hover:scale-105 transition-all duration-300">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                            <div className="text-sm font-medium text-secondary dark:text-gray-400 mb-1">Pending Requests</div>
+                            <div className="text-3xl md:text-4xl font-bold text-primary dark:text-white">{pendingRequests}</div>
+                        </div>
+                    </Link>
                 </div>
 
                 {/* Status Cards Grid */}

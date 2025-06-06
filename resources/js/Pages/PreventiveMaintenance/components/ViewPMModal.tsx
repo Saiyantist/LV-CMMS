@@ -144,7 +144,7 @@ export default function ViewPMModal({
                             {/* Schedule */}
                             <TableRow className="border-none flex items-center justify-start">
                                 <TableHead className="flex flex-[1] items-center">
-                                    <Label className="text-primary">Preventive Maintenance Schedule:</Label>
+                                    <Label className="text-muted-foreground">Preventive Maintenance Schedule:</Label>
                                 </TableHead>
                                 <TableCell className="flex flex-[1] items-center">
                                     <span className="bg-secondary/70 border border-secondary text-white rounded p-1 px-4">
@@ -164,7 +164,7 @@ export default function ViewPMModal({
                                     </TableHead>
                                     <TableCell className="flex flex-[1] items-center">{workOrder.requested_at}</TableCell>
                                 </div>  
-                                {/* Dropdown Menu for Status */}
+                                {/* Status */}
                                 <div className="flex-[1] flex gap-8">
                                     <TableHead className="flex flex-[1] items-center">
                                         <Label>Status:</Label>
@@ -237,7 +237,8 @@ export default function ViewPMModal({
                                 </TableHead>
                                 <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2">{workOrder.label}</TableCell>
                             </TableRow>
-
+                            
+                            {/* Remarks */}
                             <TableRow className="border-none flex flex-row items-center justify-between w-full">
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Remarks:</Label>

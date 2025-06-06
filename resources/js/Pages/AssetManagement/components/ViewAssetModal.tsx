@@ -252,7 +252,11 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
-                            <span>Asset Details</span>
+                            {isEditing ? [
+                                <span>Editing Asset Details</span>
+                            ] : [
+                                <span>Asset Details</span>
+                            ]}
                             <span className="text-muted-foreground">|</span>
                             <span className="text-muted-foreground">ID: {asset.id}</span>
                         </div>

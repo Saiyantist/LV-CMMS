@@ -17,7 +17,7 @@ import FlashToast from "@/Components/FlashToast";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import AssignWorkOrderModal from "./components/AcceptWorkOrderModal";
 import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
-import { BookX, CirclePlus, MoreVertical, Search, SlidersHorizontal, SquarePen, Trash } from "lucide-react";
+import { BookX, CirclePlus, MoreVertical, Search, SlidersHorizontal, SquarePen, Trash2 } from "lucide-react";
 import DeclineWorkOrderModal from "./components/DeclineWorkOrderModal";
 import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
 import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
@@ -487,7 +487,7 @@ export default function IndexLayout({
                                         size={"icon"}
                                         className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
                                         onClick={() => setDeletingWorkOrder(row.original)}
-                                    ><Trash />
+                                    ><Trash2 />
                                     </Button>
                                 )}
                             </div>

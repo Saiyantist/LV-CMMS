@@ -345,7 +345,7 @@ export default function AcceptWorkOrderModal({
                                             variant="outline"
                                             onClick={() => setShowCalendar(!showCalendar)}
                                             className={cn(
-                                                "w-full flex justify-between items-center",
+                                                "relative w-full flex justify-between items-center",
                                                 "text-left font-normal",
                                                 !data.scheduled_at && "text-muted-foreground"
                                             )}
@@ -354,38 +354,38 @@ export default function AcceptWorkOrderModal({
                                                 ? format(data.scheduled_at, "MM/dd/yyyy")
                                                 : "MM/DD/YYYY"}
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                        {showCalendar && (
-                                            <div
-                                                className="absolute z-50 bg-white shadow-md border !-mt-[44vh] -ml-[6.5rem] rounded-md"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={
-                                                    data.scheduled_at && isValid(parseISO(data.scheduled_at))
-                                                        ? parseISO(data.scheduled_at)
-                                                        : undefined
-                                                    }
-                                                    onSelect={(date) => {
-                                                    if (date) {
-                                                        setData("scheduled_at", format(date, "yyyy-MM-dd"))
-                                                        setDate(date)
-                                                        setLocalErrors((prev) => ({ ...prev, scheduled_at: "" }))
-                                                        setShowCalendar(false)
-                                                    }
-                                                    }}
-                                                    disabled={(date) => date < new Date()}
-                                                    initialFocus
+                                            {showCalendar && (
+                                                <div
+                                                    className="absolute z-50 bg-white shadow-md border !-mt-[21rem] -ml-[1rem] rounded-md"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={
+                                                        data.scheduled_at && isValid(parseISO(data.scheduled_at))
+                                                            ? parseISO(data.scheduled_at)
+                                                            : undefined
+                                                        }
+                                                        onSelect={(date) => {
+                                                        if (date) {
+                                                            setData("scheduled_at", format(date, "yyyy-MM-dd"))
+                                                            setDate(date)
+                                                            setLocalErrors((prev) => ({ ...prev, scheduled_at: "" }))
+                                                            setShowCalendar(false)
+                                                        }
+                                                        }}
+                                                        disabled={(date) => date < new Date()}
+                                                        initialFocus
+                                                    />
+                                                </div>
+                                            )}
+                                            {showCalendar && (
+                                                <div
+                                                    className="fixed inset-0 z-40"
+                                                    onClick={() => setShowCalendar(false)}
                                                 />
-                                            </div>
-                                        )}
-                                        {showCalendar && (
-                                            <div
-                                                className="fixed inset-0 z-40"
-                                                onClick={() => setShowCalendar(false)}
-                                            />
-                                        )}
+                                            )}
+                                        </Button>
                                         {localErrors.scheduled_at && (
                                             <p className="text-red-500 text-xs">{localErrors.scheduled_at}</p>
                                         )}

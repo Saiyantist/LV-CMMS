@@ -94,7 +94,34 @@ class ComplianceAndSafetyController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'compliance_area' => 'required|string',
+            'location_id' => 'required|exists:locations,id',
+            'report_description' => 'required|string',
+            'remarks' => 'nullable|string',
+            'scheduled_at' => 'required|date',
+            'priority' => 'required|string',
+            'assigned_to' => 'required|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $workOrder = WorkOrder::findOrFail($id);
+        
+        $workOrder->update([
+            'compliance_area' => $request->compliance_area,
+            'location_id' => $request->location_id,
+            'report_description' => $request->report_description,
+            'remarks' => $request->remarks,
+            'scheduled_at' => $request->scheduled_at,
+            'priority' => $request->priority,
+            'assigned_to' => $request->assigned_to,
+        ]);
+
+        return redirect()->route('work-orders.compliance-and-safety')
+            ->with('success', 'Compliance work order updated successfully.');
     }
 
     /**

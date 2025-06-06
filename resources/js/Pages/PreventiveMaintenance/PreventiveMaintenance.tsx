@@ -9,7 +9,7 @@ import EditPMModal from "./components/EditPMModal";
 import EditPMScheduleModal from "./components/EditPMScheduleModal";
 import FlashToast from "@/Components/FlashToast";
 import { getStatusColor } from "@/utils/getStatusColor";
-import { Trash, MoreVertical } from "lucide-react";
+import { Trash2, MoreVertical } from "lucide-react";
 import DeletePMModal from "./components/DeletePMModal";
 import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
@@ -264,7 +264,7 @@ const PreventiveMaintenance: React.FC = () => {
         },
         enableSorting: false,
         meta: {
-            headerClassName: "w-20",
+            headerClassName: "max-w-[5rem]",
             cellClassName: "flex justify-center",
             filterable: true,
         },
@@ -316,7 +316,7 @@ const PreventiveMaintenance: React.FC = () => {
                         size={"icon"}
                         className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
                         onClick={() => setIsDeletingPM(row.original)}
-                    ><Trash />
+                    ><Trash2 />
                     </Button>
                 </div>
 

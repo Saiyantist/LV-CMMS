@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import FlashToast from "@/Components/FlashToast";
 import { Button } from "@/Components/shadcnui/button";
-import { CirclePlus, Trash, MoreVertical } from "lucide-react";
+import { CirclePlus, Trash2, MoreVertical } from "lucide-react";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
@@ -196,7 +196,7 @@ const AssetManagement: React.FC = () => {
                             size={"icon"}
                             className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
                             onClick={() => handleDelete(row.original)}
-                        ><Trash />
+                        ><Trash2 />
                         </Button>
                     </div>
 
