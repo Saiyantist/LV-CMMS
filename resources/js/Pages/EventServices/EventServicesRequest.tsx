@@ -486,7 +486,7 @@ export default function EventServicesRequest() {
                         next event.
                     </p>
                     <p className="text-gray-400 text-m font-medium">
-                        NOTE: Please accomplish this form at least two (2)
+                        NOTE: Please accomplish this form at least two (3)
                         working days before the date of use.
                     </p>
                     <br />
