@@ -172,14 +172,45 @@ const Gallery: React.FC<GalleryProps> = ({ selectedId, onSelect }) => {
                 </div>
                 <br />
                 {selectedId && selectedId.length > 0 && (
-                    <div className="mt-6 flex justify-center">
-                        <span className="inline-block bg-secondary border border-blue-600 rounded-full px-5 py-2 text-white font-semibold shadow text-base tracking-tight">
-                            Selected Venue{selectedId.length > 1 ? "s" : ""}:{" "}
-                            {galleryItems
-                                .filter((item) => selectedId.includes(item.id))
-                                .map((item) => `"${item.title}"`)
-                                .join(", ")}
+                    <div className="mt-6 flex flex-col items-center">
+                        {/* Show label above container on mobile, hide on sm+ */}
+                        <span className="font-bold text-blue-600 whitespace-nowrap text-sm mb-2 block sm:hidden">
+                            Selected Venue{selectedId.length > 1 ? "s" : ""}:
                         </span>
+                        <div
+                            className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/70 shadow-lg border border-blue-100 backdrop-blur-md"
+                            style={{
+                                boxShadow:
+                                    "0 4px 24px 0 rgba(52, 120, 246, 0.10)",
+                                maxWidth: "100vw",
+                                overflowX: "auto",
+                                WebkitOverflowScrolling: "touch",
+                            }}
+                        >
+                            {/* Hide label inside container on mobile, show on sm+ */}
+                            <span className="font-bold text-blue-600 whitespace-nowrap text-sm sm:text-base hidden sm:block">
+                                Selected Venue{selectedId.length > 1 ? "s" : ""}
+                                :
+                            </span>
+                            <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-blue-50">
+                                {galleryItems
+                                    .filter((item) =>
+                                        selectedId.includes(item.id)
+                                    )
+                                    .map((item) => (
+                                        <span
+                                            key={item.id}
+                                            className="px-3 py-1 rounded-full bg-blue-100/90 text-blue-700 font-medium shadow border border-blue-200 text-xs sm:text-sm"
+                                            style={{
+                                                backdropFilter: "blur(2px)",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            {item.title}
+                                        </span>
+                                    ))}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

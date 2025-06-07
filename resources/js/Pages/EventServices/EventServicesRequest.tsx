@@ -806,14 +806,77 @@ export default function EventServicesRequest() {
                                     Booking Conflict
                                 </div>
                             </div>
-
                             {/* Justified intro */}
                             <div className="text-gray-700 text-sm mb-2 text-justify">
                                 Sorry, you cannot continue. The following
                                 venue(s) are already booked for your selected
                                 date and time:
                             </div>
-                            <div className="space-y-8">
+                            {/* Show "Your Request" only once */}
+                            <div className="rounded-2xl border border-blue-100 bg-white/70 shadow-inner p-4 mb-2">
+                                <div className="text-xs text-gray-500 mb-1 font-medium text-center">
+                                    Your Request
+                                </div>
+                                <div className="flex flex-col gap-1 text-sm">
+                                    <div>
+                                        <span className="font-semibold">
+                                            Venue:
+                                        </span>{" "}
+                                        {selectedVenueNames.join(", ")}
+                                    </div>
+                                    <div>
+                                        <span className="font-semibold">
+                                            Date:
+                                        </span>{" "}
+                                        {(() => {
+                                            const {
+                                                start: userStartDate,
+                                                end: userEndDate,
+                                            } = parseDateRange(dateRange);
+                                            return formatDateYMDToLong(
+                                                userStartDate
+                                            ) ===
+                                                formatDateYMDToLong(
+                                                    userEndDate
+                                                ) || !userEndDate
+                                                ? formatDateYMDToLong(
+                                                      userStartDate
+                                                  )
+                                                : `${formatDateYMDToLong(
+                                                      userStartDate
+                                                  )} - ${formatDateYMDToLong(
+                                                      userEndDate
+                                                  )}`;
+                                        })()}
+                                    </div>
+                                    <div>
+                                        <span className="font-semibold">
+                                            Time:
+                                        </span>{" "}
+                                        {(() => {
+                                            const {
+                                                start: userStartTime,
+                                                end: userEndTime,
+                                            } = parseTimeRange(timeRange);
+                                            return formatTime24to12(
+                                                userStartTime
+                                            ) ===
+                                                formatTime24to12(userEndTime) ||
+                                                !userEndTime
+                                                ? formatTime24to12(
+                                                      userStartTime
+                                                  )
+                                                : `${formatTime24to12(
+                                                      userStartTime
+                                                  )} - ${formatTime24to12(
+                                                      userEndTime
+                                                  )}`;
+                                        })()}
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Conflicting bookings list, scrollable */}
+                            <div className="space-y-4 max-h-80 overflow-y-auto pr-2 ios-scrollbar">
                                 {(conflictModal.conflicts || []).map(
                                     (c: any, idx: number) => {
                                         // Parse venue
@@ -831,7 +894,6 @@ export default function EventServicesRequest() {
                                                 ? c.venue.join(", ")
                                                 : c.venue;
                                         }
-
                                         // Parse date
                                         let [startDate, endDate] = (
                                             c.date || ""
@@ -846,7 +908,6 @@ export default function EventServicesRequest() {
                                             startDate === endDate || !endDate
                                                 ? startDate
                                                 : `${startDate} - ${endDate}`;
-
                                         // Parse time
                                         let [startTime, endTime] = (
                                             c.time || ""
@@ -861,107 +922,38 @@ export default function EventServicesRequest() {
                                             startTime === endTime || !endTime
                                                 ? startTime
                                                 : `${startTime} - ${endTime}`;
-
-                                        // User's submitted info
-                                        const userVenue =
-                                            selectedVenueNames.join(", ");
-                                        const {
-                                            start: userStartDate,
-                                            end: userEndDate,
-                                        } = parseDateRange(dateRange);
-                                        const userDateStr =
-                                            formatDateYMDToLong(
-                                                userStartDate
-                                            ) ===
-                                                formatDateYMDToLong(
-                                                    userEndDate
-                                                ) || !userEndDate
-                                                ? formatDateYMDToLong(
-                                                      userStartDate
-                                                  )
-                                                : `${formatDateYMDToLong(
-                                                      userStartDate
-                                                  )} - ${formatDateYMDToLong(
-                                                      userEndDate
-                                                  )}`;
-                                        const {
-                                            start: userStartTime,
-                                            end: userEndTime,
-                                        } = parseTimeRange(timeRange);
-                                        const userTimeStr =
-                                            formatTime24to12(userStartTime) ===
-                                                formatTime24to12(userEndTime) ||
-                                            !userEndTime
-                                                ? formatTime24to12(
-                                                      userStartTime
-                                                  )
-                                                : `${formatTime24to12(
-                                                      userStartTime
-                                                  )} - ${formatTime24to12(
-                                                      userEndTime
-                                                  )}`;
-
                                         return (
                                             <div
                                                 key={idx}
-                                                className="flex flex-col gap-2"
+                                                className="rounded-2xl border border-gray-100 bg-white/60 shadow-inner p-4"
                                             >
-                                                {/* Requester's Info */}
-                                                <div className="rounded-2xl border border-blue-100 bg-white/70 shadow-inner p-4">
-                                                    <div className="text-xs text-gray-500 mb-1 font-medium text-center">
-                                                        Your Request
-                                                    </div>
-                                                    <div className="flex flex-col gap-1 text-sm">
-                                                        <div>
-                                                            <span className="font-semibold">
-                                                                Venue:
-                                                            </span>{" "}
-                                                            {userVenue}
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-semibold">
-                                                                Date:
-                                                            </span>{" "}
-                                                            {userDateStr}
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-semibold">
-                                                                Time:
-                                                            </span>{" "}
-                                                            {userTimeStr}
-                                                        </div>
-                                                    </div>
+                                                <div className="text-xs text-gray-500 mb-1 font-medium text-center">
+                                                    Conflicting Booking
                                                 </div>
-                                                {/* Conflict Info */}
-                                                <div className="rounded-2xl border border-gray-100 bg-white/60 shadow-inner p-4">
-                                                    <div className="text-xs text-gray-500 mb-1 font-medium text-center">
-                                                        Conflicting Booking
+                                                <div className="flex flex-col gap-1 text-sm">
+                                                    <div>
+                                                        <span className="font-semibold">
+                                                            Venue:
+                                                        </span>{" "}
+                                                        {venueStr}
                                                     </div>
-                                                    <div className="flex flex-col gap-1 text-sm">
-                                                        <div>
-                                                            <span className="font-semibold">
-                                                                Venue:
-                                                            </span>{" "}
-                                                            {venueStr}
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-semibold">
-                                                                Date:
-                                                            </span>{" "}
-                                                            {dateStr}
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-semibold">
-                                                                Time:
-                                                            </span>{" "}
-                                                            {timeStr}
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-semibold">
-                                                                Status:
-                                                            </span>{" "}
-                                                            {c.status}
-                                                        </div>
+                                                    <div>
+                                                        <span className="font-semibold">
+                                                            Date:
+                                                        </span>{" "}
+                                                        {dateStr}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold">
+                                                            Time:
+                                                        </span>{" "}
+                                                        {timeStr}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold">
+                                                            Status:
+                                                        </span>{" "}
+                                                        {c.status}
                                                     </div>
                                                 </div>
                                             </div>
@@ -970,7 +962,7 @@ export default function EventServicesRequest() {
                                 )}
                             </div>
                             <div className="text-gray-700 text-sm mb-2 text-center font-medium">
-                                Please choose a different venue or time.
+                                Please choose a different venue, date or time.
                             </div>
                             <div className="flex justify-center mt-4">
                                 <button
@@ -994,7 +986,23 @@ export default function EventServicesRequest() {
                 from { transform: translateY(100%); opacity: 0; }
                 to { transform: translateY(0); opacity: 1; }
             }
-            `}
+            .ios-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #c7d2fe #f1f5f9;
+}
+.ios-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+.ios-scrollbar::-webkit-scrollbar-thumb {
+    background: #c7d2fe;
+    border-radius: 8px;
+}
+.ios-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a5b4fc;
+}
+`}
                     </style>
                 </div>
             )}
