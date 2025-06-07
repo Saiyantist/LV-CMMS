@@ -186,8 +186,8 @@ export default function AcceptWorkOrderModal({
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         { workOrder.status === "For Budget Request" && (
-                            <div className="flex flex-row gap-4">
-                                <span>Accept Work Order - With Approved Budget</span>
+                            <div className="flex flex-row gap-4 text-sm sm:text-xl">
+                                <span>Accept Budget-approved Work Order </span>
                                 <span className="text-muted-foreground">|</span>
                                 <span className="text-muted-foreground">ID: {workOrder.id}</span>
                             </div>
@@ -210,7 +210,7 @@ export default function AcceptWorkOrderModal({
 
                             {/* Date Requested */}
                             <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
+                                <TableHead className="sm:w-1/4 ">
                                     <Label>Date Requested:</Label>
                                 </TableHead>
                                 <TableCell className="">{workOrder.requested_at}</TableCell>
@@ -218,7 +218,7 @@ export default function AcceptWorkOrderModal({
 
                             {/* Requested By */}
                             <TableRow className="border-none">
-                                <TableHead className="">
+                                <TableHead className="sm:w-1/4">
                                     <Label>Requested by:</Label>
                                 </TableHead>
                                 <TableCell className="">{workOrder.requested_by.name}</TableCell>
@@ -226,7 +226,7 @@ export default function AcceptWorkOrderModal({
 
                             {/* Location */}
                             <TableRow className="border-none">
-                                <TableHead className="">
+                                <TableHead className="sm:w-1/4">
                                     <Label>Location:</Label>
                                 </TableHead>
                                 <TableCell className="">{workOrder.location.name}</TableCell>
@@ -234,7 +234,7 @@ export default function AcceptWorkOrderModal({
 
                             {/* Description */}
                             <TableRow className="border-none">
-                                <TableHead className="">
+                                <TableHead className="sm:w-1/4">
                                     <Label>Description:</Label>
                                 </TableHead>
                                 <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
@@ -243,7 +243,7 @@ export default function AcceptWorkOrderModal({
                             {/* Remarks */}
                             {/* {workOrder.remarks && (
                             <TableRow className="border-none">
-                                <TableHead className="">
+                                <TableHead className="sm:w-1/4">
                                     <Label>Remarks:</Label>
                                 </TableHead>
                                 <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
@@ -255,9 +255,9 @@ export default function AcceptWorkOrderModal({
                             )} */}
 
                             {/* Asset Detail */}
-                            {assetDetails && (
+                            {/* {assetDetails && (
                             <TableRow className="border-none">
-                                <TableHead>
+                                <TableHead className="sm:w-1/4">
                                 <Label>Asset</Label>
                                 </TableHead>
                                 <TableCell>
@@ -268,11 +268,11 @@ export default function AcceptWorkOrderModal({
                                     )}
                                 </TableCell>
                             </TableRow>
-                            )}
+                            )} */}
 
                             {/* Attachment / Images / Photos */}
                             <TableRow className="border-none">
-                                <TableHead className="">
+                                <TableHead className="sm:w-1/4">
                                     <Label>Attachment:</Label>
                                 </TableHead>
                                 <TableCell className="">
@@ -446,7 +446,7 @@ export default function AcceptWorkOrderModal({
 
 
                                     {/* Asset */}
-                                    <div className="flex-[3] space-y-2">
+                                    <div className="flex-[3] space-y-2 -mt-1">
                                         <SmartDropdown
                                             label="Asset"
                                             placeholder={assetDetails ? `${assetDetails.name} - ${assetDetails.location_name}` : "Select Asset (scroll down here)"}
@@ -568,9 +568,11 @@ export default function AcceptWorkOrderModal({
                 </div>
 
                 <DialogFooter className="px-6 py-4 border-t">
-                    <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" onClick={submit}
-                        className="bg-primary hover:bg-primary/90 text-white">Accept Request</Button>
+                    <div className="flex gap-2 xs:flex-row flex-col">
+                        <Button type="submit" onClick={submit}
+                            className="bg-primary hover:bg-primary/90 text-white">Accept Request</Button>
+                        <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    </div>
                 </DialogFooter>
 
                 {activeImageIndex !== null && (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/Components/shadcnui/dialog";
 import { Button } from "@/Components/shadcnui/button";
@@ -15,7 +15,7 @@ import { getStatusColor } from "@/utils/getStatusColor";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
 import { router } from "@inertiajs/react";
 import { getPriorityColor } from "@/utils/getPriorityColor";
-import { formatDate } from "date-fns";
+import { format } from "date-fns";
 
 
 
@@ -63,7 +63,6 @@ export default function ViewWorkOrderModal({
     const isDepartmentHead = user.roles.some(role => role.name === 'department_head');
     const isWorkOrderManager = user.permissions.includes("manage work orders");
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
-
     const getAssetDetails = (workOrder: any) => {
         if (workOrder.asset) {
             return {
@@ -198,7 +197,7 @@ export default function ViewWorkOrderModal({
                                     <TableHead className="flex flex-[1] items-center">
                                         <Label>Date Requested:</Label>
                                     </TableHead>
-                                    <TableCell className="flex flex-[1] items-center">{formatDate(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
+                                    <TableCell className="flex flex-[1] items-center">{format(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
                                 </div>  
 
                                 {/* Work Order Type */}
@@ -262,7 +261,13 @@ export default function ViewWorkOrderModal({
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Target Date:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[3.3] items-center">{formatDate(workOrder.scheduled_at, "MM/dd/yyyy")}</TableCell>
+                                <TableCell className="flex flex-[3.3] items-center">
+                                    {workOrder.scheduled_at ? [
+                                        <span>{format(workOrder.scheduled_at, "MM/dd/yyyy")}</span>
+                                    ] : [
+                                        <span className="text-gray-500 italic">No date set</span>
+                                    ]}
+                                </TableCell>
                             </TableRow>
 
                             {/* Location */}

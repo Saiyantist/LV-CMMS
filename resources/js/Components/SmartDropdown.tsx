@@ -57,7 +57,7 @@ useEffect(() => {
 
   return (
     <div className="space-y-2" ref={dropdownRef}>
-      <label className="flex items-center font-medium text-sm">
+      <label className="flex items-center font-medium text-xs sm:text-sm">
         {label}
         {required && (
           <span className="text-red-500 ml-1">*</span>
@@ -73,7 +73,7 @@ useEffect(() => {
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
-          className="text-xs sm:text-base"
+          className="text-sm"
         />
         {isOpen && (
           <div className="text-xs absolute z-10 bg-white border w-full rounded shadow max-h-60 overflow-y-auto mt-1">

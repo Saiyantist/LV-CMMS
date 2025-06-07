@@ -255,7 +255,7 @@ export default function EditWorkOrderModal({
 
                             {/* Date Requested */}
                             <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
+                                <TableHead className="w-[7rem] sm:w-1/4 ">
                                     <Label>Date Requested:</Label>
                                 </TableHead>
                                 <TableCell className="">{workOrder.requested_at}</TableCell>
@@ -644,7 +644,7 @@ export default function EditWorkOrderModal({
                                     </div>
 
                                     {/* Asset */}
-                                    <div className="flex-[3] space-y-2">
+                                    <div className="flex-[3] space-y-2 -mt-1">
                                         <SmartDropdown
                                             label="Asset"
                                             placeholder={assetDetails ? `${assetDetails.name} - ${assetDetails.location_name}` : "Select Asset (scroll down here)"}
@@ -686,11 +686,11 @@ export default function EditWorkOrderModal({
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
                     <div className="flex gap-2 xs:flex-row flex-col">
-                        <Button variant="outline" onClick={onClose}>Cancel</Button>
                         <Button type="submit" onClick={submit}
                             className="bg-primary hover:bg-primary/90 text-white">
                                 {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
                         </Button>
+                        <Button variant="outline" onClick={onClose}>Cancel</Button>
                     </div>
                 </DialogFooter>
 

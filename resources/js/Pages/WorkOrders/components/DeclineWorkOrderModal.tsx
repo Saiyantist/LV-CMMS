@@ -196,10 +196,10 @@ export default function DeclineWorkOrderModal({
 
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <form onSubmit={submit} className="flex gap-2">
+                    <div className="flex gap-2 xs:flex-row flex-col">
+                        <Button variant="destructive" type="submit" onClick={submit}>Decline</Button>
                         <Button variant="outline" onClick={onClose}>Cancel</Button>
-                        <Button variant="destructive" type="submit">Decline</Button>
-                    </form>
+                    </div>
                 </DialogFooter>
 
             {activeImageIndex !== null && (

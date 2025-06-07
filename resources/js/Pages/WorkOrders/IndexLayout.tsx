@@ -30,6 +30,12 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/Components/shadcnui/dropdown-menu";
+import {
+    Popover,
+    PopoverTrigger,
+    PopoverContent
+  } from "@/Components/shadcnui/popover";
+  
 
 interface Props {
     user: {
@@ -217,7 +223,7 @@ export default function IndexLayout({
             accessorKey: "requested_at",
             header: "Date Requested",
             cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
-            meta: { headerClassName: "w-1/8" },
+            meta: { headerClassName: "", cellClassName: "w-[10rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll" },
         },
         {
             accessorKey: "location.name",
@@ -225,7 +231,8 @@ export default function IndexLayout({
             cell: ({ row }) => <div>{row.original.location.name}</div>,
             enableSorting: false,
             meta: {
-                headerClassName: "max-w-1/8",
+                headerClassName: "",
+                cellClassName: "w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
                 filterable: true,
             },
@@ -238,8 +245,8 @@ export default function IndexLayout({
             ),
             enableSorting: false,
             meta: {
-                headerClassName: "w-1/2",
-                cellClassName: "max-w-16 px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                headerClassName: "w-[20rem]",
+                cellClassName: "px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
             },
         },
@@ -265,6 +272,7 @@ export default function IndexLayout({
                 <div className="flex gap-2 justify-start px-2">
                     {/* Large screens - visible above md breakpoint */}
                     <div className="hidden xl:flex gap-2">
+                        {/* View */}
                         <Button
                             className="bg-secondary h-6 text-xs rounded-sm"
                             onClick={() => setIsViewingWorkOrder(row.original)}
@@ -273,6 +281,7 @@ export default function IndexLayout({
                         </Button>
                         {row.getValue('status') === "Pending" && (
                             <>
+                                {/* Edit */}
                                 <Button
                                     variant={"outline"}
                                     size={"icon"}
@@ -280,6 +289,7 @@ export default function IndexLayout({
                                     onClick={() => setEditingWorkOrder(row.original)}
                                 ><SquarePen />
                                 </Button>
+                                {/* Cancel */}
                                 <Button
                                     variant={"outline"}
                                     size={"icon"}
@@ -292,7 +302,7 @@ export default function IndexLayout({
                     </div>
 
                     {/* Medium screens - visible only on md */}
-                    <div className="hidden lg:flex xl:hidden">
+                    <div className="hidden md:flex xl:hidden lg:ml-[50px]">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0">
@@ -300,14 +310,17 @@ export default function IndexLayout({
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                                {/* View */}
                                 <DropdownMenuItem onClick={() => setIsViewingWorkOrder(row.original)}>
                                     View
                                 </DropdownMenuItem>
                                 {row.getValue('status') === "Pending" && (
                                     <>
+                                        {/* Edit */}
                                         <DropdownMenuItem onClick={() => setEditingWorkOrder(row.original)}>
                                             Edit
                                         </DropdownMenuItem>
+                                        {/* Cancel */}
                                         <DropdownMenuItem 
                                             onClick={() => setCancellingWorkOrder(row.original)}
                                             className="text-destructive"
@@ -318,34 +331,6 @@ export default function IndexLayout({
                                 )}
                             </DropdownMenuContent>
                         </DropdownMenu>
-                    </div>
-
-                    {/* Mobile view - visible below md breakpoint */}
-                    <div className="flex lg:hidden xl:hidden gap-2">
-                        <Button
-                            className="bg-secondary h-6 text-xs rounded-sm"
-                            onClick={() => setIsViewingWorkOrder(row.original)}
-                        >
-                            View
-                        </Button>
-                        {row.getValue('status') === "Pending" && (
-                            <>
-                                <Button
-                                    variant={"outline"}
-                                    size={"icon"}
-                                    className="h-6 text-xs text-secondary rounded-sm"
-                                    onClick={() => setEditingWorkOrder(row.original)}
-                                ><SquarePen />
-                                </Button>
-                                <Button
-                                    variant={"outline"}
-                                    size={"icon"}
-                                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
-                                    onClick={() => setCancellingWorkOrder(row.original)}
-                                ><BookX />
-                                </Button>
-                            </>
-                        )}
                     </div>
                 </div>
             ),
@@ -836,13 +821,6 @@ export default function IndexLayout({
                 {filteredMobileWorkOrders.map((workOrder) => {
                     const description = workOrder.report_description || "";
                     const shouldTruncate = description.length > 25;
-                    const priorities = ["Low", "Medium", "High", "Critical"];
-                    const shortLabels = {
-                        Low: "L",
-                        Medium: "M",
-                        High: "H",
-                        Critical: "C",
-                    };
 
                     return (
                         <div
@@ -853,18 +831,136 @@ export default function IndexLayout({
                             }}
                         >
                             {/* Top row: ID and Status aligned horizontally */}
-                            <div className="flex justify-between items-start text-gray-800 mb-1">
-                                <p>
-                                    <span className="font-bold text-primary">ID:</span>{" "}
-                                    {workOrder.id}
-                                </p>
-                                <span
-                                    className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
-                                        workOrder.status
-                                    )}`}
-                                >
-                                    {workOrder.status}
-                                </span>
+                            <div className="flex text-gray-800 mb-1">
+                                <div className="flex flex-[11] justify-between items-start ">
+                                    {/* ID */}
+                                    <p>
+                                        <span className="font-bold text-primary">ID:</span>{" "}
+                                        {workOrder.id}
+                                    </p>
+                                    {/* Status */}
+                                    <span
+                                        className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
+                                            workOrder.status
+                                        )}`}
+                                    >
+                                        {workOrder.status}
+                                    </span>
+                                </div>
+                                {/* More Vertical Button */}
+                                <div className="flex flex-[1] justify-end items-center">
+                                    {isWorkOrderManager ? (
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="ghost" className="h-6 w-6 p-0 z-10 relative" onClick={(e) => e.stopPropagation()}>
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent
+                                                align="end"
+                                                side="bottom"
+                                                sideOffset={4}
+                                                className="w-32 p-1 rounded-md border bg-white shadow-md z-50"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {/* Pending Tab Actions */}
+                                                {(activeTab === "Pending" || activeTab === "For Budget Request") && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => setAcceptingWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                        >
+                                                            Accept
+                                                        </button>
+                                                        {activeTab === "Pending" && (
+                                                            <button
+                                                                onClick={() => setForBudgetRequest(workOrder)}
+                                                                className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                            >
+                                                                Budget Request
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => setDecliningWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                                        >
+                                                            Decline
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {/* Accepted Tab Actions */}
+                                                {activeTab === "Accepted" && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => setEditingWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {/* Declined Tab Actions */}
+                                                {activeTab === "Declined" && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => setEditingWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setDeletingWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </PopoverContent>
+                                        </Popover>
+                                    ) : (
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="ghost" className="h-6 w-6 p-0 z-10 relative" onClick={(e) => e.stopPropagation()}>
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent
+                                                align="end"
+                                                side="bottom"
+                                                sideOffset={4}
+                                                className="w-32 p-1 rounded-md border bg-white shadow-md z-50"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <button
+                                                    onClick={() => setIsViewingWorkOrder(workOrder)}
+                                                    className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                >
+                                                    View
+                                                </button>
+
+                                                {workOrder.status === "Pending" && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => setEditingWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setCancellingWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </PopoverContent>
+                                        </Popover>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Info Section */}
@@ -961,38 +1057,6 @@ export default function IndexLayout({
                                     ).toLocaleDateString()}
                                 </p>
                             </div>
-
-                            {/* Action Buttons */}
-                            {/* <div className="mt-4 flex justify-end gap-2"
-                                onClick={(e) => {e.stopPropagation();}}
-                            > */}
-                                {/* <Button
-                                    className="bg-secondary self-center text-white px-4 h-8 xs:h-10 xs:px-6 text-xs xs:text-[1rem] rounded-md hover:bg-secondary/80 hover:text-white transition-all duration-200"
-                                    onClick={() =>
-                                        setIsViewingWorkOrder(workOrder)
-                                    }
-                                >
-                                    View
-                                </Button> */}
-                                {/* { workOrder.status === "Pending" && (
-                                <div className="flex gap-2 items-center justify-center">
-                                    <Button
-                                        variant={"outline"}
-                                        size={"icon"}
-                                        className="h-8 xs:h-10 w-12 text-white rounded bg-secondary hover:bg-secondary/80 hover:text-white transition-all duration-200"
-                                        onClick={() => setEditingWorkOrder(workOrder)}
-                                    ><SquarePen />
-                                    </Button>
-                                    <Button
-                                        variant={"outline"}
-                                        size={"icon"}
-                                        className="h-8 xs:h-10 w-12 text-white rounded bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
-                                        onClick={() => setCancellingWorkOrder(workOrder)}
-                                    ><BookX />
-                                    </Button>
-                                </div>
-                                )}
-                            </div> */}
                         </div>
                     );
                 })}
