@@ -172,19 +172,16 @@ const Gallery: React.FC<GalleryProps> = ({ selectedId, onSelect }) => {
                 </div>
                 <br />
                 {selectedId && selectedId.length > 0 && (
-                    <div className="mt-6 flex flex-col items-center">
+                    <div className="mt-6 flex flex-col items-center w-full">
                         {/* Show label above container on mobile, hide on sm+ */}
-                        <span className="font-bold text-blue-600 whitespace-nowrap text-sm mb-2 block sm:hidden">
+                        <span className="font-bold text-blue-600 whitespace-nowrap text-sm mb-2 block sm:hidden self-start">
                             Selected Venue{selectedId.length > 1 ? "s" : ""}:
                         </span>
                         <div
-                            className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/70 shadow-lg border border-blue-100 backdrop-blur-md"
+                            className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/70 shadow-lg border border-blue-100 backdrop-blur-md w-full"
                             style={{
                                 boxShadow:
                                     "0 4px 24px 0 rgba(52, 120, 246, 0.10)",
-                                maxWidth: "100vw",
-                                overflowX: "auto",
-                                WebkitOverflowScrolling: "touch",
                             }}
                         >
                             {/* Hide label inside container on mobile, show on sm+ */}
@@ -192,7 +189,7 @@ const Gallery: React.FC<GalleryProps> = ({ selectedId, onSelect }) => {
                                 Selected Venue{selectedId.length > 1 ? "s" : ""}
                                 :
                             </span>
-                            <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-blue-50">
+                            <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-blue-50 w-full">
                                 {galleryItems
                                     .filter((item) =>
                                         selectedId.includes(item.id)

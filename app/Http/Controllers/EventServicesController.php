@@ -101,7 +101,10 @@ public function MyBookings()
         return [
             'id' => $event->id,
             'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
-            'venue' => $event->venue,
+            // Always return venue as array
+            'venue' => is_string($event->venue) && str_starts_with($event->venue, '[')
+                ? json_decode($event->venue, true)
+                : (is_array($event->venue) ? $event->venue : [$event->venue]),
             'name' => $event->name,
             'department' => $event->department,
             'description' => $event->description,
