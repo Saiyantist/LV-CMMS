@@ -120,7 +120,7 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
-                            <span>Edit Preventive Maintenance Schedule for Asset</span>
+                            <span>Edit PM Schedule for Asset</span>
                             <span className="text-muted-foreground">|</span>
                             <span className="text-muted-foreground">ID: {schedule.id}</span>
                         </div>
@@ -249,7 +249,7 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                             )}
 
                             {scheduleType === "Monthly" && (
-                                <div className="flex items-center gap-2 !mt-4 flex-wrap text-sm">
+                                <div className="flex items-center gap-2 justify-center sm:justify-start !mt-4 flex-wrap text-sm">
                                     <span className="text-muted-foreground">On the</span>
                                     <Select
                                         value={monthlyFrequency.toString()}
@@ -289,7 +289,7 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                             )}
 
                             {scheduleType === "Yearly" && (
-                                <div className="flex items-center gap-2 !mt-4 flex-wrap text-sm">
+                                <div className="flex items-center gap-2 justify-center sm:justify-start !mt-4 flex-wrap text-sm">
                                     <span className="text-muted-foreground">Every</span>
                                     <Select
                                         value={yearlyMonth}
@@ -340,10 +340,9 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                     </div>
 
                 </div>
+                {/* Footer - Action Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    {/* Action Buttons */}
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={onClose}>
+                    <Button variant="outline" onClick={onClose}>
                             Cancel
                     </Button>
                     <Button onClick={(e) => {
@@ -351,7 +350,6 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                     }}>
                         Save
                     </Button>
-                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

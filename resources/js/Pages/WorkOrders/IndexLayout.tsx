@@ -35,6 +35,7 @@ import {
     PopoverTrigger,
     PopoverContent
   } from "@/Components/shadcnui/popover";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/Components/shadcnui/select";
   
 
 interface Props {
@@ -396,14 +397,16 @@ export default function IndexLayout({
                         searchable: true,
                     }
                 },
-                {
+                ...(activeTab === "Accepted" ? [
+                    {
                     accessorKey: "scheduled_at",
                     header: "Target Date",
-                    cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at")}</div>,
+                    cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at") || "No date set."}</div>,
                     meta: {
                         cellClassName: "min-w-[7.5rem] max-w-[8rem] text-center",
                     },
-                },
+                }
+                ] : []),
                 {
                     accessorKey: "priority",
                     header: "Priority",
@@ -664,18 +667,30 @@ export default function IndexLayout({
 
             {/* Tabs - Mobile */}
             {user.permissions.includes("manage work orders") && (
-                <div className="md:hidden flex justify-end px-4 mt-4">
-                    <select
-                        value={activeTab}
-                        onChange={(e) => setActiveTab(e.target.value)}
-                        className="border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-secondary focus:border-secondary"
-                    >
-                        {tabs.map((tab) => (
-                            <option key={tab} value={tab}>
-                                {tab}
-                            </option>
-                        ))}
-                    </select>
+                <div className="md:hidden gap-2 mt-4">
+                    <div className="flex flex-row items-center gap-1">
+                        {/* Switch Tabs */}
+                        <div className="flex flex-[2] sm:flex-[1] justify-start pl-2">
+                            <h2 className="text-sm text-primary font-semibold">
+                                Switch Tabs:
+                            </h2>
+                        </div>
+                        {/* Dropdown */}
+                        <div className="flex flex-[5]">
+                            <Select value={activeTab} onValueChange={setActiveTab}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select tab" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {tabs.map((tab) => (
+                                        <SelectItem key={tab} value={tab}>
+                                            {tab}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
                 </div>
             )}
 

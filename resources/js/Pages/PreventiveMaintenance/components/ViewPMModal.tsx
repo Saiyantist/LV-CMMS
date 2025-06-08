@@ -105,9 +105,9 @@ export default function ViewPMModal({
                 }
             }}
         >   
-            <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
-                    <DialogTitle className="text-md sm:text-lg font-semibold text-primary">
+                    <DialogTitle className="text-lg font-semibold text-primary">
                         <div className="flex flex-row gap-4">
                             <span>Preventive Maintenance Details</span>
                             <span className="text-muted-foreground">|</span>
@@ -227,7 +227,7 @@ export default function ViewPMModal({
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[3.3] items-start max-h-[2.5rem] md:max-h-[4rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Label */}
@@ -235,7 +235,7 @@ export default function ViewPMModal({
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Label:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2">{workOrder.label}</TableCell>
+                                <TableCell className="flex flex-[3.3] items-start max-h-[2.5rem] md:max-h-[4rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.label}</TableCell>
                             </TableRow>
                             
                             {/* Remarks */}

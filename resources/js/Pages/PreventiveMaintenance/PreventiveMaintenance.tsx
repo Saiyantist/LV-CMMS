@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Datatable } from "@/Components/Datatable";
@@ -9,11 +9,14 @@ import EditPMModal from "./components/EditPMModal";
 import EditPMScheduleModal from "./components/EditPMScheduleModal";
 import FlashToast from "@/Components/FlashToast";
 import { getStatusColor } from "@/utils/getStatusColor";
-import { Trash2, MoreVertical } from "lucide-react";
+import { Trash2, MoreVertical, Search, SlidersHorizontal, ChevronDown } from "lucide-react";
 import DeletePMModal from "./components/DeletePMModal";
 import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
 import { formatDate } from "date-fns";
+import { Input } from "@/Components/shadcnui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/Components/shadcnui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
 
 interface WorkOrders {
     id: number;
@@ -185,7 +188,10 @@ const PreventiveMaintenance: React.FC = () => {
     const [isDeletingPM, setIsDeletingPM] = useState<any>(null);
     const [isEditingPMSchedule, setIsEditingPMSchedule] = useState<any>(null);
     const [activeTab, setActiveTab] = useState("Work Orders");
-
+    const [mobileSearchQuery, setMobileSearchQuery] = useState("");
+    const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, string>>({});
+    const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
+    const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
 
     const PMSWorkOrdersColumns: ColumnDef<WorkOrders>[] = [
     {
@@ -443,10 +449,310 @@ const PreventiveMaintenance: React.FC = () => {
         }
     ];
 
+    const tabs = ["Work Orders", "Schedules"];
+
     return (
         <Authenticated>
             <Head title="Preventive Maintenance" />
 
+            {/* Header */}
+            <header className="mx-auto px-0 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
+                    <h1 className="text-2xl font-semibold sm:mb-0">
+                        Preventive Maintenance
+                    </h1>
+                </div>
+            </header>
+
+            {/* Tabs - Desktop */}
+            <div className="hidden md:flex">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="bg-gray-200 text-black rounded-md mb-6">
+                        <TabsTrigger value="Work Orders">Work Orders</TabsTrigger>
+                        <TabsTrigger value="Schedules">Schedules</TabsTrigger>
+                    </TabsList>
+                </Tabs>
+            </div>
+
+            {/* Tabs - Mobile */}
+            <div className="md:hidden gap-2 mt-4">
+                <div className="flex flex-row items-center gap-1">
+                    {/* Switch Tabs */}
+                    <div className="flex flex-[2] sm:flex-[1] justify-start pl-2">
+                        <h2 className="text-sm text-primary font-semibold">
+                            Switch Tabs:
+                        </h2>
+                    </div>
+                    {/* Dropdown */}
+                    <div className="flex flex-[5]">
+                        <Select value={activeTab} onValueChange={setActiveTab}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select tab" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {tabs.map((tab) => (
+                                    <SelectItem key={tab} value={tab}>
+                                        {tab}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto lg:-mt-[3.8rem]">
+
+                {/* Preventive Maintenance Work Orders Datatable */}
+                {activeTab === "Work Orders" && (
+                    <Datatable
+                        columns={PMSWorkOrdersColumns}
+                        data={workOrders}
+                        placeholder="Search for ID, Asset Name, Location, Label, or Assigned to"
+                        />
+                )}
+
+                {/* Preventive Maintenance Schedules Datatable */}
+                {activeTab === "Schedules" && (
+                    <Datatable
+                        columns={PMSchedulesColumns}
+                        data={assetMaintenanceSchedules}
+                        placeholder="Search for ID or Asset Name"
+                    />
+                )}
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden flex flex-col gap-4 mt-4">
+                {/* Search and Filter Controls */}
+                <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search for ID, Asset Name, Location, Label, or Assigned to"
+                            value={mobileSearchQuery}
+                            onChange={(event) => setMobileSearchQuery(event.target.value)}
+                            className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
+                        />
+                    </div>
+                    <Button
+                        ref={mobileFilterButtonRef}
+                        variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
+                        size="sm"
+                        className={`h-10 gap-1 border rounded-md ${
+                            Object.keys(mobileColumnFilters).length > 0 ? "bg-primary text-white" : ""
+                        }`}
+                        onClick={() => setIsMobileFilterModalOpen(!isMobileFilterModalOpen)}
+                    >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        Filter
+                        {Object.keys(mobileColumnFilters).length > 0 && (
+                            <span className="ml-1 rounded-full bg-white text-primary w-5 h-5 flex items-center justify-center text-xs">
+                                {Object.values(mobileColumnFilters).filter((value) => value !== "" && value !== "all").length}
+                            </span>
+                        )}
+                    </Button>
+                </div>
+
+                {/* Mobile Cards */}
+                {activeTab === "Work Orders" && workOrders.map((workOrder) => {
+                    const description = workOrder.report_description || "";
+
+                    return (
+                        <div
+                            key={workOrder.id}
+                            className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"
+                            onClick={() => setIsViewPM(workOrder)}
+                        >
+                            {/* Top row: ID and Status aligned horizontally */}
+                            <div className="flex text-gray-800 mb-1">
+                                <div className="flex flex-[11] justify-between items-start">
+                                    {/* ID */}
+                                    <p>
+                                        <span className="font-bold text-primary">ID:</span>{" "}
+                                        {workOrder.id}
+                                    </p>
+                                    {/* Status */}
+                                    <span
+                                        className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
+                                            workOrder.status
+                                        )}`}
+                                    >
+                                        {workOrder.status}
+                                    </span>
+                                </div>
+                                {/* More Vertical Button */}
+                                <div className="flex flex-[1] justify-end items-center">
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="ghost" className="h-6 w-6 p-0 z-10 relative" onClick={(e) => e.stopPropagation()}>
+                                                <MoreVertical className="h-4 w-4" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            align="end"
+                                            side="bottom"
+                                            sideOffset={4}
+                                            className="w-32 p-1 rounded-md border bg-white shadow-md z-50"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            {/* <button
+                                                onClick={() => setIsViewPM(workOrder)}
+                                                className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                            >
+                                                View
+                                            </button> */}
+                                            <button
+                                                onClick={() => setIsEditingPM(workOrder)}
+                                                className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => setIsDeletingPM(workOrder)}
+                                                className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                            >
+                                                Delete
+                                            </button>
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </div>
+
+                            {/* Info Section */}
+                            <div className="space-y-1 pr-8 text-gray-800">
+                                
+                                {/* Scheduled Date */}
+                                <p>
+                                    <span className="font-bold text-primary">
+                                        Scheduled Date:
+                                    </span>{" "}
+                                    {workOrder.scheduled_at ? formatDate(workOrder.scheduled_at, "MM/dd/yyyy") : "No date set"}
+                                </p>
+
+                                {/* Asset Name */}
+                                <p>
+                                    <span className="font-bold text-primary">
+                                        Asset:
+                                    </span>{" "}
+                                    {workOrder.asset?.name || "N/A"}
+                                </p>
+
+                                {/* Location */}
+                                <p>
+                                    <span className="font-bold text-primary">
+                                        Location:
+                                    </span>{" "}
+                                    {workOrder.location?.name || "N/A"}
+                                </p>
+
+                                {/* Assigned To */}
+                                <p>
+                                    <span className="font-bold text-primary">
+                                        Assigned to:
+                                    </span>{" "}
+                                    {workOrder.assigned_to?.name || "Unassigned"}
+                                </p>
+
+                            </div>
+                        </div>
+                    );
+                })}
+
+                {/* Schedules Mobile Cards */}
+                {activeTab === "Schedules" && assetMaintenanceSchedules.map((schedule) => (
+                    <div
+                        key={schedule.id}
+                        className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"
+                        onClick={() => setIsEditingPMSchedule(schedule)}
+                    >
+                        {/* Top row: ID and Status aligned horizontally */}
+                        <div className="flex text-gray-800 mb-1">
+                            <div className="flex flex-[11] justify-between items-start">
+                                {/* ID */}
+                                <p>
+                                    <span className="font-bold text-primary">ID:</span>{" "}
+                                    {schedule.maintenance_schedule?.id}
+                                </p>
+                                {/* Status */}
+                                <span
+                                    className={`font-semibold px-2.5 py-1 border rounded ${
+                                        schedule.maintenance_schedule?.is_active
+                                            ? "bg-green-100 text-green-800 border-green-200"
+                                            : "bg-gray-100 text-gray-800 border-gray-200"
+                                    }`}
+                                >
+                                    {schedule.maintenance_schedule?.is_active ? "Active" : "Inactive"}
+                                </span>
+                            </div>
+                            {/* More Vertical Button */}
+                            <div className="flex flex-[1] justify-end items-center">
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="ghost" className="h-6 w-6 p-0 z-10 relative" onClick={(e) => e.stopPropagation()}>
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                        align="end"
+                                        side="bottom"
+                                        sideOffset={4}
+                                        className="w-32 p-1 rounded-md border bg-white shadow-md z-50"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <button
+                                            onClick={() => setIsEditingPMSchedule(schedule)}
+                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                        >
+                                            Edit
+                                        </button>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                        </div>
+
+                        {/* Info Section */}
+                        <div className="space-y-1 pr-8 text-gray-800">
+                            {/* Asset Name */}
+                            <p>
+                                <span className="font-bold text-primary">
+                                    Asset:
+                                </span>{" "}
+                                {schedule.name}
+                            </p>
+
+                            {/* Schedule */}
+                            <p>
+                                <span className="font-bold text-primary">
+                                    Schedule:
+                                </span>{" "}
+                                {formatMaintenanceSchedule(schedule.maintenance_schedule)}
+                            </p>
+
+                            {/* Next Scheduled */}
+                            <p>
+                                <span className="font-bold text-primary">
+                                    Next Scheduled:
+                                </span>{" "}
+                                {computeNextScheduledDate(schedule.maintenance_schedule, schedule.last_maintained_at)}
+                            </p>
+
+                            {/* Last Run */}
+                            <p>
+                                <span className="font-bold text-primary">
+                                    Last Run:
+                                </span>{" "}
+                                {schedule.maintenance_schedule?.last_run_at 
+                                    ? formatDate(schedule.maintenance_schedule.last_run_at, "MM/dd/yyyy")
+                                    : "Not run yet"}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Modals */}
             {isViewingPM && (
                 <ViewPMModal
                     workOrder={isViewingPM}
@@ -485,61 +791,6 @@ const PreventiveMaintenance: React.FC = () => {
             )}
 
             <FlashToast />
-
-            <header className="mx-auto px-6 md:px-0 mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
-                    <h1 className="text-2xl font-semibold sm:mb-0">
-                        Preventive Maintenance
-                    </h1>
-                </div>
-            </header>
-
-            <div className="hidden md:flex">
-                    <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="bg-gray-200 text-black rounded-md mb-6">
-                            <TabsTrigger value="Work Orders">Work Orders</TabsTrigger>
-                            <TabsTrigger value="Schedules">Schedules</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                </div>
-
-            {/* Desktop Table */}
-            <div className="hidden sm:block overflow-x-auto lg:-mt-[3.8rem]">
-
-                {/* Preventive Maintenance Work Orders Datatable */}
-                {activeTab === "Work Orders" && (
-                <Datatable
-                    columns={PMSWorkOrdersColumns}
-                    data={workOrders}
-                    placeholder="Search for ID, Asset Name, Location, Label, or Assigned to"
-                    />
-                )}
-
-                {/* Preventive Maintenance Schedules Datatable */}
-                {activeTab === "Schedules" && (
-                    <Datatable
-                        columns={PMSchedulesColumns}
-                        data={assetMaintenanceSchedules}
-                        placeholder="Search for ID or Asset Name"
-                    />
-                )}
-            </div>
-
-            {/* Mobile Search Input */}
-            <div className="sm:hidden mb-4">
-                <input
-                    type="text"
-                    placeholder="Search here"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-            </div>
-
-            {/* Mobile Cards */}
-            <div className="sm:hidden flex flex-col gap-4 mt-4">
-
-            </div>
         </Authenticated>
     );
 };

@@ -206,7 +206,7 @@ export default function EditPMModal({
                     </Button>
                 </DialogHeader>
 
-                <div className="space-y-4 px-6 max-h-[70vh] overflow-y-auto">
+                <div className="space-y-4 px-6 max-h-[55vh] md:max-h-[70vh] overflow-y-auto">
 
                     {/* PM Details */}
                     <Table className="w-full rounded-md text-xs xs:text-sm">
@@ -562,13 +562,11 @@ export default function EditPMModal({
                 </div>
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <div className="flex gap-2 xs:flex-row flex-col">
-                        <Button variant="outline" onClick={onClose}>Cancel</Button>
-                        <Button type="submit" onClick={submit}
-                            className="bg-primary hover:bg-primary/90 text-white">
-                                {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
-                        </Button>
-                    </div>
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button type="submit" onClick={submit}
+                        className="bg-primary hover:bg-primary/90 text-white">
+                            {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
+                    </Button>
                 </DialogFooter>
 
             {activeImageIndex !== null && (
