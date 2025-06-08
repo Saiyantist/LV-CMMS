@@ -172,7 +172,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
 
     return (
         <Dialog open={true} onOpenChange={() => onClose()}>
-            <DialogContent className="w-full sm:max-w-lg md:max-w-xl lg:max-w-3xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-lg md:max-w-xl lg:max-w-3xl sm:max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
@@ -195,11 +195,11 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                     </Button>
                 </DialogHeader>
 
-                <div className="px-6 pt-2 pb-4 max-h-[65vh] overflow-y-auto">
+                <div className="px-4 py-1 max-h-[45vh] sm:max-h-[65vh] overflow-y-auto">
                     {isEditing ? (
                         // Editing Section
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="px-2 -mt-2 space-y-4">
+                        <form onSubmit={handleSubmit}>
+                            <div className="p-2 -mt-2 space-y-4">
 
                                 <div className="flex flex-row gap-4">
                                     {/* Compliance Area */}
@@ -461,20 +461,20 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                             <Table className="w-full rounded-md text-xs xs:text-sm">
                                 <TableBody className="flex flex-col">
                                     {/* Row 1 */}
-                                    <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                    <TableRow className="border-none flex flex-col xs:flex-row xs:items-center xs:justify-between w-full">
 
                                         {/* Date Requested */}
                                         <div className="flex-[4] flex">
                                             <TableHead className="flex flex-[1] items-center">
                                                 <Label>Date Requested:</Label>
                                             </TableHead>
-                                            <TableCell className="flex flex-[2] items-center">
+                                            <TableCell className="flex flex-[2] xs:flex-[1] lg:flex-[2] items-center">
                                                 {format(parseISO(editableData.requested_at), "MM/dd/yyyy")}
                                             </TableCell>
                                         </div>
 
                                         {/* Status */}
-                                        <div className="flex-[3] flex gap-8">
+                                        <div className="flex-[3] flex xs:gap-8">
                                             <TableHead className="flex flex-[1] items-center">
                                                 <Label>Status:</Label>
                                             </TableHead>
@@ -489,14 +489,14 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                     </TableRow>
 
                                     {/* Row 2 */}
-                                    <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                    <TableRow className="border-none flex flex-col xs:flex-row xs:items-center xs:justify-between w-full">
 
                                         {/* Target Date */}
                                         <div className="flex-[4] flex">
                                             <TableHead className="flex flex-[1] items-center">
                                                 <Label>Target Date:</Label>
                                             </TableHead>
-                                            <TableCell className="flex flex-[2] items-center">
+                                            <TableCell className="flex flex-[2] xs:flex-[1] lg:flex-[2] items-center">
                                                 {editableData.scheduled_at
                                                     ? format(parseISO(editableData.scheduled_at), "MM/dd/yyyy")
                                                     : "Not set"}
@@ -504,7 +504,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         </div>
 
                                         {/* Priority */}
-                                        <div className="flex-[3] flex gap-8">
+                                        <div className="flex-[3] flex xs:gap-8">
                                             <TableHead className="flex flex-[1] items-center">
                                                 <Label>Priority:</Label>
                                             </TableHead>
@@ -520,8 +520,10 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         </div>
                                     </TableRow>
 
+                                    <hr className="my-2" />
+
                                     {/* Row 3 */}
-                                    <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                    <TableRow className="border-none flex flex-col xs:flex-row xs:items-center xs:justify-between w-full">
 
                                         {/* Compliance Area */}
                                         <div className="flex-[4] flex">
@@ -534,7 +536,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         </div>
 
                                         {/* Location */}
-                                        <div className="flex-[3] flex gap-8">
+                                        <div className="flex-[3] flex xs:gap-8">
                                             <TableHead className="flex flex-[1] items-center">
                                                 <Label>Location:</Label>
                                             </TableHead>
@@ -544,40 +546,37 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         </div>
                                     </TableRow>
 
-                                    {/* Assigned To */}
-                                    <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                        <TableHead className="flex flex-[1] items-center">
-                                            <Label>Assigned To:</Label>
-                                        </TableHead>
-                                        <TableCell className="flex flex-[4.4] items-center">
-                                            {editableData.assigned_to
-                                                ? `${editableData.assigned_to.first_name} ${editableData.assigned_to.last_name}`
-                                                : "Unassigned"}
-                                        </TableCell>
-                                    </TableRow>
-
-                                    <hr className="my-2" />
-
                                     {/* Description */}
                                     <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                        <TableHead className="flex flex-[1] items-center">
+                                        <TableHead className="flex flex-[2.2] xs:flex-[1] items-center">
                                             <Label>Description:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[4.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                        <TableCell className="flex flex-[4.5] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
                                             {editableData.report_description}
                                         </TableCell>
                                     </TableRow>
 
                                     {/* Safety Protocols */}
                                     <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                        <TableHead className="flex flex-[1] items-center">
+                                        <TableHead className="flex flex-[2.2] xs:flex-[1] items-center">
                                             <Label>Safety Protocols:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[4.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                        <TableCell className="flex flex-[4.5] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
                                             {editableData.remarks || <span className="text-gray-500 italic">No safety protocols specified</span>}
                                         </TableCell>
                                     </TableRow>
 
+                                    {/* Assigned To */}
+                                    <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                                        <TableHead className="flex flex-[2.2] xs:flex-[1] items-center">
+                                            <Label>Assigned To:</Label>
+                                        </TableHead>
+                                        <TableCell className="flex flex-[4.5] items-center">
+                                            {editableData.assigned_to
+                                                ? `${editableData.assigned_to.first_name} ${editableData.assigned_to.last_name}`
+                                                : "Unassigned"}
+                                        </TableCell>
+                                    </TableRow>
 
                                 </TableBody>
                             </Table>
@@ -585,40 +584,40 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                     )}
                 </div>
 
-                {!window.location.pathname.includes('/') && (
+                {!window.location.pathname.includes('/dashboard') ? [
                     <DialogFooter className="px-6 pt-2 pb-4 border-t">
-                        <div className="flex justify-end gap-2">
-                            {isEditing ? (
-                                <>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => {
-                                            setEditableData(workOrder);
-                                            setIsEditing(false);
-                                        }}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="bg-primary text-white hover:bg-primary/90 hover:text-white"
-                                        onClick={handleSubmit}
-                                    >
-                                        Save Changes
-                                    </Button>
-                                </>
-                            ) : (
+                        {isEditing ? (
+                            <>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setEditableData(workOrder);
+                                        setIsEditing(false);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
                                 <Button
                                     variant="outline"
                                     className="bg-primary text-white hover:bg-primary/90 hover:text-white"
-                                    onClick={() => setIsEditing(true)}
+                                    onClick={handleSubmit}
                                 >
-                                    Edit
+                                    Save Changes
                                 </Button>
-                            )}
-                        </div>
+                            </>
+                        ) : (
+                            <Button
+                                variant="outline"
+                                className="bg-primary text-white hover:bg-primary/90 hover:text-white"
+                                onClick={() => setIsEditing(true)}
+                            >
+                                Edit
+                            </Button>
+                        )}
                     </DialogFooter>
-                )}
+                ] : [
+                    <DialogFooter></DialogFooter>
+                ]}
             </DialogContent>
         </Dialog>
     );

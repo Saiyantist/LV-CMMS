@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Datatable } from "@/Components/Datatable";
@@ -17,6 +17,7 @@ import { formatDate } from "date-fns";
 import { Input } from "@/Components/shadcnui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/Components/shadcnui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
+import ScrollToTopButton from "@/Components/ScrollToTopButton";
 
 interface WorkOrders {
     id: number;
@@ -192,6 +193,20 @@ const PreventiveMaintenance: React.FC = () => {
     const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, string>>({});
     const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
     const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
+    const [showScrollUpButton, setShowScrollUpButton] = useState(false)
+
+    const handleScroll = () => {
+        setShowScrollUpButton(window.scrollY > 300);
+    };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     const PMSWorkOrdersColumns: ColumnDef<WorkOrders>[] = [
     {
@@ -791,6 +806,12 @@ const PreventiveMaintenance: React.FC = () => {
             )}
 
             <FlashToast />
+
+            {/* Scroll to Top Button */}
+            <ScrollToTopButton
+                showScrollUpButton={showScrollUpButton}
+                scrollToTop={scrollToTop}
+            />
         </Authenticated>
     );
 };

@@ -775,13 +775,15 @@ export default function IndexLayout({
                                         {workOrder.id}
                                     </p>
                                     {/* Status */}
-                                    <span
-                                        className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
-                                            workOrder.status
-                                        )}`}
-                                    >
-                                        {workOrder.status}
-                                    </span>
+                                    {activeTab !== "For Budget Request" && (
+                                        <span
+                                            className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
+                                                workOrder.status
+                                            )}`}
+                                        >
+                                            {workOrder.status}
+                                        </span>
+                                    )}
                                 </div>
                                 {/* More Vertical Button */}
                                 <div className="flex flex-[1] justify-end items-center">
@@ -901,7 +903,15 @@ export default function IndexLayout({
 
                             {/* Info Section */}
                             <div className="space-y-1 pr-8 text-gray-800">
-
+                                {/* Date Requested */}
+                                <p>
+                                    <span className="font-bold text-primary">
+                                        Date Requested:
+                                    </span>{" "}
+                                    {new Date(
+                                        workOrder.requested_at
+                                    ).toLocaleDateString()}
+                                </p>
                                 {/* Description */}
                                 <p>
                                     <span className="font-bold text-primary">
@@ -922,7 +932,7 @@ export default function IndexLayout({
 
                                 {/* Priority */}
                                 {isWorkOrderManager && (
-                                    <p className="flex items-center text-sm">
+                                    <p className="flex items-center">
                                         <span className="font-bold text-primary mr-1">
                                             Priority:
                                         </span>
@@ -982,16 +992,6 @@ export default function IndexLayout({
                                         </span>
                                     </p>
                                 )}
-
-                                {/* Date Requested */}
-                                <p>
-                                    <span className="font-bold text-primary">
-                                        Date Requested:
-                                    </span>{" "}
-                                    {new Date(
-                                        workOrder.requested_at
-                                    ).toLocaleDateString()}
-                                </p>
                             </div>
                         </div>
                     );

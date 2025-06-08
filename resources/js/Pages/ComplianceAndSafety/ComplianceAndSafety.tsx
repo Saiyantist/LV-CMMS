@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
@@ -8,13 +8,17 @@ import DeleteComplianceModal from "./components/DeleteComplianceModal";
 import { Datatable } from "@/Components/Datatable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/Components/shadcnui/button";
-import { Trash2, MoreVertical, CirclePlus } from "lucide-react";
+import { Trash2, MoreVertical, CirclePlus, Search, SlidersHorizontal } from "lucide-react";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { getPriorityColor } from "@/utils/getPriorityColor";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
 import FlashToast from "@/Components/FlashToast";
 import { prioritySorting } from "@/utils/prioritySorting";
 import { format } from "date-fns";
+import { Input } from "@/Components/shadcnui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/Components/shadcnui/popover";
+import FilterModal from "@/Components/FilterModal";
+import ScrollToTopButton from "@/Components/ScrollToTopButton";
 
 interface WorkOrder {
     id: number;
@@ -70,6 +74,24 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
     const [editing, setEditing] = useState(false);
     const [editableItem, setEditableItem] = useState<WorkOrder | null>(null);
     const [deletingItem, setDeletingItem] = useState<WorkOrder | null>(null);
+    const [mobileSearchQuery, setMobileSearchQuery] = useState("");
+    const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
+    const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, string>>({});
+    const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
+    const [showScrollUpButton, setShowScrollUpButton] = useState(false)
+
+    const handleScroll = () => {
+        setShowScrollUpButton(window.scrollY > 300);
+    };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     const columns: ColumnDef<WorkOrder>[] = [
         {
@@ -221,6 +243,23 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
         },
     ];
 
+    // Filter work orders based on search query and filters
+    const filteredMobileWorkOrders = workOrders.filter((workOrder) => {
+        const matchesSearch = mobileSearchQuery === "" || 
+            workOrder.compliance_area.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+            workOrder.location.name.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+            workOrder.report_description.toLowerCase().includes(mobileSearchQuery.toLowerCase());
+
+        const matchesFilters = Object.entries(mobileColumnFilters).every(([key, value]) => {
+            if (!value || value === "all") return true;
+            if (key === "status") return workOrder.status === value;
+            if (key === "location.name") return workOrder.location.name === value;
+            return true;
+        });
+
+        return matchesSearch && matchesFilters;
+    });
+
     return (
         <Authenticated>
             <Head title="Compliance and Safety" />
@@ -241,7 +280,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
             </header>
 
             {/* Desktop Table */}
-            <div className="hidden sm:block lg:-mt-[4.1rem] overflow-x-auto">
+            <div className="hidden md:block lg:-mt-[4.1rem] overflow-x-auto">
                 <Datatable
                     columns={columns}
                     data={workOrders}
@@ -250,82 +289,135 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
             </div>
 
             {/* Mobile Cards */}
-            <div className="sm:hidden flex flex-col gap-4 mt-4">
-                {Array.isArray(workOrders) && workOrders.map((item) => (
+            <div className="md:hidden flex flex-col gap-4 mt-4">
+                {/* Search and Filter Controls */}
+                <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search for ID, Compliance Area, or Location"
+                            value={mobileSearchQuery}
+                            onChange={(event) => setMobileSearchQuery(event.target.value)}
+                            className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
+                        />
+                    </div>
+                    <Button
+                        ref={mobileFilterButtonRef}
+                        variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
+                        size="sm"
+                        className={`h-10 gap-1 border rounded-md ${
+                            Object.keys(mobileColumnFilters).length > 0 ? "bg-primary text-white" : ""
+                        }`}
+                        onClick={() => setIsMobileFilterModalOpen(!isMobileFilterModalOpen)}
+                    >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        Filter
+                        {Object.keys(mobileColumnFilters).length > 0 && (
+                            <span className="ml-1 rounded-full bg-white text-primary w-5 h-5 flex items-center justify-center text-xs">
+                                {Object.values(mobileColumnFilters).filter((value) => value !== "" && value !== "all").length}
+                            </span>
+                        )}
+                    </Button>
+                </div>
+
+                {/* Filter Modal */}
+                <FilterModal
+                    isOpen={isMobileFilterModalOpen}
+                    onClose={() => setIsMobileFilterModalOpen(false)}
+                    columns={columns}
+                    columnFilters={mobileColumnFilters}
+                    setColumnFilters={setMobileColumnFilters}
+                    data={filteredMobileWorkOrders}
+                    buttonRef={mobileFilterButtonRef as React.RefObject<HTMLButtonElement>}
+                />
+
+                {filteredMobileWorkOrders.map((item) => (
                     <div
                         key={item.id}
-                        className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
+                        className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"
+                        onClick={() => {
+                            setViewingItem(item);
+                            setEditableItem(item);
+                            setEditing(false);
+                        }}
                     >
-                        <div className="flex justify-between items-start text-sm text-gray-800 mb-1">
-                            <p>
-                                <span className="font-medium">ID:</span>{" "}
-                                {item.id}
-                            </p>
-                            <span className={`px-2 py-1 rounded ${getStatusColor(item.status)}`}>
-                                {item.status}
-                            </span>
+                        {/* Top row: ID and Status aligned horizontally */}
+                        <div className="flex text-gray-800 mb-1">
+                            <div className="flex flex-[11] justify-between items-start">
+                                {/* ID */}
+                                <p>
+                                    <span className="font-bold text-primary">ID:</span>{" "}
+                                    {item.id}
+                                </p>
+                                {/* Status */}
+                                <span
+                                    className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
+                                        item.status
+                                    )}`}
+                                >
+                                    {item.status}
+                                </span>
+                            </div>
+                            {/* More Vertical Button */}
+                            <div className="flex flex-[1] justify-end items-center">
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="ghost" className="h-6 w-6 p-0 z-10 relative" onClick={(e) => e.stopPropagation()}>
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                        align="end"
+                                        side="bottom"
+                                        sideOffset={4}
+                                        className="w-32 p-1 rounded-md border bg-white shadow-md z-50"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <button
+                                            onClick={() => setDeletingItem(item)}
+                                            className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                        >
+                                            Delete
+                                        </button>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
                         </div>
 
-                        <div className="space-y-1 pr-8 text-sm text-gray-800">
+                        {/* Info Section */}
+                        <div className="space-y-1 pr-8 text-gray-800">
+                            {/* Target Date */}
                             <p>
-                                <span className="font-medium">
-                                    Compliance Area:
-                                </span>{" "}
+                                <span className="font-bold text-primary">Target Date:</span>{" "}
+                                {format(new Date(item.scheduled_at), "yyyy-MM-dd")}
+                            </p>
+
+                            {/* Compliance Area */}
+                            <p>
+                                <span className="font-bold text-primary">Compliance Area:</span>{" "}
                                 {item.compliance_area}
                             </p>
+
+                            {/* Location */}
                             <p>
-                                <span className="font-medium">
-                                    Location:
-                                </span>{" "}
+                                <span className="font-bold text-primary">Location:</span>{" "}
                                 {item.location.name}
                             </p>
+
+                            {/* Priority */}
                             <p>
-                                <span className="font-medium">
-                                    Description:
-                                </span>{" "}
-                                {item.report_description}
-                            </p>
-                            <p>
-                                <span className="font-medium">
-                                    Priority:
-                                </span>{" "}
+                                <span className="font-bold text-primary">Priority:</span>{" "}
                                 <span className={`px-2 py-1 rounded ${getPriorityColor(item.priority)}`}>
                                     {item.priority}
                                 </span>
                             </p>
+
+                            {/* Assigned To */}
                             <p>
-                                <span className="font-medium">
-                                    Assigned To:
-                                </span>{" "}
+                                <span className="font-bold text-primary">Assigned To:</span>{" "}
                                 {item.assigned_to ? `${item.assigned_to.first_name} ${item.assigned_to.last_name}` : "Unassigned"}
                             </p>
-                            <p>
-                                <span className="font-medium">
-                                    Target Date:
-                                </span>{" "}
-                                {item.scheduled_at}
-                            </p>
-                        </div>
 
-                        <div className="mt-4 flex justify-end gap-2">
-                            <Button
-                                className="w-1/2 bg-secondary text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition"
-                                onClick={() => {
-                                    setViewingItem(item);
-                                    setEditableItem(item);
-                                    setEditing(false);
-                                }}
-                            >
-                                View
-                            </Button>
-                            <Button
-                                className="w-1/2 bg-destructive text-white px-4 py-2 text-sm rounded-md hover:opacity-90 transition"
-                                onClick={() => {
-                                    setDeletingItem(item);
-                                }}
-                            >
-                                Delete
-                            </Button>
                         </div>
                     </div>
                 ))}
@@ -360,6 +452,12 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
             )}
 
             <FlashToast />
+
+            {/* Scroll to Top Button */}
+            <ScrollToTopButton
+                showScrollUpButton={showScrollUpButton}
+                scrollToTop={scrollToTop}
+            />
         </Authenticated>
     );
 };

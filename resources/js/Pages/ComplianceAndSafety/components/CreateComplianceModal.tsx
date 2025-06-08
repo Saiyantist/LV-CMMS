@@ -195,8 +195,8 @@ export default function CreateComplianceModal({
                     </Button>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6 px-6 py-2 max-h-[65vh] overflow-y-auto">
-                    <div className="px-2 -mt-2 space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-6 px-2 py-2 max-h-[55vh] sm:max-h-[65vh] overflow-y-auto">
+                    <div className="px-4 -mt-2 space-y-4">
                         {/* Compliance Area */}
                         <div className="space-y-2">
                             <Label htmlFor="compliance_area" className="flex items-center">
@@ -269,8 +269,8 @@ export default function CreateComplianceModal({
                                 placeholder="Enter safety protocols and procedures..."
                             />
                         </div>
-
-                        <div className="flex flex-row justify-between gap-4">
+                        
+                        <div className="flex flex-col xs:flex-row justify-between gap-4">
                             {/* Target Date */}
                             <div className="flex-[1] space-y-2">
                                 <Label htmlFor="scheduled_at" className="flex items-center">
@@ -437,18 +437,16 @@ export default function CreateComplianceModal({
 
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <div className="flex gap-2 xs:flex-row flex-col">
-                        <Button variant="outline" onClick={onClose}>
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            onClick={handleSubmit}
-                            className="bg-primary hover:bg-primary/90 text-white"
-                        >
-                            Create Work Order
-                        </Button>
-                    </div>
+                    <Button variant="outline" onClick={onClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        type="submit"
+                        onClick={handleSubmit}
+                        className="bg-primary hover:bg-primary/90 text-white"
+                    >
+                        Create Work Order
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
