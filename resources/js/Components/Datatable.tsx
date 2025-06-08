@@ -200,7 +200,7 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
             ref={filterButtonRef}
             variant={hasActiveFilters ? "default" : "outline"}
             size="sm"
-            className={`h-10 gap-1 border rounded-md ${hasActiveFilters ? "bg-primary text-white" : ""}`}
+            className={`z-10 h-10 gap-1 border rounded-md ${hasActiveFilters ? "bg-primary text-white" : ""}`}
             onClick={() => setIsFilterModalOpen(!isFilterModalOpen)}
           >
             <SlidersHorizontal className="h-4 w-4" />

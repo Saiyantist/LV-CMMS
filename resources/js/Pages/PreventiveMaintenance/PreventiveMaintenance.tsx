@@ -16,7 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { formatDate } from "date-fns";
 import { Input } from "@/Components/shadcnui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/Components/shadcnui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
+import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
 
 interface WorkOrders {
@@ -471,11 +471,13 @@ const PreventiveMaintenance: React.FC = () => {
             <Head title="Preventive Maintenance" />
 
             {/* Header */}
-            <header className="mx-auto px-0 mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
-                    <h1 className="text-2xl font-semibold sm:mb-0">
+            <header className="sticky top-0 z-40 sm:z-0 w-full mx-auto px-0 md:mb-6 bg-white">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start -mt-6 pt-6 text-center sm:text-left gap-3 sm:gap-4">
+                    <h1 className="text-2xl font-semibold">
                         Preventive Maintenance
                     </h1>
+
+                    <SelectSeparator className="sm:hidden mt-2 bg-secondary/30"/>
                 </div>
             </header>
 
@@ -493,7 +495,7 @@ const PreventiveMaintenance: React.FC = () => {
             <div className="md:hidden gap-2 mt-4">
                 <div className="flex flex-row items-center gap-1">
                     {/* Switch Tabs */}
-                    <div className="flex flex-[2] sm:flex-[1] justify-start pl-2">
+                    <div className="flex xs:flex-[1.5] sm:flex-[1] justify-start px-2">
                         <h2 className="text-sm text-primary font-semibold">
                             Switch Tabs:
                         </h2>

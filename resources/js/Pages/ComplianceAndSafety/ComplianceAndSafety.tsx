@@ -19,6 +19,7 @@ import { Input } from "@/Components/shadcnui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/Components/shadcnui/popover";
 import FilterModal from "@/Components/FilterModal";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
+import { SelectSeparator } from "@/Components/shadcnui/select";
 
 interface WorkOrder {
     id: number;
@@ -264,8 +265,9 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
         <Authenticated>
             <Head title="Compliance and Safety" />
 
-            <header className="mx-auto px-0 mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
+            {/* Header */}
+            <header className="sticky top-0 z-40 sm:z-0 w-full mx-auto px-0 md:mb-6 bg-white">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start -mt-6 pt-6 text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                         Compliance and Safety
                     </h1>
@@ -276,6 +278,8 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                         <span>Add</span>
                         <CirclePlus className="h-5 w-5" />
                     </PrimaryButton>
+
+                    <SelectSeparator className="sm:hidden mt-2 bg-secondary/30"/>
                 </div>
             </header>
 

@@ -116,7 +116,7 @@ export default function DeleteAssetModal({
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
-                            <span>Delete Asset</span>
+                            <span className="text-red-500">Delete</span><span className="-ms-2.5">Asset</span>
                             <span className="text-muted-foreground">|</span>
                             <span className="text-muted-foreground">ID: {asset.id}</span>
                         </div>
@@ -144,24 +144,28 @@ export default function DeleteAssetModal({
                             <hr className="my-2" />
 
                             {/* Location, Condition, and Date Acquired */}
-                            <div className="flex flex-col xs:flex-row gap-4 my-4">
-                                <div className="space-y-2 flex-[1]">
-                                    <Label>Location</Label>
-                                    <p className="text-sm text-muted-foreground">{asset.location.name}</p>
+                            <div className="flex flex-col xs:flex-row gap-2 xs:my-2">
+                                <div className="space-y-2 flex flex-row flex-[1] xs:flex-col">
+                                    <Label htmlFor="location" className="flex flex-[1] items-center">Location</Label>
+                                    <div className="!mb-2 flex flex-[2]">
+                                        <p className="text-sm text-muted-foreground">{asset.location.name}</p>
+                                    </div>
                                 </div>
-                                <div className="space-y-2 flex-[1]">
-                                    <Label>Condition</Label>
-                                    <p>
+                                <div className="space-y-2 flex flex-row flex-[1] xs:flex-col">
+                                    <Label htmlFor="status" className="flex flex-[1] items-center">Condition</Label>
+                                    <div className="!mb-2 flex flex-[2]">
                                         <span className={`px-2 py-1 rounded text-xs ${getStatusColor(asset.status)}`}>
                                             {asset.status}
                                         </span>
-                                    </p>
+                                    </div>
                                 </div>
-                                <div className="space-y-2 flex-[1]">
-                                    <Label>Date Acquired</Label>
-                                    <p className="text-sm text-muted-foreground">
-                                        {asset.date_acquired ? format(parseISO(asset.date_acquired), "MM/dd/yyyy") : "Not set"}
-                                    </p>
+                                <div className="space-y-2 flex flex-row flex-[1] xs:flex-col">
+                                    <Label htmlFor="date_acquired" className="flex flex-[1] items-center">Date Acquired</Label>
+                                    <div className="!mb-2 flex flex-[2]">
+                                        <p className="text-sm text-muted-foreground">
+                                            {asset.date_acquired ? format(parseISO(asset.date_acquired), "MM/dd/yyyy") : "Not set"}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 

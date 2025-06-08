@@ -182,12 +182,12 @@ export default function AcceptWorkOrderModal({
                 }
             }}
         >
-            <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         { workOrder.status === "For Budget Request" && (
-                            <div className="flex flex-row gap-4 text-sm sm:text-xl">
-                                <span>Accept Budget-approved Work Order </span>
+                            <div className="flex flex-row gap-4 text-xl">
+                                <span>Accept Budget-approved W.O. </span>
                                 <span className="text-muted-foreground">|</span>
                                 <span className="text-muted-foreground">ID: {workOrder.id}</span>
                             </div>
@@ -198,84 +198,61 @@ export default function AcceptWorkOrderModal({
                                 <span className="text-muted-foreground">ID: {workOrder.id}</span>
                             </div>
                         )}
-                        </DialogTitle>
+                    </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />
                     </Button>
                 </DialogHeader>
 
-                <div className="space-y-4 px-6 max-h-[70vh] overflow-y-auto">
+                <div className="space-y-4 px-6 max-h-[55vh] sm:max-h-[65vh] overflow-y-auto">
+                    {/* Info Section */}
                     <Table className="w-full rounded-md">
-                        <TableBody>
+                        <TableBody className="flex flex-col">
 
                             {/* Date Requested */}
-                            <TableRow className="border-none">
-                                <TableHead className="sm:w-1/4 ">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Date Requested:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_at}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {format(workOrder.requested_at, "MM/dd/yyyy")}
+                                </TableCell>
                             </TableRow>
 
                             {/* Requested By */}
-                            <TableRow className="border-none">
-                                <TableHead className="sm:w-1/4">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Requested by:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_by.name}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {workOrder.requested_by.name}
+                                </TableCell>
                             </TableRow>
 
                             {/* Location */}
-                            <TableRow className="border-none">
-                                <TableHead className="sm:w-1/4">
+                            <TableRow className="border-none flex flex-row">
+                            <TableHead className="flex flex-[1] items-center">
                                     <Label>Location:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.location.name}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {workOrder.location.name}
+                                </TableCell>
                             </TableRow>
 
                             {/* Description */}
-                            <TableRow className="border-none">
-                                <TableHead className="sm:w-1/4">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
-                            {/* Remarks */}
-                            {/* {workOrder.remarks && (
-                            <TableRow className="border-none">
-                                <TableHead className="sm:w-1/4">
-                                    <Label>Remarks:</Label>
-                                </TableHead>
-                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
-                                        workOrder.remarks
-                                    ) : (
-                                        <span className="text-gray-500 italic">No Remarks</span>
-                                    )}</TableCell>
-                            </TableRow>
-                            )} */}
-
-                            {/* Asset Detail */}
-                            {/* {assetDetails && (
-                            <TableRow className="border-none">
-                                <TableHead className="sm:w-1/4">
-                                <Label>Asset</Label>
-                                </TableHead>
-                                <TableCell>
-                                    {assetDetails ? (
-                                        `${assetDetails?.name} - ${assetDetails?.location_name}`
-                                    ) : (
-                                        <span className="text-gray-500 italic">No Asset attached</span>
-                                    )}
-                                </TableCell>
-                            </TableRow>
-                            )} */}
-
-                            {/* Attachment / Images / Photos */}
-                            <TableRow className="border-none">
-                                <TableHead className="sm:w-1/4">
+                            {/* Attachment/Images */}
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Attachment:</Label>
                                 </TableHead>
-                                <TableCell className="">
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
                                     {workOrder.images.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                             {workOrder.images.map((src, index) => (

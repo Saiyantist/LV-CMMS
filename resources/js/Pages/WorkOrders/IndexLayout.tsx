@@ -35,7 +35,7 @@ import {
     PopoverTrigger,
     PopoverContent
   } from "@/Components/shadcnui/popover";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/Components/shadcnui/select";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectSeparator } from "@/Components/shadcnui/select";
   
 
 interface Props {
@@ -634,11 +634,12 @@ export default function IndexLayout({
             <Head title="Work Orders" />
 
             {/* Header */}
-            <header className="mx-auto px-0 mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
+            <header className="sticky top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start -mt-6 pt-6 text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                         Work Orders
                     </h1>
+
                     <PrimaryButton
                         onClick={() => setIsCreating(true)}
                         className="bg-secondary text-white hover:bg-primary transition-all duration-300 !text-lg xs:text-lg md:text-base rounded-md w-[98%] sm:w-auto text-center self-center justify-center gap-2"
@@ -646,6 +647,8 @@ export default function IndexLayout({
                         <span>Create</span>
                         <CirclePlus className="h-5 w-5" />
                     </PrimaryButton>
+
+                    <SelectSeparator className="sm:hidden mt-2 bg-secondary/30"/>
                 </div>
             </header>
 
@@ -670,7 +673,7 @@ export default function IndexLayout({
                 <div className="md:hidden gap-2 mt-4">
                     <div className="flex flex-row items-center gap-1">
                         {/* Switch Tabs */}
-                        <div className="flex flex-[2] sm:flex-[1] justify-start pl-2">
+                        <div className="flex xs:flex-[1.5] sm:flex-[1] justify-start px-2">
                             <h2 className="text-sm text-primary font-semibold">
                                 Switch Tabs:
                             </h2>

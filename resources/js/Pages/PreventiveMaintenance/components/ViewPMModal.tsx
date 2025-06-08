@@ -105,7 +105,7 @@ export default function ViewPMModal({
                 }
             }}
         >   
-            <DialogContent className="w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-xl lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-lg font-semibold text-primary">
                         <div className="flex flex-row gap-4">
@@ -119,7 +119,7 @@ export default function ViewPMModal({
                     </Button>
                 </DialogHeader>
 
-                <div className="px-2 sm:px-6 max-h-[70vh] overflow-y-auto">
+                <div className="px-6 max-h-[55vh] sm:max-h-[65vh] overflow-y-auto">
 
                     <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody className="flex flex-col">
@@ -142,12 +142,12 @@ export default function ViewPMModal({
                             )}
 
                             {/* Schedule */}
-                            <TableRow className="border-none flex items-center justify-start">
+                            <TableRow className="border-none flex items-center">
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label className="text-muted-foreground">Preventive Maintenance Schedule:</Label>
                                 </TableHead>
                                 <TableCell className="flex flex-[1] items-center">
-                                    <span className="bg-secondary/70 border border-secondary text-white rounded p-1 px-4">
+                                    <span className="bg-secondary /70 border border-secondary text-white rounded p-1 px-4">
                                         {workOrder.asset?.maintenance_schedule ? formatMaintenanceSchedule(workOrder.asset.maintenance_schedule) : "-"}
                                     </span>
                                 </TableCell>
@@ -165,8 +165,8 @@ export default function ViewPMModal({
                                     <TableCell className="flex flex-[1] items-center">{workOrder.requested_at}</TableCell>
                                 </div>  
                                 {/* Status */}
-                                <div className="flex-[1] flex gap-8">
-                                    <TableHead className="flex flex-[1] items-center">
+                                <div className="flex-[1] flex">
+                                    <TableHead className="flex flex-[0.7] items-center">
                                         <Label>Status:</Label>
                                     </TableHead>
                                     <TableCell className="flex flex-[2] items-center">
@@ -194,7 +194,7 @@ export default function ViewPMModal({
                                     <TableHead className="flex flex-[0.7] items-center">
                                         <Label>Priority:</Label>
                                     </TableHead>
-                                    <TableCell className="flex flex-[1] items-start">
+                                    <TableCell className="flex flex-[2] items-start">
                                         <div
                                             className={`px-2 py-1 rounded bg-muted ${getPriorityColor(
                                                 workOrder.priority

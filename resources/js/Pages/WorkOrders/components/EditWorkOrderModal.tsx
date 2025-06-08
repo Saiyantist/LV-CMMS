@@ -246,9 +246,9 @@ export default function EditWorkOrderModal({
                     </Button>
                 </DialogHeader>
 
-                <div className="space-y-4 px-6 max-h-[55vh] sm:max-h-[70vh] overflow-y-auto">
+                <div className="space-y-4 px-6 max-h-[55vh] sm:max-h-[65vh] overflow-y-auto">
 
-                    {/* Show wO details to WOM */}
+                    {/* Show WO details to WOM */}
                     {isWorkOrderManager && (
                         <Table className="w-full rounded-md">
                             <TableBody>
@@ -258,7 +258,7 @@ export default function EditWorkOrderModal({
                                 <TableHead className="w-[7rem] sm:w-1/4 ">
                                     <Label>Date Requested:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_at}</TableCell>
+                                <TableCell className="">{format(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
                             </TableRow>
 
                             {/* Requested By */}
@@ -428,7 +428,7 @@ export default function EditWorkOrderModal({
                             <div className="py-2">
 
                                 {/* Row 1 */}
-                                <div className="flex flex-row justify-between gap-4 ">
+                                <div className="flex flex-row justify-between gap-4">
                                     
                                     {/* Label */}
                                     <div className="flex-[2] space-y-2">

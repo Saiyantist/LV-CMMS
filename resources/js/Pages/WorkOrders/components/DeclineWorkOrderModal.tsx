@@ -13,6 +13,7 @@ import {
 import { Label } from "@/Components/shadcnui/label";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { router } from "@inertiajs/react";
+import { format } from "date-fns";
 
 
 
@@ -90,7 +91,7 @@ export default function DeclineWorkOrderModal({
                 }
             }}
         >
-            <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
@@ -107,67 +108,54 @@ export default function DeclineWorkOrderModal({
 
                 <div className="px-6 max-h-[70vh] overflow-y-auto">
 
+                    {/* Info Section */}
                     <Table className="w-full rounded-md">
-                        <TableBody>
-                        
+                        <TableBody className="flex flex-col">
+
                             {/* Date Requested */}
-                            <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Date Requested:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_at}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {format(workOrder.requested_at, "MM/dd/yyyy")}
+                                </TableCell>
                             </TableRow>
 
                             {/* Requested By */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Requested by:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_by.name}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {workOrder.requested_by.name}
+                                </TableCell>
                             </TableRow>
 
                             {/* Location */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row">
+                            <TableHead className="flex flex-[1] items-center">
                                     <Label>Location:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.location.name}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {workOrder.location.name}
+                                </TableCell>
                             </TableRow>
 
                             {/* Description */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
-
-                            {/* Asset Detail */}
-                            {assetDetails && (
-                            <TableRow className="border-none">
-                                <TableHead>
-                                <Label>Asset</Label>
-                                </TableHead>
-                                <TableCell>{assetDetails.name} - {assetDetails.location_name}</TableCell>
-                            </TableRow>
-                            )}
-
-                            {/* Status */}
-                            {/* <TableRow className="border-none">
-                                <TableHead className="">
-                                    <Label>Status:</Label>
-                                </TableHead>
-                                <TableCell className="">
-                                    <span className={`rounded-md text-sm border font-medium shadow-sm h-8 px-2 py-1 ${getStatusColor(workOrder.status)}`}>{workOrder.status}</span>
-                                </TableCell>
-                            </TableRow> */}
 
                             {/* Attachment/Images */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Attachment:</Label>
                                 </TableHead>
-                                <TableCell className="">
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
                                     {workOrder.images.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                             {workOrder.images.map((src, index) => (

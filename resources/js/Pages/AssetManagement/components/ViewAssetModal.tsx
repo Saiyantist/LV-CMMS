@@ -277,7 +277,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                     <div className="px-6 py-2 max-h-[65vh] overflow-y-auto">
                         <div className="px-2 -mt-2 space-y-4">
                             {/* Asset Name and Specification */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
+                            <div className="grid grid-cols-1 gap-4 ">
                                 {/* Asset Name */}
                                 <div className="space-y-2">
                                     <Label htmlFor="name" className="flex items-center">
@@ -318,10 +318,10 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                             </div>
                             <hr className="!my-4"/>
                             {/* Location, Condition, and Date Acquired */}
-                            <div className="flex flex-col xs:flex-row gap-4 !my-6">
+                            <div className="flex flex-col xs:flex-row gap-2 !my-6">
                                 {/* Location */}
-                                <div className="space-y-2 flex-[1]">
-                                    <Label htmlFor="location" className="flex items-center">
+                                <div className="space-y-2 flex flex-row flex-[1] xs:flex-col">
+                                    <Label htmlFor="location" className="flex flex-[1] items-center">
                                         Location
                                     </Label>
                                     {isEditing ? (
@@ -354,13 +354,15 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                             </Select>
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-muted-foreground !mt-4">{editableData.location.name}</p>
+                                        <div className="!mb-2 flex flex-[2]">
+                                            <p className="text-sm text-muted-foreground">{editableData.location.name}</p>
+                                        </div>
                                     )}
                                 </div>
 
                                 {/* Condition */}
-                                <div className="space-y-2 flex-[1]">
-                                    <Label htmlFor="condition" className="flex items-center">
+                                <div className="space-y-2 flex flex-row flex-[1] xs:flex-col">
+                                    <Label htmlFor="condition" className="flex flex-[1] items-center">
                                         Condition
                                     </Label>
                                     {isEditing ? (
@@ -384,21 +386,23 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                         </Select>
                                     </div>
                                     ) : (
-                                    <p>
-                                        <span
-                                            className={`px-2 py-1 rounded text-xs ${getStatusColor(
-                                                editableData.status
-                                            )}`}
-                                        >
-                                            {editableData.status}
-                                        </span>
-                                    </p>
+                                        <div className="!mb-2 flex flex-[2]">
+                                            <p>
+                                                <span
+                                                    className={`px-2 py-1 rounded text-xs ${getStatusColor(
+                                                        editableData.status
+                                                    )}`}
+                                                >
+                                                    {editableData.status}
+                                                </span>
+                                            </p>
+                                        </div>
                                     )}
                                 </div>
 
                                 {/* Date Acquired */}
-                                <div className="space-y-2 flex-[1]">
-                                    <Label htmlFor="date_acquired" className="flex items-center">
+                                <div className="space-y-2 flex flex-row flex-[1] xs:flex-col">
+                                    <Label htmlFor="date_acquired" className="flex flex-[1] items-center">
                                         Date Acquired
                                     </Label>
                                     {isEditing ? (
@@ -438,9 +442,11 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                             )}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-muted-foreground !mt-4">
+                                    <div className="!mb-2 flex flex-[2]">
+                                        <p className="text-sm text-muted-foreground">
                                             {editableData.date_acquired ? format(parseISO(editableData.date_acquired), "MM/dd/yyyy") : "Not set"}
                                         </p>
+                                    </div>
                                     )}
                                 </div>
                             </div>

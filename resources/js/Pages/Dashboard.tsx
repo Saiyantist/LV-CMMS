@@ -79,13 +79,14 @@ export default function Dashboard({
     );
 
     const isDepartmentHead = roleNames.has("department_head");
+    const isMaintenancePersonnel = roleNames.has("maintenance_personnel");
     const isGasdCoordinator = roleNames.has("gasd_coordinator");
     const isCommunicationsOfficer = roleNames.has("communications_officer");
     const isSuperAdmin = roleNames.has("super_admin");
 
     // Tab state for super admin
-    const [activeTab, setActiveTab] = useState<"facilities" | "eventservices">(
-        "facilities"
+    const [activeTab, setActiveTab] = useState<"cmms" | "eventservices">(
+        "cmms"
     );
 
     return (
@@ -101,276 +102,133 @@ export default function Dashboard({
                 />
             )}
 
-            {/* Super Admin: Tab Switcher */}
-            {isSuperAdmin && (
-                <div className="flex gap-2 mb-6">
-                    <button
-                        className={`px-4 py-2 rounded-t-lg font-semibold transition ${
-                            activeTab === "facilities"
-                                ? "bg-primary text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                        onClick={() => setActiveTab("facilities")}
-                    >
-                        CMMS
-                    </button>
-                    <button
-                        className={`px-4 py-2 rounded-t-lg font-semibold transition ${
-                            activeTab === "eventservices"
-                                ? "bg-primary text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                        onClick={() => setActiveTab("eventservices")}
-                    >
-                        Event Services
-                    </button>
-                </div>
-            )}
-
-            {/* Super Admin: Show selected tab */}
+            {/* Super Admin */}
             {isSuperAdmin ? (
-                activeTab === "facilities" ? (
-                    <div className="space-y-6 h-full">
-                        {/* Welcome Card */}
-                        <Card className="overflow-hidden bg-white shadow-sm rounded">
-                            <div className="p-4 text-black text-lg sm:text-xl sm:p-6 text-center xs:text-left">
-                                Welcome, {user.name}!👋🏻
-                            </div>
-                        </Card>
-
-                        {/* Chart Section */}
-                        {(isSuperAdmin || isGasdCoordinator) && (
-                            <>
-                                {/* Overview */}
-                                <Card className="flex justify-center overflow-hidden bg-primary p-6 shadow-sm rounded">
-                                    <Overview />
-                                </Card>
-
-                                {/* Upcoming Work Orders and Preventive Maintenance */}
-                                <div className="flex flex-col xl:flex-row gap-4">
-                                    {/* Work Orders */}
-                                    <Card className="flex justify-start overflow-hidden shadow-sm rounded w-full p-4 max-h-[20rem] overflow-y-auto scrollbar-hide hover:overflow-y-scroll">
-                                        <div className="flex flex-col gap-4 w-full">
-                                            <div className="flex justify-between items-center">
-                                                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                    Upcoming Work Orders
-                                                </h1>
-                                                <Link
-                                                    href={route(
-                                                        "work-orders.index"
-                                                    )}
-                                                    className="text-sm underline text-primary hover:text-primary/80 mr-1"
-                                                >
-                                                    View All
-                                                </Link>
-                                            </div>
-                                            <UpcomingWorkOrdersTable
-                                                data={upcomingWorkOrders}
-                                                locations={locations}
-                                                user={user}
-                                            />
-                                        </div>
-                                    </Card>
-                                    {/* Preventive Maintenance */}
-                                    <Card className="flex justify-start overflow-hidden shadow-sm rounded w-full max-h-[20rem]">
-                                        <div className="flex flex-col gap-4 p-4 w-full">
-                                            <div className="flex justify-between items-center">
-                                                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                    Upcoming Preventive
-                                                    Maintenance
-                                                </h1>
-                                                <Link
-                                                    href={route(
-                                                        "work-orders.preventive-maintenance"
-                                                    )}
-                                                    className="text-sm underline text-primary hover:text-primary/80 mr-1"
-                                                >
-                                                    View All
-                                                </Link>
-                                            </div>
-                                            <UpcomingPreventiveMaintenanceTable
-                                                data={
-                                                    upcomingPreventiveMaintenance
-                                                }
-                                                locations={locations}
-                                                user={user}
-                                            />
-                                        </div>
-                                    </Card>
-                                </div>
-
-                                {/* Upcoming Compliances */}
-                                <div>
-                                    <Card className="flex justify-start overflow-hidden shadow-sm rounded w-full max-h-[20rem]">
-                                        <div className="flex flex-col gap-4 p-4 w-full">
-                                            <div className="flex justify-between items-center">
-                                                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                    Upcoming Compliances
-                                                </h1>
-                                                <Link
-                                                    href={route(
-                                                        "work-orders.compliance-and-safety"
-                                                    )}
-                                                    className="text-sm underline text-primary hover:text-primary/80 mr-1"
-                                                >
-                                                    View All
-                                                </Link>
-                                            </div>
-                                            <UpcomingCompliancesTable
-                                                data={upcomingCompliances}
-                                                locations={locations}
-                                                user={user}
-                                            />
-                                        </div>
-                                    </Card>
-                                </div>
-                            </>
-                        )}
-
-                        {isDepartmentHead && (
-                            <>
-                                {/* My Work Orders */}
-                                <div className="flex flex-col md:flex-row justify-between gap-4">
-                                    {/* Total Work Order Requests */}
-                                    <Card className="w-full text-white bg-primary hover:shadow-lg hover:scale-105 transition-all duration-300">
-                                        <CardHeader>
-                                            <CardTitle>
-                                                My Work Order Requests
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <p className="text-2xl font-bold text-white">
-                                                {workOrderRequests.length}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-
-                                    <div className="flex w-full gap-4">
-                                        <Card className="w-full text-white bg-secondary/50 hover:shadow-lg hover:scale-105 hover:bg-secondary transition-all duration-300">
-                                            <CardHeader>
-                                                <CardTitle>
-                                                    Pending Work Orders
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <p className="text-2xl font-bold">
-                                                    {pendingWorkOrders.length}
-                                                </p>
-                                            </CardContent>
-                                        </Card>
-                                        <Card className="w-full text-white bg-destructive/70 hover:shadow-lg hover:scale-105 hover:bg-destructive transition-all duration-300">
-                                            <CardHeader>
-                                                <CardTitle>
-                                                    Declined Work Orders
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <p className="text-2xl font-bold">
-                                                    {declinedWorkOrders.length}
-                                                </p>
-                                            </CardContent>
-                                        </Card>
-                                    </div>
-                                </div>
-
-                                {/* My Recent Work Orders */}
-                                <div className="flex flex-col md:flex-row justify-between gap-4 text-xs sm:text-sm">
-                                    <Card className="w-full">
-                                        <CardHeader>
-                                            <CardTitle className="text-primary text-base sm:text-lg">
-                                                My Recent Work Orders
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-2 max-h-[25rem] overflow-y-auto">
-                                            {workOrderRequests
-                                                .sort(
-                                                    (a: any, b: any) =>
-                                                        new Date(
-                                                            b.requested_at
-                                                        ).getTime() -
-                                                        new Date(
-                                                            a.requested_at
-                                                        ).getTime()
-                                                )
-                                                .slice(0, 3)
-                                                .map((workOrder: any) => (
-                                                    <Card
-                                                        key={workOrder.id}
-                                                        onClick={() => {
-                                                            setIsViewingWorkOrder(
-                                                                workOrder
-                                                            );
-                                                        }}
-                                                        className="hover:bg-muted hover:shadow-lg transition-all duration-300"
-                                                    >
-                                                        <CardHeader>
-                                                            <CardTitle className="flex justify-between items-start text-xs sm:text-base">
-                                                                <p className="bg-primary rounded-md px-2 py-1 text-xs sm:text-sm text-white">
-                                                                    <span className="font-bold">
-                                                                        ID:
-                                                                    </span>{" "}
-                                                                    {
-                                                                        workOrder.id
-                                                                    }
-                                                                </p>
-                                                                <span
-                                                                    className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
-                                                                        workOrder.status
-                                                                    )}`}
-                                                                >
-                                                                    {
-                                                                        workOrder.status
-                                                                    }
-                                                                </span>
-                                                            </CardTitle>
-                                                        </CardHeader>
-                                                        <CardContent>
-                                                            {/* Info Section */}
-                                                            <div className="space-y-2 pr-8 text-gray-800">
-                                                                {/* Date Requested */}
-                                                                <p>
-                                                                    <span className="font-bold text-primary">
-                                                                        Date
-                                                                        Requested:
-                                                                    </span>{" "}
-                                                                    {new Date(
-                                                                        workOrder.requested_at
-                                                                    ).toLocaleDateString()}
-                                                                </p>
-
-                                                                {/* Location */}
-                                                                <p>
-                                                                    <span className="font-bold text-primary">
-                                                                        Location:
-                                                                    </span>{" "}
-                                                                    {workOrder
-                                                                        .location
-                                                                        ?.name ||
-                                                                        "N/A"}
-                                                                </p>
-
-                                                                {/* Description */}
-                                                                <p className="items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
-                                                                    <span className="font-bold text-primary ">
-                                                                        Description:
-                                                                    </span>{" "}
-                                                                    {
-                                                                        workOrder.report_description
-                                                                    }
-                                                                </p>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                ))}
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            </>
-                        )}
+                <div className="space-y-4">
+                    {/* Welcome Card */}
+                    <Card className="overflow-hidden bg-white shadow-sm rounded">
+                        <div className="p-4 text-black text-lg sm:text-xl sm:p-6 text-center xs:text-left">
+                            Welcome, {user.name}!👋🏻
+                        </div>
+                    </Card>
+                    <div className="flex gap-2 mb-6">
+                        <button
+                            className={`px-4 py-2 rounded-t-lg font-semibold transition ${
+                                activeTab === "cmms"
+                                    ? "bg-primary text-white"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                            onClick={() => setActiveTab("cmms")}
+                        >
+                            CMMS
+                        </button>
+                        <button
+                            className={`px-4 py-2 rounded-t-lg font-semibold transition ${
+                                activeTab === "eventservices"
+                                    ? "bg-primary text-white"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                            onClick={() => setActiveTab("eventservices")}
+                        >
+                            Event Services
+                        </button>
                     </div>
-                ) : (
-                    <EventServicesDashboard bookings={[]} />
-                )
+                    {activeTab === "cmms" ? (
+                        <div className="space-y-6 h-full">    
+                            {/* Overview */}
+                            <Card className="flex justify-center overflow-hidden bg-primary p-6 shadow-sm rounded">
+                                <Overview />
+                            </Card>
+    
+                            {/* Upcoming Work Orders and Preventive Maintenance */}
+                            <div className="flex flex-col xl:flex-row gap-4">
+                                {/* Work Orders */}
+                                <Card className="flex justify-start overflow-hidden shadow-sm rounded w-full p-4 max-h-[20rem] overflow-y-auto scrollbar-hide hover:overflow-y-scroll">
+                                    <div className="flex flex-col gap-4 w-full">
+                                        <div className="flex justify-between items-center">
+                                            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                Upcoming Work Orders
+                                            </h1>
+                                            <Link
+                                                href={route(
+                                                    "work-orders.index"
+                                                )}
+                                                className="text-sm underline text-primary hover:text-primary/80 mr-1"
+                                            >
+                                                View All
+                                            </Link>
+                                        </div>
+                                        <UpcomingWorkOrdersTable
+                                            data={upcomingWorkOrders}
+                                            locations={locations}
+                                            user={user}
+                                        />
+                                    </div>
+                                </Card>
+                                {/* Preventive Maintenance */}
+                                <Card className="flex justify-start overflow-hidden shadow-sm rounded w-full max-h-[20rem]">
+                                    <div className="flex flex-col gap-4 p-4 w-full">
+                                        <div className="flex justify-between items-center">
+                                            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                Upcoming Preventive
+                                                Maintenance
+                                            </h1>
+                                            <Link
+                                                href={route(
+                                                    "work-orders.preventive-maintenance"
+                                                )}
+                                                className="text-sm underline text-primary hover:text-primary/80 mr-1"
+                                            >
+                                                View All
+                                            </Link>
+                                        </div>
+                                        <UpcomingPreventiveMaintenanceTable
+                                            data={
+                                                upcomingPreventiveMaintenance
+                                            }
+                                            locations={locations}
+                                            user={user}
+                                        />
+                                    </div>
+                                </Card>
+                            </div>
+    
+                            {/* Upcoming Compliances */}
+                            <div>
+                                <Card className="flex justify-start overflow-hidden shadow-sm rounded w-full max-h-[20rem]">
+                                    <div className="flex flex-col gap-4 p-4 w-full">
+                                        <div className="flex justify-between items-center">
+                                            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                Upcoming Compliances
+                                            </h1>
+                                            <Link
+                                                href={route(
+                                                    "work-orders.compliance-and-safety"
+                                                )}
+                                                className="text-sm underline text-primary hover:text-primary/80 mr-1"
+                                            >
+                                                View All
+                                            </Link>
+                                        </div>
+                                        <UpcomingCompliancesTable
+                                            data={upcomingCompliances}
+                                            locations={locations}
+                                            user={user}
+                                        />
+                                    </div>
+                                </Card>
+                            </div>
+                        </div>
+                     ) : activeTab === "eventservices" ? (
+                        <EventServicesDashboard bookings={[]} />
+                     ) : (
+                        <div className="flex justify-center items-center h-full">
+                            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                                No active tab
+                            </h1>
+                        </div>
+                     )}
+                </div>
             ) : isCommunicationsOfficer ? (
                 <EventServicesDashboard bookings={[]} />
             ) : (
@@ -382,8 +240,8 @@ export default function Dashboard({
                         </div>
                     </Card>
 
-                    {/* Chart Section */}
-                    {(isSuperAdmin || isGasdCoordinator) && (
+                    {/* GASD Coordinator */}
+                    {isGasdCoordinator && (
                         <>
                             {/* Overview */}
                             <Card className="flex justify-center overflow-hidden bg-primary p-6 shadow-sm rounded">
@@ -468,6 +326,7 @@ export default function Dashboard({
                         </>
                     )}
 
+                    {/* Department Head */}
                     {isDepartmentHead && (
                         <>
                             {/* My Work Orders */}
@@ -605,6 +464,11 @@ export default function Dashboard({
                                 </Card>
                             </div>
                         </>
+                    )}
+
+                    {/* Maintenance Personnel */}
+                    {isMaintenancePersonnel && (
+                        <div>Maintenance Personnel Dashboard here</div>
                     )}
                 </div>
             )}

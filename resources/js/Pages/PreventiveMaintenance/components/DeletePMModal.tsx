@@ -137,36 +137,51 @@ export default function DeletePMModal({
                 <div className="px-6 max-h-[70vh] overflow-y-auto">
 
                 <Table className="w-full rounded-md text-xs xs:text-sm">
-                        <TableBody className="flex flex-col">
-                            {/* Row 3 */}
-                            <div className="flex items-center justify-start">
+                    <TableBody className="flex flex-col">
+                        {/* Row 1 */}
+                        
+                        {/* Asset */}
+                        {assetDetails && (
+                        <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                            <TableHead className="flex flex-[1] items-center">
+                            <Label>Asset</Label>
+                            </TableHead>
+                            <TableCell className="flex flex-[3.3] items-center whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll">
+                                {assetDetails ? (
+                                    `${assetDetails?.name} - ${assetDetails?.location_name}`
+                                ) : (
+                                    <span className="text-gray-500 italic">No Asset attached</span>
+                                )}
+                            </TableCell>
+                        </TableRow>
+                        )}
 
-                                {/* Schedule */}
+                        {/* Schedule */}
+                        <TableRow className="border-none flex items-center">
+                            <TableHead className="flex flex-[1] items-center">
+                                <Label className="text-muted-foreground">Preventive Maintenance Schedule:</Label>
+                            </TableHead>
+                            <TableCell className="flex flex-[1] items-center">
+                                <span className="bg-secondary/70 border border-secondary text-white rounded p-1 px-4">
+                                    {workOrder.asset?.maintenance_schedule ? formatMaintenanceSchedule(workOrder.asset.maintenance_schedule) : "-"}
+                                </span>
+                            </TableCell>
+                        </TableRow>
+
+                        <hr className="my-2" />
+
+                        {/* Row 2 */}
+                        <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                            {/* Date Generated */}
+                            <div className="flex-[1] flex">
                                 <TableHead className="flex flex-[1] items-center">
-                                    <Label className="text-primary">Preventive Maintenance Schedule:</Label>
+                                    <Label>Date Generated:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[1] items-center">
-                                    <span className="bg-secondary/70 border border-secondary text-white rounded p-1 px-4">
-                                        {workOrder.asset?.maintenance_schedule ? formatMaintenanceSchedule(workOrder.asset.maintenance_schedule) : "-"}
-                                    </span>
-                                </TableCell>
-
-                            </div>
-
-                            <hr className="my-2" />
-
-                            {/* Row 2 */}
-                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                {/* Date Generated */}
+                                <TableCell className="flex flex-[1] items-center">{workOrder.requested_at}</TableCell>
+                            </div>  
+                                {/* Status */}
                                 <div className="flex-[1] flex">
-                                    <TableHead className="flex flex-[1] items-center">
-                                        <Label>Date Generated:</Label>
-                                    </TableHead>
-                                    <TableCell className="flex flex-[1] items-center">{workOrder.requested_at}</TableCell>
-                                </div>  
-                                {/* Dropdown Menu for Status */}
-                                <div className="flex-[1] flex gap-8">
-                                    <TableHead className="flex flex-[1] items-center">
+                                    <TableHead className="flex flex-[0.7] items-center">
                                         <Label>Status:</Label>
                                     </TableHead>
                                     <TableCell className="flex flex-[2] items-center">
@@ -177,125 +192,108 @@ export default function DeletePMModal({
                                         </span>
                                     </TableCell>
                                 </div>
-                            </TableRow>
+                        </TableRow>
 
-                            {/* Row 3 */}
-                            <TableRow className="border-none flex flex-row items-center justify-end w-full">
+                        {/* Row 3 */}
+                        <TableRow className="border-none flex flex-row items-center justify-end w-full">
 
-                                {/* Scheduled Date */}
-                                <div className="flex-[1] flex">
-                                    <TableHead className="flex flex-[1] items-center">
-                                        <Label>Scheduled Date:</Label>
-                                    </TableHead>
-                                    <TableCell className="flex flex-[1] items-center">{workOrder.scheduled_at ? workOrder.scheduled_at : "-"}</TableCell>
-                                </div>  
-                                {/* Priority */}
-                                <div className="flex-[1] flex">
-                                    <TableHead className="flex flex-[0.7] items-center">
-                                        <Label>Priority:</Label>
-                                    </TableHead>
-                                    <TableCell className="flex flex-[1] items-start">
+                            {/* Scheduled Date */}
+                            <div className="flex-[1] flex">
+                                <TableHead className="flex flex-[1] items-center">
+                                    <Label>Scheduled Date:</Label>
+                                </TableHead>
+                                <TableCell className="flex flex-[1] items-center">{workOrder.scheduled_at ? workOrder.scheduled_at : "-"}</TableCell>
+                            </div>  
+                            {/* Priority */}
+                            <div className="flex-[1] flex">
+                                <TableHead className="flex flex-[0.7] items-center">
+                                    <Label>Priority:</Label>
+                                </TableHead>
+                                <TableCell className="flex flex-[2] items-start">
+                                    <div
+                                        className={`px-2 py-1 rounded bg-muted ${getPriorityColor(
+                                            workOrder.priority
+                                        )}`}
+                                    >
+                                        {workOrder.priority || "No Priority"}
+                                    </div>
+                                </TableCell>
+                            </div>
+
+                        </TableRow>
+                    </TableBody>
+                </Table>
+
+                <hr className="my-2" />
+
+                <Table className="w-full rounded-md text-xs xs:text-sm">
+                    <TableBody className="flex flex-col">
+                        {/* Location */}
+                        <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                            <TableHead className="flex flex-[1] items-center">
+                                <Label>Location:</Label>
+                            </TableHead>
+                            <TableCell className="flex flex-[3.3] items-center">{workOrder.location.name}</TableCell>
+                        </TableRow>
+
+                        {/* Description */}
+                        <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                            <TableHead className="flex flex-[1] items-center">
+                                <Label>Description:</Label>
+                            </TableHead>
+                            <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                        </TableRow>
+
+                        {/* Label */}
+                        <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                            <TableHead className="flex flex-[1] items-center">
+                                <Label>Label:</Label>
+                            </TableHead>
+                            <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.label}</TableCell>
+                        </TableRow>
+
+                        <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                            <TableHead className="flex flex-[1] items-center">
+                                <Label>Remarks:</Label>
+                            </TableHead>
+                            <TableCell className="flex flex-[3.3] items-center">
+                                {workOrder.remarks ? (
+                                    workOrder.remarks
+                                ) : (
+                                    <span className="text-gray-500 italic">No Remarks</span>
+                                )}
+                            </TableCell>
+                        </TableRow>
+
+                        {/* Attachment/Images */}
+                        <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                            <TableHead className="flex flex-[1] items-center">
+                                <Label>Attachment:</Label>
+                            </TableHead>
+                            <TableCell className="flex flex-[3.3] items-center">
+                                {workOrder.images && workOrder.images.length > 0 ? (
+                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                        {workOrder.images.map((src, index) => (
                                         <div
-                                            className={`px-2 py-1 rounded bg-muted ${getPriorityColor(
-                                                workOrder.priority
-                                            )}`}
+                                            key={index}
+                                            className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
+                                            onClick={() => setActiveImageIndex(index)}
                                         >
-                                            {workOrder.priority || "No Priority"}
+                                            <img
+                                            src={src}
+                                            alt={`Attachment ${index + 1}`}
+                                            className="w-full h-full object-cover"
+                                            />
                                         </div>
-                                    </TableCell>
-                                </div>
-
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-
-                    <hr className="my-2" />
-
-                    <Table className="w-full rounded-md text-xs xs:text-sm">
-                        <TableBody className="flex flex-col">
-
-                            {/* Asset */}
-                            {assetDetails && (
-                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                <TableHead className="flex flex-[1] items-center">
-                                <Label>Asset</Label>
-                                </TableHead>
-                                <TableCell className="flex flex-[3.3] items-center whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll">
-                                    {assetDetails ? (
-                                        `${assetDetails?.name} - ${assetDetails?.location_name}`
+                                        ))}
+                                    </div>
                                     ) : (
-                                        <span className="text-gray-500 italic">No Asset attached</span>
+                                    <span className="text-gray-500 italic">No attachments</span>
                                     )}
-                                </TableCell>
-                            </TableRow>
-                            )}
-
-                            {/* Location */}
-                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                <TableHead className="flex flex-[1] items-center">
-                                    <Label>Location:</Label>
-                                </TableHead>
-                                <TableCell className="flex flex-[3.3] items-center">{workOrder.location.name}</TableCell>
-                            </TableRow>
-
-                            {/* Description */}
-                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                <TableHead className="flex flex-[1] items-center">
-                                    <Label>Description:</Label>
-                                </TableHead>
-                                <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
-                            </TableRow>
-
-                            {/* Label */}
-                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                <TableHead className="flex flex-[1] items-center">
-                                    <Label>Label:</Label>
-                                </TableHead>
-                                <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.label}</TableCell>
-                            </TableRow>
-
-                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                <TableHead className="flex flex-[1] items-center">
-                                    <Label>Remarks:</Label>
-                                </TableHead>
-                                <TableCell className="flex flex-[3.3] items-center">
-                                    {workOrder.remarks ? (
-                                        workOrder.remarks
-                                    ) : (
-                                        <span className="text-gray-500 italic">No Remarks</span>
-                                    )}
-                                </TableCell>
-                            </TableRow>
-
-                            {/* Attachment/Images */}
-                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
-                                <TableHead className="flex flex-[1] items-center">
-                                    <Label>Attachment:</Label>
-                                </TableHead>
-                                <TableCell className="flex flex-[3.3] items-center">
-                                    {workOrder.images && workOrder.images.length > 0 ? (
-                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                            {workOrder.images.map((src, index) => (
-                                            <div
-                                                key={index}
-                                                className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
-                                                onClick={() => setActiveImageIndex(index)}
-                                            >
-                                                <img
-                                                src={src}
-                                                alt={`Attachment ${index + 1}`}
-                                                className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                            ))}
-                                        </div>
-                                        ) : (
-                                        <span className="text-gray-500 italic">No attachments</span>
-                                        )}
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
 
                 </div>
 

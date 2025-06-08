@@ -192,7 +192,7 @@ export default function EditPMModal({
                 }
             }}
         >
-            <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-xl lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
@@ -214,7 +214,7 @@ export default function EditPMModal({
 
                             {/* Date Generated */}
                             <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
+                                <TableHead className="w-[7rem] sm:w-1/4 ">
                                     <Label>Date Generated:</Label>
                                 </TableHead>
                                 <TableCell className="">{workOrder.requested_at}</TableCell>
@@ -298,7 +298,7 @@ export default function EditPMModal({
                                     }
                                     placeholder="Describe your report here..."
                                     required
-                                    className="h-[7rem] text-xs sm:text-sm"
+                                    className="h-1 max-h-[10rem] text-xs sm:text-sm"
                                 />
                                 {localErrors.report_description && (
                                     <p className="text-red-500 text-xs">
@@ -549,6 +549,7 @@ export default function EditPMModal({
                                         setData("remarks", e.target.value)
                                     }
                                     placeholder="Edit remarks here"
+                                    className="h-1 max-h-[10rem] text-xs sm:text-sm"
                                 />
                                 {localErrors.remarks && (
                                     <p className="text-red-500 text-xs">
