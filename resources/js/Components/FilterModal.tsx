@@ -103,7 +103,7 @@ export default function FilterModal({
 
   return (
     <div
-      className="fixed z-50"
+      className="fixed z-50 ml-6 2xs:ml-0"
       style={{ top: `${position.top}px`, left: `${position.left}px` }}
       ref={modalRef}
       data-filter-modal="true"

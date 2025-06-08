@@ -225,14 +225,14 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
         <Authenticated>
             <Head title="Compliance and Safety" />
 
-            <header className="mx-auto px-6 md:px-0 mb-6">
+            <header className="mx-auto px-0 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                         Compliance and Safety
                     </h1>
                     <PrimaryButton
                         onClick={() => setIsCreating(true)}
-                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-base xs:text-lg md:text-base rounded-md w-full sm:w-auto text-center justify-center gap-2"
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 !text-lg xs:text-lg md:text-base rounded-md w-[98%] sm:w-auto text-center justify-center gap-2"
                     >
                         <span>Add</span>
                         <CirclePlus className="h-5 w-5" />

@@ -319,11 +319,9 @@ export default function ForBudgetRequestModal({
                 </div>
 
                 <DialogFooter className="px-6 py-4 border-t">
-                    <div className="flex gap-2 xs:flex-row flex-col">
-                        <Button type="submit" onClick={submit}
-                            className="bg-primary hover:bg-primary/90 text-white">Move to Budget Request</Button>
-                        <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    </div>
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button type="submit" onClick={submit}
+                        className="bg-primary hover:bg-primary/90 text-white">Move to Budget Request</Button>
                 </DialogFooter>
 
                 {activeImageIndex !== null && (

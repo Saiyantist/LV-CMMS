@@ -94,7 +94,7 @@ export default function DeleteWorkOrderModal({
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
-                            <span>Delete Work Order</span>
+                            <span className="text-red-500">Delete</span><span className="-ms-2.5">Work Order</span>
                             <span className="text-muted-foreground">|</span>
                             <span className="text-muted-foreground">ID: {workOrder.id}</span>
                         </div>
@@ -213,14 +213,11 @@ export default function DeleteWorkOrderModal({
 
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <form onSubmit={submit} className="flex gap-2">
-
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
                     <Button type="submit" onClick={submit}
                         className="bg-destructive hover:bg-destructive/90 text-white">
                             Delete
-                        </Button>
-                    </form>
+                    </Button>
                 </DialogFooter>
 
             {activeImageIndex !== null && (

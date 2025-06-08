@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import PrimaryButton from "@/Components/PrimaryButton";
 import CreateAssetModal from "./components/CreateAssetModal";
@@ -13,12 +13,15 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import FlashToast from "@/Components/FlashToast";
 import { Button } from "@/Components/shadcnui/button";
-import { CirclePlus, Trash2, MoreVertical } from "lucide-react";
+import { CirclePlus, Trash2, MoreVertical, Search, SlidersHorizontal } from "lucide-react";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
 import DeleteAssetModal from "./components/DeleteAssetModal";
 import { formatDate } from "date-fns";
+import { Input } from "@/Components/shadcnui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/Components/shadcnui/popover";
+import FilterModal from "@/Components/FilterModal";
 
 interface Asset {
     id: number;
@@ -63,6 +66,10 @@ const AssetManagement: React.FC = () => {
     const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(null);
     const [showScrollUpButton, setShowScrollUpButton] = useState(false);
     const [deletingAsset, setDeletingAsset] = useState<Asset | null>(null);
+    const [mobileSearchQuery, setMobileSearchQuery] = useState("");
+    const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
+    const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, string>>({});
+    const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
 
     const handleScroll = () => {
         setShowScrollUpButton(window.scrollY > 300);
@@ -76,6 +83,26 @@ const AssetManagement: React.FC = () => {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    // useEffect(() => {
+    //     const handleClickOutside = (event: MouseEvent) => {
+    //         if (isMobileFilterModalOpen && mobileFilterButtonRef.current && !mobileFilterButtonRef.current.contains(event.target as Node)) {
+    //             const modalElement = document.querySelector('[data-filter-modal="true"]');
+    //             if (
+    //                 modalElement &&
+    //                 !modalElement.contains(event.target as Node) &&
+    //                 !mobileFilterButtonRef.current.contains(event.target as Node)
+    //             ) {
+    //                 setIsMobileFilterModalOpen(false);
+    //             }
+    //         }
+    //     };
+    
+    //     document.addEventListener("mousedown", handleClickOutside);
+    //     return () => {
+    //         document.removeEventListener("mousedown", handleClickOutside);
+    //     };
+    // }, [isMobileFilterModalOpen]);
 
     const handleCheckboxChange = (assetId: number) => {
         setSelectedAssets((prev) =>
@@ -244,19 +271,36 @@ const AssetManagement: React.FC = () => {
         }
     };
 
+    // Filter assets based on search query and filters
+    const filteredMobileAssets = assets.filter((asset) => {
+        const matchesSearch = mobileSearchQuery === "" || 
+            asset.name.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+            asset.specification_details.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+            asset.location.name.toLowerCase().includes(mobileSearchQuery.toLowerCase());
+
+        const matchesFilters = Object.entries(mobileColumnFilters).every(([key, value]) => {
+            if (!value || value === "all") return true;
+            if (key === "status") return asset.status === value;
+            if (key === "location.name") return asset.location.name === value;
+            return true;
+        });
+
+        return matchesSearch && matchesFilters;
+    });
+
     return (
         <AuthenticatedLayout>
             <Head title="Asset Management" />
 
-            {/* Header section*/}
-            <header className="mx-auto px-6 md:px-0 mb-6">
+            {/* Header */}
+            <header className="mx-auto px-0 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                             Asset Management
                     </h1>
                     <PrimaryButton
                         onClick={() => setIsCreating(true)}
-                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-base xs:text-lg md:text-base rounded-md w-full sm:w-auto text-center justify-center gap-2"
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 !text-lg xs:text-lg md:text-base rounded-md w-[98%] sm:w-auto text-center justify-center gap-2"
                     >
                         <span>Add</span>
                         <CirclePlus className="h-5 w-5" />
@@ -265,7 +309,7 @@ const AssetManagement: React.FC = () => {
             </header>
 
             {/* Desktop Table View */}
-            <div className="hidden md:block w-full overflow-x-auto rounded-md -mt-[4.1rem]">
+            <div className="hidden md:block overflow-x-auto rounded-md lg:-mt-[4.1rem]">
                 <Datatable
                     columns={columns}
                     data={assets}
@@ -274,69 +318,137 @@ const AssetManagement: React.FC = () => {
             </div>
 
             {/* Mobile Card View */}
-            <div className="sm:hidden flex flex-col gap-4 mt-4">
-                {assets.map((asset) => (
+            <div className="md:hidden flex flex-col gap-4 mt-4">
+                {/* Search and Filter Controls */}
+                <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search for ID, Name, Specification, or Location"
+                            value={mobileSearchQuery}
+                            onChange={(event) => setMobileSearchQuery(event.target.value)}
+                            className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
+                        />
+                    </div>
+                    <Button
+                        ref={mobileFilterButtonRef}
+                        variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
+                        size="sm"
+                        className={`h-10 gap-1 border rounded-md ${
+                            Object.keys(mobileColumnFilters).length > 0 ? "bg-primary text-white" : ""
+                        }`}
+                        onClick={() => {
+                            console.log("Click filter button")
+                            setIsMobileFilterModalOpen(!isMobileFilterModalOpen)
+                        }}
+                    >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        Filter
+                        {Object.keys(mobileColumnFilters).length > 0 && (
+                            <span className="ml-1 rounded-full bg-white text-primary w-5 h-5 flex items-center justify-center text-xs">
+                                {Object.values(mobileColumnFilters).filter((value) => value !== "" && value !== "all").length}
+                            </span>
+                        )}
+                    </Button>
+                </div>
+
+                {/* Filter Modal */}
+                <FilterModal
+                    isOpen={isMobileFilterModalOpen}
+                    onClose={() => setIsMobileFilterModalOpen(false)}
+                    columns={columns}
+                    columnFilters={mobileColumnFilters}
+                    setColumnFilters={setMobileColumnFilters}
+                    data={filteredMobileAssets}
+                    buttonRef={mobileFilterButtonRef as React.RefObject<HTMLButtonElement>}
+                />
+
+                {filteredMobileAssets.map((asset) => (
                     <div
                         key={asset.id}
-                        className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
+                        className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"
+                        onClick={() => setViewingAsset(asset)}
                     >
-                        <div className="absolute top-3 right-3">
-                            <p>
+                        {/* Top row: ID and Status aligned horizontally */}
+                        <div className="flex text-gray-800 mb-1">
+                            <div className="flex flex-[11] justify-between items-start">
+                                {/* ID */}
+                                <p>
+                                    <span className="font-bold text-primary">ID:</span>{" "}
+                                    {asset.id}
+                                </p>
+                                {/* Status */}
                                 <span
-                                    className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(
+                                    className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
                                         asset.status
                                     )}`}
                                 >
                                     {asset.status}
                                 </span>
-                            </p>
+                            </div>
+                            {/* More Vertical Button */}
+                            <div className="flex flex-[1] justify-end items-center">
+                                <Popover>
+                                    <PopoverTrigger asChild >
+                                        <Button variant="ghost" className="h-6 w-6 p-0 z-10 relative" onClick={(e) => e.stopPropagation()}>
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                        align="end"
+                                        side="bottom"
+                                        sideOffset={4}
+                                        className="w-32 p-1 rounded-md border bg-white shadow-md z-50"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {/* <button
+                                            onClick={() => setViewingAsset(asset)}
+                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                        >
+                                            View
+                                        </button> */}
+                                        <button
+                                            onClick={() => handleDelete(asset)}
+                                            className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                        >
+                                            Delete
+                                        </button>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
                         </div>
-                        <div className="space-y-1 pr-8 text-sm text-gray-800">
+
+                        {/* Info Section */}
+                        <div className="space-y-1 pr-8 text-gray-800">
+                            {/* Name */}
                             <p>
-                                <span className="font-medium">ID:</span>{" "}
-                                {asset.id}
-                            </p>
-                            <p>
-                                <span className="font-medium">Name:</span>{" "}
+                                <span className="font-bold text-primary">Name:</span>{" "}
                                 {asset.name}
                             </p>
+
+                            {/* Specification */}
                             <p>
-                                <span className="font-medium">Spec:</span>{" "}
+                                <span className="font-bold text-primary">Specification:</span>{" "}
                                 {asset.specification_details}
                             </p>
+
+                            {/* Location */}
                             <p>
-                                <span className="font-medium">
-                                    Location:
-                                </span>{" "}
+                                <span className="font-bold text-primary">Location:</span>{" "}
                                 {asset.location.name}
                             </p>
 
+                            {/* Date Acquired */}
                             <p>
-                                <span className="font-medium">
-                                    Acquired:
-                                </span>{" "}
-                                {asset.date_acquired}
+                                <span className="font-bold text-primary">Date Acquired:</span>{" "}
+                                {formatDate(asset.date_acquired, "MM/dd/yyyy")}
                             </p>
+
+                            {/* Last Maintenance */}
                             <p>
-                                <span className="font-medium">
-                                    Last Maintenance:
-                                </span>{" "}
-                                {asset.last_maintained_at}
+                                <span className="font-bold text-primary">Last Maintenance:</span>{" "}
+                                {formatDate(asset.last_maintained_at, "MM/dd/yyyy")}
                             </p>
-                        </div>
-                        <div className="mt-4 flex justify-between gap-2">
-                            <button
-                                onClick={() => setViewingAsset(asset)}
-                                className="flex-1 bg-secondary text-white px-3 py-2 text-sm rounded-md hover:bg-blue-700 transition"
-                            >
-                                View
-                            </button>
-                            <button
-                                onClick={() => handleDelete(asset)}
-                                className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
-                            >
-                                Delete
-                            </button>
                         </div>
                     </div>
                 ))}

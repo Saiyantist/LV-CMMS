@@ -143,14 +143,14 @@ export default function DeleteAssetModal({
 
                             <hr className="my-2" />
 
-                            {/* Location, Status, and Date Acquired */}
-                            <div className="flex flex-row gap-4 my-4">
+                            {/* Location, Condition, and Date Acquired */}
+                            <div className="flex flex-col xs:flex-row gap-4 my-4">
                                 <div className="space-y-2 flex-[1]">
                                     <Label>Location</Label>
                                     <p className="text-sm text-muted-foreground">{asset.location.name}</p>
                                 </div>
                                 <div className="space-y-2 flex-[1]">
-                                    <Label>Status</Label>
+                                    <Label>Condition</Label>
                                     <p>
                                         <span className={`px-2 py-1 rounded text-xs ${getStatusColor(asset.status)}`}>
                                             {asset.status}
@@ -206,13 +206,11 @@ export default function DeleteAssetModal({
 
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <form onSubmit={submit} className="flex gap-2">
-                        <Button variant="outline" onClick={onClose}>Cancel</Button>
-                        <Button type="submit" onClick={submit}
-                            className="bg-destructive hover:bg-destructive/90 text-white">
-                            Delete
-                        </Button>
-                    </form>
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button type="submit" onClick={submit}
+                        className="bg-destructive hover:bg-destructive/90 text-white">
+                        Delete
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

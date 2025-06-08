@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm, usePage } from "@inertiajs/react";
 import { router } from "@inertiajs/react";
 import axios from "axios";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, set } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, History, X } from "lucide-react";
 import { Button } from "@/Components/shadcnui/button";
@@ -136,6 +136,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
     useEffect(() => {
         if (isHistoryOpen) {
             setLoadingHistory(true);
+            setTimeout(() => {
             axios
                 .get(`/asset-maintenance-history/${asset.id}`)
                 .then((res) => {
@@ -144,8 +145,9 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                 .catch((err) => {
                     console.error("Failed to fetch history", err);
                     setHistory([]);
-                })
-                .finally(() => setLoadingHistory(false));
+                    })
+                    .finally(() => setLoadingHistory(false));
+            }, 100);
         }
     }, [isHistoryOpen, asset.id]);
 
@@ -316,7 +318,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                             </div>
                             <hr className="!my-4"/>
                             {/* Location, Condition, and Date Acquired */}
-                            <div className="flex flex-row gap-4 !my-6">
+                            <div className="flex flex-col xs:flex-row gap-4 !my-6">
                                 {/* Location */}
                                 <div className="space-y-2 flex-[1]">
                                     <Label htmlFor="location" className="flex items-center">
@@ -705,7 +707,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                     </div>
                 ) : (
                     <div className="px-6 py-2 max-h-[65vh] overflow-y-auto">
-                        <h3 className="text-lg font-semibold mb-4 text-center">
+                        <h3 className="text-lg mb-4 text-center">
                             Asset Maintenance History
                         </h3>
                         {loadingHistory ? (
@@ -724,21 +726,37 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                         className="border p-4 rounded-md bg-muted"
                                     >
                                         <div className="grid grid-cols-2 gap-2 text-sm">
-                                            <div>
+                                            <div className="space-y-2">
                                                 <Label>Status</Label>
-                                                <p>{item.status}</p>
+                                                <p>
+                                                    <span
+                                                        className={`px-2 py-1 rounded text-xs ${getStatusColor(
+                                                            item.status
+                                                        )}`}
+                                                    >
+                                                        {item.status}
+                                                    </span>
+                                                </p>
                                             </div>
-                                            <div>
+                                            <div className="space-y-2">
                                                 <Label>Downtime Reason</Label>
-                                                <p>{item.downtime_reason}</p>
+                                                <p className="text-muted-foreground">{item.downtime_reason}</p>
                                             </div>
-                                            <div>
+                                            <div className="space-y-2">
                                                 <Label>Failed at</Label>
-                                                <p>{formatDate(item.failed_at)}</p>
+                                                <p className="text-muted-foreground">{formatDate(item.failed_at)}</p>
                                             </div>
-                                            <div>
+                                            <div className="space-y-2">
                                                 <Label>Maintained at</Label>
-                                                <p>{item.maintained_at ? formatDate(item.maintained_at) : 'Not (yet) maintained'}</p>
+                                                {item.maintained_at ? (
+                                                    <p className="text-muted-foreground">
+                                                        {formatDate(item.maintained_at)}
+                                                    </p>
+                                                )   : (
+                                                    <p className="text-muted-foreground italic">
+                                                        Not yet maintained
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -749,7 +767,6 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                 )}
 
                 <DialogFooter className="px-6 py-4 border-t">
-                    <div className="flex justify-end gap-2">
                         {isHistoryOpen ? (
                             <Button
                                 variant="outline"
@@ -762,7 +779,6 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                             <>
                                 <Button
                                     variant="outline"
-                                    // className="border-destructive !text-destructive hover:!bg-destructive/5 hover:!text-destructive"
                                     onClick={() => {
                                         setEditableData(asset);
                                         setIsEditing(false);
@@ -806,7 +822,6 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                 </Button>
                             </>
                         )}
-                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

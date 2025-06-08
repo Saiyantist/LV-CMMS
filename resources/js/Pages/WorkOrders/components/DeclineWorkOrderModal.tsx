@@ -94,7 +94,7 @@ export default function DeclineWorkOrderModal({
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
-                            <span>Decline Work Order</span>
+                            <span className="text-red-500">Decline</span><span className="-ms-2.5">Work Order</span>
                             <span className="text-muted-foreground">|</span>
                             <span className="text-muted-foreground">ID: {workOrder.id}</span>
                         </div>
@@ -196,10 +196,10 @@ export default function DeclineWorkOrderModal({
 
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <div className="flex gap-2 xs:flex-row flex-col">
-                        <Button variant="destructive" type="submit" onClick={submit}>Decline</Button>
-                        <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    </div>
+                    <Button variant="outline" onClick={onClose}>Cancel</Button> 
+                    <Button variant="destructive" type="submit" onClick={submit}>
+                        Decline
+                    </Button>
                 </DialogFooter>
 
             {activeImageIndex !== null && (

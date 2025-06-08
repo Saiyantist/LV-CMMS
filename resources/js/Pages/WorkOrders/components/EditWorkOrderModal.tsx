@@ -226,7 +226,7 @@ export default function EditWorkOrderModal({
                 }
             }}
         >
-            <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-xl lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
@@ -246,7 +246,7 @@ export default function EditWorkOrderModal({
                     </Button>
                 </DialogHeader>
 
-                <div className="space-y-4 px-6 max-h-[70vh] overflow-y-auto">
+                <div className="space-y-4 px-6 max-h-[55vh] sm:max-h-[70vh] overflow-y-auto">
 
                     {/* Show wO details to WOM */}
                     {isWorkOrderManager && (
@@ -282,7 +282,7 @@ export default function EditWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex max-h-[50px] sm:max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Remarks */}
@@ -290,7 +290,7 @@ export default function EditWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Remarks:</Label>
                                 </TableHead>
-                                <TableCell className="flex max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
+                                <TableCell className="flex max-h-[50px] sm:max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
                                         workOrder.remarks
                                     ) : (
                                         <span className="text-gray-500 italic">No Remarks</span>
@@ -469,7 +469,7 @@ export default function EditWorkOrderModal({
                                             onClick={() => setShowCalendar(!showCalendar)}
                                             className={cn(
                                                 "w-full flex justify-between items-center",
-                                                "text-left font-normal",
+                                                "text-left font-normal !text-xs sm:!text-sm",
                                                 !data.scheduled_at && "text-muted-foreground"
                                             )}
                                         >
@@ -540,10 +540,10 @@ export default function EditWorkOrderModal({
                                 </div>
 
                                 {/* Row 2 */}
-                                <div className="flex flex-row justify-between gap-4 !mt-4">
+                                <div className="flex flex-row justify-evenly gap-4 !mt-4">
 
                                     {/* Assigned To */}
-                                    <div className="flex-[2] space-y-2">
+                                    <div className="flex-[1] xs:flex-[2] space-y-2">
                                         <Label htmlFor="assigned_to" className="flex items-center">
                                             Assign to <span className="text-red-500 ml-1">*</span>
                                         </Label>
@@ -644,7 +644,7 @@ export default function EditWorkOrderModal({
                                     </div>
 
                                     {/* Asset */}
-                                    <div className="flex-[3] space-y-2 -mt-1">
+                                    <div className="flex-[2] xs:flex-[3] space-y-2 xs:mt-0">
                                         <SmartDropdown
                                             label="Asset"
                                             placeholder={assetDetails ? `${assetDetails.name} - ${assetDetails.location_name}` : "Select Asset (scroll down here)"}
@@ -685,13 +685,11 @@ export default function EditWorkOrderModal({
                 </div>
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <div className="flex gap-2 xs:flex-row flex-col">
-                        <Button type="submit" onClick={submit}
-                            className="bg-primary hover:bg-primary/90 text-white">
-                                {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
-                        </Button>
-                        <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    </div>
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button type="submit" onClick={submit}
+                        className="bg-primary hover:bg-primary/90 text-white">
+                            {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
+                    </Button>
                 </DialogFooter>
 
             {activeImageIndex !== null && (

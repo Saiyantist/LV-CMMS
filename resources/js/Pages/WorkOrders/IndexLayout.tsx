@@ -630,95 +630,15 @@ export default function IndexLayout({
         <AuthenticatedLayout>
             <Head title="Work Orders" />
 
-            {/* Modals */}
-            {isCreating && (
-                <CreateWorkOrderModal
-                    locations={locations}
-                    assets={assets}
-                    user={user}
-                    maintenancePersonnel={maintenancePersonnel}
-                    onClose={() => setIsCreating(false)}
-                />
-            )}
-
-            {editingWorkOrder && (
-                <EditWorkOrderModal
-                    workOrder={editingWorkOrder}
-                    locations={locations}
-                    assets={assets}
-                    user={user}
-                    maintenancePersonnel={maintenancePersonnel}
-                    onClose={() => setEditingWorkOrder(null)}
-                />
-            )}
-
-            {acceptingWorkOrder && (
-                <AssignWorkOrderModal
-                    workOrder={acceptingWorkOrder}
-                    locations={locations}
-                    assets={assets}
-                    user={user}
-                    maintenancePersonnel={maintenancePersonnel}
-                    onClose={() => setAcceptingWorkOrder(null)}
-                />
-            )}
-
-            {forBudgetRequest && (
-                <ForBudgetRequestModal
-                    workOrder={forBudgetRequest}
-                    locations={locations}
-                    user={user}
-                    onClose={() => setForBudgetRequest(null)}
-                />
-            )}
-
-            {isViewingWorkOrder && (
-                <ViewWorkOrderModal
-                    workOrder={isViewingWorkOrder}
-                    locations={locations}
-                    user={user}
-                    onClose={() => setIsViewingWorkOrder(null)}
-                />
-            )}
-
-            {decliningWorkOrder && (
-                <DeclineWorkOrderModal
-                    workOrder={decliningWorkOrder}
-                    locations={locations}
-                    user={user}
-                    onClose={() => setDecliningWorkOrder(null)}
-                />
-            )}
-
-            {cancellingWorkOrder && (
-                <CancelWorkOrderModal
-                    workOrder={cancellingWorkOrder}
-                    locations={locations}
-                    user={user}
-                    onClose={() => setCancellingWorkOrder(null)}
-                />
-            )}
-
-            {deletingWorkOrder && (
-                <DeleteWorkOrderModal
-                    workOrder={deletingWorkOrder}
-                    locations={locations}
-                    user={user}
-                    onClose={() => setDeletingWorkOrder(null)}
-                />
-            )}
-            
-            <FlashToast />
-
             {/* Header */}
-            <header className="mx-auto px-6 md:px-0 mb-6">
+            <header className="mx-auto px-0 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                         Work Orders
                     </h1>
                     <PrimaryButton
                         onClick={() => setIsCreating(true)}
-                        className="bg-secondary text-white hover:bg-primary transition-all duration-200 text-base xs:text-lg md:text-base rounded-md w-[95%] sm:w-auto text-center self-center justify-center gap-2"
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 !text-lg xs:text-lg md:text-base rounded-md w-[98%] sm:w-auto text-center self-center justify-center gap-2"
                     >
                         <span>Create</span>
                         <CirclePlus className="h-5 w-5" />
@@ -763,8 +683,7 @@ export default function IndexLayout({
             <div
                 className={`hidden md:block overflow-x-auto rounded-md lg:-mt-[4.1rem]  ${
                     !user.permissions.includes("manage work orders")
-                        ? "-mt-[3.8rem]"
-                        : ""
+                        && "-mt-[3.8rem]"
                 }`}
             >
                 <Datatable
@@ -775,7 +694,7 @@ export default function IndexLayout({
             </div>
 
             {/* Mobile Card View */}
-            <div className="md:hidden flex flex-col gap-4 mt-4 px-4">
+            <div className="md:hidden flex flex-col gap-4 mt-4">
 
                 {/* Search and Filter Controls */}
                 <div className="flex items-center gap-2">
@@ -827,7 +746,9 @@ export default function IndexLayout({
                             key={workOrder.id}
                             className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"
                             onClick={() => {
-                                setIsViewingWorkOrder(workOrder);
+                                if(!isWorkOrderManager) {
+                                    setIsViewingWorkOrder(workOrder);
+                                }
                             }}
                         >
                             {/* Top row: ID and Status aligned horizontally */}
@@ -1061,6 +982,86 @@ export default function IndexLayout({
                     );
                 })}
             </div>
+
+            {/* Modals */}
+            {isCreating && (
+                <CreateWorkOrderModal
+                    locations={locations}
+                    assets={assets}
+                    user={user}
+                    maintenancePersonnel={maintenancePersonnel}
+                    onClose={() => setIsCreating(false)}
+                />
+            )}
+
+            {editingWorkOrder && (
+                <EditWorkOrderModal
+                    workOrder={editingWorkOrder}
+                    locations={locations}
+                    assets={assets}
+                    user={user}
+                    maintenancePersonnel={maintenancePersonnel}
+                    onClose={() => setEditingWorkOrder(null)}
+                />
+            )}
+
+            {acceptingWorkOrder && (
+                <AssignWorkOrderModal
+                    workOrder={acceptingWorkOrder}
+                    locations={locations}
+                    assets={assets}
+                    user={user}
+                    maintenancePersonnel={maintenancePersonnel}
+                    onClose={() => setAcceptingWorkOrder(null)}
+                />
+            )}
+
+            {forBudgetRequest && (
+                <ForBudgetRequestModal
+                    workOrder={forBudgetRequest}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setForBudgetRequest(null)}
+                />
+            )}
+
+            {isViewingWorkOrder && (
+                <ViewWorkOrderModal
+                    workOrder={isViewingWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setIsViewingWorkOrder(null)}
+                />
+            )}
+
+            {decliningWorkOrder && (
+                <DeclineWorkOrderModal
+                    workOrder={decliningWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setDecliningWorkOrder(null)}
+                />
+            )}
+
+            {cancellingWorkOrder && (
+                <CancelWorkOrderModal
+                    workOrder={cancellingWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setCancellingWorkOrder(null)}
+                />
+            )}
+
+            {deletingWorkOrder && (
+                <DeleteWorkOrderModal
+                    workOrder={deletingWorkOrder}
+                    locations={locations}
+                    user={user}
+                    onClose={() => setDeletingWorkOrder(null)}
+                />
+            )}
+            
+            <FlashToast />
 
             {/* Scroll to Top Button */}
             <ScrollToTopButton
