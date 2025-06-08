@@ -131,14 +131,6 @@ export default function MyBookings({
             };
         });
 
-        // Sort by most recent date (descending)
-        result.sort((a, b) => {
-            // Use 'date' field, or fallback to 'created_at'
-            const dateA = new Date(a.date || a.created_at);
-            const dateB = new Date(b.date || b.created_at);
-            return dateB.getTime() - dateA.getTime();
-        });
-
         // Filter by tab (status) for admin roles
         if (isAdmin && activeTab) {
             result = result.filter(
