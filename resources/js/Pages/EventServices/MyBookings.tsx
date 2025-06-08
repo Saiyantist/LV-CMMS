@@ -104,7 +104,6 @@ export default function MyBookings({
 
     useEffect(() => {
         let result = bookings.map((booking) => {
-            // Compute if booking is "On Going"
             const today = new Date();
             const start = booking.event_start_date
                 ? new Date(booking.event_start_date)
@@ -118,24 +117,25 @@ export default function MyBookings({
                 end &&
                 today >= start &&
                 today <= end;
+            const isCompleted =
+                booking.status === "Approved" && end && today > end;
 
             return {
                 ...booking,
-                displayStatus: isOngoing ? "On Going" : booking.status,
+                status: isCompleted ? "Completed" : booking.status,
+                displayStatus: isOngoing
+                    ? "On Going"
+                    : isCompleted
+                    ? "Completed"
+                    : booking.status,
             };
         });
 
         // Filter by tab (status) for admin roles
         if (isAdmin && activeTab) {
-            if (activeTab === "On Going") {
-                result = result.filter(
-                    (booking) => booking.displayStatus === "On Going"
-                );
-            } else {
-                result = result.filter(
-                    (booking) => booking.displayStatus === activeTab
-                );
-            }
+            result = result.filter(
+                (booking) => booking.displayStatus === activeTab
+            );
         }
 
         // Apply search filter
@@ -234,7 +234,7 @@ export default function MyBookings({
                 );
         }
     };
-    
+
     isModalOpen && selectedBooking
         ? createPortal(
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">

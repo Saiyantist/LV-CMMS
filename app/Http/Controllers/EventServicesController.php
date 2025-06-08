@@ -67,9 +67,28 @@ class EventServicesController extends Controller
         'listEvents' => $listEvents,
     ]);
 }
+
+
+
+protected function autoCompleteBookings()
+{
+    $now = now()->toDateString();
+    $bookings = EventService::where('status', 'Approved')
+        ->whereDate('event_end_date', '<', $now)
+        ->get();
+
+    foreach ($bookings as $booking) {
+        $booking->status = 'Completed';
+        $booking->save();
+    }
+}
+
+
 // filepath: app\Http\Controllers\EventServicesController.php
 public function MyBookings()
 {
+    $this->autoCompleteBookings(); // <-- Add this line
+
     $user = Auth::user();
 
     if ($user->hasRole('super_admin') || $user->hasRole('communications_officer')) {
@@ -303,4 +322,6 @@ public function checkConflict(Request $request)
 
     return response()->json(['conflict' => false]);
 }
+
+
 }

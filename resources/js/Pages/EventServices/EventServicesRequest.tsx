@@ -281,9 +281,7 @@ export default function EventServicesRequest() {
                 // No conflict, proceed
                 setCurrentStep(4);
             } catch (err) {
-                setError(
-                    "Could not check for booking conflicts. Please try again."
-                );
+                setError("Let’s sync things up – please refresh the page.");
             }
             return;
         }
@@ -621,11 +619,7 @@ export default function EventServicesRequest() {
                                     </div>
                                 </div>
                             )}
-                            {/* {error && (
-                                <div className="text-red-500 text-sm mt-2 text-center">
-                                    {error}
-                                </div>
-                            )} */}
+
                             <div className="text-gray-500 text-sm mt-4">
                                 <p>
                                     Kindly use this naming format:
@@ -635,14 +629,6 @@ export default function EventServicesRequest() {
                                     Example: 112424_EnglishMonth
                                 </p>
                             </div>
-                            {/* In Step 1, add a warning if file is missing after reload */}
-                            {/* {!file && (
-                                <div className="text-red-500 text-sm mt-2 text-center">
-                                    {currentStep === 1
-                                        ? "File is required. Please re-upload your proof of approval."
-                                        : ""}
-                                </div>
-                            )} */}
                         </div>
                     </div>
                 )}
