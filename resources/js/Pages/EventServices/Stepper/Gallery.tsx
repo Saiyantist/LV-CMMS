@@ -12,7 +12,7 @@ const galleryItems: GalleryItem[] = [
         id: 1,
         title: "Auditorium",
         subtitle: "Capacities: 300",
-        image: "/images/lvbuilding.jpg",
+        image: "/images/audi.jpg",
     },
     {
         id: 2,
@@ -24,7 +24,7 @@ const galleryItems: GalleryItem[] = [
         id: 3,
         title: "College Library",
         subtitle: "Capacities: ",
-        image: "/images/lv2.jpg",
+        image: "/images/College_library.jpg",
     },
     {
         id: 4,
@@ -32,47 +32,57 @@ const galleryItems: GalleryItem[] = [
         subtitle: "Capacities: ",
         image: "/images/lv2.jpg",
     },
+
+       {
+        id: 11,
+        title: "Elementary & High School Library",
+        subtitle: "Capacities: ",
+        image: "/images/elem_library.jpg",
+    },
     {
         id: 5,
         title: "Computer Laboratory A",
         subtitle: "Capacities: ",
-        image: "/images/lvbuilding.jpg",
+        image: "/images/comlab.jpg",
     },
     {
         id: 6,
         title: "Computer Laboratory B",
         subtitle: "Capacities: ",
-        image: "/images/lv1.jpg",
+        image: "/images/comlab.jpg",
     },
     {
         id: 7,
-        title: "EFS Classroom(s) Room #:",
+        title: "EFS Classroom(s)",
         subtitle: "Capacities: ",
-        image: "/images/lv1.jpg",
+        image: "/images/efs_building.jpg",
     },
     {
-        id: 8,
+       id: 8,
+        title: "DSR Classroom(s)",
+        subtitle: "Capacities: ",
+        image: "/images/dsr_building.jpg",
+    },
+
+    {
+        id: 9,
         title: "LVCC Grounds",
         subtitle: "Capacities: 700 ",
         image: "/images/lv2.jpg",
     },
     {
-        id: 9,
+        id: 10,
         title: "LVCC Main Lobby",
         subtitle: "Capacities: ",
         image: "/images/lvbuilding.jpg",
     },
+    
+    
     {
-        id: 10,
-        title: "Elementary & High School Library",
-        subtitle: "Capacities: ",
-        image: "/images/lv2.jpg",
-    },
-    {
-        id: 11,
+        id: 12,
         title: "Basketball Court",
         subtitle: "Capacities: ",
-        image: "/images/lv1.jpg",
+        image: "/images/basketball_court.jpg",
     },
 ];
 
