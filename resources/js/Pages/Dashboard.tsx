@@ -48,18 +48,19 @@ interface DashboardProps {
     maintenanceSchedules: any[];
     upcomingCompliances: {
         id: number;
-        target_date: string;
+        scheduled_at: string;
         compliance_area: string;
         location: { id: number; name: string };
-        assigned_to: { id: number; name: string };
+        assigned_to: { id: number; first_name: string; last_name: string };
         status: string;
         report_description: string;
         requested_at: string;
-        requested_by: { id: number; name: string };
+        requested_by: { id: number; first_name: string; last_name: string };
         approved_at: string;
         approved_by: string;
         remarks: string;
         images: string[];
+        priority: string;
     }[];
 }
 
@@ -73,6 +74,7 @@ export default function Dashboard({
     upcomingCompliances,
     locations,
     user,
+    maintenancePersonnel,
 }: DashboardProps) {
     const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
 
@@ -215,6 +217,7 @@ export default function Dashboard({
                                             data={upcomingCompliances}
                                             locations={locations}
                                             user={user}
+                                            maintenancePersonnel={maintenancePersonnel}
                                         />
                                     </div>
                                 </Card>
@@ -320,6 +323,7 @@ export default function Dashboard({
                                             data={upcomingCompliances}
                                             locations={locations}
                                             user={user}
+                                            maintenancePersonnel={maintenancePersonnel}
                                         />
                                     </div>
                                 </Card>

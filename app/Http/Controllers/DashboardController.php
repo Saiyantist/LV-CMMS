@@ -166,8 +166,8 @@ class DashboardController extends Controller
                     'report_description' => $wo->report_description,
                     'status' => $wo->status,
                     'work_order_type' => $wo->work_order_type,
-                    'priority' => $wo->priority ?: "",
-                    'scheduled_at' => $wo->scheduled_at,
+                    'priority' => $wo->priority ?? null,
+                    'scheduled_at' => $wo->scheduled_at ?? null,
                     'requested_at' => $wo->requested_at,
                     'requested_by' => [
                         'id' => $wo->requestedBy->id,
@@ -207,6 +207,7 @@ class DashboardController extends Controller
                 'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
             ],
             'locations' => $locations,
+            'maintenancePersonnel' => User::role('maintenance_personnel')->with('roles')->get(),
         ]);
     }
 }
