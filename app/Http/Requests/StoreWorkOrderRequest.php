@@ -64,8 +64,8 @@ class StoreWorkOrderRequest extends FormRequest
                 return $rules = [
                     'location_id' => 'required|exists:locations,id',
                     'report_description' => 'required|string|max:1000',
-                    'images' => 'nullable|array', // Accept multiple images
-                    'images.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:1024',
+                    'attachments' => 'nullable|array', // Accept multiple images
+                    'attachments.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:1024',
                 ];
             }
         }
@@ -75,8 +75,8 @@ class StoreWorkOrderRequest extends FormRequest
             $rules = [
                 'location_id' => 'required|exists:locations,id',
                 'report_description' => 'required|string|max:1000',
-                'images' => 'nullable|array', // Accept multiple images
-                'images.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:1024',
+                'attachments' => 'nullable|array', // Accept multiple images
+                'attachments.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:1024',
             ];
 
             // Work Order Manager Validation add-ons

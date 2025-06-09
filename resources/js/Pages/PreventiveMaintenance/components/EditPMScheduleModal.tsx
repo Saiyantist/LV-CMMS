@@ -69,6 +69,30 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
         }
     };
 
+    const getDaysInMonth = (month: string, year: number): number => {
+        const months: { [key: string]: number } = {
+            "January": 0, "February": 1, "March": 2, "April": 3,
+            "May": 4, "June": 5, "July": 6, "August": 7,
+            "September": 8, "October": 9, "November": 10, "December": 11
+        };
+        
+        // Check if it's a leap year for February
+        const isLeapYear = (year: number) => {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        };
+        
+        const monthIndex = months[month];
+        if (monthIndex === undefined) return 31; // Default to 31 if month is invalid
+        
+        if (monthIndex === 1) { // February
+            return isLeapYear(year) ? 29 : 28;
+        }
+        
+        // Months with 30 days: April, June, September, November
+        const monthsWith30Days = [3, 5, 8, 10];
+        return monthsWith30Days.includes(monthIndex) ? 30 : 31;
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
@@ -313,7 +337,7 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                                     <Input
                                         type="number"
                                         min="1"
-                                        max="31"
+                                        max={getDaysInMonth(yearlyMonth, new Date().getFullYear())}
                                         className="w-20"
                                         value={yearlyDay}
                                         onChange={(e) => {
@@ -326,8 +350,8 @@ const EditPMScheduleModal: React.FC<EditPMScheduleModalProps> = ({ schedule, onC
                                             if (!isNaN(num)) {
                                                 if (num < 1) {
                                                     setYearlyDay(1);
-                                                } else if (num > 31) {
-                                                    setYearlyDay(31);
+                                                } else if (num > getDaysInMonth(yearlyMonth, new Date().getFullYear())) {
+                                                    setYearlyDay(getDaysInMonth(yearlyMonth, new Date().getFullYear()));
                                                 } else {
                                                     setYearlyDay(num);
                                                 }

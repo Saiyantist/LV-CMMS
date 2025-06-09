@@ -37,7 +37,7 @@ interface ComplianceWorkOrder {
     approved_at: string;
     approved_by: string;
     remarks: string;
-    images: string[];
+    attachments: string[];
     priority: string;
 }
 

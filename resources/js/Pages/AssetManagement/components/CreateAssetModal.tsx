@@ -135,6 +135,7 @@ export default function CreateAssetModal({
                                     value={data.name}
                                     onChange={(e) => setData("name", e.target.value)}
                                     required
+                                    placeholder="Enter Asset Name"
                                 />
                             </div>
 

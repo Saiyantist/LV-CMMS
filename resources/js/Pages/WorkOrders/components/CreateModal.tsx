@@ -72,7 +72,7 @@ export default function CreateWorkOrderModal({
     const { data, setData, post, errors } = useForm({
         location_id: "",
         report_description: "",
-        images: [] as File[],
+        attachments: [] as File[],
         ...(isWorkOrderManager && {
             status: "",
             work_order_type: "Work Order",
@@ -134,7 +134,7 @@ export default function CreateWorkOrderModal({
         const formData = new FormData();
         formData.append("location_id", locationId);
         formData.append("report_description", data.report_description);
-        data.images.forEach((image) => formData.append("images[]", image));
+        data.attachments.forEach((file) => formData.append("attachments[]", file));
 
         if (isWorkOrderManager) {
             formData.append("work_order_type", data.work_order_type || "Work Order");
@@ -159,11 +159,11 @@ export default function CreateWorkOrderModal({
         onClose();
     };
 
-    /** Handle Image Previews */
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    /** Handle File Previews */
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
-            setData("images", files);
+            setData("attachments", files);
 
             const previews = files.map((file) => URL.createObjectURL(file));
             setPreviewImages((prev) => [...prev, ...previews]);
@@ -195,7 +195,7 @@ export default function CreateWorkOrderModal({
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const files = Array.from(e.dataTransfer.files);
-            setData("images", [...data.images, ...files]);
+            setData("attachments", [...data.attachments, ...files]);
 
             const previews = files.map((file) => URL.createObjectURL(file));
             setPreviewImages((prev) => [...prev, ...previews]);
@@ -657,7 +657,7 @@ export default function CreateWorkOrderModal({
                                     <input
                                         type="file"
                                         ref={fileInputRef}
-                                        onChange={handleImageChange}
+                                        onChange={handleFileChange}
                                         className="hidden"
                                         accept="image/jpeg, image/png"
                                         multiple
@@ -684,9 +684,9 @@ export default function CreateWorkOrderModal({
                                         ))}
                                     </div>
                                 )}
-                                {localErrors.images && (
+                                {localErrors.attachments && (
                                     <p className="text-red-500 text-xs">
-                                        {localErrors.images}
+                                        {localErrors.attachments}
                                     </p>
                                 )}
                             </div>

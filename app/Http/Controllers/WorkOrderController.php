@@ -8,10 +8,11 @@ use App\Mail\NewWorkOrder;
 use App\Mail\UpdatedWorkOrder;
 use App\Mail\AssignedWorkOrder;
 use App\Models\Asset;
-use App\Models\Image;
+// use App\Models\Image;
 use App\Models\Location;
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Models\Attachment;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Worker;
 use Illuminate\Support\Facades\Mail;
@@ -37,14 +38,14 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
-        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'images']);
+        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'attachments']);
 
         if ($user->hasPermissionTo('view own work orders') && !$user->hasPermissionTo('manage work orders')) {
             $workOrders->where('requested_by', $user->id);
         }
 
         /**
-         * Format work orders to include images
+         * Format work orders to include attachments
          */
         $formattedWorkOrders = $workOrders->get()->map(function ($wo) {
             return [
@@ -73,7 +74,7 @@ class WorkOrderController extends Controller
                     'id' => $wo->location_id,
                     'name' => $wo->location ? $wo->location->name : null,
                 ],
-                'images' => $wo->images->pluck('url')->toArray(), // ✅ important part
+                'attachments' => $wo->attachments->pluck('url')->toArray(), // ✅ important part
                 'asset' => $wo->asset ? [
                     'id' => $wo->asset->id,
                     'name' => $wo->asset->name,
@@ -128,20 +129,41 @@ class WorkOrderController extends Controller
         ]);
 
         // Handle image uploads (if any)
-        if ($request->hasFile('images')) {
-            $this->handleImageUploads($request->file('images'), $workOrder->id);
+        if ($request->hasFile('attachments')) {
+            $this->handleImageUploads($request->file('attachments'), $workOrder->id);
         }
 
-        // Mail the GASD Coordinator
-        $workOrder->load(['location', 'requestedBy']);
-        $workOrderData = [
-            'id' => $workOrder->id,
-            'requested_at' => $workOrder->requested_at,
-            'report_description' => $workOrder->report_description,
-            'location' => $workOrder->location->name,
-            'requested_by' => $workOrder->requestedBy->first_name . ' ' . $workOrder->requestedBy->last_name,
-        ];
-        Mail::to($this->gasdCoordinator->email)->send(new NewWorkOrder($workOrderData));
+        // Only send email if the creator is not a work order manager
+        if (!$isWorkOrderManager) {
+            // Mail the GASD Coordinator
+            $workOrder->load(['location', 'requestedBy']);
+            $workOrderData = [
+                'id' => $workOrder->id,
+                'requested_at' => $workOrder->requested_at,
+                'report_description' => $workOrder->report_description,
+                'location' => $workOrder->location->name,
+                'requested_by' => $workOrder->requestedBy->first_name . ' ' . $workOrder->requestedBy->last_name,
+            ];
+            Mail::to($this->gasdCoordinator->email)->send(new NewWorkOrder($workOrderData));
+        }
+
+        $oldAssignedTo = $workOrder->assigned_to;
+        $oldStatus = $workOrder->status;
+        // Send email to assigned maintenance personnel if assignment changed
+        if ($request->status === 'Assigned' && ($oldAssignedTo !== $request->assigned_to || $oldStatus !== 'Assigned')) {
+            $workOrder->load(['location', 'requestedBy', 'assignedTo']);
+            $workOrderData = [
+                'id' => $workOrder->id,
+                'requested_by' => $workOrder->requestedBy->first_name . ' ' . $workOrder->requestedBy->last_name,
+                'requested_at' => \Carbon\Carbon::parse($workOrder->requested_at)->format('m/d/Y H:i'),
+                'scheduled_at' => \Carbon\Carbon::parse($workOrder->scheduled_at)->format('m/d/Y'),
+                'location' => $workOrder->location->name,
+                'report_description' => $workOrder->report_description,
+                'priority' => $workOrder->priority,
+                'remarks' => $workOrder->remarks,
+            ];
+            Mail::to($workOrder->assignedTo->email)->send(new AssignedWorkOrder($workOrderData));
+        }
         
         return redirect()->route('work-orders.index')->with('success', 'Work order created successfully.');
     }
@@ -153,7 +175,7 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
-        $workOrder->load(['location', 'asset', 'requestedBy', 'assignedTo', 'images']);
+        $workOrder->load(['location', 'asset', 'requestedBy', 'assignedTo', 'attachments']);
 
         $formattedWorkOrder = [
             'id' => $workOrder->id,
@@ -179,7 +201,7 @@ class WorkOrderController extends Controller
                 'id' => $workOrder->location_id,
                 'name' => $workOrder->location ? $workOrder->location->name : null,
             ],
-            'images' => $workOrder->images->pluck('url')->toArray(),
+            'attachments' => $workOrder->attachments->pluck('url')->toArray(),
             'asset' => $workOrder->asset ? [
                 'id' => $workOrder->asset->id,
                 'name' => $workOrder->asset->name,
@@ -218,13 +240,13 @@ class WorkOrderController extends Controller
         $user = auth()->user();
 
         // Handle image uploads
-        if ($request->hasFile('images')) {
-            $this->handleImageUploads($request->file('images'), $workOrder->id);
+        if ($request->hasFile('attachments')) {
+            $this->handleImageUploads($request->file('attachments'), $workOrder->id);
         }
         
         // Handle image deletions
-        if ($request->has('deleted_images')) {
-            $this->handleDeleteImage($request->deleted_images, $workOrder->id);
+        if ($request->has('deleted_attachments')) {
+            $this->handleDeleteImage($request->deleted_attachments, $workOrder->id);
         }
 
         /** Maintenance Personnel */
@@ -522,37 +544,43 @@ class WorkOrderController extends Controller
 
     // --------------- Custom Methods ---------------
 
-    private function handleImageUploads($images, $workOrderId)
+    private function handleImageUploads($files, $workOrderId)
     {
-        foreach ($images as $image) {
-            $filename = 'wo_' . $workOrderId . '_' . uniqid() . '.' . $image->extension(); // Prefix to be added to the image name
-            $path = $image->storeAs('work_orders', $filename, 'public'); // Save under storage/app/public/work_orders folder
-            Image::create([
-                'imageable_id' => $workOrderId,
-                'imageable_type' => WorkOrder::class,
+        foreach ($files as $file) {
+            $filename = 'wo_' . $workOrderId . '_' . uniqid() . '.' . $file->extension();
+            $path = $file->storeAs('work_orders', $filename, 'public'); // Save under storage/app/public/work_orders folder
+            
+            Attachment::create([
+                'attachable_id' => $workOrderId,
+                'attachable_type' => WorkOrder::class,
                 'path' => $path,
+                'file_type' => $file->getClientMimeType(),
             ]);
         }
     }
 
-    private function handleDeleteImage($deleteImages, $workOrderId)
+    private function handleDeleteImage($deleteFiles, $workOrderId)
     {
-            foreach ($deleteImages as $image) {
-                $removeFromUrl = config('app.url') . 'storage/'; // Remove app URL and 'storage/' prefix
-                $imagePath = str_replace($removeFromUrl, '', $image); 
-                $deleteImage = Image::where('path', $imagePath)->where('imageable_id', $workOrderId)->first();
-                if ($deleteImage) {
-                    $deleteImage->delete(); // Delete the image record from the database
-                    \Storage::disk('public')->delete($imagePath); // Delete the file from storage
-                }
+        foreach ($deleteFiles as $file) {
+            $removeFromUrl = config('app.url') . 'storage/'; // Remove app URL and 'storage/' prefix
+            $filePath = str_replace($removeFromUrl, '', $file);
+            $deleteFile = Attachment::where('path', $filePath)
+                ->where('attachable_id', $workOrderId)
+                ->where('attachable_type', WorkOrder::class)
+                ->first();
+                
+            if ($deleteFile) {
+                $deleteFile->delete(); // Delete the attachment record
+                \Storage::disk('public')->delete($filePath); // Delete the file from storage
             }
+        }
     }
 
     public function assignedWorkOrders()
     {
         $user = auth()->user();
 
-        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'images'])
+        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'attachments'])
             ->where('assigned_to', $user->id)
             ->get()
             ->map(function ($wo) {
@@ -580,7 +608,7 @@ class WorkOrderController extends Controller
                         'id' => $wo->location_id,
                         'name' => $wo->location ? $wo->location->name : null,
                     ],
-                    'images' => $wo->images->pluck('url')->toArray(), // ✅ important part
+                    'attachments' => $wo->attachments->pluck('url')->toArray(), // ✅ important part
                     'asset' => $wo->asset ? [
                         'id' => $wo->asset->id,
                         'name' => $wo->asset->name,
@@ -620,7 +648,7 @@ class WorkOrderController extends Controller
         $validated = $request->validate([
             'report_description' => 'required|string|max:1000',
             'location_id' => 'required|exists:locations,id',
-            'images.*' => 'nullable|image|max:5120', // If any images are being uploaded
+            'attachments.*' => 'nullable|image|max:5120', // If any images are being uploaded
         ]);
 
         $workOrder = WorkOrder::create([

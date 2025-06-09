@@ -18,7 +18,7 @@ A new user has registered and is awaiting for approval.
 *This an external user.*
 @endif
 
-<x-mail::button :url="url('/admin/users')">
+<x-mail::button :url="url('/admin/manage-roles')">
 Review & Assign Role
 </x-mail::button>
 

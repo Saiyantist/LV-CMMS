@@ -43,7 +43,7 @@ interface EditWorkOrderProps {
         approved_at: string;
         approved_by: string;
         remarks: string;
-        images: string[];
+        attachments: string[];
     };
     locations: Location[];
     assets: {
@@ -92,7 +92,7 @@ export default function EditWorkOrderModal({
         location_id: "",
         report_description: workOrder.report_description,
         asset_id: workOrder?.asset?.id ?? "",
-        images: [] as File[],
+        attachments: [] as File[],
         status: workOrder.status,
         work_order_type: workOrder.work_order_type,
         label: workOrder.label,
@@ -161,7 +161,7 @@ export default function EditWorkOrderModal({
         formData.append("location_id", String(locationId));
         formData.append("report_description", data.report_description);
 
-        data.images.forEach((image) => formData.append("images[]", image));
+        data.attachments.forEach((image) => formData.append("attachments[]", image));
         deletedImages.forEach((image) =>
             formData.append("deleted_images[]", image)
         );
@@ -192,7 +192,7 @@ export default function EditWorkOrderModal({
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
-            setData("images", files);
+            setData("attachments", files);
         }
     };
 
@@ -319,9 +319,9 @@ export default function EditWorkOrderModal({
                                     <Label>Attachment:</Label>
                                 </TableHead>
                                 <TableCell className="">
-                                    {workOrder.images?.length > 0 ? (
+                                    {workOrder.attachments?.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                            {workOrder.images.map((src, index) => (
+                                            {workOrder.attachments.map((src, index) => (
                                             <div
                                                 key={index}
                                                 className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
@@ -397,12 +397,12 @@ export default function EditWorkOrderModal({
                                 )}
                             </div>
 
-                            { workOrder.images?.length > 0 && (
+                            { workOrder.attachments?.length > 0 && (
                             <div>
                                 <strong>Images:</strong>
                                 <div className="flex flex-wrap gap-2 mt-1">
-                                    {workOrder.images?.length > 0 ? (
-                                        workOrder.images.map((url, index) => (
+                                    {workOrder.attachments?.length > 0 ? (
+                                        workOrder.attachments.map((url, index) => (
                                             <img
                                                 key={index}
                                                 src={url}
@@ -720,17 +720,17 @@ export default function EditWorkOrderModal({
 
                 {/* Image */}
                 <img
-                    src={workOrder.images[activeImageIndex]}
+                    src={workOrder.attachments[activeImageIndex]}
                     alt={`Preview ${activeImageIndex + 1}`}
                     className="max-h-[90vh] max-w-full object-contain rounded"
                 />
 
                 <div className="absolute bottom-6 text-white text-sm bg-black/40 px-3 py-1 rounded-full">
-                {activeImageIndex + 1} of {workOrder.images.length}
+                {activeImageIndex + 1} of {workOrder.attachments.length}
                 </div>
 
                 {/* Right Arrow */}
-                {activeImageIndex < workOrder.images.length - 1 && (
+                {activeImageIndex < workOrder.attachments.length - 1 && (
                 <button
                     className="absolute right-4 text-white text-4xl"
                     onClick={() => setActiveImageIndex(activeImageIndex + 1)}
