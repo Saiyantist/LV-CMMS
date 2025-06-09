@@ -447,7 +447,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                             </Button>
                                             {showCalendar && (
-                                                <div className="absolute z-50 bg-white shadow-md border mt-2 rounded-md">
+                                                <div className="absolute z-50 bg-white shadow-md border mt-2 !-ml-[6.6rem] sm:!-ml-[1rem] rounded-md">
                                                     <Calendar
                                                         mode="single"
                                                         selected={editableData.date_acquired ? parseISO(editableData.date_acquired) : undefined}

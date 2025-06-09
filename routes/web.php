@@ -18,6 +18,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PreventiveMaintenanceController;
 use App\Mail\TestWorkOrderAssigned;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\AttachmentController;
 
 /**
  *  Guest Routes
@@ -108,6 +109,9 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
                 Route::put('/{id}', [ComplianceAndSafetyController::class, 'update'])->name('work-orders.compliance-and-safety.update');
                 Route::delete('/{id}', [ComplianceAndSafetyController::class, 'destroy'])->name('work-orders.compliance-and-safety.destroy');
             });
+
+            // Attachment routes
+            Route::delete('/attachments/{id}', [AttachmentController::class, 'destroy'])->name('attachments.destroy');
         });
         
         Route::resource('work-orders', WorkOrderController::class)->except(['create', 'show']); // ALWAYS put this at the end ng mga "/work-orders" routes.
