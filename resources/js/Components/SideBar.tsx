@@ -142,9 +142,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             href: route("event-services.my-bookings") || "",
                             text: user.roles.some(
                                 (r) => r.name === "communications_officer"
-       
                             )
                                 ? "Requests Management"
+                                : user.roles.some(
+                                      (r) => r.name === "gasd_coordinator"
+                                  )
+                                ? "Event Services"
                                 : "My Bookings",
                             icon: user.roles.some(
                                 (r) => r.name === "communications_officer"
@@ -214,6 +217,29 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 />
             ),
         },
+
+        {
+            routeName: "event-services.my-bookings",
+            href: route("event-services.my-bookings") || "",
+            text: user.roles.some((r) => r.name === "communications_officer")
+                ? "Requests Management"
+                : user.roles.some((r) => r.name === "gasd_coordinator")
+                ? "Event Services"
+                : "My Bookings",
+            icon: user.roles.some(
+                (r) => r.name === "communications_officer"
+            ) ? (
+                <CalendarCog
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ) : (
+                <Book
+                    size={16}
+                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+                />
+            ),
+        },
     ].filter(Boolean);
 
     // Insert the following routes if there are pages na.
@@ -246,6 +272,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             href: route("event-services.my-bookings") || "",
             text: user.roles.some((r) => r.name === "communications_officer")
                 ? "Requests Management"
+                : user.roles.some((r) => r.name === "gasd_coordinator")
+                ? "Event Services"
                 : "My Bookings",
             icon: user.roles.some(
                 (r) => r.name === "communications_officer"
@@ -386,7 +414,9 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         {
             routeName: "event-services.my-bookings",
             href: route("event-services.my-bookings") || "",
-            text: user.roles.some((r) => r.name === "communications_officer" || "super_admin")
+            text: user.roles.some(
+                (r) => r.name === "communications_officer" || "super_admin"
+            )
                 ? "Requests Management"
                 : "My Bookings",
             icon: user.roles.some(
@@ -694,48 +724,63 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         />
                         Dashboard
                     </Link>
-                    {isWorkOrderRequester ? [
-                        <>
-                            <Link
-                                href={route("work-orders.index")}
-                                className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
-                                    currentRoute === "work-orders.index"
-                                        ? "bg-white text-primary"
-                                        : "text-white hover:text-opacity-80"
-                                }`}
-                            >
-                                <Building size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
-                                Work Orders
-                            </Link>
-                            {isEventServiceRequester && (
-                                <Link
-                                    href={route("event-services.my-bookings")}
-                                    className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
-                                        currentRoute === "event-services.my-bookings"
-                                            ? "bg-white text-primary"
-                                            : "text-white hover:text-opacity-80"
-                                    }`}
-                                >
-                                    <Book size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
-                                    Bookings
-                                </Link>
-                            )}
-                        </>
-                    ] : [
-                        <>
-                            <Link
-                                href={route("event-services.my-bookings")}
-                                className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
-                                    currentRoute === "event-services.my-bookings"
-                                        ? "bg-white text-primary"
-                                        : "text-white hover:text-opacity-80"
-                                }`}
-                            >
-                                <Book size={16} className="w-6 h-6 xs:w-7 xs:h-7" />
-                                My Bookings
-                            </Link>
-                        </>
-                    ]}
+                    {isWorkOrderRequester
+                        ? [
+                              <>
+                                  <Link
+                                      href={route("work-orders.index")}
+                                      className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
+                                          currentRoute === "work-orders.index"
+                                              ? "bg-white text-primary"
+                                              : "text-white hover:text-opacity-80"
+                                      }`}
+                                  >
+                                      <Building
+                                          size={16}
+                                          className="w-6 h-6 xs:w-7 xs:h-7"
+                                      />
+                                      Work Orders
+                                  </Link>
+                                  {isEventServiceRequester && (
+                                      <Link
+                                          href={route(
+                                              "event-services.my-bookings"
+                                          )}
+                                          className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
+                                              currentRoute ===
+                                              "event-services.my-bookings"
+                                                  ? "bg-white text-primary"
+                                                  : "text-white hover:text-opacity-80"
+                                          }`}
+                                      >
+                                          <Book
+                                              size={16}
+                                              className="w-6 h-6 xs:w-7 xs:h-7"
+                                          />
+                                          Bookings
+                                      </Link>
+                                  )}
+                              </>,
+                          ]
+                        : [
+                              <>
+                                  <Link
+                                      href={route("event-services.my-bookings")}
+                                      className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
+                                          currentRoute ===
+                                          "event-services.my-bookings"
+                                              ? "bg-white text-primary"
+                                              : "text-white hover:text-opacity-80"
+                                      }`}
+                                  >
+                                      <Book
+                                          size={16}
+                                          className="w-6 h-6 xs:w-7 xs:h-7"
+                                      />
+                                      My Bookings
+                                  </Link>
+                              </>,
+                          ]}
                     <Link
                         href={route("profile.edit")}
                         className={`flex flex-col items-center text-xs sm:text-sm px-4 xs:px-8 py-1 rounded-md transition ${

@@ -91,13 +91,17 @@ public function MyBookings()
 
     $user = Auth::user();
 
-    if ($user->hasRole('super_admin') || $user->hasRole('communications_officer')) {
-        $myEvents = EventService::with('user')->get(); // <-- add with('user')
+    if (
+        $user->hasRole('super_admin') ||
+        $user->hasRole('communications_officer') ||
+        $user->hasRole('gasd_coordinator') // <-- add this line
+    ) {
+        $myEvents = EventService::with('user')->get();
     } else {
         $myEvents = EventService::with('user')->where('user_id', $user->id)->get();
     }
 
-    $bookings = $myEvents->map(function ($event) {
+    $bookings = $myEvents->map(function ($event) use ($user) {
         return [
             'id' => $event->id,
             'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
@@ -114,7 +118,10 @@ public function MyBookings()
             'event_end_date' => $event->event_end_date,
             'event_start_time' => $event->event_start_time,
             'event_end_time' => $event->event_end_time,
-            'requested_services' => $event->requested_services,
+            'requested_services' =>
+                $user->hasRole('gasd_coordinator')
+                    ? $this->filterGasdServices($event->requested_services)
+                    : $event->requested_services,
             'proof_of_approval' => $event->proof_of_approval,
             'status' => $event->status,
             // Add user info for requester
@@ -326,5 +333,44 @@ public function checkConflict(Request $request)
     return response()->json(['conflict' => false]);
 }
 
+protected function filterGasdServices($services)
+{
+    $gasd = [
+        "Maintainer Time",
+        "Lighting",
+        "Tables",
+        "Bathroom Cleaning",
+        "Chairs",
+        "Aircon",
+        "Marshal",
+        "LV DRRT",
+    ];
 
+    // Decode if string
+    if (is_string($services)) {
+        $services = json_decode($services, true);
+    }
+
+    // If array, filter directly
+    if (is_array($services)) {
+        return array_values(array_filter($services, fn($s) => in_array($s, $gasd)));
+    }
+
+    // If object (assoc array), flatten and filter
+    if (is_array($services)) {
+        $flat = [];
+        foreach ($services as $val) {
+            if (is_array($val)) {
+                foreach ($val as $v) {
+                    if (in_array($v, $gasd)) $flat[] = $v;
+                }
+            } elseif (is_string($val) && in_array($val, $gasd)) {
+                $flat[] = $val;
+            }
+        }
+        return $flat;
+    }
+
+    return [];
+}
 }

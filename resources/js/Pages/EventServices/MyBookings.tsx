@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/Components/shadcnui/button";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
@@ -73,6 +73,9 @@ export default function MyBookings({
     const isAdmin =
         userRoles.includes("super_admin") ||
         userRoles.includes("communications_officer");
+    const isGasdCoordinator = user?.roles?.some(
+        (role: any) => role.name === "gasd_coordinator"
+    );
 
     // Tabs logic
     const bookingTabs: Booking["status"][] = [
@@ -99,6 +102,9 @@ export default function MyBookings({
     const [filterVenue] = useState<string>("");
     const [filterStatus] = useState<string>("");
     const [showCreateModal, setShowCreateModal] = useState(false);
+
+    // --- Add this state for GASD Coordinator tab ---
+    const [gasdTab, setGasdTab] = useState<"my" | "pending">("my");
 
     const itemsPerPage = 5;
 
@@ -240,7 +246,7 @@ export default function MyBookings({
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
                   <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
                       <button
-                          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl"
+                          className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl"
                           onClick={() => setIsModalOpen(false)}
                           aria-label="Close"
                       >
@@ -336,6 +342,51 @@ export default function MyBookings({
                         {start && end
                             ? `${formatTime(start)} - ${formatTime(end)}`
                             : "N/A"}
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: "requestedServices",
+            header: isGasdCoordinator
+                ? () => (
+                      <div className="flex flex-col items-center text-center">
+                          Requested Services
+                          <span className="text-xs text-gray-500">
+                              (GENERAL ADMINISTRATIVE SERVICES)
+                          </span>
+                      </div>
+                  )
+                : "Requested Services",
+            cell: ({ row }) => {
+                let services = row.original.requested_services;
+                // Handle array, JSON string, or object
+                if (typeof services === "string") {
+                    try {
+                        services = JSON.parse(services);
+                    } catch {
+                        services = [];
+                    }
+                }
+                let serviceList = "";
+                if (Array.isArray(services)) {
+                    serviceList = services.join(", ");
+                } else if (services && typeof services === "object") {
+                    serviceList = Object.entries(services)
+                        .filter(([_, value]) => value)
+                        .map(([key]) =>
+                            key
+                                .replace(/([A-Z])/g, " $1")
+                                .replace(/^./, (str) => str.toUpperCase())
+                        )
+                        .join(", ");
+                }
+                if (!serviceList) serviceList = "N/A";
+                return (
+                    <div title={serviceList}>
+                        {serviceList.length > 25
+                            ? serviceList.slice(0, 25) + "..."
+                            : serviceList}
                     </div>
                 );
             },
@@ -466,6 +517,21 @@ export default function MyBookings({
                 const hideDelete = ["Pending", "Approved", "On Going"].includes(
                     activeTab
                 );
+
+                // Remove Cancel button for GASD Coordinator
+                if (isGasdCoordinator) {
+                    return (
+                        <div className="flex justify-center space-x-2">
+                            <Button
+                                className="bg-secondary text-xs hover:bg-primary text-white"
+                                onClick={() => handleViewBooking(booking)}
+                                disabled={!canEdit}
+                            >
+                                View
+                            </Button>
+                        </div>
+                    );
+                }
 
                 return (
                     <div className="flex justify-center space-x-2">
@@ -617,6 +683,51 @@ export default function MyBookings({
         setConfirmModal({ open: false, message: "", onConfirm: null });
     };
 
+    const GASD_SERVICES = [
+        "Maintainer Time",
+        "Lighting",
+        "Tables",
+        "Bathroom Cleaning",
+        "Chairs",
+        "Aircon",
+        "Marshal",
+        "LV DRRT",
+    ];
+
+    const gasdFilteredBookings = useMemo(() => {
+        if (!isGasdCoordinator) return filteredBookings;
+        if (gasdTab === "pending") {
+            // Only show pending bookings if requested services include any GASD_SERVICES
+            return bookings.filter((b) => {
+                if (b.status !== "Pending") return false;
+                let services = b.requested_services;
+                // Parse JSON string if needed
+                if (typeof services === "string") {
+                    try {
+                        services = JSON.parse(services);
+                    } catch {
+                        services = {};
+                    }
+                }
+                let selected: string[] = [];
+                if (Array.isArray(services)) {
+                    selected = services;
+                } else if (services && typeof services === "object") {
+                    Object.values(services).forEach((val) => {
+                        if (Array.isArray(val)) {
+                            selected.push(...val);
+                        } else if (typeof val === "string" && val) {
+                            selected.push(val);
+                        }
+                    });
+                }
+                return selected.some((s) => GASD_SERVICES.includes(s));
+            });
+        }
+        // "my" tab
+        return bookings.filter((b) => b.user?.id === user.id);
+    }, [isGasdCoordinator, gasdTab, bookings, filteredBookings, user.id]);
+
     return (
         <AuthenticatedLayout>
             <Head title="Bookings" />
@@ -628,6 +739,8 @@ export default function MyBookings({
                                 userRoles.includes("communications_officer")) ||
                             userRoles.includes("super_admin")
                                 ? "Requests Management"
+                                : isGasdCoordinator
+                                ? "My Bookings / Pending Bookings"
                                 : "My Bookings"}
                         </h1>
                         <Button
@@ -678,6 +791,31 @@ export default function MyBookings({
                                 </select>
                             </div>
                         </>
+                    )}
+                    {/* --- Add this for GASD Coordinator --- */}
+                    {isGasdCoordinator && (
+                        <div className="mt-4 flex gap-2">
+                            <Button
+                                className={`rounded-md px-4 py-2 font-semibold ${
+                                    gasdTab === "my"
+                                        ? "bg-primary text-white"
+                                        : "bg-secondary text-white"
+                                }`}
+                                onClick={() => setGasdTab("my")}
+                            >
+                                My Bookings
+                            </Button>
+                            <Button
+                                className={`rounded-md px-4 py-2 font-semibold ${
+                                    gasdTab === "pending"
+                                        ? "bg-primary text-white"
+                                        : "bg-secondary text-white"
+                                }`}
+                                onClick={() => setGasdTab("pending")}
+                            >
+                                Pending Bookings
+                            </Button>
+                        </div>
                     )}
                 </header>
 
@@ -735,14 +873,21 @@ export default function MyBookings({
                 <div className="hidden md:block -mt-16 overflow-hidden">
                     <Datatable
                         columns={columns as any}
-                        data={filteredBookings}
+                        data={
+                            isGasdCoordinator
+                                ? gasdFilteredBookings
+                                : filteredBookings
+                        }
                         placeholder="Search Bookings"
                     />
                 </div>
 
                 {/* Mobile Card View */}
                 <div className="md:hidden flex flex-col gap-4">
-                    {filteredBookings.map((booking, index) => {
+                    {(isGasdCoordinator
+                        ? gasdFilteredBookings
+                        : filteredBookings
+                    ).map((booking, index) => {
                         // Venue formatting: remove [" "] and ellipsis if > 25 chars
                         let venues = Array.isArray(booking.venue)
                             ? booking.venue.join(", ")

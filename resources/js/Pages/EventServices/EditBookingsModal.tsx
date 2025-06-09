@@ -434,7 +434,7 @@ const EditBookingsModal = ({
                             )}
                         </div> */}
                         {/* Requested Venue Dropdown */}
-                        <div
+                        {/* <div
                             className="flex flex-col relative w-full mt-5"
                             ref={venueDropdownRef}
                         >
@@ -481,7 +481,8 @@ const EditBookingsModal = ({
                                     {formErrors.venue}
                                 </span>
                             )}
-                        </div>
+                        </div> */}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                             {/* Event Name */}
                             <div className="flex flex-col">
@@ -766,7 +767,8 @@ const EditBookingsModal = ({
                                 )}
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+
+                        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
                                     Event Start Date
@@ -810,8 +812,9 @@ const EditBookingsModal = ({
                                     </span>
                                 )}
                             </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                        </div> */}
+
+                        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
                                     Event Start Time
@@ -858,7 +861,8 @@ const EditBookingsModal = ({
                                     </span>
                                 )}
                             </div>
-                        </div>
+                        </div> */}
+                        
                         {/* Requested Services Dropdown */}
                         <div
                             className="flex flex-col relative w-full mt-5"

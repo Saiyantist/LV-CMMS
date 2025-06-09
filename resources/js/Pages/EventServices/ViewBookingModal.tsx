@@ -17,6 +17,20 @@ import {
 } from "lucide-react";
 import EditBookingsModal from "./EditBookingsModal";
 
+// Extend the Window interface to include Laravel
+declare global {
+    interface Window {
+        Laravel?: {
+            user?: {
+                id?: number | string;
+                roles?: { name: string }[];
+                [key: string]: any;
+            };
+            [key: string]: any;
+        };
+    }
+}
+
 const formatDate = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
