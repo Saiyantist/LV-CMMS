@@ -124,6 +124,12 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
           if (value && typeof value === 'object' && 'name' in value) {
             return value.name === filterValue
           }
+
+          // Handle boolean values
+          if (typeof value === 'boolean') {
+            const status = value ? "Active" : "Inactive"
+            return status === filterValue
+          }
           
           return value === filterValue
         })

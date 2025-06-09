@@ -147,7 +147,7 @@ export default function DeclineWorkOrderModal({
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[2] xs:flex-[3] max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Attachment/Images */}

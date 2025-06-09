@@ -220,7 +220,7 @@ export default function AcceptWorkOrderModal({
                             </TableRow>
 
                             {/* Requested By */}
-                            <TableRow className="border-none flex flex-row">
+                            <TableRow className="border-none flex flex-row items-center justify-between">
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Requested by:</Label>
                                 </TableHead>
@@ -230,7 +230,7 @@ export default function AcceptWorkOrderModal({
                             </TableRow>
 
                             {/* Location */}
-                            <TableRow className="border-none flex flex-row">
+                            <TableRow className="border-none flex flex-row items-center justify-between">
                             <TableHead className="flex flex-[1] items-center">
                                     <Label>Location:</Label>
                                 </TableHead>
@@ -240,12 +240,27 @@ export default function AcceptWorkOrderModal({
                             </TableRow>
 
                             {/* Description */}
-                            <TableRow className="border-none flex flex-row">
+                            <TableRow className="border-none flex flex-row items-center justify-between">
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[2] xs:flex-[3] max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-start max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
+
+                            {/* Remarks */}
+                            {workOrder.status === "For Budget Request" && (
+                            <TableRow className="border-none flex flex-row items-center justify-between">
+                                <TableHead className="flex flex-[1] items-center">
+                                    <Label>Remarks:</Label>
+                                </TableHead>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-start max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                    {workOrder.remarks ? (
+                                        workOrder.remarks
+                                    ) : (
+                                        <span className="text-gray-500 italic">No Remarks</span>
+                                    )}</TableCell>
+                            </TableRow>
+                            )}
 
                             {/* Attachment/Images */}
                             <TableRow className="border-none flex flex-row">
@@ -423,7 +438,7 @@ export default function AcceptWorkOrderModal({
 
 
                                     {/* Asset */}
-                                    <div className="flex-[3] space-y-2 -mt-1">
+                                    <div className="flex-[3] space-y-2">
                                         <SmartDropdown
                                             label="Asset"
                                             placeholder={assetDetails ? `${assetDetails.name} - ${assetDetails.location_name}` : "Select Asset (scroll down here)"}

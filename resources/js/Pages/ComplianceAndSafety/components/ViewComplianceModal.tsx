@@ -240,6 +240,17 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                                 <SelectValue placeholder="Select Status" />
                                             </SelectTrigger>
                                             <SelectContent>
+                                                {workOrder.status === "Pending" && (
+                                                    <>
+                                                        <SelectItem value="Pending">Pending</SelectItem>
+                                                        <SelectItem value="Assigned">Assigned</SelectItem>
+                                                        <SelectItem value="For Budget Request">For Budget Request</SelectItem>
+                                                        <SelectItem value="Scheduled">Scheduled</SelectItem>
+                                                        <SelectItem value="Ongoing">Ongoing</SelectItem>
+                                                        <SelectItem value="Completed">Completed</SelectItem>
+                                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                                    </>
+                                                )}
                                                 {workOrder.status === "Assigned" && (
                                                     <>
                                                         <SelectItem value="Assigned">Assigned</SelectItem>
@@ -530,7 +541,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                             <TableHead className="flex flex-[1] items-center">
                                                 <Label>Compliance Area:</Label>
                                             </TableHead>
-                                            <TableCell className="flex flex-[2] items-center">
+                                            <TableCell className="flex flex-[2] xs:flex-[1] lg:flex-[2] items-center">
                                                 {editableData.compliance_area}
                                             </TableCell>
                                         </div>
@@ -551,7 +562,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         <TableHead className="flex flex-[2.2] xs:flex-[1] items-center">
                                             <Label>Description:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[4.5] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                        <TableCell className="flex flex-[4.5] items-start max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">
                                             {editableData.report_description}
                                         </TableCell>
                                     </TableRow>
@@ -561,7 +572,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         <TableHead className="flex flex-[2.2] xs:flex-[1] items-center">
                                             <Label>Safety Protocols:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[4.5] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                        <TableCell className="flex flex-[4.5] items-start max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">
                                             {editableData.remarks || <span className="text-gray-500 italic">No safety protocols specified</span>}
                                         </TableCell>
                                     </TableRow>

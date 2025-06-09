@@ -17,7 +17,7 @@ import FlashToast from "@/Components/FlashToast";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import AssignWorkOrderModal from "./components/AcceptWorkOrderModal";
 import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
-import { BookX, CirclePlus, MoreVertical, Search, SlidersHorizontal, SquarePen, Trash2 } from "lucide-react";
+import { BookX, CirclePlus, MoreVertical, Search, SlidersHorizontal, SquarePen, Trash2, ArrowUpDown } from "lucide-react";
 import DeclineWorkOrderModal from "./components/DeclineWorkOrderModal";
 import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
 import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
@@ -100,6 +100,7 @@ interface WorkOrders {
         id: number;
         name: string;
     };
+    status: string;
 }
 
 export default function IndexLayout({
@@ -135,6 +136,13 @@ export default function IndexLayout({
     const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
     const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, any>>({});
     const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
+    const [mobileSortConfig, setMobileSortConfig] = useState<{
+        key: string;
+        direction: 'asc' | 'desc';
+    }>({
+        key: 'requested_at',
+        direction: 'desc'
+    });
     
     // const toggleDescription = (id: number) => {
     //     setExpandedDescriptions((prev) =>
@@ -153,6 +161,31 @@ export default function IndexLayout({
     //         );
     //     });
     // }, [filteredWorkOrders, mobileSearchQuery]);
+
+    const sortOptions = useMemo(() => {
+        const baseOptions = [
+            { label: 'ID', value: 'id' },
+            { label: 'Date Requested', value: 'requested_at' }
+        ];
+
+        // Only add priority option if not in Pending tab
+        if (activeTab !== "Pending") {
+            baseOptions.push({ label: 'Priority', value: 'priority' });
+        }
+
+        return baseOptions;
+    }, [activeTab]);
+
+    // Reset sort config if current sort key is not available in current tab
+    useEffect(() => {
+        const availableSortKeys = sortOptions.map(option => option.value);
+        if (!availableSortKeys.includes(mobileSortConfig.key)) {
+            setMobileSortConfig({
+                key: 'requested_at',
+                direction: 'desc'
+            });
+        }
+    }, [activeTab, sortOptions, mobileSortConfig.key]);
 
     const filteredMobileWorkOrders = useMemo(() => {
         let filtered = filteredWorkOrders;
@@ -179,9 +212,44 @@ export default function IndexLayout({
                 );
             });
         }
+
+        // Apply sorting
+        filtered = [...filtered].sort((a, b) => {
+            const { key, direction } = mobileSortConfig;
+            let aValue = a[key];
+            let bValue = b[key];
+
+            // Handle nested properties
+            if (key.includes('.')) {
+                const keys = key.split('.');
+                aValue = keys.reduce((obj, k) => obj?.[k], a);
+                bValue = keys.reduce((obj, k) => obj?.[k], b);
+            }
+
+            // Handle date sorting
+            if (key === 'requested_at') {
+                aValue = new Date(aValue).getTime();
+                bValue = new Date(bValue).getTime();
+            }
+
+            // Handle priority sorting
+            if (key === 'priority') {
+                const priorityOrder: Record<string, number> = { low: 0, med: 1, high: 2, crit: 3 };
+                const aPriority = (a as WorkOrders).priority?.toLowerCase() || '';
+                const bPriority = (b as WorkOrders).priority?.toLowerCase() || '';
+                aValue = priorityOrder[aPriority] ?? -1;
+                bValue = priorityOrder[bPriority] ?? -1;
+            }
+
+            if (direction === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
     
         return filtered;
-    }, [filteredWorkOrders, mobileSearchQuery, mobileColumnFilters]);
+    }, [filteredWorkOrders, mobileSearchQuery, mobileColumnFilters, mobileSortConfig]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -716,6 +784,8 @@ export default function IndexLayout({
 
                 {/* Search and Filter Controls */}
                 <div className="flex items-center gap-2">
+
+                    {/* Search */}
                     <div className="relative flex-1">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -725,6 +795,65 @@ export default function IndexLayout({
                             className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
                         />
                     </div>
+
+                    {/* Sort */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-10 gap-1 border rounded-md"
+                            >
+                                <ArrowUpDown className="h-4 w-4" />
+                                Sort
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            className="w-48 p-2 rounded-md border bg-white shadow-md"
+                        >
+                            <div className="space-y-2">
+                                {sortOptions.map((option) => (
+                                    <div key={option.value} className="flex items-center justify-between">
+                                        <span className="text-sm">{option.label}</span>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`h-6 w-6 p-0 ${
+                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'asc'
+                                                        ? 'bg-primary text-white'
+                                                        : ''
+                                                }`}
+                                                onClick={() => setMobileSortConfig({
+                                                    key: option.value,
+                                                    direction: 'asc'
+                                                })}
+                                            >
+                                                ↑
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`h-6 w-6 p-0 ${
+                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'desc'
+                                                        ? 'bg-primary text-white'
+                                                        : ''
+                                                }`}
+                                                onClick={() => setMobileSortConfig({
+                                                    key: option.value,
+                                                    direction: 'desc'
+                                                })}
+                                            >
+                                                ↓
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+
+                    {/* Filter */}
                     <Button
                         ref={mobileFilterButtonRef}
                         variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
@@ -742,6 +871,7 @@ export default function IndexLayout({
                             </span>
                         )}
                     </Button>
+
                 </div>
 
                 {/* Filter Modal */}
@@ -798,11 +928,10 @@ export default function IndexLayout({
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent
+                                                className="w-48 p-2 rounded-md border bg-white shadow-md"
                                                 align="end"
                                                 side="bottom"
                                                 sideOffset={4}
-                                                className="w-32 p-1 rounded-md border bg-white shadow-md z-50"
-                                                onClick={(e) => e.stopPropagation()}
                                             >
                                                 {/* Pending Tab Actions */}
                                                 {(activeTab === "Pending" || activeTab === "For Budget Request") && (
@@ -869,11 +998,10 @@ export default function IndexLayout({
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent
+                                                className="w-48 p-2 rounded-md border bg-white shadow-md"
                                                 align="end"
                                                 side="bottom"
                                                 sideOffset={4}
-                                                className="w-32 p-1 rounded-md border bg-white shadow-md z-50"
-                                                onClick={(e) => e.stopPropagation()}
                                             >
                                                 <button
                                                     onClick={() => setIsViewingWorkOrder(workOrder)}
@@ -933,8 +1061,8 @@ export default function IndexLayout({
                                     {workOrder.location?.name || "N/A"}
                                 </p>
 
-                                {/* Priority */}
-                                {isWorkOrderManager && (
+                                {/* Priority - Hide for Pending tab */}
+                                {isWorkOrderManager && activeTab !== "Pending" && (
                                     <p className="flex items-center">
                                         <span className="font-bold text-primary mr-1">
                                             Priority:

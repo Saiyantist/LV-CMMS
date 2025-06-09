@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Datatable } from "@/Components/Datatable";
@@ -9,7 +9,7 @@ import EditPMModal from "./components/EditPMModal";
 import EditPMScheduleModal from "./components/EditPMScheduleModal";
 import FlashToast from "@/Components/FlashToast";
 import { getStatusColor } from "@/utils/getStatusColor";
-import { Trash2, MoreVertical, Search, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { Trash2, MoreVertical, Search, SlidersHorizontal, ChevronDown, ArrowUpDown } from "lucide-react";
 import DeletePMModal from "./components/DeletePMModal";
 import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
@@ -18,6 +18,7 @@ import { Input } from "@/Components/shadcnui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/Components/shadcnui/popover";
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
+import FilterModal from "@/Components/FilterModal";
 
 interface WorkOrders {
     id: number;
@@ -194,6 +195,13 @@ const PreventiveMaintenance: React.FC = () => {
     const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
     const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
     const [showScrollUpButton, setShowScrollUpButton] = useState(false)
+    const [mobileSortConfig, setMobileSortConfig] = useState<{
+        key: string;
+        direction: 'asc' | 'desc';
+    }>({
+        key: 'scheduled_at',
+        direction: 'desc'
+    });
 
     const handleScroll = () => {
         setShowScrollUpButton(window.scrollY > 300);
@@ -387,7 +395,7 @@ const PreventiveMaintenance: React.FC = () => {
             header: "Asset Name",
             accessorKey: "name",
             accessorFn: (row) => row.name,
-            enableSorting: true,
+            enableSorting: false,
             meta: {
                 cellClassName: "max-w-[7rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
@@ -397,7 +405,7 @@ const PreventiveMaintenance: React.FC = () => {
             id: "schedule",
             header: "Schedule",
             accessorFn: (row) => formatMaintenanceSchedule(row.maintenance_schedule),
-            enableSorting: true,
+            enableSorting: false,
             meta: {
                 cellClassName: "max-w-[12rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
@@ -423,6 +431,12 @@ const PreventiveMaintenance: React.FC = () => {
             meta: {
                 headerClassName: "w-20",
                 cellClassName: "flex justify-center",
+                filterable: true,
+                filterOptions: [
+                    { label: "All", value: "all" },
+                    { label: "Active", value: "Active" },
+                    { label: "Inactive", value: "Inactive" }
+                ]
             },
         },
         {
@@ -466,12 +480,136 @@ const PreventiveMaintenance: React.FC = () => {
 
     const tabs = ["Work Orders", "Schedules"];
 
+    const sortOptions = activeTab === "Work Orders" ? [
+        { label: 'ID', value: 'id' },
+        { label: 'Scheduled Date', value: 'scheduled_at' }
+    ] : [
+        { label: 'ID', value: 'id' },
+        { label: 'Next Scheduled', value: 'next_scheduled' },
+        { label: 'Last Run', value: 'last_run_at' }
+    ];
+
+    // Filter and sort work orders based on search query, filters, and sort config
+    const filteredMobileWorkOrders = useMemo(() => {
+        let filtered = workOrders.filter((workOrder) => {
+            const matchesSearch = mobileSearchQuery === "" || 
+                workOrder.id.toString().includes(mobileSearchQuery) ||
+                workOrder.asset?.name?.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+                workOrder.location?.name?.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+                workOrder.label?.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+                workOrder.assigned_to?.name?.toLowerCase().includes(mobileSearchQuery.toLowerCase());
+
+            const matchesFilters = Object.entries(mobileColumnFilters).every(([key, value]) => {
+                if (!value || value === "all") return true;
+                if (key === "status") return workOrder.status === value;
+                if (key === "location.name") return workOrder.location?.name === value;
+                if (key === "label") return workOrder.label === value;
+                return true;
+            });
+
+            return matchesSearch && matchesFilters;
+        });
+
+        // Apply sorting
+        filtered = [...filtered].sort((a, b) => {
+            const { key, direction } = mobileSortConfig;
+            let aValue: number | string;
+            let bValue: number | string;
+
+            if (key === 'scheduled_at') {
+                const aDate = a[key] as string;
+                const bDate = b[key] as string;
+                aValue = aDate ? new Date(aDate).getTime() : 0;
+                bValue = bDate ? new Date(bDate).getTime() : 0;
+            } else {
+                aValue = a[key as keyof WorkOrders] as number | string;
+                bValue = b[key as keyof WorkOrders] as number | string;
+            }
+
+            if (direction === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+
+        return filtered;
+    }, [workOrders, mobileSearchQuery, mobileColumnFilters, mobileSortConfig]);
+
+    // Filter and sort schedules based on search query, filters, and sort config
+    const filteredMobileSchedules = useMemo(() => {
+        let filtered = assetMaintenanceSchedules.filter((schedule) => {
+            const matchesSearch = mobileSearchQuery === "" || 
+                schedule.maintenance_schedule?.id.toString().includes(mobileSearchQuery) ||
+                schedule.name.toLowerCase().includes(mobileSearchQuery.toLowerCase());
+
+            const matchesFilters = Object.entries(mobileColumnFilters).every(([key, value]) => {
+                if (!value || value === "all") return true;
+                if (key === "maintenance_schedule.is_active") {
+                    const status = schedule.maintenance_schedule?.is_active ? "Active" : "Inactive";
+                    return status === value;
+                }
+                return true;
+            });
+
+            return matchesSearch && matchesFilters;
+        });
+
+        // Apply sorting
+        filtered = [...filtered].sort((a, b) => {
+            const { key, direction } = mobileSortConfig;
+            let aValue: number | string;
+            let bValue: number | string;
+
+            if (key === 'id') {
+                aValue = a.maintenance_schedule?.id || 0;
+                bValue = b.maintenance_schedule?.id || 0;
+            } else if (key === 'next_scheduled') {
+                const aDate = computeNextScheduledDate(a.maintenance_schedule, a.last_maintained_at);
+                const bDate = computeNextScheduledDate(b.maintenance_schedule, b.last_maintained_at);
+                aValue = aDate === "-" ? 0 : new Date(aDate).getTime();
+                bValue = bDate === "-" ? 0 : new Date(bDate).getTime();
+            } else if (key === 'last_run_at') {
+                const aDate = a.maintenance_schedule?.last_run_at;
+                const bDate = b.maintenance_schedule?.last_run_at;
+                aValue = aDate ? new Date(aDate).getTime() : 0;
+                bValue = bDate ? new Date(bDate).getTime() : 0;
+            } else {
+                aValue = a[key as keyof AssetWithMaintenanceSchedule] as number | string;
+                bValue = b[key as keyof AssetWithMaintenanceSchedule] as number | string;
+            }
+
+            if (direction === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+
+        return filtered;
+    }, [assetMaintenanceSchedules, mobileSearchQuery, mobileColumnFilters, mobileSortConfig]);
+
+    // Set default sort config based on active tab
+    useEffect(() => {
+        if (activeTab === "Work Orders") {
+            setMobileSortConfig({
+                key: 'scheduled_at',
+                direction: 'desc'
+            });
+        } else {
+            setMobileSortConfig({
+                key: 'id',
+                direction: 'desc'
+            });
+        }
+    }, [activeTab]);
+
     return (
         <Authenticated>
             <Head title="Preventive Maintenance" />
 
             {/* Header */}
-            <header className="sticky top-0 z-40 sm:z-0 w-full mx-auto px-0 md:mb-6 bg-white">
+            <header className="sticky top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start -mt-6 pt-6 text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold">
                         Preventive Maintenance
@@ -520,14 +658,13 @@ const PreventiveMaintenance: React.FC = () => {
 
             {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto lg:-mt-[3.8rem]">
-
                 {/* Preventive Maintenance Work Orders Datatable */}
                 {activeTab === "Work Orders" && (
                     <Datatable
                         columns={PMSWorkOrdersColumns}
                         data={workOrders}
                         placeholder="Search for ID, Asset Name, Location, Label, or Assigned to"
-                        />
+                    />
                 )}
 
                 {/* Preventive Maintenance Schedules Datatable */}
@@ -547,12 +684,74 @@ const PreventiveMaintenance: React.FC = () => {
                     <div className="relative flex-1">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search for ID, Asset Name, Location, Label, or Assigned to"
+                            placeholder={activeTab === "Work Orders" ? "Search for ID, Asset Name, Location, Label, or Assigned to" : "Search for ID or Asset Name"}
                             value={mobileSearchQuery}
                             onChange={(event) => setMobileSearchQuery(event.target.value)}
                             className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
                         />
                     </div>
+
+                    {/* Sort */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-10 gap-1 border rounded-md"
+                            >
+                                <ArrowUpDown className="h-4 w-4" />
+                                Sort
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            align="end"
+                            side="bottom"
+                            sideOffset={4}
+                            className="w-48 p-2 rounded-md border bg-white shadow-md"
+                        >
+                            <div className="space-y-2">
+                                {sortOptions.map((option) => (
+                                    <div key={option.value} className="flex items-center justify-between">
+                                        <span className="text-sm">{option.label}</span>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`h-6 w-6 p-0 ${
+                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'asc'
+                                                        ? 'bg-primary text-white'
+                                                        : ''
+                                                }`}
+                                                onClick={() => setMobileSortConfig({
+                                                    key: option.value,
+                                                    direction: 'asc'
+                                                })}
+                                            >
+                                                ↑
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`h-6 w-6 p-0 ${
+                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'desc'
+                                                        ? 'bg-primary text-white'
+                                                        : ''
+                                                }`}
+                                                onClick={() => setMobileSortConfig({
+                                                    key: option.value,
+                                                    direction: 'desc'
+                                                })}
+                                            >
+                                                ↓
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+
+                    {/* Filter */}
                     <Button
                         ref={mobileFilterButtonRef}
                         variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
@@ -572,8 +771,19 @@ const PreventiveMaintenance: React.FC = () => {
                     </Button>
                 </div>
 
-                {/* Mobile Cards */}
-                {activeTab === "Work Orders" && workOrders.map((workOrder) => {
+                {/* Filter Modal */}
+                <FilterModal
+                    isOpen={isMobileFilterModalOpen}
+                    onClose={() => setIsMobileFilterModalOpen(false)}
+                    columns={activeTab === "Work Orders" ? PMSWorkOrdersColumns : PMSchedulesColumns}
+                    columnFilters={mobileColumnFilters}
+                    setColumnFilters={setMobileColumnFilters}
+                    data={activeTab === "Work Orders" ? workOrders : assetMaintenanceSchedules}
+                    buttonRef={mobileFilterButtonRef as React.RefObject<HTMLButtonElement>}
+                />
+
+                {/* Work Orders Mobile Cards */}
+                {activeTab === "Work Orders" && filteredMobileWorkOrders.map((workOrder) => {
                     const description = workOrder.report_description || "";
 
                     return (
@@ -614,12 +824,6 @@ const PreventiveMaintenance: React.FC = () => {
                                             className="w-32 p-1 rounded-md border bg-white shadow-md z-50"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            {/* <button
-                                                onClick={() => setIsViewPM(workOrder)}
-                                                className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
-                                            >
-                                                View
-                                            </button> */}
                                             <button
                                                 onClick={() => setIsEditingPM(workOrder)}
                                                 className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
@@ -678,7 +882,7 @@ const PreventiveMaintenance: React.FC = () => {
                 })}
 
                 {/* Schedules Mobile Cards */}
-                {activeTab === "Schedules" && assetMaintenanceSchedules.map((schedule) => (
+                {activeTab === "Schedules" && filteredMobileSchedules.map((schedule) => (
                     <div
                         key={schedule.id}
                         className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"

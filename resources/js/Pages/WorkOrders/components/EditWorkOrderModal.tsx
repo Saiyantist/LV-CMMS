@@ -282,7 +282,7 @@ export default function EditWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex max-h-[50px] sm:max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Remarks */}
@@ -290,7 +290,7 @@ export default function EditWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Remarks:</Label>
                                 </TableHead>
-                                <TableCell className="flex max-h-[50px] sm:max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
+                                <TableCell className="flex max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
                                         workOrder.remarks
                                     ) : (
                                         <span className="text-gray-500 italic">No Remarks</span>

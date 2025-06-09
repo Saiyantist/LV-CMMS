@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
@@ -8,7 +8,7 @@ import DeleteComplianceModal from "./components/DeleteComplianceModal";
 import { Datatable } from "@/Components/Datatable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/Components/shadcnui/button";
-import { Trash2, MoreVertical, CirclePlus, Search, SlidersHorizontal } from "lucide-react";
+import { Trash2, MoreVertical, CirclePlus, Search, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { getPriorityColor } from "@/utils/getPriorityColor";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
@@ -79,7 +79,14 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
     const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
     const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, string>>({});
     const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
-    const [showScrollUpButton, setShowScrollUpButton] = useState(false)
+    const [showScrollUpButton, setShowScrollUpButton] = useState(false);
+    const [mobileSortConfig, setMobileSortConfig] = useState<{
+        key: string;
+        direction: 'asc' | 'desc';
+    }>({
+        key: 'scheduled_at',
+        direction: 'desc'
+    });
 
     const handleScroll = () => {
         setShowScrollUpButton(window.scrollY > 300);
@@ -160,6 +167,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
             meta: {
                 cellClassName: "max-w-[10rem]",
             },
+            enableSorting: false
         },
         {
             accessorKey: "scheduled_at",
@@ -244,29 +252,66 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
         },
     ];
 
-    // Filter work orders based on search query and filters
-    const filteredMobileWorkOrders = workOrders.filter((workOrder) => {
-        const matchesSearch = mobileSearchQuery === "" || 
-            workOrder.compliance_area.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
-            workOrder.location.name.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
-            workOrder.report_description.toLowerCase().includes(mobileSearchQuery.toLowerCase());
+    // Filter and sort work orders based on search query, filters, and sort config
+    const filteredMobileWorkOrders = useMemo(() => {
+        let filtered = workOrders.filter((workOrder) => {
+            const matchesSearch = mobileSearchQuery === "" || 
+                workOrder.compliance_area.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+                workOrder.location.name.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+                workOrder.report_description.toLowerCase().includes(mobileSearchQuery.toLowerCase());
 
-        const matchesFilters = Object.entries(mobileColumnFilters).every(([key, value]) => {
-            if (!value || value === "all") return true;
-            if (key === "status") return workOrder.status === value;
-            if (key === "location.name") return workOrder.location.name === value;
-            return true;
+            const matchesFilters = Object.entries(mobileColumnFilters).every(([key, value]) => {
+                if (!value || value === "all") return true;
+                if (key === "status") return workOrder.status === value;
+                if (key === "location.name") return workOrder.location.name === value;
+                return true;
+            });
+
+            return matchesSearch && matchesFilters;
         });
 
-        return matchesSearch && matchesFilters;
-    });
+        // Apply sorting
+        filtered = [...filtered].sort((a, b) => {
+            const { key, direction } = mobileSortConfig;
+            let aValue: number | string;
+            let bValue: number | string;
+
+            if (key === 'scheduled_at') {
+                aValue = new Date(a.scheduled_at).getTime();
+                bValue = new Date(b.scheduled_at).getTime();
+            } else if (key === 'id') {
+                aValue = a.id;
+                bValue = b.id;
+            } else if (key === 'status') {
+                aValue = a.status;
+                bValue = b.status;
+            } else {
+                aValue = a[key as keyof WorkOrder] as number | string;
+                bValue = b[key as keyof WorkOrder] as number | string;
+            }
+
+            if (direction === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+
+        return filtered;
+    }, [workOrders, mobileSearchQuery, mobileColumnFilters, mobileSortConfig]);
+
+    const sortOptions = [
+        { label: 'ID', value: 'id' },
+        { label: 'Target Date', value: 'scheduled_at' },
+        { label: 'Status', value: 'status' }
+    ];
 
     return (
         <Authenticated>
             <Head title="Compliance and Safety" />
 
             {/* Header */}
-            <header className="sticky top-0 z-40 sm:z-0 w-full mx-auto px-0 md:mb-6 bg-white">
+            <header className="sticky top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start -mt-6 pt-6 text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                         Compliance and Safety
@@ -305,6 +350,68 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                             className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
                         />
                     </div>
+
+                    {/* Sort */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-10 gap-1 border rounded-md"
+                            >
+                                <ArrowUpDown className="h-4 w-4" />
+                                Sort
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            align="end"
+                            side="bottom"
+                            sideOffset={4}
+                            className="w-48 p-2 rounded-md border bg-white shadow-md"
+                        >
+                            <div className="space-y-2">
+                                {sortOptions.map((option) => (
+                                    <div key={option.value} className="flex items-center justify-between">
+                                        <span className="text-sm">{option.label}</span>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`h-6 w-6 p-0 ${
+                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'asc'
+                                                        ? 'bg-primary text-white'
+                                                        : ''
+                                                }`}
+                                                onClick={() => setMobileSortConfig({
+                                                    key: option.value,
+                                                    direction: 'asc'
+                                                })}
+                                            >
+                                                ↑
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`h-6 w-6 p-0 ${
+                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'desc'
+                                                        ? 'bg-primary text-white'
+                                                        : ''
+                                                }`}
+                                                onClick={() => setMobileSortConfig({
+                                                    key: option.value,
+                                                    direction: 'desc'
+                                                })}
+                                            >
+                                                ↓
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+
+                    {/* Filter */}
                     <Button
                         ref={mobileFilterButtonRef}
                         variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
@@ -393,7 +500,11 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                             {/* Target Date */}
                             <p>
                                 <span className="font-bold text-primary">Target Date:</span>{" "}
-                                {format(new Date(item.scheduled_at), "yyyy-MM-dd")}
+                                {item.scheduled_at ? (
+                                    format(item.scheduled_at, "yyyy-MM-dd")
+                                ) : (
+                                    <span className="text-muted-foreground italic">No date set</span>
+                                )}
                             </p>
 
                             {/* Compliance Area */}
@@ -421,7 +532,6 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
                                 <span className="font-bold text-primary">Assigned To:</span>{" "}
                                 {item.assigned_to ? `${item.assigned_to.first_name} ${item.assigned_to.last_name}` : "Unassigned"}
                             </p>
-
                         </div>
                     </div>
                 ))}

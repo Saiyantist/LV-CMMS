@@ -68,6 +68,10 @@ export default function FilterModal({
       if (value && typeof value === 'object' && 'name' in value) {
         return value.name
       }
+      // Handle boolean values
+      if (typeof value === 'boolean') {
+        return value ? "Active" : "Inactive"
+      }
       return value
     })
 

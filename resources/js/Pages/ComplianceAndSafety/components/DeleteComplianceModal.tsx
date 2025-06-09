@@ -154,7 +154,7 @@ const DeleteComplianceModal: React.FC<DeleteComplianceModalProps> = ({
                                         <TableHead className="flex flex-[1] items-center">
                                             <Label>Compliance Area:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[2] items-center">
+                                        <TableCell className="flex flex-[2] xs:flex-[1] lg:flex-[2] items-center">
                                             {workOrder.compliance_area}
                                         </TableCell>
                                     </div>
@@ -175,7 +175,7 @@ const DeleteComplianceModal: React.FC<DeleteComplianceModalProps> = ({
                                 <TableHead className="flex flex-[2.2] xs:flex-[1] items-center">
                                             <Label>Description:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[4.5] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                        <TableCell className="flex flex-[4.5] items-start max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">
                                         {workOrder.report_description}
                                     </TableCell>
                                 </TableRow>
@@ -185,7 +185,7 @@ const DeleteComplianceModal: React.FC<DeleteComplianceModalProps> = ({
                                 <TableHead className="flex flex-[2.2] xs:flex-[1] items-center">
                                             <Label>Safety Protocols:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[4.5] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                        <TableCell className="flex flex-[4.5] items-start max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">
                                         {workOrder.remarks || <span className="text-gray-500 italic">No safety protocols specified</span>}
                                     </TableCell>
                                 </TableRow>

@@ -141,19 +141,19 @@ export default function DeleteWorkOrderModal({
                             </TableRow>
 
                             {/* Description */}
-                            <TableRow className="border-none flex flex-row">
+                            <TableRow className="border-none flex flex-row items-center">
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[2] xs:flex-[3] items-center max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Remarks */}
-                            <TableRow className="border-none flex flex-row">    
+                            <TableRow className="border-none flex flex-row items-center">    
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Remarks:</Label>
                                 </TableHead>
-                                <TableCell className="flex flex-[2] xs:flex-[3] items-center max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
                                         workOrder.remarks
                                     ) : (
                                         <span className="text-gray-500 italic">No Remarks</span>
@@ -161,7 +161,7 @@ export default function DeleteWorkOrderModal({
                             </TableRow>
 
                             {/* Status */}
-                            <TableRow className="border-none flex flex-row">
+                            <TableRow className="border-none flex flex-row items-center">
                                 <TableHead className="flex flex-[1] items-center">
                                     <Label>Status:</Label>
                                 </TableHead>
