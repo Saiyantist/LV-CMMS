@@ -634,7 +634,7 @@ export default function CreateWorkOrderModal({
                                         </p>
                                         <p className="text-xs text-secondary/70">
                                             JPEG, JPG, and PNG formats, up to
-                                            1MB
+                                            5MB
                                         </p>
                                     </div>
                                     <Button

@@ -65,7 +65,7 @@ class StoreWorkOrderRequest extends FormRequest
                     'location_id' => 'required|exists:locations,id',
                     'report_description' => 'required|string|max:1000',
                     'attachments' => 'nullable|array', // Accept multiple images
-                    'attachments.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:1024',
+                    'attachments.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:5120',
                 ];
             }
         }
@@ -76,7 +76,7 @@ class StoreWorkOrderRequest extends FormRequest
                 'location_id' => 'required|exists:locations,id',
                 'report_description' => 'required|string|max:1000',
                 'attachments' => 'nullable|array', // Accept multiple images
-                'attachments.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:1024',
+                'attachments.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:5120',
             ];
 
             // Work Order Manager Validation add-ons
