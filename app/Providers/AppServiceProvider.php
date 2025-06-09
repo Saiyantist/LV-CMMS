@@ -23,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
         if($this->app->environment('production')) {
+            URL::forceRootUrl(config('app.url'));
             URL::forceScheme('https');
         }
         
