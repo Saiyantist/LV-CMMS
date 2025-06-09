@@ -59,7 +59,11 @@ interface DashboardProps {
         approved_at: string;
         approved_by: string;
         remarks: string;
-        attachments: string[];
+        attachments: {
+            id: number;
+            path: string;
+            file_type: string;
+        }[];
         priority: string;
     }[];
 }
