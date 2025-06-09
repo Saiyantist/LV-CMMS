@@ -74,7 +74,7 @@ const galleryItems: GalleryItem[] = [
         id: 10,
         title: "LVCC Main Lobby",
         subtitle: "Capacities: ",
-        image: "/images/lvbuilding.jpg",
+        image: "/images/main_lobby.jpg",
     },
     
     
