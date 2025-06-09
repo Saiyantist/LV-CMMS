@@ -16,7 +16,8 @@ class UserSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
-    {
+    {   
+        // Super Admin
         User::create([
             'first_name' => 'Angelo', 'last_name' => 'Delos Santos (SA)',
             'gender' => 'male',
@@ -28,6 +29,7 @@ class UserSeeder extends Seeder
             'department_id' => 1,
             ])->assignRole('super_admin');
 
+        // GASD Coordinator with working Email (for testing purposes)
         User::create([
             'first_name' => 'Angelo', 'last_name' => 'Delos Santos (LV)',
             'gender' => 'male',
@@ -39,6 +41,7 @@ class UserSeeder extends Seeder
             'department_id' => 1,
             ])->assignRole('gasd_coordinator');
 
+        // Communications Officer with working Email (for testing purposes)
         User::create([
             'first_name' => 'Joshua', 'last_name' => 'Allador',
             'gender' => 'male',
