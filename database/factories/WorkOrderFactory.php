@@ -39,6 +39,18 @@ class WorkOrderFactory extends Factory
             $data['label'] = fake()->randomElement(['HVAC','Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Repairing', 'Welding',  'No Label']);
             $data['remarks'] = fake()->optional()->sentence();
         }
+        // If work order type is Compliance, add compliance-specific data
+        else if ($workOrderType === 'Compliance') {
+            $data['compliance_area'] = fake()->randomElement([
+                'Fire Safety Compliance',
+                'Plumbing and Sanitation',
+                'Structural Safety',
+                'Occupational Safety and Health',
+                'Accessibility Compliance'
+            ]);
+            $data['priority'] = fake()->randomElement(['Low', 'Medium', 'High', 'Critical']);
+            $data['remarks'] = fake()->paragraph(); // Safety protocols
+        }
         // For other work order types, only add priority, label, and remarks if status is not Pending
         else if ($status !== 'Pending') {
             $data['priority'] = fake()->randomElement(['Low', 'Medium', 'High', 'Critical']);

@@ -1,21 +1,28 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { Head, usePage } from "@inertiajs/react";
-import Authenticated from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
-import CreateAssetModal from "./CreateAssetModal";
-import ViewAssetModal from "./ViewAssetModal";
-import { Datatable } from "../WorkOrders/components/Datatable";
+import CreateAssetModal from "./components/CreateAssetModal";
+import ViewAssetModal from "./components/ViewAssetModal";
+import { Datatable } from "@/Components/Datatable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import FlashToast from "@/Components/FlashToast";
 import { Button } from "@/Components/shadcnui/button";
-import { Trash } from "lucide-react";
+import { CirclePlus, Trash2, MoreVertical, Search, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/shadcnui/dropdown-menu";
+import DeleteAssetModal from "./components/DeleteAssetModal";
+import { formatDate } from "date-fns";
+import { Input } from "@/Components/shadcnui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/Components/shadcnui/popover";
+import FilterModal from "@/Components/FilterModal";
+import { SelectSeparator } from "@/Components/shadcnui/select";
 
 interface Asset {
     id: number;
@@ -59,6 +66,24 @@ const AssetManagement: React.FC = () => {
     const [isCreating, setIsCreating] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<(typeof assets)[0] | null>(null);
     const [showScrollUpButton, setShowScrollUpButton] = useState(false);
+    const [deletingAsset, setDeletingAsset] = useState<Asset | null>(null);
+    const [mobileSearchQuery, setMobileSearchQuery] = useState("");
+    const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
+    const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, string>>({});
+    const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
+    const [mobileSortConfig, setMobileSortConfig] = useState<{
+        key: string;
+        direction: 'asc' | 'desc';
+    }>({
+        key: 'id',
+        direction: 'desc'
+    });
+
+    const sortOptions = [
+        { label: 'ID', value: 'id' },
+        { label: 'Date Acquired', value: 'date_acquired' },
+        { label: 'Last Maintenance', value: 'last_maintained_at' }
+    ];
 
     const handleScroll = () => {
         setShowScrollUpButton(window.scrollY > 300);
@@ -72,6 +97,26 @@ const AssetManagement: React.FC = () => {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    // useEffect(() => {
+    //     const handleClickOutside = (event: MouseEvent) => {
+    //         if (isMobileFilterModalOpen && mobileFilterButtonRef.current && !mobileFilterButtonRef.current.contains(event.target as Node)) {
+    //             const modalElement = document.querySelector('[data-filter-modal="true"]');
+    //             if (
+    //                 modalElement &&
+    //                 !modalElement.contains(event.target as Node) &&
+    //                 !mobileFilterButtonRef.current.contains(event.target as Node)
+    //             ) {
+    //                 setIsMobileFilterModalOpen(false);
+    //             }
+    //         }
+    //     };
+    
+    //     document.addEventListener("mousedown", handleClickOutside);
+    //     return () => {
+    //         document.removeEventListener("mousedown", handleClickOutside);
+    //     };
+    // }, [isMobileFilterModalOpen]);
 
     const handleCheckboxChange = (assetId: number) => {
         setSelectedAssets((prev) =>
@@ -89,16 +134,8 @@ const AssetManagement: React.FC = () => {
         }
     };
 
-    const handleDelete = (assetId: number) => {
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this asset? This action is irreversible and cannot be undone."
-        );
-        if (!confirmed) return;
-
-        router.delete(route("assets.destroy", assetId), {
-            onSuccess: () => toast.success("Asset deleted successfully."),
-            onError: () => toast.error("Failed to delete asset."),
-        });
+    const handleDelete = (asset: Asset) => {
+        setDeletingAsset(asset);
     };
 
     // Define columns for the data table
@@ -125,23 +162,16 @@ const AssetManagement: React.FC = () => {
         {
             accessorKey: "specification_details",
             header: "Specification",
-            cell: ({ row }) => {
-                const spec = row.getValue("specification_details") as string;
-                return (
-                    <div>
-                        {spec.length > 25
-                            ? `${spec.substring(0, 25)}...`
-                            : spec}
-                    </div>
-                );
-            },
+            cell: ({ row }) => (
+                <div>{row.getValue("specification_details")}</div>
+            ),
             enableSorting: false,
             meta: {
                 headerClassName: "w-[20%]",
+                cellClassName: "max-w-16 text-left px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
             },
         },
-
         {
             accessorKey: "location.name",
             header: "Location",
@@ -149,6 +179,7 @@ const AssetManagement: React.FC = () => {
             enableSorting: false,
             meta: {
                 headerClassName: "w-[15%]",
+                cellClassName: "whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
                 filterable: true,
             },
@@ -174,7 +205,7 @@ const AssetManagement: React.FC = () => {
         {
             accessorKey: "date_acquired",
             header: "Date Acquired",
-            cell: ({ row }) => <div>{row.getValue("date_acquired")}</div>,
+            cell: ({ row }) => <div>{formatDate(row.getValue("date_acquired"), "MM/dd/yyyy")}</div>,
             meta: {
                 headerClassName: "w-[12%]",
                 cellClassName: "text-center",
@@ -183,7 +214,7 @@ const AssetManagement: React.FC = () => {
         {
             accessorKey: "last_maintained_at",
             header: "Last Maintenance",
-            cell: ({ row }) => <div>{row.getValue("last_maintained_at")}</div>,
+            cell: ({ row }) => <div>{formatDate(row.getValue("last_maintained_at"), "MM/dd/yyyy")}</div>,
             meta: {
                 headerClassName: "w-[12%]",
                 cellClassName: "text-center",
@@ -193,20 +224,45 @@ const AssetManagement: React.FC = () => {
             id: "actions",
             header: "Action",
             cell: ({ row }) => (
-                <div className="flex justify-start gap-2 px-2">
-                    <Button
-                        onClick={() => setViewingAsset(row.original)}
-                        className="bg-secondary h-6 text-xs rounded-sm"
-                    >
-                        View
-                    </Button>
-                    <Button
-                        variant={"outline"}
-                        size={"icon"}
-                        className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
-                        onClick={() => handleDelete(row.original.id)}
-                    ><Trash />
-                    </Button>
+                <div className="flex gap-2 justify-center">
+                    {/* Extra Large screens - visible above xl breakpoint */}
+                    <div className="hidden xl:flex gap-2">
+                        <Button
+                            onClick={() => setViewingAsset(row.original)}
+                            className="bg-secondary h-6 text-xs rounded-sm"
+                        >
+                            View
+                        </Button>
+                        <Button
+                            variant={"outline"}
+                            size={"icon"}
+                            className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                            onClick={() => handleDelete(row.original)}
+                        ><Trash2 />
+                        </Button>
+                    </div>
+
+                    {/* Medium screens - visible from md to lg */}
+                    <div className="hidden md:flex xl:hidden">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-5 w-5 p-0">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setViewingAsset(row.original)}>
+                                    View
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                    onClick={() => handleDelete(row.original)}
+                                    className="text-destructive"
+                                >
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
             ),
             enableSorting: false,
@@ -229,106 +285,282 @@ const AssetManagement: React.FC = () => {
         }
     };
 
+    // Filter and sort assets based on search query, filters, and sort config
+    const filteredMobileAssets = useMemo(() => {
+        let filtered = assets.filter((asset) => {
+            const matchesSearch = mobileSearchQuery === "" || 
+                asset.name.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+                asset.specification_details.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+                asset.location.name.toLowerCase().includes(mobileSearchQuery.toLowerCase());
+
+            const matchesFilters = Object.entries(mobileColumnFilters).every(([key, value]) => {
+                if (!value || value === "all") return true;
+                if (key === "status") return asset.status === value;
+                if (key === "location.name") return asset.location.name === value;
+                return true;
+            });
+
+            return matchesSearch && matchesFilters;
+        });
+
+        // Apply sorting
+        filtered = [...filtered].sort((a, b) => {
+            const { key, direction } = mobileSortConfig;
+            let aValue: number | string;
+            let bValue: number | string;
+
+            // Handle date sorting
+            if (key === 'date_acquired' || key === 'last_maintained_at') {
+                const aDate = a[key as keyof Asset] as string;
+                const bDate = b[key as keyof Asset] as string;
+                aValue = new Date(aDate).getTime();
+                bValue = new Date(bDate).getTime();
+            } else {
+                aValue = a[key as keyof Asset] as number | string;
+                bValue = b[key as keyof Asset] as number | string;
+            }
+
+            if (direction === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+
+        return filtered;
+    }, [assets, mobileSearchQuery, mobileColumnFilters, mobileSortConfig]);
+
     return (
-        <Authenticated>
+        <AuthenticatedLayout>
             <Head title="Asset Management" />
 
-            {/* Header section*/}
-            <div>
-                <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4 py-4">
-                        <h1 className="text-2xl font-semibold sm:mb-0 text-black">
+            {/* Header */}
+            <header className="sticky md:flex top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start -mt-6 pt-6 text-center sm:text-left gap-3 sm:gap-4">
+                    <h1 className="text-2xl font-semibold sm:mb-0">
                             Asset Management
-                        </h1>
-                        <PrimaryButton
-                            onClick={() => setIsCreating(true)}
-                            className="bg-secondary text-white hover:bg-primary transition-all duration-300 text-sm sm:text-base px-5 py-2 rounded-md w-full sm:w-auto text-center justify-center"
-                        >
-                            Add an Asset
-                        </PrimaryButton>
-                    </div>
-                </header>
+                    </h1>
+                    
+                    <PrimaryButton
+                        onClick={() => setIsCreating(true)}
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 !text-lg xs:text-lg md:text-base rounded-md w-[98%] sm:w-auto text-center justify-center gap-2"
+                    >
+                        <span>Add</span>
+                        <CirclePlus className="h-5 w-5" />
+                    </PrimaryButton>
+
+                    <SelectSeparator className="sm:hidden mt-2 bg-secondary/30"/>
+                </div>
+            </header>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto rounded-md lg:-mt-[4.1rem]">
+                <Datatable
+                    columns={columns}
+                    data={assets}
+                    placeholder="Search for ID, Name, Specification, or Location"
+                />
             </div>
 
-            {/* Main content below header */}
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 mx-auto ">
-                {/* Desktop Table View */}
-                <div className="hidden md:block w-full overflow-x-auto rounded-md -mt-[6.5rem]">
-                    <Datatable
-                        columns={columns}
-                        data={assets}
-                        placeholder="Search assets"
-                    />
+            {/* Mobile Card View */}
+            <div className="md:hidden flex flex-col gap-4 mt-4">
+
+                {/* Search and Filter Controls */}
+                <div className="flex items-center gap-2">
+
+                    {/* Search */}
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search for ID, Name, Specification, or Location"
+                            value={mobileSearchQuery}
+                            onChange={(event) => setMobileSearchQuery(event.target.value)}
+                            className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
+                        />
+                    </div>
+
+                    {/* Sort */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-10 gap-1 border rounded-md"
+                            >
+                                <ArrowUpDown className="h-4 w-4" />
+                                Sort
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            align="end"
+                            side="bottom"
+                            sideOffset={4}
+                            className="w-48 p-2 rounded-md border bg-white shadow-md"
+                        >
+                            <div className="space-y-2">
+                                {sortOptions.map((option) => (
+                                    <div key={option.value} className="flex items-center justify-between">
+                                        <span className="text-sm">{option.label}</span>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`h-6 w-6 p-0 ${
+                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'asc'
+                                                        ? 'bg-primary text-white'
+                                                        : ''
+                                                }`}
+                                                onClick={() => setMobileSortConfig({
+                                                    key: option.value,
+                                                    direction: 'asc'
+                                                })}
+                                            >
+                                                ↑
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`h-6 w-6 p-0 ${
+                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'desc'
+                                                        ? 'bg-primary text-white'
+                                                        : ''
+                                                }`}
+                                                onClick={() => setMobileSortConfig({
+                                                    key: option.value,
+                                                    direction: 'desc'
+                                                })}
+                                            >
+                                                ↓
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+
+                    {/* Filter */}
+                    <Button
+                        ref={mobileFilterButtonRef}
+                        variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
+                        size="sm"
+                        className={`h-10 gap-1 border rounded-md ${
+                            Object.keys(mobileColumnFilters).length > 0 ? "bg-primary text-white" : ""
+                        }`}
+                        onClick={() => setIsMobileFilterModalOpen(!isMobileFilterModalOpen)}
+                    >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        Filter
+                        {Object.keys(mobileColumnFilters).length > 0 && (
+                            <span className="ml-1 rounded-full bg-white text-primary w-5 h-5 flex items-center justify-center text-xs">
+                                {Object.values(mobileColumnFilters).filter((value) => value !== "" && value !== "all").length}
+                            </span>
+                        )}
+                    </Button>
                 </div>
 
-                {/* Mobile Card View */}
-                <div className="sm:hidden flex flex-col gap-4 mt-4">
-                    {assets.map((asset) => (
-                        <div
-                            key={asset.id}
-                            className="bg-white border border-gray-200 rounded-2xl p-4 shadow-md relative"
-                        >
-                            <div className="absolute top-3 right-3">
+                {/* Filter Modal */}
+                <FilterModal
+                    isOpen={isMobileFilterModalOpen}
+                    onClose={() => setIsMobileFilterModalOpen(false)}
+                    columns={columns}
+                    columnFilters={mobileColumnFilters}
+                    setColumnFilters={setMobileColumnFilters}
+                    data={filteredMobileAssets}
+                    buttonRef={mobileFilterButtonRef as React.RefObject<HTMLButtonElement>}
+                />
+
+                {filteredMobileAssets.map((asset) => (
+                    <div
+                        key={asset.id}
+                        className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"
+                        onClick={() => setViewingAsset(asset)}
+                    >
+                        {/* Top row: ID and Status aligned horizontally */}
+                        <div className="flex text-gray-800 mb-1">
+                            <div className="flex flex-[11] justify-between items-start">
+                                {/* ID */}
                                 <p>
-                                    <span
-                                        className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(
-                                            asset.status
-                                        )}`}
-                                    >
-                                        {asset.status}
-                                    </span>
-                                </p>
-                            </div>
-                            <div className="space-y-1 pr-8 text-sm text-gray-800">
-                                <p>
-                                    <span className="font-medium">ID:</span>{" "}
+                                    <span className="font-bold text-primary">ID:</span>{" "}
                                     {asset.id}
                                 </p>
-                                <p>
-                                    <span className="font-medium">Name:</span>{" "}
-                                    {asset.name}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Spec:</span>{" "}
-                                    {asset.specification_details}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Location:
-                                    </span>{" "}
-                                    {asset.location.name}
-                                </p>
-
-                                <p>
-                                    <span className="font-medium">
-                                        Acquired:
-                                    </span>{" "}
-                                    {asset.date_acquired}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        Last Maintenance:
-                                    </span>{" "}
-                                    {asset.last_maintained_at}
-                                </p>
+                                {/* Status */}
+                                <span
+                                    className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
+                                        asset.status
+                                    )}`}
+                                >
+                                    {asset.status}
+                                </span>
                             </div>
-                            <div className="mt-4 flex justify-between gap-2">
-                                <button
-                                    onClick={() => setViewingAsset(asset)}
-                                    className="flex-1 bg-secondary text-white px-3 py-2 text-sm rounded-md hover:bg-blue-700 transition"
-                                >
-                                    View
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(asset.id)}
-                                    className="flex-1 bg-destructive text-white px-3 py-2 text-sm rounded-md hover:bg-red-700 transition"
-                                >
-                                    Delete
-                                </button>
+                            {/* More Vertical Button */}
+                            <div className="flex flex-[1] justify-end items-center">
+                                <Popover>
+                                    <PopoverTrigger asChild >
+                                        <Button variant="ghost" className="h-6 w-6 p-0 z-10 relative" onClick={(e) => e.stopPropagation()}>
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                        align="end"
+                                        side="bottom"
+                                        sideOffset={4}
+                                        className="w-32 p-1 rounded-md border bg-white shadow-md z-50"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {/* <button
+                                            onClick={() => setViewingAsset(asset)}
+                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                        >
+                                            View
+                                        </button> */}
+                                        <button
+                                            onClick={() => handleDelete(asset)}
+                                            className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                        >
+                                            Delete
+                                        </button>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
                         </div>
-                    ))}
-                </div>
+
+                        {/* Info Section */}
+                        <div className="space-y-1 pr-8 text-gray-800">
+                            {/* Name */}
+                            <p>
+                                <span className="font-bold text-primary">Name:</span>{" "}
+                                {asset.name}
+                            </p>
+
+                            {/* Specification */}
+                            <p>
+                                <span className="font-bold text-primary">Specification:</span>{" "}
+                                    {asset.specification_details.length > 50 
+                                        ? `${asset.specification_details.slice(0, 50)}...`
+                                        : asset.specification_details}
+                            </p>
+
+                            {/* Location */}
+                            <p>
+                                <span className="font-bold text-primary">Location:</span>{" "}
+                                {asset.location.name}
+                            </p>
+
+                            {/* Date Acquired */}
+                            <p>
+                                <span className="font-bold text-primary">Date Acquired:</span>{" "}
+                                {formatDate(asset.date_acquired, "MM/dd/yyyy")}
+                            </p>
+
+                            {/* Last Maintenance */}
+                            <p>
+                                <span className="font-bold text-primary">Last Maintenance:</span>{" "}
+                                {formatDate(asset.last_maintained_at, "MM/dd/yyyy")}
+                            </p>
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {isCreating && (
@@ -347,13 +579,21 @@ const AssetManagement: React.FC = () => {
                 />
             )}
 
+            {deletingAsset && (
+                <DeleteAssetModal
+                    asset={deletingAsset}
+                    locations={locations}
+                    onClose={() => setDeletingAsset(null)}
+                />
+            )}
+
             <FlashToast />
             {/* Scroll to Top Button */}
             <ScrollToTopButton
                 showScrollUpButton={showScrollUpButton}
                 scrollToTop={scrollToTop}
             />
-        </Authenticated>
+        </AuthenticatedLayout>
     );
 };
 

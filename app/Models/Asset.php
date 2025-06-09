@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Asset extends Model
 {    
+    use SoftDeletes;
+
     protected $fillable = [
         'name',
         'specification_details',
@@ -35,7 +38,7 @@ class Asset extends Model
 
     public function maintenanceSchedule()
     {
-        return $this->hasOne(PreventiveMaintenance::class);
+        return $this->hasOne(PreventiveMaintenance::class, 'asset_id', 'id');
     }
 
     /**

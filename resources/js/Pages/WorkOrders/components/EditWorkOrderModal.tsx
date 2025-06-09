@@ -43,7 +43,7 @@ interface EditWorkOrderProps {
         approved_at: string;
         approved_by: string;
         remarks: string;
-        images: string[];
+        attachments: string[];
     };
     locations: Location[];
     assets: {
@@ -92,7 +92,7 @@ export default function EditWorkOrderModal({
         location_id: "",
         report_description: workOrder.report_description,
         asset_id: workOrder?.asset?.id ?? "",
-        images: [] as File[],
+        attachments: [] as File[],
         status: workOrder.status,
         work_order_type: workOrder.work_order_type,
         label: workOrder.label,
@@ -161,7 +161,7 @@ export default function EditWorkOrderModal({
         formData.append("location_id", String(locationId));
         formData.append("report_description", data.report_description);
 
-        data.images.forEach((image) => formData.append("images[]", image));
+        data.attachments.forEach((image) => formData.append("attachments[]", image));
         deletedImages.forEach((image) =>
             formData.append("deleted_images[]", image)
         );
@@ -192,7 +192,7 @@ export default function EditWorkOrderModal({
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
-            setData("images", files);
+            setData("attachments", files);
         }
     };
 
@@ -226,7 +226,7 @@ export default function EditWorkOrderModal({
                 }
             }}
         >
-            <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-xl lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
@@ -246,19 +246,19 @@ export default function EditWorkOrderModal({
                     </Button>
                 </DialogHeader>
 
-                <div className="space-y-4 px-6 max-h-[70vh] overflow-y-auto">
+                <div className="space-y-4 px-6 max-h-[55vh] sm:max-h-[65vh] overflow-y-auto">
 
-                    {/* Show wO details to WOM */}
+                    {/* Show WO details to WOM */}
                     {isWorkOrderManager && (
                         <Table className="w-full rounded-md">
                             <TableBody>
 
                             {/* Date Requested */}
                             <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
+                                <TableHead className="w-[7rem] sm:w-1/4 ">
                                     <Label>Date Requested:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_at}</TableCell>
+                                <TableCell className="">{format(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
                             </TableRow>
 
                             {/* Requested By */}
@@ -282,7 +282,7 @@ export default function EditWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Remarks */}
@@ -290,7 +290,7 @@ export default function EditWorkOrderModal({
                                 <TableHead className="">
                                     <Label>Remarks:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.remarks ? (
+                                <TableCell className="flex max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.remarks ? (
                                         workOrder.remarks
                                     ) : (
                                         <span className="text-gray-500 italic">No Remarks</span>
@@ -319,9 +319,9 @@ export default function EditWorkOrderModal({
                                     <Label>Attachment:</Label>
                                 </TableHead>
                                 <TableCell className="">
-                                    {workOrder.images.length > 0 ? (
+                                    {workOrder.attachments?.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                            {workOrder.images.map((src, index) => (
+                                            {workOrder.attachments.map((src, index) => (
                                             <div
                                                 key={index}
                                                 className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
@@ -397,12 +397,12 @@ export default function EditWorkOrderModal({
                                 )}
                             </div>
 
-                            { workOrder.images?.length > 0 && (
+                            { workOrder.attachments?.length > 0 && (
                             <div>
                                 <strong>Images:</strong>
                                 <div className="flex flex-wrap gap-2 mt-1">
-                                    {workOrder.images?.length > 0 ? (
-                                        workOrder.images.map((url, index) => (
+                                    {workOrder.attachments?.length > 0 ? (
+                                        workOrder.attachments.map((url, index) => (
                                             <img
                                                 key={index}
                                                 src={url}
@@ -428,7 +428,7 @@ export default function EditWorkOrderModal({
                             <div className="py-2">
 
                                 {/* Row 1 */}
-                                <div className="flex flex-row justify-between gap-4 ">
+                                <div className="flex flex-row justify-between gap-4">
                                     
                                     {/* Label */}
                                     <div className="flex-[2] space-y-2">
@@ -469,7 +469,7 @@ export default function EditWorkOrderModal({
                                             onClick={() => setShowCalendar(!showCalendar)}
                                             className={cn(
                                                 "w-full flex justify-between items-center",
-                                                "text-left font-normal",
+                                                "text-left font-normal !text-xs sm:!text-sm",
                                                 !data.scheduled_at && "text-muted-foreground"
                                             )}
                                         >
@@ -540,10 +540,10 @@ export default function EditWorkOrderModal({
                                 </div>
 
                                 {/* Row 2 */}
-                                <div className="flex flex-row justify-between gap-4 !mt-4">
+                                <div className="flex flex-row justify-evenly gap-4 !mt-4">
 
                                     {/* Assigned To */}
-                                    <div className="flex-[2] space-y-2">
+                                    <div className="flex-[1] xs:flex-[2] space-y-2">
                                         <Label htmlFor="assigned_to" className="flex items-center">
                                             Assign to <span className="text-red-500 ml-1">*</span>
                                         </Label>
@@ -644,7 +644,7 @@ export default function EditWorkOrderModal({
                                     </div>
 
                                     {/* Asset */}
-                                    <div className="flex-[3] space-y-2">
+                                    <div className="flex-[2] xs:flex-[3] space-y-2 xs:mt-0">
                                         <SmartDropdown
                                             label="Asset"
                                             placeholder={assetDetails ? `${assetDetails.name} - ${assetDetails.location_name}` : "Select Asset (scroll down here)"}
@@ -685,13 +685,11 @@ export default function EditWorkOrderModal({
                 </div>
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <div className="flex gap-2 xs:flex-row flex-col">
-                        <Button variant="outline" onClick={onClose}>Cancel</Button>
-                        <Button type="submit" onClick={submit}
-                            className="bg-primary hover:bg-primary/90 text-white">
-                                {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
-                        </Button>
-                    </div>
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button type="submit" onClick={submit}
+                        className="bg-primary hover:bg-primary/90 text-white">
+                            {workOrder.status === "Declined" ? "Confirm" : "Save Changes"}
+                    </Button>
                 </DialogFooter>
 
             {activeImageIndex !== null && (
@@ -722,17 +720,17 @@ export default function EditWorkOrderModal({
 
                 {/* Image */}
                 <img
-                    src={workOrder.images[activeImageIndex]}
+                    src={workOrder.attachments[activeImageIndex]}
                     alt={`Preview ${activeImageIndex + 1}`}
                     className="max-h-[90vh] max-w-full object-contain rounded"
                 />
 
                 <div className="absolute bottom-6 text-white text-sm bg-black/40 px-3 py-1 rounded-full">
-                {activeImageIndex + 1} of {workOrder.images.length}
+                {activeImageIndex + 1} of {workOrder.attachments.length}
                 </div>
 
                 {/* Right Arrow */}
-                {activeImageIndex < workOrder.images.length - 1 && (
+                {activeImageIndex < workOrder.attachments.length - 1 && (
                 <button
                     className="absolute right-4 text-white text-4xl"
                     onClick={() => setActiveImageIndex(activeImageIndex + 1)}

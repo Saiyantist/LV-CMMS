@@ -15,12 +15,35 @@ class EventServicesController extends Controller
     // Map events for calendar view
     $calendarEvents = [];
     foreach ($events as $event) {
-        $day = date('j', strtotime($event->event_start_date)); // day of month (1-31)
-        $calendarEvents[$day][] = [
-            'title' => $event->event_name,
-            'time' => date('H:i', strtotime($event->event_start_date)),
-            'status' => $event->status,
-        ];
+        $start = strtotime($event->event_start_date);
+        $end = strtotime($event->event_end_date);
+
+        // Ensure logical order
+        if ($end < $start) {
+            [$start, $end] = [$end, $start];
+        }
+
+        for ($d = $start; $d <= $end; $d = strtotime('+1 day', $d)) {
+            $dateKey = date('Y-m-d', $d);
+            $calendarEvents[$dateKey][] = [
+             // 'title' => $event->event_name,
+                'title' => $event->name,
+                'venue' => is_array($event->venue) ? implode(', ', $event->venue) : $event->venue,
+                'dateRequested' => $event->created_at ? date('F j, Y', strtotime($event->created_at)) : null,
+                'eventDate' => date('Y-m-d', $d),
+                'eventStartDate' => $event->event_start_date,
+                'eventEndDate' => $event->event_end_date,
+                'time' => $event->event_start_time && $event->event_end_time
+                    ? date('h:i A', strtotime($event->event_start_time)) . ' - ' . date('h:i A', strtotime($event->event_end_time))
+                    : ($event->event_start_time ? date('h:i A', strtotime($event->event_start_time)) : ''),
+                'status' => $event->status,
+                // Add these fields:
+                'department' => $event->department,
+                'participants' => $event->participants,
+                'number_of_participants' => $event->number_of_participants,
+                'description' => $event->description,
+            ];
+        }
     }
 
     // Map events for list view
@@ -30,7 +53,10 @@ class EventServicesController extends Controller
             'date' => $event->created_at->format('Y-m-d'),
             'venue' => $event->location,
             'eventDate' => $event->event_start_date,
-            'time' => $event->event_start_time,
+            // Combine start and end time
+            'time' => $event->event_start_time && $event->event_end_time
+                ? date('h:i A', strtotime($event->event_start_time)) . ' - ' . date('h:i A', strtotime($event->event_end_time))
+                : ($event->event_start_time ? date('h:i A', strtotime($event->event_start_time)) : ''),
             'name' => $event->event_name,
             'status' => $event->status,
         ];
@@ -41,37 +67,75 @@ class EventServicesController extends Controller
         'listEvents' => $listEvents,
     ]);
 }
+
+
+
+protected function autoCompleteBookings()
+{
+    $now = now()->toDateString();
+    $bookings = EventService::where('status', 'Approved')
+        ->whereDate('event_end_date', '<', $now)
+        ->get();
+
+    foreach ($bookings as $booking) {
+        $booking->status = 'Completed';
+        $booking->save();
+    }
+}
+
+
 // filepath: app\Http\Controllers\EventServicesController.php
 public function MyBookings()
 {
+    $this->autoCompleteBookings(); // <-- Add this line
+
     $user = Auth::user();
 
-    // Check if user is super admin or communications officer
-    if ($user->hasRole('super_admin') || $user->hasRole('communications_officer')) {
-        $myEvents = EventService::all();
+    if (
+        $user->hasRole('super_admin') ||
+        $user->hasRole('communications_officer') ||
+        $user->hasRole('gasd_coordinator') // <-- add this line
+    ) {
+        $myEvents = EventService::with('user')->get();
     } else {
-        $myEvents = EventService::where('user_id', $user->id)->get();
+        $myEvents = EventService::with('user')->where('user_id', $user->id)->get();
     }
 
-$bookings = $myEvents->map(function ($event) {
-    return [
-        'id' => $event->id,
-        'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
-        'venue' => $event->venue,
-        'name' => $event->name,
-        'department' => $event->department,
-        'description' => $event->description,
-        'participants' => $event->participants,
-        'number_of_participants' => $event->number_of_participants,
-        'event_start_date' => $event->event_start_date,
-        'event_end_date' => $event->event_end_date,
-        'event_start_time' => $event->event_start_time,
-        'event_end_time' => $event->event_end_time,
-        'requested_services' => $event->requested_services,
-        'proof_of_approval' => $event->proof_of_approval,
-        'status' => $event->status,
-    ];
-});
+    $bookings = $myEvents->map(function ($event) use ($user) {
+        return [
+            'id' => $event->id,
+            'date' => $event->created_at ? $event->created_at->format('Y-m-d') : null,
+            // Always return venue as array
+            'venue' => is_string($event->venue) && str_starts_with($event->venue, '[')
+                ? json_decode($event->venue, true)
+                : (is_array($event->venue) ? $event->venue : [$event->venue]),
+            'name' => $event->name,
+            'department' => $event->department,
+            'description' => $event->description,
+            'participants' => $event->participants,
+            'number_of_participants' => $event->number_of_participants,
+            'event_start_date' => $event->event_start_date,
+            'event_end_date' => $event->event_end_date,
+            'event_start_time' => $event->event_start_time,
+            'event_end_time' => $event->event_end_time,
+            'requested_services' =>
+                $user->hasRole('gasd_coordinator')
+                    ? $this->filterGasdServices($event->requested_services)
+                    : $event->requested_services,
+            'proof_of_approval' => $event->proof_of_approval,
+            'status' => $event->status,
+            // Add user info for requester
+            'user' => $event->user
+                ? [
+                    'id' => $event->user->id,
+                    'first_name' => $event->user->first_name,
+                    'last_name' => $event->user->last_name,
+                    'name' => $event->user->name ?? null,
+                    'email' => $event->user->email,
+                ]
+                : null,
+        ];
+    });
 
     return Inertia::render('EventServices/MyBookings', [
         'bookings' => $bookings
@@ -121,7 +185,10 @@ $bookings = $myEvents->map(function ($event) {
         ]);
 
         if ($request->hasFile('proof_of_approval')) {
-            $validated['proof_of_approval'] = $request->file('proof_of_approval')->store('proofs', 'public');
+            $file = $request->file('proof_of_approval');
+            $path = $file->store('proofs', 'public');
+            $validated['proof_of_approval'] = $path;
+            $validated['proof_of_approval_original_name'] = $file->getClientOriginalName(); // <-- Add this
         }
 
         $validated['venue'] = json_encode($validated['venue'] ?? []);
@@ -157,7 +224,10 @@ public function update(Request $request, $id)
     ]);
 
     if ($request->hasFile('proof_of_approval')) {
-        $validated['proof_of_approval'] = $request->file('proof_of_approval')->store('proofs', 'public');
+        $file = $request->file('proof_of_approval');
+        $path = $file->store('proofs', 'public');
+        $validated['proof_of_approval'] = $path;
+        $validated['proof_of_approval_original_name'] = $file->getClientOriginalName(); // <-- Add this
     }
 
     if (isset($validated['venue'])) {
@@ -217,4 +287,90 @@ public function statusCounts()
     return response()->json($counts);
 }
 
+public function checkConflict(Request $request)
+{
+    $venues = $request->venues ?? [];
+    $startDate = $request->startDate;
+    $endDate = $request->endDate;
+    $startTime = $request->startTime;
+    $endTime = $request->endTime;
+
+    // Only consider bookings that are Pending, Approved, or On Going
+    $conflicts = EventService::whereIn('status', ['Pending', 'Approved', 'On Going'])
+        ->where(function ($q) use ($venues) {
+            foreach ($venues as $venue) {
+                $q->orWhereJsonContains('venue', $venue);
+            }
+        })
+        ->where(function ($q) use ($startDate, $endDate) {
+            $q->where(function ($q2) use ($startDate, $endDate) {
+                $q2->where('event_start_date', '<=', $endDate)
+                   ->where('event_end_date', '>=', $startDate);
+            });
+        })
+        ->where(function ($q) use ($startTime, $endTime) {
+            $q->where(function ($q2) use ($startTime, $endTime) {
+                $q2->where('event_start_time', '<', $endTime)
+                   ->where('event_end_time', '>', $startTime);
+            });
+        })
+        ->get();
+
+    if ($conflicts->count()) {
+        return response()->json([
+            'conflict' => true,
+            'conflicts' => $conflicts->map(function ($c) {
+                return [
+                    'venue' => is_array($c->venue) ? implode(', ', $c->venue) : $c->venue,
+                    'date' => $c->event_start_date . ' to ' . $c->event_end_date,
+                    'time' => $c->event_start_time . ' to ' . $c->event_end_time,
+                    'status' => $c->status,
+                ];
+            }),
+        ]);
+    }
+
+    return response()->json(['conflict' => false]);
+}
+
+protected function filterGasdServices($services)
+{
+    $gasd = [
+        "Maintainer Time",
+        "Lighting",
+        "Tables",
+        "Bathroom Cleaning",
+        "Chairs",
+        "Aircon",
+        "Marshal",
+        "LV DRRT",
+    ];
+
+    // Decode if string
+    if (is_string($services)) {
+        $services = json_decode($services, true);
+    }
+
+    // If array, filter directly
+    if (is_array($services)) {
+        return array_values(array_filter($services, fn($s) => in_array($s, $gasd)));
+    }
+
+    // If object (assoc array), flatten and filter
+    if (is_array($services)) {
+        $flat = [];
+        foreach ($services as $val) {
+            if (is_array($val)) {
+                foreach ($val as $v) {
+                    if (in_array($v, $gasd)) $flat[] = $v;
+                }
+            } elseif (is_string($val) && in_array($val, $gasd)) {
+                $flat[] = $val;
+            }
+        }
+        return $flat;
+    }
+
+    return [];
+}
 }

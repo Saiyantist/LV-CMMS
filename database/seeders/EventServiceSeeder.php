@@ -8,6 +8,6 @@ class EventServiceSeeder extends Seeder
 {
     public function run(): void
     {
-        EventService::factory(30)->create();
+        EventService::factory(50)->create();
     }
 }

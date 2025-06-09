@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm, usePage } from "@inertiajs/react";
 import { router } from "@inertiajs/react";
 import axios from "axios";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, set } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, History, X } from "lucide-react";
 import { Button } from "@/Components/shadcnui/button";
@@ -136,6 +136,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
     useEffect(() => {
         if (isHistoryOpen) {
             setLoadingHistory(true);
+            setTimeout(() => {
             axios
                 .get(`/asset-maintenance-history/${asset.id}`)
                 .then((res) => {
@@ -144,8 +145,9 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                 .catch((err) => {
                     console.error("Failed to fetch history", err);
                     setHistory([]);
-                })
-                .finally(() => setLoadingHistory(false));
+                    })
+                    .finally(() => setLoadingHistory(false));
+            }, 100);
         }
     }, [isHistoryOpen, asset.id]);
 
@@ -204,7 +206,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
         frequency: "",
     });
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const formData = new FormData();
         formData.append("huwag", "1");
@@ -246,13 +248,41 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
         }, 1000);
     };
 
+    const getDaysInMonth = (month: string, year: number): number => {
+        const months: { [key: string]: number } = {
+            "January": 0, "February": 1, "March": 2, "April": 3,
+            "May": 4, "June": 5, "July": 6, "August": 7,
+            "September": 8, "October": 9, "November": 10, "December": 11
+        };
+        
+        // Check if it's a leap year for February
+        const isLeapYear = (year: number) => {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        };
+        
+        const monthIndex = months[month];
+        if (monthIndex === undefined) return 31; // Default to 31 if month is invalid
+        
+        if (monthIndex === 1) { // February
+            return isLeapYear(year) ? 29 : 28;
+        }
+        
+        // Months with 30 days: April, June, September, November
+        const monthsWith30Days = [3, 5, 8, 10];
+        return monthsWith30Days.includes(monthIndex) ? 30 : 31;
+    };
+
     return (
         <Dialog open={true} onOpenChange={() => onClose()}>
             <DialogContent className="w-full sm:max-w-lg md:max-w-xl lg:max-w-3xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
-                            <span>Asset Details</span>
+                            {isEditing ? [
+                                <span>Editing Asset Details</span>
+                            ] : [
+                                <span>Asset Details</span>
+                            ]}
                             <span className="text-muted-foreground">|</span>
                             <span className="text-muted-foreground">ID: {asset.id}</span>
                         </div>
@@ -271,7 +301,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                     <div className="px-6 py-2 max-h-[65vh] overflow-y-auto">
                         <div className="px-2 -mt-2 space-y-4">
                             {/* Asset Name and Specification */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
+                            <div className="grid grid-cols-1 gap-4 ">
                                 {/* Asset Name */}
                                 <div className="space-y-2">
                                     <Label htmlFor="name" className="flex items-center">
@@ -298,7 +328,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                     </Label>
                                     {isEditing ? (
                                         <Input
-                                            id="specification"
+                                            id="specifipcation"
                                             value={editableData.specification_details}
                                             onChange={(e) => setEditableData({
                                                 ...editableData,
@@ -312,10 +342,10 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                             </div>
                             <hr className="!my-4"/>
                             {/* Location, Condition, and Date Acquired */}
-                            <div className="flex flex-row gap-4 !my-6">
+                            <div className="flex flex-col xs:flex-row gap-2 !my-6">
                                 {/* Location */}
-                                <div className="space-y-2 flex-[1]">
-                                    <Label htmlFor="location" className="flex items-center">
+                                <div className="space-y-2 flex flex-row flex-[1] xs:flex-col">
+                                    <Label htmlFor="location" className="flex flex-[1] items-center">
                                         Location
                                     </Label>
                                     {isEditing ? (
@@ -348,13 +378,15 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                             </Select>
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-muted-foreground !mt-4">{editableData.location.name}</p>
+                                        <div className="!mb-2 flex flex-[2]">
+                                            <p className="text-sm text-muted-foreground">{editableData.location.name}</p>
+                                        </div>
                                     )}
                                 </div>
 
                                 {/* Condition */}
-                                <div className="space-y-2 flex-[1]">
-                                    <Label htmlFor="condition" className="flex items-center">
+                                <div className="space-y-2 flex flex-row flex-[1] xs:flex-col">
+                                    <Label htmlFor="condition" className="flex flex-[1] items-center">
                                         Condition
                                     </Label>
                                     {isEditing ? (
@@ -378,21 +410,23 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                         </Select>
                                     </div>
                                     ) : (
-                                        <p>
-                                        <span
-                                            className={`px-2 py-1 rounded text-xs ${getStatusColor(
-                                                editableData.status
-                                            )}`}
-                                        >
-                                            {editableData.status}
-                                        </span>
-                                    </p>
+                                        <div className="!mb-2 flex flex-[2]">
+                                            <p>
+                                                <span
+                                                    className={`px-2 py-1 rounded text-xs ${getStatusColor(
+                                                        editableData.status
+                                                    )}`}
+                                                >
+                                                    {editableData.status}
+                                                </span>
+                                            </p>
+                                        </div>
                                     )}
                                 </div>
 
                                 {/* Date Acquired */}
-                                <div className="space-y-2 flex-[1]">
-                                    <Label htmlFor="date_acquired" className="flex items-center">
+                                <div className="space-y-2 flex flex-row flex-[1] xs:flex-col">
+                                    <Label htmlFor="date_acquired" className="flex flex-[1] items-center">
                                         Date Acquired
                                     </Label>
                                     {isEditing ? (
@@ -413,7 +447,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                             </Button>
                                             {showCalendar && (
-                                                <div className="absolute z-50 bg-white shadow-md border mt-2 rounded-md">
+                                                <div className="absolute z-50 bg-white shadow-md border mt-2 !-ml-[6.6rem] sm:!-ml-[1rem] rounded-md">
                                                     <Calendar
                                                         mode="single"
                                                         selected={editableData.date_acquired ? parseISO(editableData.date_acquired) : undefined}
@@ -432,9 +466,11 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                             )}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-muted-foreground !mt-4">
+                                    <div className="!mb-2 flex flex-[2]">
+                                        <p className="text-sm text-muted-foreground">
                                             {editableData.date_acquired ? format(parseISO(editableData.date_acquired), "MM/dd/yyyy") : "Not set"}
                                         </p>
+                                    </div>
                                     )}
                                 </div>
                             </div>
@@ -446,7 +482,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                             {/* Preventive Maintenance Section - Only show when not editing */}
                             {!isEditing && asset.maintenance_schedule && (
                                 <div className="space-y-4 mt-6">
-                                    <div className="flex items-center">
+                                    <div className="flex items-center bg-secondary p-2 text-white">
                                         <Label className="text-lg font-semibold">
                                             Preventive Maintenance Schedule
                                         </Label>
@@ -522,12 +558,12 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                     {isPreventiveMaintenance && (
                                         <>
                                             {asset.maintenance_schedule && (
-                                                <div className="space-y-2 text-sm">
-                                                    <Label className="flex items-center">Toggle Active Status</Label>
+                                                <div className="flex flex-row gap-2 items-center text-sm">
                                                     <Switch
                                                         checked={isActive}
                                                         onCheckedChange={setIsActive}
                                                     />
+                                                    <Label className="flex items-center text-sm font-medium text-gray-700">Toggle Active Status</Label>
                                                 </div>
                                             )}
                                             <div className="flex flex-row w-full gap-4">
@@ -640,7 +676,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                                             <Input
                                                                 type="number"
                                                                 min="1"
-                                                                max="31"
+                                                                max={getDaysInMonth(yearlyMonth, new Date().getFullYear())}
                                                                 className="w-20"
                                                                 value={yearlyDay}
                                                                 onChange={(e) => {
@@ -653,8 +689,8 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                                                     if (!isNaN(num)) {
                                                                         if (num < 1) {
                                                                             setYearlyDay(1);
-                                                                        } else if (num > 31) {
-                                                                            setYearlyDay(31);
+                                                                        } else if (num > getDaysInMonth(yearlyMonth, new Date().getFullYear())) {
+                                                                            setYearlyDay(getDaysInMonth(yearlyMonth, new Date().getFullYear()));
                                                                         } else {
                                                                             setYearlyDay(num);
                                                                         }
@@ -701,7 +737,7 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                     </div>
                 ) : (
                     <div className="px-6 py-2 max-h-[65vh] overflow-y-auto">
-                        <h3 className="text-lg font-semibold mb-4 text-center">
+                        <h3 className="text-lg mb-4 text-center">
                             Asset Maintenance History
                         </h3>
                         {loadingHistory ? (
@@ -720,21 +756,37 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                         className="border p-4 rounded-md bg-muted"
                                     >
                                         <div className="grid grid-cols-2 gap-2 text-sm">
-                                            <div>
+                                            <div className="space-y-2">
                                                 <Label>Status</Label>
-                                                <p>{item.status}</p>
+                                                <p>
+                                                    <span
+                                                        className={`px-2 py-1 rounded text-xs ${getStatusColor(
+                                                            item.status
+                                                        )}`}
+                                                    >
+                                                        {item.status}
+                                                    </span>
+                                                </p>
                                             </div>
-                                            <div>
+                                            <div className="space-y-2">
                                                 <Label>Downtime Reason</Label>
-                                                <p>{item.downtime_reason}</p>
+                                                <p className="text-muted-foreground">{item.downtime_reason}</p>
                                             </div>
-                                            <div>
+                                            <div className="space-y-2">
                                                 <Label>Failed at</Label>
-                                                <p>{formatDate(item.failed_at)}</p>
+                                                <p className="text-muted-foreground">{formatDate(item.failed_at)}</p>
                                             </div>
-                                            <div>
+                                            <div className="space-y-2">
                                                 <Label>Maintained at</Label>
-                                                <p>{item.maintained_at ? formatDate(item.maintained_at) : 'Not (yet) maintained'}</p>
+                                                {item.maintained_at ? (
+                                                    <p className="text-muted-foreground">
+                                                        {formatDate(item.maintained_at)}
+                                                    </p>
+                                                )   : (
+                                                    <p className="text-muted-foreground italic">
+                                                        Not yet maintained
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -745,7 +797,6 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                 )}
 
                 <DialogFooter className="px-6 py-4 border-t">
-                    <div className="flex justify-end gap-2">
                         {isHistoryOpen ? (
                             <Button
                                 variant="outline"
@@ -758,7 +809,6 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                             <>
                                 <Button
                                     variant="outline"
-                                    // className="border-destructive !text-destructive hover:!bg-destructive/5 hover:!text-destructive"
                                     onClick={() => {
                                         setEditableData(asset);
                                         setIsEditing(false);
@@ -802,7 +852,6 @@ const ViewAssetModal: React.FC<ViewAssetModalProps> = ({
                                 </Button>
                             </>
                         )}
-                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

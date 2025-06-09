@@ -25,7 +25,7 @@ interface Location {
     name: string;
 }
 
-interface AssignWorkOrderModalProps {
+interface AcceptWorkOrderModalProps {
     workOrder: {
         id: number;
         location: { id: number; name: string };
@@ -41,7 +41,7 @@ interface AssignWorkOrderModalProps {
         approved_at: string;
         approved_by: string;
         remarks: string;
-        images: string[];
+        attachments: string[];
     };
     locations: Location[];
     assets: {
@@ -58,14 +58,14 @@ interface AssignWorkOrderModalProps {
     onClose: () => void;
 }
 
-export default function AssignWorkOrderModal({
+export default function AcceptWorkOrderModal({
     workOrder,
     locations,
     assets,
     maintenancePersonnel,
     user,
     onClose,
-}: AssignWorkOrderModalProps) {
+}: AcceptWorkOrderModalProps) {
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
     const [date, setDate] = useState<Date>()
     const [showCalendar, setShowCalendar] = useState(false)
@@ -79,7 +79,7 @@ export default function AssignWorkOrderModal({
         location_id: workOrder.location.id,
         report_description: workOrder.report_description,
         asset_id: workOrder?.asset?.id ?? "",
-        images: [] as File[],
+        attachments: [] as File[],
         status: "Assigned",
         label: workOrder.label,
         assigned_to: workOrder.assigned_to ?? "",
@@ -120,15 +120,22 @@ export default function AssignWorkOrderModal({
             if (isWorkOrderManager) {
                 formData.append("location_id", data.location_id.toString());
                 formData.append("report_description", data.report_description || "");
+                formData.append("asset_id", data.asset_id || "");
+                formData.append("status", data.status || "Assigned");
                 formData.append("label", data.label || "");
-                formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
                 formData.append("assigned_to", data.assigned_to?.id?.toString() || "")
                 formData.append("priority", data.priority || "");
-                formData.append("status", data.status || "Assigned");
+                formData.append("remarks", data.remarks === "" ? workOrder.remarks : data.remarks);
+                formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
                 formData.append("approved_at", approvedDate ? format(approvedDate, "yyyy-MM-dd") : data.approved_at ? format(data.approved_at, "yyyy-MM-dd") : "")
                 formData.append("approved_by", data.approved_by || "");
-                formData.append("remarks", data.remarks === "" ? workOrder.remarks : data.remarks);
             }
+
+            // // For Debugging
+            // console.log("=== Form Data ===:");
+            // for (const [key, value] of formData.entries()) {
+            //     console.log(`${key}:`, value);
+            // }
             
             router.post(`/work-orders/${workOrder.id}`, formData, {
                 forceFormData: true,
@@ -175,12 +182,12 @@ export default function AssignWorkOrderModal({
                 }
             }}
         >
-            <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         { workOrder.status === "For Budget Request" && (
-                            <div className="flex flex-row gap-4">
-                                <span>Accept Work Order - With Approved Budget</span>
+                            <div className="flex flex-row gap-4 text-xl">
+                                <span>Accept Budget-approved W.O. </span>
                                 <span className="text-muted-foreground">|</span>
                                 <span className="text-muted-foreground">ID: {workOrder.id}</span>
                             </div>
@@ -191,55 +198,63 @@ export default function AssignWorkOrderModal({
                                 <span className="text-muted-foreground">ID: {workOrder.id}</span>
                             </div>
                         )}
-                        </DialogTitle>
+                    </DialogTitle>
                     <Button variant="ghost" size="icon" className="absolute right-4 top-3 border rounded-full h-6 w-6" onClick={onClose}>
                         <X className="h-4 w-4" />
                     </Button>
                 </DialogHeader>
 
-                <div className="space-y-4 px-6 max-h-[70vh] overflow-y-auto">
+                <div className="space-y-4 px-6 max-h-[55vh] sm:max-h-[65vh] overflow-y-auto">
+                    {/* Info Section */}
                     <Table className="w-full rounded-md">
-                        <TableBody>
+                        <TableBody className="flex flex-col">
 
                             {/* Date Requested */}
-                            <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Date Requested:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_at}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {format(workOrder.requested_at, "MM/dd/yyyy")}
+                                </TableCell>
                             </TableRow>
 
                             {/* Requested By */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row items-center justify-between">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Requested by:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_by.name}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {workOrder.requested_by.name}
+                                </TableCell>
                             </TableRow>
 
                             {/* Location */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row items-center justify-between">
+                            <TableHead className="flex flex-[1] items-center">
                                     <Label>Location:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.location.name}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {workOrder.location.name}
+                                </TableCell>
                             </TableRow>
 
                             {/* Description */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row items-center justify-between">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-start max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
                             {/* Remarks */}
-                            {workOrder.remarks && (
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            {workOrder.status === "For Budget Request" && (
+                            <TableRow className="border-none flex flex-row items-center justify-between">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Remarks:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.remarks ? (
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-start max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                    {workOrder.remarks ? (
                                         workOrder.remarks
                                     ) : (
                                         <span className="text-gray-500 italic">No Remarks</span>
@@ -247,31 +262,15 @@ export default function AssignWorkOrderModal({
                             </TableRow>
                             )}
 
-                            {/* Asset Detail */}
-                            {assetDetails && (
-                            <TableRow className="border-none">
-                                <TableHead>
-                                <Label>Asset</Label>
-                                </TableHead>
-                                <TableCell>
-                                    {assetDetails ? (
-                                        `${assetDetails?.name} - ${assetDetails?.location_name}`
-                                    ) : (
-                                        <span className="text-gray-500 italic">No Asset attached</span>
-                                    )}
-                                </TableCell>
-                            </TableRow>
-                            )}
-
-                            {/* Attachment / Images / Photos */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            {/* Attachment/Images */}
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Attachment:</Label>
                                 </TableHead>
-                                <TableCell className="">
-                                    {workOrder.images.length > 0 ? (
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {workOrder.attachments.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                            {workOrder.images.map((src, index) => (
+                                            {workOrder.attachments.map((src, index) => (
                                             <div
                                                 key={index}
                                                 className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
@@ -338,7 +337,7 @@ export default function AssignWorkOrderModal({
                                             variant="outline"
                                             onClick={() => setShowCalendar(!showCalendar)}
                                             className={cn(
-                                                "w-full flex justify-between items-center",
+                                                "relative w-full flex justify-between items-center",
                                                 "text-left font-normal",
                                                 !data.scheduled_at && "text-muted-foreground"
                                             )}
@@ -347,38 +346,38 @@ export default function AssignWorkOrderModal({
                                                 ? format(data.scheduled_at, "MM/dd/yyyy")
                                                 : "MM/DD/YYYY"}
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                        {showCalendar && (
-                                            <div
-                                                className="absolute z-50 bg-white shadow-md border !-mt-[44vh] -ml-[6.5rem] rounded-md"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={
-                                                    data.scheduled_at && isValid(parseISO(data.scheduled_at))
-                                                        ? parseISO(data.scheduled_at)
-                                                        : undefined
-                                                    }
-                                                    onSelect={(date) => {
-                                                    if (date) {
-                                                        setData("scheduled_at", format(date, "yyyy-MM-dd"))
-                                                        setDate(date)
-                                                        setLocalErrors((prev) => ({ ...prev, scheduled_at: "" }))
-                                                        setShowCalendar(false)
-                                                    }
-                                                    }}
-                                                    disabled={(date) => date < new Date()}
-                                                    initialFocus
+                                            {showCalendar && (
+                                                <div
+                                                    className="absolute z-50 bg-white shadow-md border !-mt-[21rem] -ml-[1rem] rounded-md"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={
+                                                        data.scheduled_at && isValid(parseISO(data.scheduled_at))
+                                                            ? parseISO(data.scheduled_at)
+                                                            : undefined
+                                                        }
+                                                        onSelect={(date) => {
+                                                        if (date) {
+                                                            setData("scheduled_at", format(date, "yyyy-MM-dd"))
+                                                            setDate(date)
+                                                            setLocalErrors((prev) => ({ ...prev, scheduled_at: "" }))
+                                                            setShowCalendar(false)
+                                                        }
+                                                        }}
+                                                        disabled={(date) => date < new Date()}
+                                                        initialFocus
+                                                    />
+                                                </div>
+                                            )}
+                                            {showCalendar && (
+                                                <div
+                                                    className="fixed inset-0 z-40"
+                                                    onClick={() => setShowCalendar(false)}
                                                 />
-                                            </div>
-                                        )}
-                                        {showCalendar && (
-                                            <div
-                                                className="fixed inset-0 z-40"
-                                                onClick={() => setShowCalendar(false)}
-                                            />
-                                        )}
+                                            )}
+                                        </Button>
                                         {localErrors.scheduled_at && (
                                             <p className="text-red-500 text-xs">{localErrors.scheduled_at}</p>
                                         )}
@@ -563,7 +562,9 @@ export default function AssignWorkOrderModal({
                 <DialogFooter className="px-6 py-4 border-t">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
                     <Button type="submit" onClick={submit}
-                        className="bg-primary hover:bg-primary/90 text-white">Accept Request</Button>
+                        className="bg-primary hover:bg-primary/90 text-white">
+                            Accept Request 
+                    </Button>
                 </DialogFooter>
 
                 {activeImageIndex !== null && (
@@ -591,16 +592,16 @@ export default function AssignWorkOrderModal({
                     )}
 
                     <img
-                        src={workOrder.images[activeImageIndex]}
+                        src={workOrder.attachments[activeImageIndex]}
                         alt={`Preview ${activeImageIndex + 1}`}
                         className="max-h-[90vh] max-w-full object-contain rounded"
                     />
 
                     <div className="absolute bottom-6 text-white text-sm bg-black/40 px-3 py-1 rounded-full">
-                    {activeImageIndex + 1} of {workOrder.images.length}
+                    {activeImageIndex + 1} of {workOrder.attachments.length}
                     </div>
 
-                    {activeImageIndex < workOrder.images.length - 1 && (
+                    {activeImageIndex < workOrder.attachments.length - 1 && (
                     <button
                         className="absolute right-4 text-white text-4xl"
                         onClick={() => setActiveImageIndex(activeImageIndex + 1)}

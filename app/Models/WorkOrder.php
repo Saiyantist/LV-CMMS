@@ -12,21 +12,22 @@ class WorkOrder extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'report_description',
-        'location_id',
-        'status',
         'work_order_type',
-        'label',
+        'compliance_area',
+        'location_id',
+        'report_description',
+        'remarks',
+        'scheduled_at',
         'priority',
+        'assigned_to',
+        'status',
+        'label',
         'requested_by',
         'requested_at',
-        'assigned_to',
         'assigned_at',
-        'scheduled_at',
         'approved_at',
         'approved_by',
         'completed_at',
-        'remarks',
         'asset_id',
         'maintenance_schedule_id',
     ];
@@ -58,11 +59,6 @@ class WorkOrder extends Model
         return $this->belongsTo(PreventiveMaintenance::class, 'maintenance_schedule_id');
     }
 
-    public function images()
-    {
-        return $this->morphMany(Image::class, 'imageable');
-    }
-
     public function requestedBy()
     {
         return $this->belongsTo(User::class, 'requested_by');
@@ -71,5 +67,15 @@ class WorkOrder extends Model
     public function assignedTo()
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    // public function images()
+    // {
+    //     return $this->morphMany(Image::class, 'imageable');
+    // }
+
+    public function attachments()
+    {
+        return $this->morphMany(Attachment::class, 'attachable');
     }
 }

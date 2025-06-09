@@ -3,17 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Image extends Model
+class Attachment extends Model
 {
     protected $fillable = [
         'path',
-        'imageable_id',
-        'imageable_type',
-        'caption',
+        'file_type',
+        'attachable_id',
+        'attachable_type'
     ];
 
-    public function imageable()
+    public function attachable(): MorphTo
     {
         return $this->morphTo();
     }
@@ -26,4 +27,4 @@ class Image extends Model
     {
         return asset('storage/' . $this->path);
     }
-}
+} 

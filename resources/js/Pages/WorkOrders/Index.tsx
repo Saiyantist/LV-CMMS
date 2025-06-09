@@ -1,7 +1,7 @@
 // WorkOrders.tsx
 import { useState, useEffect } from "react";
 import { PageProps } from "@/types";
-import { usePage , router } from "@inertiajs/react";
+// import { usePage , router } from "@inertiajs/react";
 import IndexLayout from "./IndexLayout";
 
 export default function WorkOrders({
@@ -19,13 +19,13 @@ export default function WorkOrders({
         label: string;
         priority: string;
         remarks: string;
-        requested_by: string;
+        requested_by: { id: number; first_name: string; last_name: string};
         requested_at: string;
         location: {
             id: number;
             name: string;
         };
-        images: string;
+        attachments: string[];
         asset: {
             id: number;
             name: string;

@@ -15,7 +15,9 @@ class RestrictInternalRequester
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()->hasRole('internal_requester') || $request->user()->hasRole('maintenance_personnel')) {
+        if ($request->user()->hasRole('internal_requester')
+        // || $request->user()->hasRole('maintenance_personnel')
+        ) {
             abort(403, 'Unauthorized to access this page');
         }
         return $next($request);

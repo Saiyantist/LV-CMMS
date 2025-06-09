@@ -55,7 +55,11 @@ interface DataTableProps<TData extends { priority?: string; status?: string; [ke
 
 
 export function Datatable<TData extends { priority?: string; status?: string; [key: string]: any }, TValue>({ columns, data, placeholder = "Search" }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>(() => {
+    // Check if requested_at column exists
+    const hasRequestedAt = columns.some(col => col.id === 'requested_at' || col.accessorKey === 'requested_at');
+    return [{ id: hasRequestedAt ? 'requested_at' : 'id', desc: true }];
+  });
   const [searchQuery, setSearchQuery] = useState("")
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [columnFilters, setColumnFilters] = useState<Record<string, any>>({})
@@ -70,9 +74,9 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
 
   const canSeeCriticalOrOverdue = (row: TData) => {
     if (isWorkOrderManager) {
-      return (row.original.priority === "Critical" || row.original.status === "Overdue")
+      return ((row.original.priority === "Critical" || row.original.status === "Overdue") && row.original.status !== "Completed")
     } else if (isMaintenancePersonnel && row.original.assigned_to?.id === user.id) {
-      return (row.original.priority === "Critical" || row.original.status === "Overdue")
+      return ((row.original.priority === "Critical" || row.original.status === "Overdue") && row.original.status !== "Completed")
     }
     return false
   }
@@ -115,6 +119,18 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
 
           const keys = key.split(".")
           const value = keys.reduce((obj, k) => obj?.[k], row as any)
+          
+          // Handle nested objects with name property
+          if (value && typeof value === 'object' && 'name' in value) {
+            return value.name === filterValue
+          }
+
+          // Handle boolean values
+          if (typeof value === 'boolean') {
+            const status = value ? "Active" : "Inactive"
+            return status === filterValue
+          }
+          
           return value === filterValue
         })
       })
@@ -127,6 +143,12 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
           if (!col.accessorKey) return false;
           const keys = col.accessorKey.split(".")
           const value = keys.reduce((obj, key) => obj?.[key], item as any)
+          
+          // Handle nested objects with name property
+          if (value && typeof value === 'object' && 'name' in value) {
+            return value.name?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+          }
+          
           return value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
         }),
       )
@@ -169,19 +191,22 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
       <div className="flex justify-end pb-4 mt-1">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={placeholder}
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              className="h-10 w-52 pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
-            />
+            <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
+            <div className="inline-block">
+              <Input
+                placeholder={placeholder}
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="min-w-60 max-w-[25rem] h-10 pl-8 rounded-md border bg-white/70 !text-xs focus-visible:bg-white"
+                style={{ width: `${placeholder.length * 0.45}rem` }}
+              />
+            </div>
           </div>
           <Button
             ref={filterButtonRef}
             variant={hasActiveFilters ? "default" : "outline"}
             size="sm"
-            className={`h-10 gap-1 border rounded-md ${hasActiveFilters ? "bg-primary text-white" : ""}`}
+            className={`z-10 h-10 gap-1 border rounded-md ${hasActiveFilters ? "bg-primary text-white" : ""}`}
             onClick={() => setIsFilterModalOpen(!isFilterModalOpen)}
           >
             <SlidersHorizontal className="h-4 w-4" />
@@ -274,6 +299,7 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
       {totalFilteredRows > 10 && (
         <div className="flex items-center justify-between space-x-2 py-4">
           <div className="flex items-center gap-2">
+
             {/* Previous Button */}
             <Button
               variant="outline"
@@ -298,7 +324,7 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
                   variant={pageIndex === page ? "default" : "outline"}
                   size="sm"
                   onClick={() => table.setPageIndex(page)}
-                  className={pageIndex === page ? "bg-primary" : ""}
+                  className={pageIndex === page ? "bg-secondary" : ""}
                 >
                   {page + 1}
                 </Button>
@@ -336,9 +362,27 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
                   ))}
                 </SelectContent>
               </Select>
-            </div>
 
+            </div>
           </div>
+          <div className="text-sm text-muted-foreground italic !mr-2">
+            {searchQuery || hasActiveFilters ? (
+              <span>Showing {totalFilteredRows} of {data.length} records</span>
+            ) : (
+              <span>Total Records: {data.length}</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Total Records Counter */}
+      {totalFilteredRows <= 10 && (
+        <div className="flex justify-end text-sm text-muted-foreground italic mt-4 mr-4">
+          {searchQuery || hasActiveFilters ? (
+            <span>Showing {totalFilteredRows} of {data.length} records</span>
+          ) : (
+            <span>Total Records: {data.length}</span>
+          )}
         </div>
       )}
     </>
