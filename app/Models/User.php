@@ -13,11 +13,12 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 use Psy\CodeCleaner\FunctionReturnInWriteContextPass;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Traits\HasPermissions;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, HasPermissions;
 
     /**
      * The attributes that are mass assignable.

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ApexCharts from "apexcharts";
 import axios from "axios";
+import { Link } from "@inertiajs/react";
 
 interface WorkOrder {
     status: string;
@@ -18,14 +19,14 @@ const allStatuses = [
 ];
 
 const statusColors: Record<string, string> = {
-    Pending: "#1C64F2",
-    Assigned: "#22C55E",
-    Ongoing: "#FDBA8C",
-    Overdue: "#FF0000",
-    Completed: "#16A34A",
-    "For Budget Request": "#FACC15",
-    Declined: "#F87171",
-    Cancelled: "#64748B",
+    Pending: "#cbd5e1", // bg-slate-300
+    Assigned: "#60A5FA", // bg-blue-400
+    Ongoing: "#fde68a", // bg-amber-200
+    Overdue: "#F87171", // bg-red-400
+    Completed: "#4ADE80", // bg-green-400
+    "For Budget Request": "#fdba74", // bg-orange-300
+    Declined: "#fb7185", // bg-rose-400
+    Cancelled: "#fecdd3", // bg-rose-200
 };
 
 const getStatusCounts = (workOrders: WorkOrder[] = []) => {
@@ -95,7 +96,7 @@ const getChartOptions = (labels: string[], data: number[]) => ({
     },
 });
 
-const Chart: React.FC = () => {
+const Overview: React.FC = () => {
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<ApexCharts | null>(null);
     const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
@@ -137,57 +138,75 @@ const Chart: React.FC = () => {
     }, [workOrders]);
 
     const statusTotals = getStatusCounts(workOrders);
+    const totalWorkOrders = Object.values(statusTotals).reduce((sum, count) => sum + count, 0)
+    const pendingRequests = statusTotals["Pending"] || 0
+  
+
+    // Main status cards to display
+    const mainStatusCards = [
+        { label: "Assigned", value: statusTotals["Assigned"], color: statusColors["Assigned"] },
+        { label: "On Going", value: statusTotals["Ongoing"], color: statusColors["Ongoing"] },
+        { label: "Completed", value: statusTotals["Completed"], color: statusColors["Completed"] },
+        { label: "Overdue", value: statusTotals["Overdue"], color: statusColors["Overdue"] },
+    ]
 
     return (
-        <div className="w-full flex flex-col xl:flex-row gap-6 md:gap-8 bg-transparent rounded-2xl dark:bg-gray-800 p-4 md:p-8 items-stretch justify-between transition-all duration-300">
-            {/* Status Totals */}
-            <div className="flex flex-col items-center flex-1">
-                {/* <h6 className="font-semibold text-sm mb-4 text-gray-700 dark:text-gray-200 tracking-wide">
-                    Status Totals
-                </h6> */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
-                    {allStatuses.map((status) => (
-                        <div key={status} className="flex justify-center">
-                            <div
-                                className="w-28 h-16 sm:w-32 sm:h-20 flex flex-col items-center justify-center rounded-lg font-bold text-xs sm:text-sm shadow text-black text-center px-2 border"
-                                style={{
-                                    backgroundColor: "#ffffff",
-                                    borderColor: "transparent",
-                                    // borderWidth: "1px",
-                                }}
-                                title={status}
-                            >
-                                <span className="text-[0.65rem] sm:text-xs font-medium">
-                                    {status}
-                                </span>
-                                <span className="text-lg sm:text-xl">
-                                    {statusTotals[status]}
-                                </span>
-                            </div>
+        <div className="w-full flex flex-col xl:flex-row gap-6 rounded-2xl dark:bg-gray-800 items-center transition-all duration-300">
+            
+            
+            {/* Left Section - Status Cards */}
+            <div className="flex-[3] w-full space-y-4">
+                    <h1 className="text-2xl font-bold text-white dark:text-gray-900">Dashboard: <span className="font-light">Overview of Work Orders</span></h1>
+                {/* Top Summary Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Total Work Orders Card */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div className="text-sm font-medium text-secondary dark:text-gray-400 mb-1">Total Work Orders</div>
+                        <div className="text-3xl md:text-4xl font-bold text-primary dark:text-white">{totalWorkOrders}</div>
+                    </div>
+
+                    {/* Pending Requests Card */}
+                    <Link href={route("work-orders.index")} className="hover:scale-105 transition-all duration-300">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                            <div className="text-sm font-medium text-secondary dark:text-gray-400 mb-1">Pending Requests</div>
+                            <div className="text-3xl md:text-4xl font-bold text-primary dark:text-white">{pendingRequests}</div>
                         </div>
+                    </Link>
+                </div>
+
+                {/* Status Cards Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
+                    {mainStatusCards.map((card) => (
+                    <div
+                        key={card.label}
+                        className="bg-white dark:bg-gray-800 rounded-lg p-3 md:p-4 shadow-sm border border-gray-200 dark:border-gray-700 text-center"
+                    >
+                        <div className="text-xs md:text-sm font-medium text-secondary dark:text-gray-400 mb-2">{card.label}</div>
+                        <div className="text-xl md:text-2xl font-bold text-primary dark:text-white">{card.value}</div>
+                    </div>
                     ))}
                 </div>
             </div>
 
             {/* Donut Chart with Custom Legend */}
-            <div className="flex flex-col md:flex-row items-center justify-center flex-1 mt-8 md:mt-0 gap-6">
+            <div className="flex flex-[2] w-full flex-col xs:flex-row self-end justify-around gap-2 bg-white border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-2">
                 {/* Donut Chart */}
                 <div
                     ref={chartRef}
-                    className="w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] md:w-[300px] md:h-[300px] transition-all duration-300"
+                    className="w-[12rem] h-[12rem] sm:w-[15rem] sm:h-[15rem] transition-all duration-300 self-center"
                 />
 
                 {/* Custom Legend */}
-                <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
+                <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2 justify-center">
                     {allStatuses.map((status) => (
-                        <div key={status} className="flex items-center gap-2">
+                        <div key={status} className="flex items-center ml-4 gap-2">
                             <span
                                 className="w-3 h-3 rounded-full"
                                 style={{
                                     backgroundColor: statusColors[status],
                                 }}
                             />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                            <span className="text-xs md:text-sm text-gray-700 dark:text-gray-300">
                                 {status}
                             </span>
                         </div>
@@ -198,4 +217,4 @@ const Chart: React.FC = () => {
     );
 };
 
-export default Chart;
+export default Overview;

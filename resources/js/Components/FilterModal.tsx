@@ -63,7 +63,16 @@ export default function FilterModal({
   const getUniqueValues = (accessorKey: string) => {
     const keys = accessorKey.split(".")
     const values = data.map((item) => {
-      return keys.reduce((obj, key) => obj?.[key], item)
+      const value = keys.reduce((obj, key) => obj?.[key], item)
+      // If the value is an object with name property, return the name
+      if (value && typeof value === 'object' && 'name' in value) {
+        return value.name
+      }
+      // Handle boolean values
+      if (typeof value === 'boolean') {
+        return value ? "Active" : "Inactive"
+      }
+      return value
     })
 
     return Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.toString().localeCompare(b.toString()))
@@ -98,7 +107,7 @@ export default function FilterModal({
 
   return (
     <div
-      className="fixed z-50"
+      className="fixed z-50 ml-6 2xs:ml-0"
       style={{ top: `${position.top}px`, left: `${position.left}px` }}
       ref={modalRef}
       data-filter-modal="true"
@@ -114,39 +123,47 @@ export default function FilterModal({
         </div>
 
         <div className="space-y-4 p-4 max-h-[60vh] overflow-y-auto">
-          {filterableColumns.map((column) => {
-            const accessorKey = column.accessorKey as string
-            const uniqueValues = getUniqueValues(accessorKey)
+          {filterableColumns.length === 0 ? (
+            <div className="text-center text-muted-foreground py-4">
+              <span className="text-sm italic">
+                No available filters for this table
+              </span>
+            </div>
+          ) : (
+            filterableColumns.map((column) => {
+              const accessorKey = column.accessorKey as string
+              const uniqueValues = getUniqueValues(accessorKey)
 
-            return (
-              <div key={accessorKey} className="space-y-2">
-                <label className="text-sm font-medium">{column.header?.toString() || accessorKey}</label>
-                <Select
-                  value={localFilters[accessorKey] || ""}
-                  onValueChange={(value) => handleFilterChange(accessorKey, value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {uniqueValues.map((value) => (
-                      <SelectItem key={value} value={value}>
-                        {value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )
-          })}
+              return (
+                <div key={accessorKey} className="space-y-2">
+                  <label className="text-sm font-medium">{column.header?.toString() || accessorKey}</label>
+                  <Select
+                    value={localFilters[accessorKey] || ""}
+                    onValueChange={(value) => handleFilterChange(accessorKey, value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      {uniqueValues.map((value) => (
+                        <SelectItem key={`${accessorKey}-${value}`} value={value}>
+                          {value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )
+            })
+          )}
         </div>
 
         <div className="flex justify-between p-4 border-t">
-          <Button size="sm" className="w-full bg-primary text-white hover:bg-primary/90 mr-2" onClick={applyFilters}>
+          <Button size="sm" className="w-full bg-primary text-white hover:bg-primary/90 mr-2" onClick={applyFilters} disabled={filterableColumns.length === 0}>
             Apply
           </Button>
-          <Button size="sm" variant="outline" className="w-full" onClick={clearFilters}>
+          <Button size="sm" variant="outline" className="w-full" onClick={clearFilters} disabled={filterableColumns.length === 0}>
             Clear
           </Button>
         </div>

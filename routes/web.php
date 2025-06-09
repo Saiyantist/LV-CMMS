@@ -6,6 +6,7 @@ use App\Http\Controllers\AssetMaintenanceHistoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ComplianceAndSafetyController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,9 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\EventServicesController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PreventiveMaintenanceController;
+use App\Mail\TestWorkOrderAssigned;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\AttachmentController;
 
 /**
  *  Guest Routes
@@ -94,12 +98,20 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
                 Route::get('/', [PreventiveMaintenanceController::class, 'index'])->name('work-orders.preventive-maintenance');
                 Route::post('/', [PreventiveMaintenanceController::class, 'store'])->name('work-orders.preventive-maintenance.store');
                 Route::put('/{id}', [PreventiveMaintenanceController::class, 'update'])->name('work-orders.preventive-maintenance.update');
+                Route::put('/schedule/{id}', [PreventiveMaintenanceController::class, 'updateSchedule'])->name('work-orders.preventive-maintenance.update-schedule');
                 Route::delete('/{id}', [PreventiveMaintenanceController::class, 'destroy'])->name('work-orders.preventive-maintenance.destroy');
             });
-    
-            Route::get('/work-orders/compliance-and-safety', function () {
-                return Inertia::render('ComplianceAndSafety/ComplianceAndSafety');
-            })->name('work-orders.compliance-and-safety');
+            
+            Route::group(['prefix' => 'work-orders/compliance-and-safety'], function () {
+                Route::get('/', [ComplianceAndSafetyController::class, 'index'])->name('work-orders.compliance-and-safety');
+                Route::get('/create', [ComplianceAndSafetyController::class, 'create'])->name('work-orders.compliance-and-safety.create');
+                Route::post('/', [ComplianceAndSafetyController::class, 'store'])->name('work-orders.compliance-and-safety.store');
+                Route::put('/{id}', [ComplianceAndSafetyController::class, 'update'])->name('work-orders.compliance-and-safety.update');
+                Route::delete('/{id}', [ComplianceAndSafetyController::class, 'destroy'])->name('work-orders.compliance-and-safety.destroy');
+            });
+
+            // Attachment routes
+            Route::delete('/attachments/{id}', [AttachmentController::class, 'destroy'])->name('attachments.destroy');
         });
         
         Route::resource('work-orders', WorkOrderController::class)->except(['create', 'show']); // ALWAYS put this at the end ng mga "/work-orders" routes.
@@ -141,6 +153,7 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::delete('/event-services/{id}', [EventServicesController::class, 'destroy'])->name('event-services.destroy');
         Route::put('/event-services/{id}', [EventServicesController::class, 'update'])->name('event-services.update');
         
+        Route::post('/event-services/check-conflict', [EventServicesController::class, 'checkConflict']);
    
 
 // Route to fetch the Booking Statistics (Donut Chart = COMMS Officer's Dashboard)
@@ -159,10 +172,19 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     });
 });
 
-Route::get('/api/event-services/status-counts', [EventServicesController::class, 'statusCounts'])
-    ->middleware(['auth', 'verified'])
-    ->name('api.event-services.status-counts');
+Route::get('/mail-test', function () {
+    $email = 'angelo.delossantos000@gmail.com';
 
+    $data = [
+        'name' => 'John Doe',
+        'description' => 'Replace fire extinguisher at Building A',
+        'due_date' => now()->addDays(3)->format('F j, Y'),
+    ];
+
+    Mail::to($email)->send(new TestWorkOrderAssigned($data));
+
+    return 'Email sent to ' . $email . '!';
+});
     
 
 require __DIR__ . '/auth.php';

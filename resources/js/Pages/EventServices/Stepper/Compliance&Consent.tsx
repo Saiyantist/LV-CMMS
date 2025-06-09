@@ -62,7 +62,7 @@ const ComplianceAndConsent = ({
                             Data Privacy Notice{" "}
                             <span className="text-red-500">*</span>
                         </h2>
-                        <p className="text-md text-gray-700 mb-4 italic">
+                        {/* <p className="text-md text-gray-700 mb-4 italic">
                             In compliance with data privacy laws, such as, but
                             not limited to, Republic Act No. 10173 (Philippine
                             Data Privacy Act of 2012) and implementing rules and
@@ -81,8 +81,18 @@ const ComplianceAndConsent = ({
                             as your right to data portability, to file a
                             complaint and be entitled to damages for violation
                             of your rights under this data privacy.
-                        </p>
+                        </p> */}
                         <p className="text-md text-gray-700 mb-4 italic">
+                            Please be informed that a signature, as part of the
+                            proof of approval provided in the initial step of
+                            this process, is included in your submission. As
+                            signatures are considered sensitive information, it
+                            is important to understand that they are collected
+                            and processed in accordance with our privacy and
+                            consent policies. Kindly review the following terms
+                            carefully before proceeding.
+                        </p>
+                        {/* <p className="text-md text-gray-700 mb-4 italic">
                             For your data privacy inquiries, you may reach our
                             Data Protection Officer through:{" "}
                             <a
@@ -91,7 +101,7 @@ const ComplianceAndConsent = ({
                             >
                                 dpo@laverdad.edu.ph
                             </a>
-                        </p>
+                        </p> */}
                         <label className="inline-flex items-center space-x-2">
                             <input
                                 type="checkbox"

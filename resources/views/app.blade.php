@@ -7,7 +7,6 @@
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
           <!-- Favicon -->
-          <!-- <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon.ico') }}"> -->
           <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon"/>
 
 
@@ -20,6 +19,7 @@
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
         @inertiaHead
+        <meta name="csrf-token" content="{{ csrf_token() }}">
     </head>
     <body class="font-sans antialiased">
         @inertia

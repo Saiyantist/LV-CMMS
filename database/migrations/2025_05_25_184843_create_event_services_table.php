@@ -13,7 +13,7 @@ $table->unsignedBigInteger('user_id');
 $table->string('name');
 $table->json('venue')->nullable(); // Multiple or nullable
 $table->string('department')->nullable();
-$table->string('description')->nullable(); // Event purpose
+$table->string('description', 255)->nullable(); // Event purpose
 $table->string('participants')->nullable();
 $table->integer('number_of_participants')->nullable();
 $table->date('event_start_date');
@@ -31,6 +31,9 @@ $table->timestamps();
 
     public function down()
     {
+        Schema::table('event_services', function (Blueprint $table) {
+            $table->string('description', 255)->nullable()->change();
+        });
         Schema::dropIfExists('event_services');
     }
 }

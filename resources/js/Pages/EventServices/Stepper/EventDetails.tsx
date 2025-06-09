@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-// import { Inertia } from "@inertiajs/inertia";
 import DateTimeSelection from "./Date&Time";
-import { ArrowRightCircle } from "lucide-react"; // or any icon you use
+import { ArrowRightCircle } from "lucide-react";
 
 interface EventDetailsProps {
     value: {

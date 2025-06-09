@@ -9,6 +9,7 @@ use App\Models\WorkOrder;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class AssetController extends Controller
 {
@@ -80,6 +81,10 @@ class AssetController extends Controller
                 'status' => 'required|string',
                 'date_acquired' => 'required|date',
             ]);
+
+            if (isset($validatedPreventiveMaintenance['weeklyFrequency']) && $validatedPreventiveMaintenance['weeklyFrequency'] > 3) {
+                return redirect()->back()->with('error', 'Weekly frequency cannot be greater than 3.');
+            }
 
 
             $unit = strtolower($validatedPreventiveMaintenance['schedule']); // 'Weeks' -> 'weeks'
@@ -329,10 +334,32 @@ class AssetController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Asset $asset)
-{
-    $asset->delete();
+    {
+        try {
+            // Begin transaction
+            DB::beginTransaction();
 
-    return redirect()->back()->with('success', 'Asset deleted successfully.');
-}
+            // Delete related maintenance schedule if exists
+            if ($asset->maintenanceSchedule) {
+                $asset->maintenanceSchedule->delete();
+            }
+
+            // Delete related maintenance histories
+            $asset->maintenanceHistories()->delete();
+
+            // Soft delete the asset
+            $asset->delete();
+
+            // Commit transaction
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Asset deleted successfully.');
+        } catch (\Exception $e) {
+            // Rollback transaction on error
+            DB::rollBack();
+            Log::error('Error deleting asset: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to delete asset. Please try again.');
+        }
+    }
 
 }

@@ -7,24 +7,37 @@ import { Tabs, TabsList, TabsTrigger } from "@/Components/shadcnui/tabs";
 import { Button } from "@/Components/shadcnui/button";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import CreateWorkOrderModal from "./components/CreateModal";
-import EditWorkOrderModal from "./components/EditModal";
+import EditWorkOrderModal from "./components/EditWorkOrderModal";
 import { StatusCell } from "./components/StatusCell";
-import { Datatable } from "./components/Datatable";
+import { Datatable } from "@/Components/Datatable";
 import { getPriorityColor } from "@/utils/getPriorityColor";
 import { getStatusColor } from "@/utils/getStatusColor";
 import { prioritySorting } from "@/utils/prioritySorting";
 import FlashToast from "@/Components/FlashToast";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import AssignWorkOrderModal from "./components/AssignWorkOrderModal";
+import AssignWorkOrderModal from "./components/AcceptWorkOrderModal";
 import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
-import { BookX, Search, SlidersHorizontal, SquarePen, Trash } from "lucide-react";
+import { BookX, CirclePlus, MoreVertical, Search, SlidersHorizontal, SquarePen, Trash2, ArrowUpDown } from "lucide-react";
 import DeclineWorkOrderModal from "./components/DeclineWorkOrderModal";
 import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
 import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
 import DeleteWorkOrderModal from "./components/DeleteWorkOrderModal";
 import { Input } from "@/Components/shadcnui/input";
-import FilterModal from "./components/FilterModal";
-import { clearLine } from "readline";
+import FilterModal from "@/Components/FilterModal";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/Components/shadcnui/dropdown-menu";
+import {
+    Popover,
+    PopoverTrigger,
+    PopoverContent
+  } from "@/Components/shadcnui/popover";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectSeparator } from "@/Components/shadcnui/select";
+  
+
 interface Props {
     user: {
         id: number;
@@ -75,7 +88,7 @@ interface WorkOrders {
         id: number;
         name: string;
     };
-    images: string[];
+    attachments: string[];
     asset: {
         id: number;
         name: string;
@@ -87,6 +100,7 @@ interface WorkOrders {
         id: number;
         name: string;
     };
+    status: string;
 }
 
 export default function IndexLayout({
@@ -117,19 +131,26 @@ export default function IndexLayout({
     const [decliningWorkOrder, setDecliningWorkOrder] = useState<any>(null);
     const [cancellingWorkOrder, setCancellingWorkOrder] = useState<any>(null);
     const [deletingWorkOrder, setDeletingWorkOrder] = useState<any>(null);
-    const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>([]);
+    // const [expandedDescriptions, setExpandedDescriptions] = useState<number[]>([]);
     const [mobileSearchQuery, setMobileSearchQuery] = useState("");
     const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
     const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, any>>({});
     const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
+    const [mobileSortConfig, setMobileSortConfig] = useState<{
+        key: string;
+        direction: 'asc' | 'desc';
+    }>({
+        key: 'requested_at',
+        direction: 'desc'
+    });
     
-    const toggleDescription = (id: number) => {
-        setExpandedDescriptions((prev) =>
-            prev.includes(id)
-                ? prev.filter((item) => item !== id)
-                : [...prev, id]
-        );
-    };
+    // const toggleDescription = (id: number) => {
+    //     setExpandedDescriptions((prev) =>
+    //         prev.includes(id)
+    //             ? prev.filter((item) => item !== id)
+    //             : [...prev, id]
+    //     );
+    // };
 
     // const filteredMobileWorkOrders = useMemo(() => {
     //     return filteredWorkOrders.filter((workOrder) => {
@@ -140,6 +161,31 @@ export default function IndexLayout({
     //         );
     //     });
     // }, [filteredWorkOrders, mobileSearchQuery]);
+
+    const sortOptions = useMemo(() => {
+        const baseOptions = [
+            { label: 'ID', value: 'id' },
+            { label: 'Date Requested', value: 'requested_at' }
+        ];
+
+        // Only add priority option if not in Pending tab
+        if (activeTab !== "Pending") {
+            baseOptions.push({ label: 'Priority', value: 'priority' });
+        }
+
+        return baseOptions;
+    }, [activeTab]);
+
+    // Reset sort config if current sort key is not available in current tab
+    useEffect(() => {
+        const availableSortKeys = sortOptions.map(option => option.value);
+        if (!availableSortKeys.includes(mobileSortConfig.key)) {
+            setMobileSortConfig({
+                key: 'requested_at',
+                direction: 'desc'
+            });
+        }
+    }, [activeTab, sortOptions, mobileSortConfig.key]);
 
     const filteredMobileWorkOrders = useMemo(() => {
         let filtered = filteredWorkOrders;
@@ -166,9 +212,44 @@ export default function IndexLayout({
                 );
             });
         }
+
+        // Apply sorting
+        filtered = [...filtered].sort((a, b) => {
+            const { key, direction } = mobileSortConfig;
+            let aValue = a[key];
+            let bValue = b[key];
+
+            // Handle nested properties
+            if (key.includes('.')) {
+                const keys = key.split('.');
+                aValue = keys.reduce((obj, k) => obj?.[k], a);
+                bValue = keys.reduce((obj, k) => obj?.[k], b);
+            }
+
+            // Handle date sorting
+            if (key === 'requested_at') {
+                aValue = new Date(aValue).getTime();
+                bValue = new Date(bValue).getTime();
+            }
+
+            // Handle priority sorting
+            if (key === 'priority') {
+                const priorityOrder: Record<string, number> = { low: 0, med: 1, high: 2, crit: 3 };
+                const aPriority = (a as WorkOrders).priority?.toLowerCase() || '';
+                const bPriority = (b as WorkOrders).priority?.toLowerCase() || '';
+                aValue = priorityOrder[aPriority] ?? -1;
+                bValue = priorityOrder[bPriority] ?? -1;
+            }
+
+            if (direction === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
     
         return filtered;
-    }, [filteredWorkOrders, mobileSearchQuery, mobileColumnFilters]);
+    }, [filteredWorkOrders, mobileSearchQuery, mobileColumnFilters, mobileSortConfig]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -190,12 +271,28 @@ export default function IndexLayout({
         };
     }, [isMobileFilterModalOpen]);
 
+    const getPlaceholderText = () => {
+        
+        if (!isWorkOrderManager) {
+            return "Search Location or Description";
+        }
+
+        switch (activeTab) {
+            case "Pending":
+                return "Search for ID, Location, Description, and Requested by";
+            case "For Budget Request":
+                return "Search for ID, Location, Description, Requested by, and Label";
+            default:
+                return "Search for ID, Location, Description, Label, and Assignee";
+        }
+    };
+
     const requesterOrPersonnelColumns: ColumnDef<WorkOrders>[] = [
         {
             accessorKey: "requested_at",
             header: "Date Requested",
             cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
-            meta: { headerClassName: "w-1/8" },
+            meta: { headerClassName: "", cellClassName: "w-[10rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll" },
         },
         {
             accessorKey: "location.name",
@@ -203,7 +300,8 @@ export default function IndexLayout({
             cell: ({ row }) => <div>{row.original.location.name}</div>,
             enableSorting: false,
             meta: {
-                headerClassName: "max-w-1/8",
+                headerClassName: "",
+                cellClassName: "w-[8rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
                 filterable: true,
             },
@@ -216,8 +314,8 @@ export default function IndexLayout({
             ),
             enableSorting: false,
             meta: {
-                headerClassName: "w-1/2",
-                cellClassName: "max-w-16 px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                headerClassName: "w-[20rem]",
+                cellClassName: "px-2 text-left whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                 searchable: true,
             },
         },
@@ -240,36 +338,74 @@ export default function IndexLayout({
             id: "actions",
             header: "Actions",
             cell: ({ row }) => (
-                    <div className="flex gap-2 justify-start px-2">
+                <div className="flex gap-2 justify-start px-2">
+                    {/* Large screens - visible above md breakpoint */}
+                    <div className="hidden xl:flex gap-2">
+                        {/* View */}
                         <Button
                             className="bg-secondary h-6 text-xs rounded-sm"
                             onClick={() => setIsViewingWorkOrder(row.original)}
                         >
                             View
                         </Button>
-                        { row.getValue('status') === "Pending" && (
-                        <>
-                            <Button
-                                variant={"outline"}
-                                size={"icon"}
-                                className="h-6 text-xs text-secondary rounded-sm"
-                                onClick={() => setEditingWorkOrder(row.original)}
-                            ><SquarePen />
-                            </Button>
-                            <Button
-                                variant={"outline"}
-                                size={"icon"}
-                                className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
-                                onClick={() => setCancellingWorkOrder(row.original)}
-                            ><BookX />
-                            </Button>
-                        </>
+                        {row.getValue('status') === "Pending" && (
+                            <>
+                                {/* Edit */}
+                                <Button
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="h-6 text-xs text-secondary rounded-sm"
+                                    onClick={() => setEditingWorkOrder(row.original)}
+                                ><SquarePen />
+                                </Button>
+                                {/* Cancel */}
+                                <Button
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
+                                    onClick={() => setCancellingWorkOrder(row.original)}
+                                ><BookX />
+                                </Button>
+                            </>
                         )}
                     </div>
+
+                    {/* Medium screens - visible only on md */}
+                    <div className="hidden md:flex xl:hidden lg:ml-[50px]">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {/* View */}
+                                <DropdownMenuItem onClick={() => setIsViewingWorkOrder(row.original)}>
+                                    View
+                                </DropdownMenuItem>
+                                {row.getValue('status') === "Pending" && (
+                                    <>
+                                        {/* Edit */}
+                                        <DropdownMenuItem onClick={() => setEditingWorkOrder(row.original)}>
+                                            Edit
+                                        </DropdownMenuItem>
+                                        {/* Cancel */}
+                                        <DropdownMenuItem 
+                                            onClick={() => setCancellingWorkOrder(row.original)}
+                                            className="text-destructive"
+                                        >
+                                            Cancel
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </div>
             ),
             enableSorting: false,
             meta: {
-                cellClassName: "w-[10rem]",
+                cellClassName: "w-[10rem] md:w-[3rem] lg:w-[10rem]",
             }
         },
     ];
@@ -289,7 +425,8 @@ export default function IndexLayout({
             header: "Date Requested",
             cell: ({ row }) => <div>{row.getValue("requested_at")}</div>,
             meta: { 
-                cellClassName: "w-[8.5rem] whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
+                headerClassName: "w-[8.5rem]",
+                cellClassName: "whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
             },
         },
         {
@@ -315,6 +452,7 @@ export default function IndexLayout({
                 searchable: true,
             },
         },
+        // Accepted and Declined tabs
         ...(activeTab !== "Pending" && activeTab !== "For Budget Request"
             ? [
                 {
@@ -327,15 +465,16 @@ export default function IndexLayout({
                         searchable: true,
                     }
                 },
-                {
+                ...(activeTab === "Accepted" ? [
+                    {
                     accessorKey: "scheduled_at",
                     header: "Target Date",
-                    cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at")}</div>,
+                    cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at") || "No date set."}</div>,
                     meta: {
                         cellClassName: "min-w-[7.5rem] max-w-[8rem] text-center",
-                        searchable: true,
                     },
-                },
+                }
+                ] : []),
                 {
                     accessorKey: "priority",
                     header: "Priority",
@@ -390,27 +529,55 @@ export default function IndexLayout({
                     header: "Action",
                     cell: ({ row }: { row: Row<WorkOrders> }) => (
                         <div className="flex gap-2 justify-center">
-                            <Button
-                                className="bg-secondary h-6 text-xs rounded-sm hover:bg-secondary/80 hover:text-white transition-all duration-200"
-                                onClick={() => setEditingWorkOrder(row.original)}
-                            >
-                                Edit
-                            </Button>
-                            {activeTab === "Declined" && (
+                            {/* Large screens - visible above md breakpoint */}
+                            <div className="hidden xl:flex gap-2">
                                 <Button
-                                    variant={"outline"}
-                                    size={"icon"}
-                                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
-                                    onClick={() => setDeletingWorkOrder(row.original)}
-                                ><Trash />
+                                    className="bg-secondary h-6 text-xs rounded-sm hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                    onClick={() => setEditingWorkOrder(row.original)}
+                                >
+                                    Edit
                                 </Button>
-                            )}
+                                {activeTab === "Declined" && (
+                                    <Button
+                                        variant={"outline"}
+                                        size={"icon"}
+                                        className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                                        onClick={() => setDeletingWorkOrder(row.original)}
+                                    ><Trash2 />
+                                    </Button>
+                                )}
+                            </div>
+
+                            {/* Large screens - visible from md to lg */}
+                            <div className="hidden md:flex xl:hidden">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="h-5 w-5 p-0">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setEditingWorkOrder(row.original)}>
+                                            Edit
+                                        </DropdownMenuItem>
+                                        {activeTab === "Declined" && (
+                                            <DropdownMenuItem 
+                                                onClick={() => setDeletingWorkOrder(row.original)}
+                                                className="text-destructive"
+                                            >
+                                                Delete
+                                            </DropdownMenuItem>
+                                        )}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
                         </div>
                     ),
                     enableSorting: false,
                 }
               ]
             : []),
+        // Pending and For Budget Request tabs
         ...(activeTab === "Pending" || activeTab === "For Budget Request"
             ? [
                 {
@@ -421,7 +588,7 @@ export default function IndexLayout({
                     ),
                     enableSorting: false,
                     meta: {
-                        cellClassName: "max-w-[8rem] text-center",
+                        cellClassName: "max-w-[5rem] text-center whitespace-nowrap overflow-x-auto scrollbar-hide hover:overflow-x-scroll",
                         searchable: true,
                         filterable: true,
                     },
@@ -462,27 +629,57 @@ export default function IndexLayout({
                     header: "Action",
                     cell: ({ row }: { row: Row<WorkOrders> }) => (
                         <div className="flex gap-2 justify-center">
-                            <Button
-                                className="bg-secondary h-6 text-xs text-white rounded-sm !border-none hover:bg-secondary/80 hover:text-white transition-all duration-200"
-                                onClick={() => setAcceptingWorkOrder(row.original)}
-                            >
-                                Accept
-                            </Button>
-                            {activeTab === "Pending" && (
+                            {/* Extra Large screens - visible above xl breakpoint */}
+                            <div className="hidden xl:flex gap-2">
                                 <Button
-                                    className="h-6 text-xs text-white rounded-sm !border-none bg-secondary/65 hover:bg-secondary/80 hover:text-white transition-all duration-200"
-                                    onClick={() => setForBudgetRequest(row.original)}
+                                    className="bg-secondary h-6 text-xs text-white rounded-sm !border-none hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                    onClick={() => setAcceptingWorkOrder(row.original)}
                                 >
-                                    Budget Request
+                                    Accept
                                 </Button>
-                            )}
-                            <Button
-                                variant={"outline"}
-                                size={"icon"}
-                                className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
-                                onClick={() => setDecliningWorkOrder(row.original)}
-                            ><BookX />
-                            </Button>
+                                {activeTab === "Pending" && (
+                                    <Button
+                                        className="h-6 text-xs text-white rounded-sm !border-none bg-secondary/65 hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                        onClick={() => setForBudgetRequest(row.original)}
+                                    >
+                                        Budget Request
+                                    </Button>
+                                )}
+                                <Button
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
+                                    onClick={() => setDecliningWorkOrder(row.original)}
+                                ><BookX />
+                                </Button>
+                            </div>
+
+                            {/* Medium screens - visible from md to lg */}
+                            <div className="hidden md:flex xl:hidden">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="h-5 w-5 p-0">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setAcceptingWorkOrder(row.original)}>
+                                            Accept
+                                        </DropdownMenuItem>
+                                        {activeTab === "Pending" && (
+                                            <DropdownMenuItem onClick={() => setForBudgetRequest(row.original)}>
+                                                Budget Request
+                                            </DropdownMenuItem>
+                                        )}
+                                        <DropdownMenuItem 
+                                            onClick={() => setDecliningWorkOrder(row.original)}
+                                            className="text-destructive"
+                                        >
+                                            Decline
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
                         </div>
                     ),
                     enableSorting: false,
@@ -503,6 +700,424 @@ export default function IndexLayout({
     return (
         <AuthenticatedLayout>
             <Head title="Work Orders" />
+
+            {/* Header */}
+            <header className="sticky top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start -mt-6 pt-6 text-center sm:text-left gap-3 sm:gap-4">
+                    <h1 className="text-2xl font-semibold sm:mb-0">
+                        Work Orders
+                    </h1>
+
+                    <PrimaryButton
+                        onClick={() => setIsCreating(true)}
+                        className="bg-secondary text-white hover:bg-primary transition-all duration-300 !text-lg xs:text-lg md:text-base rounded-md w-[98%] sm:w-auto text-center self-center justify-center gap-2"
+                    >
+                        <span>Create</span>
+                        <CirclePlus className="h-5 w-5" />
+                    </PrimaryButton>
+
+                    <SelectSeparator className="sm:hidden mt-2 bg-secondary/30"/>
+                </div>
+            </header>
+
+            {/* Tabs - Desktop */}
+            {user.permissions.includes("manage work orders") && (
+                <div className="hidden md:flex">
+                    <Tabs value={activeTab} onValueChange={setActiveTab}>
+                        <TabsList className="bg-gray-200 text-black rounded-md mb-6">
+                            <TabsTrigger value="Pending">Pending</TabsTrigger>
+                            <TabsTrigger value="Accepted">Accepted</TabsTrigger>
+                            <TabsTrigger value="For Budget Request">
+                                For Budget Request
+                            </TabsTrigger>
+                            <TabsTrigger value="Declined" className="data-[state=active]:bg-red-600/80 hover:bg-red-600/60 hover:text-white duration-200">Declined</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                </div>
+            )}
+
+            {/* Tabs - Mobile */}
+            {user.permissions.includes("manage work orders") && (
+                <div className="md:hidden gap-2 mt-4">
+                    <div className="flex flex-row items-center gap-1">
+                        {/* Switch Tabs */}
+                        <div className="flex xs:flex-[1.5] sm:flex-[1] justify-start px-2">
+                            <h2 className="text-sm text-primary font-semibold">
+                                Switch Tabs:
+                            </h2>
+                        </div>
+                        {/* Dropdown */}
+                        <div className="flex flex-[5]">
+                            <Select value={activeTab} onValueChange={setActiveTab}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select tab" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {tabs.map((tab) => (
+                                        <SelectItem key={tab} value={tab}>
+                                            {tab}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Desktop Table View */}
+            <div
+                className={`hidden md:block overflow-x-auto rounded-md lg:-mt-[4.1rem]  ${
+                    !user.permissions.includes("manage work orders")
+                        && "-mt-[3.8rem]"
+                }`}
+            >
+                <Datatable
+                    columns={columns}
+                    data={filteredWorkOrders}
+                    placeholder={getPlaceholderText()}
+                />
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden flex flex-col gap-4 mt-4">
+
+                {/* Search and Filter Controls */}
+                <div className="flex items-center gap-2">
+
+                    {/* Search */}
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search Location or Description"
+                            value={mobileSearchQuery}
+                            onChange={(event) => setMobileSearchQuery(event.target.value)}
+                            className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
+                        />
+                    </div>
+
+                    {/* Sort */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-10 gap-1 border rounded-md"
+                            >
+                                <ArrowUpDown className="h-4 w-4" />
+                                Sort
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            className="w-48 p-2 rounded-md border bg-white shadow-md"
+                        >
+                            <div className="space-y-2">
+                                {sortOptions.map((option) => (
+                                    <div key={option.value} className="flex items-center justify-between">
+                                        <span className="text-sm">{option.label}</span>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`h-6 w-6 p-0 ${
+                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'asc'
+                                                        ? 'bg-primary text-white'
+                                                        : ''
+                                                }`}
+                                                onClick={() => setMobileSortConfig({
+                                                    key: option.value,
+                                                    direction: 'asc'
+                                                })}
+                                            >
+                                                ↑
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`h-6 w-6 p-0 ${
+                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'desc'
+                                                        ? 'bg-primary text-white'
+                                                        : ''
+                                                }`}
+                                                onClick={() => setMobileSortConfig({
+                                                    key: option.value,
+                                                    direction: 'desc'
+                                                })}
+                                            >
+                                                ↓
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+
+                    {/* Filter */}
+                    <Button
+                        ref={mobileFilterButtonRef}
+                        variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
+                        size="sm"
+                        className={`h-10 gap-1 border rounded-md ${
+                            Object.keys(mobileColumnFilters).length > 0 ? "bg-primary text-white" : ""
+                        }`}
+                        onClick={() => setIsMobileFilterModalOpen(!isMobileFilterModalOpen)}
+                    >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        Filter
+                        {Object.keys(mobileColumnFilters).length > 0 && (
+                            <span className="ml-1 rounded-full bg-white text-primary w-5 h-5 flex items-center justify-center text-xs">
+                                {Object.values(mobileColumnFilters).filter((value) => value !== "" && value !== "all").length}
+                            </span>
+                        )}
+                    </Button>
+
+                </div>
+
+                {/* Filter Modal */}
+                <FilterModal
+                    isOpen={isMobileFilterModalOpen}
+                    onClose={() => setIsMobileFilterModalOpen(false)}
+                    columns={columns}
+                    columnFilters={mobileColumnFilters}
+                    setColumnFilters={setMobileColumnFilters}
+                    data={filteredWorkOrders}
+                    buttonRef={mobileFilterButtonRef as React.RefObject<HTMLButtonElement>}
+                />
+
+                {filteredMobileWorkOrders.map((workOrder) => {
+                    const description = workOrder.report_description || "";
+                    const shouldTruncate = description.length > 25;
+
+                    return (
+                        <div
+                            key={workOrder.id}
+                            className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"
+                            onClick={() => {
+                                if(!isWorkOrderManager) {
+                                    setIsViewingWorkOrder(workOrder);
+                                }
+                            }}
+                        >
+                            {/* Top row: ID and Status aligned horizontally */}
+                            <div className="flex text-gray-800 mb-1">
+                                <div className="flex flex-[11] justify-between items-start ">
+                                    {/* ID */}
+                                    <p>
+                                        <span className="font-bold text-primary">ID:</span>{" "}
+                                        {workOrder.id}
+                                    </p>
+                                    {/* Status */}
+                                    {activeTab !== "For Budget Request" && (
+                                        <span
+                                            className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
+                                                workOrder.status
+                                            )}`}
+                                        >
+                                            {workOrder.status}
+                                        </span>
+                                    )}
+                                </div>
+                                {/* More Vertical Button */}
+                                <div className="flex flex-[1] justify-end items-center">
+                                    {isWorkOrderManager ? (
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="ghost" className="h-6 w-6 p-0 z-10 relative" onClick={(e) => e.stopPropagation()}>
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent
+                                                className="w-48 p-2 rounded-md border bg-white shadow-md"
+                                                align="end"
+                                                side="bottom"
+                                                sideOffset={4}
+                                            >
+                                                {/* Pending Tab Actions */}
+                                                {(activeTab === "Pending" || activeTab === "For Budget Request") && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => setAcceptingWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                        >
+                                                            Accept
+                                                        </button>
+                                                        {activeTab === "Pending" && (
+                                                            <button
+                                                                onClick={() => setForBudgetRequest(workOrder)}
+                                                                className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                            >
+                                                                Budget Request
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => setDecliningWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                                        >
+                                                            Decline
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {/* Accepted Tab Actions */}
+                                                {activeTab === "Accepted" && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => setEditingWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {/* Declined Tab Actions */}
+                                                {activeTab === "Declined" && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => setEditingWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setDeletingWorkOrder(workOrder)}
+                                                            className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </PopoverContent>
+                                        </Popover>
+                                    ) : workOrder.status === "Pending" && !isWorkOrderManager ? (
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="ghost" className="h-6 w-6 p-0 z-10 relative" onClick={(e) => e.stopPropagation()}>
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent
+                                                className="w-48 p-2 rounded-md border bg-white shadow-md"
+                                                align="end"
+                                                side="bottom"
+                                                sideOffset={4}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <button
+                                                    onClick={() => setEditingWorkOrder(workOrder)}
+                                                    className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => setCancellingWorkOrder(workOrder)}
+                                                    className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                                >
+                                                    Cancel W.O.
+                                                </button>
+                                            </PopoverContent>
+                                        </Popover>
+                                    ) : null}
+                                </div>
+                            </div>
+
+                            {/* Info Section */}
+                            <div className="space-y-1 pr-8 text-gray-800">
+                                {/* Date Requested */}
+                                <p>
+                                    <span className="font-bold text-primary">
+                                        Date Requested:
+                                    </span>{" "}
+                                    {new Date(
+                                        workOrder.requested_at
+                                    ).toLocaleDateString()}
+                                </p>
+                                {/* Description */}
+                                <p>
+                                    <span className="font-bold text-primary">
+                                        Description:
+                                    </span>{" "}
+                                    {shouldTruncate
+                                        ? `${description.slice(0, 25)}...`
+                                        : description}
+                                </p>
+
+                                {/* Location */}
+                                <p>
+                                    <span className="font-bold text-primary">
+                                        Location:
+                                    </span>{" "}
+                                    {workOrder.location?.name || "N/A"}
+                                </p>
+
+                                {/* Priority - Hide for Pending tab */}
+                                {isWorkOrderManager && activeTab !== "Pending" && (
+                                    <p className="flex items-center">
+                                        <span className="font-bold text-primary mr-1">
+                                            Priority:
+                                        </span>
+                                        <span className="flex gap-1">
+                                            {["low", "med", "high", "crit"].map(
+                                                (level) => {
+                                                    const normalizedPriority =
+                                                        workOrder.priority
+                                                            ?.toLowerCase()
+                                                            .trim();
+
+                                                    // Mapping for alternate values like "medium" -> "med"
+                                                    const priorityAliases: Record<
+                                                        string,
+                                                        string
+                                                    > = {
+                                                        low: "low",
+                                                        medium: "med",
+                                                        med: "med",
+                                                        high: "high",
+                                                        critical: "crit",
+                                                        crit: "crit",
+                                                    };
+
+                                                    const current =
+                                                        priorityAliases[
+                                                            normalizedPriority || ""
+                                                        ] || "";
+
+                                                    const isActive =
+                                                        current === level;
+
+                                                    const bgColorMap: Record<
+                                                        string,
+                                                        string
+                                                    > = {
+                                                        low: "bg-green-100 text-green-800",
+                                                        med: "bg-yellow-100 text-yellow-800",
+                                                        high: "bg-orange-100 text-orange-800",
+                                                        crit: "bg-red-100 text-red-800",
+                                                    };
+
+                                                    return (
+                                                        <span
+                                                            key={level}
+                                                            className={`px-2 py-1 text-xs font-semibold border ${
+                                                                isActive
+                                                                    ? `${bgColorMap[level]} border-transparent`
+                                                                    : "bg-gray-100 text-gray-400 border-gray-300"
+                                                            }`}
+                                                        >
+                                                            {level}
+                                                        </span>
+                                                    );
+                                                }
+                                            )}
+                                        </span>
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
 
             {/* Modals */}
             {isCreating && (
@@ -583,278 +1198,6 @@ export default function IndexLayout({
             )}
             
             <FlashToast />
-
-            {/* Header */}
-            <header className="mx-auto max-w-7xl sm:px-6 lg:px-8 mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start text-center sm:text-left gap-3 sm:gap-4">
-                    <h1 className="text-2xl font-semibold sm:mb-0">
-                        Work Orders
-                    </h1>
-                    <PrimaryButton
-                        onClick={() => setIsCreating(true)}
-                        className="bg-secondary text-white hover:bg-primary transition-all duration-200 !text-lg sm:text-base px-5 py-3 sm:py-2 rounded-md w-[95%] sm:w-auto text-center self-center justify-center"
-                    >
-                        + Add Work Order
-                    </PrimaryButton>
-                </div>
-            </header>
-
-            {/* Tabs - Desktop */}
-            {user.permissions.includes("manage work orders") && (
-                <div className="hidden md:flex">
-                    <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="bg-gray-200 text-black rounded-md mb-6">
-                            <TabsTrigger value="Pending">Pending</TabsTrigger>
-                            <TabsTrigger value="Accepted">Accepted</TabsTrigger>
-                            <TabsTrigger value="For Budget Request">
-                                For Budget Request
-                            </TabsTrigger>
-                            <TabsTrigger value="Declined" className="data-[state=active]:bg-red-600/80 hover:bg-red-600/60 hover:text-white duration-200">Declined</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                </div>
-            )}
-
-            {/* Tabs - Mobile */}
-            {user.permissions.includes("manage work orders") && (
-                <div className="md:hidden flex justify-end px-4 mt-4">
-                    <select
-                        value={activeTab}
-                        onChange={(e) => setActiveTab(e.target.value)}
-                        className="border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-secondary focus:border-secondary"
-                    >
-                        {tabs.map((tab) => (
-                            <option key={tab} value={tab}>
-                                {tab}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            )}
-
-            {/* Desktop Table View */}
-            <div
-                className={`hidden md:block overflow-x-auto rounded-md -mt-[4.1rem] ${
-                    !user.permissions.includes("manage work orders")
-                        ? "-mt-[3.8rem]"
-                        : ""
-                }`}
-            >
-                <Datatable
-                    columns={columns}
-                    data={filteredWorkOrders}
-                    placeholder="Search here"
-                />
-            </div>
-
-            {/* Mobile Card View */}
-            <div className="md:hidden flex flex-col gap-4 mt-4 px-4">
-
-                {/* Search and Filter Controls */}
-                <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search description or location"
-                            value={mobileSearchQuery}
-                            onChange={(event) => setMobileSearchQuery(event.target.value)}
-                            className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
-                        />
-                    </div>
-                    <Button
-                        ref={mobileFilterButtonRef}
-                        variant={Object.keys(mobileColumnFilters).length > 0 ? "default" : "outline"}
-                        size="sm"
-                        className={`h-10 gap-1 border rounded-md ${
-                            Object.keys(mobileColumnFilters).length > 0 ? "bg-primary text-white" : ""
-                        }`}
-                        onClick={() => setIsMobileFilterModalOpen(!isMobileFilterModalOpen)}
-                    >
-                        <SlidersHorizontal className="h-4 w-4" />
-                        Filter
-                        {Object.keys(mobileColumnFilters).length > 0 && (
-                            <span className="ml-1 rounded-full bg-white text-primary w-5 h-5 flex items-center justify-center text-xs">
-                                {Object.values(mobileColumnFilters).filter((value) => value !== "" && value !== "all").length}
-                            </span>
-                        )}
-                    </Button>
-                </div>
-
-                {/* Filter Modal */}
-                <FilterModal
-                    isOpen={isMobileFilterModalOpen}
-                    onClose={() => setIsMobileFilterModalOpen(false)}
-                    columns={columns}
-                    columnFilters={mobileColumnFilters}
-                    setColumnFilters={setMobileColumnFilters}
-                    data={filteredWorkOrders}
-                    buttonRef={mobileFilterButtonRef as React.RefObject<HTMLButtonElement>}
-                />
-
-                {filteredMobileWorkOrders.map((workOrder) => {
-                    const description = workOrder.report_description || "";
-                    const shouldTruncate = description.length > 25;
-                    const priorities = ["Low", "Medium", "High", "Critical"];
-                    const shortLabels = {
-                        Low: "L",
-                        Medium: "M",
-                        High: "H",
-                        Critical: "C",
-                    };
-
-                    return (
-                        <div
-                            key={workOrder.id}
-                            className="text-xs xs:text-sm bg-white border border-gray-200 rounded-2xl p-4 shadow relative hover:bg-muted transition-all duration-200"
-                            onClick={() => {
-                                setIsViewingWorkOrder(workOrder);
-                            }}
-                        >
-                            {/* Top row: ID and Status aligned horizontally */}
-                            <div className="flex justify-between items-start text-gray-800 mb-1">
-                                <p>
-                                    <span className="font-bold text-primary">ID:</span>{" "}
-                                    {workOrder.id}
-                                </p>
-                                <span
-                                    className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(
-                                        workOrder.status
-                                    )}`}
-                                >
-                                    {workOrder.status}
-                                </span>
-                            </div>
-
-                            {/* Info Section */}
-                            <div className="space-y-1 pr-8 text-gray-800">
-
-                                {/* Description */}
-                                <p>
-                                    <span className="font-bold text-primary">
-                                        Description:
-                                    </span>{" "}
-                                    {shouldTruncate
-                                        ? `${description.slice(0, 25)}...`
-                                        : description}
-                                </p>
-
-                                {/* Location */}
-                                <p>
-                                    <span className="font-bold text-primary">
-                                        Location:
-                                    </span>{" "}
-                                    {workOrder.location?.name || "N/A"}
-                                </p>
-
-                                {/* Priority */}
-                                {isWorkOrderManager && (
-                                    <p className="flex items-center text-sm">
-                                        <span className="font-bold text-primary mr-1">
-                                            Priority:
-                                        </span>
-                                        <span className="flex gap-1">
-                                            {["low", "med", "high", "crit"].map(
-                                                (level) => {
-                                                    const normalizedPriority =
-                                                        workOrder.priority
-                                                            ?.toLowerCase()
-                                                            .trim();
-
-                                                    // Mapping for alternate values like "medium" -> "med"
-                                                    const priorityAliases: Record<
-                                                        string,
-                                                        string
-                                                    > = {
-                                                        low: "low",
-                                                        medium: "med",
-                                                        med: "med",
-                                                        high: "high",
-                                                        critical: "crit",
-                                                        crit: "crit",
-                                                    };
-
-                                                    const current =
-                                                        priorityAliases[
-                                                            normalizedPriority || ""
-                                                        ] || "";
-
-                                                    const isActive =
-                                                        current === level;
-
-                                                    const bgColorMap: Record<
-                                                        string,
-                                                        string
-                                                    > = {
-                                                        low: "bg-green-100 text-green-800",
-                                                        med: "bg-yellow-100 text-yellow-800",
-                                                        high: "bg-orange-100 text-orange-800",
-                                                        crit: "bg-red-100 text-red-800",
-                                                    };
-
-                                                    return (
-                                                        <span
-                                                            key={level}
-                                                            className={`px-2 py-1 text-xs font-semibold border ${
-                                                                isActive
-                                                                    ? `${bgColorMap[level]} border-transparent`
-                                                                    : "bg-gray-100 text-gray-400 border-gray-300"
-                                                            }`}
-                                                        >
-                                                            {level}
-                                                        </span>
-                                                    );
-                                                }
-                                            )}
-                                        </span>
-                                    </p>
-                                )}
-
-                                {/* Date Requested */}
-                                <p>
-                                    <span className="font-bold text-primary">
-                                        Date Requested:
-                                    </span>{" "}
-                                    {new Date(
-                                        workOrder.requested_at
-                                    ).toLocaleDateString()}
-                                </p>
-                            </div>
-
-                            {/* Action Buttons */}
-                            {/* <div className="mt-4 flex justify-end gap-2"
-                                onClick={(e) => {e.stopPropagation();}}
-                            > */}
-                                {/* <Button
-                                    className="bg-secondary self-center text-white px-4 h-8 xs:h-10 xs:px-6 text-xs xs:text-[1rem] rounded-md hover:bg-secondary/80 hover:text-white transition-all duration-200"
-                                    onClick={() =>
-                                        setIsViewingWorkOrder(workOrder)
-                                    }
-                                >
-                                    View
-                                </Button> */}
-                                {/* { workOrder.status === "Pending" && (
-                                <div className="flex gap-2 items-center justify-center">
-                                    <Button
-                                        variant={"outline"}
-                                        size={"icon"}
-                                        className="h-8 xs:h-10 w-12 text-white rounded bg-secondary hover:bg-secondary/80 hover:text-white transition-all duration-200"
-                                        onClick={() => setEditingWorkOrder(workOrder)}
-                                    ><SquarePen />
-                                    </Button>
-                                    <Button
-                                        variant={"outline"}
-                                        size={"icon"}
-                                        className="h-8 xs:h-10 w-12 text-white rounded bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
-                                        onClick={() => setCancellingWorkOrder(workOrder)}
-                                    ><BookX />
-                                    </Button>
-                                </div>
-                                )}
-                            </div> */}
-                        </div>
-                    );
-                })}
-            </div>
 
             {/* Scroll to Top Button */}
             <ScrollToTopButton

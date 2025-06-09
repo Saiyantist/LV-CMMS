@@ -36,7 +36,7 @@ interface ForBudgetRequestModalProps {
         label: string;
         priority: string;
         remarks: string;
-        images: string[];
+        attachments: string[];
     };
     locations: Location[];
     user: {
@@ -62,7 +62,7 @@ export default function ForBudgetRequestModal({
         location_id: workOrder.location.id,
         report_description: workOrder.report_description,
         asset: workOrder.asset,
-        images: [] as File[],
+        attachments: [] as File[],
         status: "For Budget Request",
         label: workOrder.label,
         priority: workOrder.priority,
@@ -144,7 +144,7 @@ export default function ForBudgetRequestModal({
                 }
             }}
         >
-            <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-xl font-semibold text-primary">
                         <div className="flex flex-row gap-4">
@@ -159,60 +159,57 @@ export default function ForBudgetRequestModal({
                 </DialogHeader>
 
                 <div className="space-y-4 px-6 max-h-[70vh] overflow-y-auto">
+                    {/* Info Section */}
                     <Table className="w-full rounded-md">
-                        <TableBody>
+                        <TableBody className="flex flex-col">
 
                             {/* Date Requested */}
-                            <TableRow className="border-none">
-                                <TableHead className="w-1/4 ">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Date Requested:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_at}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {format(workOrder.requested_at, "MM/dd/yyyy")}
+                                </TableCell>
                             </TableRow>
 
                             {/* Requested By */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Requested by:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.requested_by.name}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {workOrder.requested_by.name}
+                                </TableCell>
                             </TableRow>
 
                             {/* Location */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row">
+                            <TableHead className="flex flex-[1] items-center">
                                     <Label>Location:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.location.name}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {workOrder.location.name}
+                                </TableCell>
                             </TableRow>
 
                             {/* Description */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Description:</Label>
                                 </TableHead>
-                                <TableCell className="">{workOrder.report_description}</TableCell>
+                                <TableCell className="flex flex-[2] xs:flex-[3] max-h-[3.5rem] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
-                            {/* Asset Detail */}
-                            {assetDetails && (
-                            <TableRow className="border-none">
-                                <TableHead>
-                                <Label>Asset</Label>
-                                </TableHead>
-                                <TableCell>{assetDetails.name} - {assetDetails.location_name}</TableCell>
-                            </TableRow>
-                            )}
-
-                            {/* Attachment / Images / Photos */}
-                            <TableRow className="border-none">
-                                <TableHead className="">
+                            {/* Attachment/Images */}
+                            <TableRow className="border-none flex flex-row">
+                                <TableHead className="flex flex-[1] items-center">
                                     <Label>Attachment:</Label>
                                 </TableHead>
-                                <TableCell className="">
-                                    {workOrder.images.length > 0 ? (
+                                <TableCell className="flex flex-[2] xs:flex-[3] items-center">
+                                    {workOrder.attachments.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                            {workOrder.images.map((src, index) => (
+                                            {workOrder.attachments.map((src, index) => (
                                             <div
                                                 key={index}
                                                 className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
@@ -321,7 +318,7 @@ export default function ForBudgetRequestModal({
                 <DialogFooter className="px-6 py-4 border-t">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
                     <Button type="submit" onClick={submit}
-                        className="bg-primary hover:bg-primary/90 text-white">Accept Partially</Button>
+                        className="bg-primary hover:bg-primary/90 text-white">Move to Budget Request</Button>
                 </DialogFooter>
 
                 {activeImageIndex !== null && (
@@ -349,16 +346,16 @@ export default function ForBudgetRequestModal({
                     )}
 
                     <img
-                        src={workOrder.images[activeImageIndex]}
+                        src={workOrder.attachments[activeImageIndex]}
                         alt={`Preview ${activeImageIndex + 1}`}
                         className="max-h-[90vh] max-w-full object-contain rounded"
                     />
 
                     <div className="absolute bottom-6 text-white text-sm bg-black/40 px-3 py-1 rounded-full">
-                    {activeImageIndex + 1} of {workOrder.images.length}
+                    {activeImageIndex + 1} of {workOrder.attachments.length}
                     </div>
 
-                    {activeImageIndex < workOrder.images.length - 1 && (
+                    {activeImageIndex < workOrder.attachments.length - 1 && (
                     <button
                         className="absolute right-4 text-white text-4xl"
                         onClick={() => setActiveImageIndex(activeImageIndex + 1)}
