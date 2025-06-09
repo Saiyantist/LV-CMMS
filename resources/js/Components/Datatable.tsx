@@ -197,8 +197,8 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
                 placeholder={placeholder}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className="h-10 pl-8 rounded-md border bg-white/70 !text-xs focus-visible:bg-white"
-                style={{ width: `${placeholder.length * 0.4}rem` }}
+                className="min-w-60 max-w-[25rem] h-10 pl-8 rounded-md border bg-white/70 !text-xs focus-visible:bg-white"
+                style={{ width: `${placeholder.length * 0.45}rem` }}
               />
             </div>
           </div>

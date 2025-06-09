@@ -76,7 +76,7 @@ export default function ViewWorkOrderModal({
         }
         return null;
     };
-    
+
     const assetDetails = getAssetDetails(workOrder);
 
     const getAvailableStatuses = (status: string): string[] => {
@@ -97,7 +97,7 @@ export default function ViewWorkOrderModal({
                 }
             }}
         >   
-            <DialogContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
+            <DialogContent className="w-full sm:max-w-xl lg:max-w-2xl max-h-[95vh] p-0 overflow-visible">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle className="text-md sm:text-lg font-semibold text-primary">
                         <div className="flex flex-row gap-4">
@@ -116,31 +116,32 @@ export default function ViewWorkOrderModal({
                     <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody className="flex flex-col">
 
-                            {isMaintenancePersonnel || isWorkOrderManager && (
-                                <TableRow className="border-none flex flex-row items-center justify-between w-full">
+                            {/* Row 1 */}
+
+                            {(isMaintenancePersonnel || isWorkOrderManager) && (
+                                <TableRow className="border-none flex flex-col sm:flex-row w-full">
 
                                     {/* Requested By */}
                                     <div className="flex-[1] flex">
-                                        <TableHead className="flex flex-[1] items-center">
+                                        <TableHead className="flex flex-[1.5] items-center">
                                             <Label>Requested By:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[1] items-center">{workOrder.requested_by.name}</TableCell>
+                                        <TableCell className="flex flex-[3.3] sm:flex-[1] items-center">{workOrder.requested_by.name}</TableCell>
                                     </div>
 
                                     {workOrder.assigned_to?.id === user.id ? [
 
                                     // Status if Work Order Request is Assigned to the Maintenance Personnel = DROPDOWN MENU
-                                    <div className="flex-[1] flex gap-8">
-                                        <TableHead className="flex flex-[1] items-center">
+                                    <div className="flex-[1] flex">
+                                        <TableHead className="flex flex-[1.5] items-center">
                                             <Label>Status:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[2] items-center">
-                                            {workOrder.status === "Completed" ? [
-                                            <span
-                                                className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(workOrder.status)}`}
+                                        <TableCell className="flex flex-[3.3] sm:flex-[1] items-center">
+                                            {(workOrder.status === "Completed" || workOrder.status === "For Budget Request") ? [
+                                            <p className={`px-2 !h-7 border rounded flex items-center justify-center gap-2 whitespace-nowrap hover:no-underline ${getStatusColor(workOrder.status)}`}
                                             >
                                                 {workOrder.status}
-                                            </span>
+                                            </p>
                                             ] : [
                                             <>
                                                 <DropdownMenu>
@@ -173,8 +174,8 @@ export default function ViewWorkOrderModal({
                                     ] : [
                                         
                                     // Status if Work Order Request is own = STATIC VIEWING ONLY
-                                    <div className="flex-[1] flex gap-8">
-                                        <TableHead className="flex flex-[1] items-center">
+                                    <div className="flex-[1] flex">
+                                        <TableHead className="flex flex-[1.5] items-center">
                                             <Label>Status:</Label>
                                         </TableHead>
                                         <TableCell className="flex flex-[2] items-center">
@@ -189,25 +190,29 @@ export default function ViewWorkOrderModal({
                                     ]}
                                 </TableRow>
                             )}
-                    
-                            <TableRow className="border-none flex flex-row items-center justify-between w-full">
+
+
+                            {/* Row 2 */}
+                            <TableRow className="border-none flex flex-col sm:flex-row w-full">
 
                                 {/* Date Requested */}
                                 <div className="flex-[1] flex">
-                                    <TableHead className="flex flex-[1] items-center">
+                                    <TableHead className={`flex ${isMaintenancePersonnel ? "flex-[1.5]" : "flex-[1]"} items-center`}>
                                         <Label>Date Requested:</Label>
                                     </TableHead>
-                                    <TableCell className="flex flex-[1] items-center">{format(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
+                                    <TableCell className="flex flex-[3.3] sm:flex-[1] items-center">{format(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
                                 </div>  
 
                                 {/* Work Order Type */}
                                 {isMaintenancePersonnel && (
                                 <div className="flex-[1] flex">
-                                    <TableHead className="flex flex-[0.7] items-center">
+                                    <TableHead className="flex flex-[1.5] items-center">
                                         <Label>Work Order Type:</Label>
                                     </TableHead>
-                                    <TableCell className="flex flex-[1] items-center">
-                                        {workOrder.work_order_type}
+                                    <TableCell className="flex flex-[3.3] sm:flex-[1] items-center">
+                                        <span className="text-secondary font-semibold">
+                                            {workOrder.work_order_type}
+                                        </span>
                                     </TableCell>
                                 </div>
                                 )}
@@ -250,10 +255,11 @@ export default function ViewWorkOrderModal({
                         </TableBody>
                     </Table>
 
-                    {isMaintenancePersonnel || isWorkOrderManager && (
+                    {(isMaintenancePersonnel || isWorkOrderManager) && (
                         <hr className="my-2" />
                     )}
 
+                    {/* Default */}
                     <Table className="w-full rounded-md text-xs xs:text-sm">
                         <TableBody className="flex flex-col">
                             {/* Target Date */}
@@ -286,7 +292,7 @@ export default function ViewWorkOrderModal({
                                 <TableCell className="flex flex-[3.3] items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">{workOrder.report_description}</TableCell>
                             </TableRow>
 
-                            {isMaintenancePersonnel || isWorkOrderManager && (
+                            {(isMaintenancePersonnel || isWorkOrderManager) && (
                                 <TableRow className="border-none flex flex-row items-center justify-between w-full">
                                     <TableHead className="flex flex-[1] items-center">
                                         <Label>Remarks:</Label>

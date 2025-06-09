@@ -374,7 +374,7 @@ export default function IndexLayout({
                     <div className="hidden md:flex xl:hidden lg:ml-[50px]">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
                                     <MoreVertical className="h-4 w-4" />
                                 </Button>
                             </DropdownMenuTrigger>
@@ -789,7 +789,7 @@ export default function IndexLayout({
                     <div className="relative flex-1">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search description or location"
+                            placeholder="Search Location or Description"
                             value={mobileSearchQuery}
                             onChange={(event) => setMobileSearchQuery(event.target.value)}
                             className="h-10 w-full pl-8 rounded-md border bg-white/70 focus-visible:bg-white"
@@ -990,7 +990,7 @@ export default function IndexLayout({
                                                 )}
                                             </PopoverContent>
                                         </Popover>
-                                    ) : (
+                                    ) : workOrder.status === "Pending" && !isWorkOrderManager ? (
                                         <Popover>
                                             <PopoverTrigger asChild>
                                                 <Button variant="ghost" className="h-6 w-6 p-0 z-10 relative" onClick={(e) => e.stopPropagation()}>
@@ -1002,33 +1002,23 @@ export default function IndexLayout({
                                                 align="end"
                                                 side="bottom"
                                                 sideOffset={4}
+                                                onClick={(e) => e.stopPropagation()}
                                             >
                                                 <button
-                                                    onClick={() => setIsViewingWorkOrder(workOrder)}
+                                                    onClick={() => setEditingWorkOrder(workOrder)}
                                                     className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
                                                 >
-                                                    View
+                                                    Edit
                                                 </button>
-
-                                                {workOrder.status === "Pending" && (
-                                                    <>
-                                                        <button
-                                                            onClick={() => setEditingWorkOrder(workOrder)}
-                                                            className="block w-full text-left px-2 py-1 text-sm hover:bg-muted rounded"
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setCancellingWorkOrder(workOrder)}
-                                                            className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                    </>
-                                                )}
+                                                <button
+                                                    onClick={() => setCancellingWorkOrder(workOrder)}
+                                                    className="block w-full text-left px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded"
+                                                >
+                                                    Cancel W.O.
+                                                </button>
                                             </PopoverContent>
                                         </Popover>
-                                    )}
+                                    ) : null}
                                 </div>
                             </div>
 

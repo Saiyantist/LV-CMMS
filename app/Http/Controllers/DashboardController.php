@@ -27,6 +27,8 @@ class DashboardController extends Controller
         $workOrderRequests = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'images')
             ->where('requested_by', $user->id)->get();
 
+        $assignedWorkOrders = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'images')->where('assigned_to', $user->id)->get();
+
         $pendingWorkOrders = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'images')
             ->where('status', 'pending')
             ->where('requested_by', $user->id)->get();
@@ -152,44 +154,45 @@ class DashboardController extends Controller
         
         // Get upcoming compliances
         $upcomingCompliances = WorkOrder::with(['location', 'assignedTo', 'requestedBy'])
-        ->where('work_order_type', 'Compliance')
-        ->whereIn('status', ['Assigned', 'Ongoing', 'For Budget Request'])
-        ->orderBy('scheduled_at', 'asc')
-        ->take(3)
-        ->get()
-        ->map(function ($wo) {
-            return [
-                'id' => $wo->id,
-                'compliance_area' => $wo->compliance_area,
-                'report_description' => $wo->report_description,
-                'status' => $wo->status,
-                'work_order_type' => $wo->work_order_type,
-                'priority' => $wo->priority ?: "",
-                'scheduled_at' => $wo->scheduled_at,
-                'requested_at' => $wo->requested_at,
-                'requested_by' => [
-                    'id' => $wo->requestedBy->id,
-                    'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
-                ],
-                'location' => [
-                    'id' => $wo->location_id,
-                    'name' => $wo->location ? $wo->location->name : null,
-                ],
-                'assigned_to' => $wo->assignedTo ? [
-                    'id' => $wo->assignedTo->id,
-                    'first_name' => $wo->assignedTo->first_name,
-                    'last_name' => $wo->assignedTo->last_name,
-                ] : null,
-                'label' => $wo->label,
-                'approved_at' => $wo->approved_at ? Carbon::parse($wo->approved_at)->format('m/d/Y') : "",
-                'approved_by' => $wo->approved_by ?: "",
-                'remarks' => $wo->remarks ?: "",
-                'images' => $wo->images->pluck('url')->toArray(),
-            ];
-        });
+            ->where('work_order_type', 'Compliance')
+            ->whereIn('status', ['Assigned', 'Ongoing', 'For Budget Request'])
+            ->orderBy('scheduled_at', 'asc')
+            ->take(3)
+            ->get()
+            ->map(function ($wo) {
+                return [
+                    'id' => $wo->id,
+                    'compliance_area' => $wo->compliance_area,
+                    'report_description' => $wo->report_description,
+                    'status' => $wo->status,
+                    'work_order_type' => $wo->work_order_type,
+                    'priority' => $wo->priority ?: "",
+                    'scheduled_at' => $wo->scheduled_at,
+                    'requested_at' => $wo->requested_at,
+                    'requested_by' => [
+                        'id' => $wo->requestedBy->id,
+                        'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
+                    ],
+                    'location' => [
+                        'id' => $wo->location_id,
+                        'name' => $wo->location ? $wo->location->name : null,
+                    ],
+                    'assigned_to' => $wo->assignedTo ? [
+                        'id' => $wo->assignedTo->id,
+                        'first_name' => $wo->assignedTo->first_name,
+                        'last_name' => $wo->assignedTo->last_name,
+                    ] : null,
+                    'label' => $wo->label,
+                    'approved_at' => $wo->approved_at ? Carbon::parse($wo->approved_at)->format('m/d/Y') : "",
+                    'approved_by' => $wo->approved_by ?: "",
+                    'remarks' => $wo->remarks ?: "",
+                    'images' => $wo->images->pluck('url')->toArray(),
+                ];
+            });
 
         return Inertia::render('Dashboard', [
             'workOrderRequests' => $formattedWorkOrders,
+            'assignedWorkOrders' => $assignedWorkOrders,
             'pendingWorkOrders' => $pendingWorkOrders,
             'declinedWorkOrders' => $declinedWorkOrders,
             'upcomingWorkOrders' => $upcomingWorkOrders,

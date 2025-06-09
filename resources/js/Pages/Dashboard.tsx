@@ -25,6 +25,7 @@ interface DashboardProps {
         status: string;
         images: string[];
     }[];
+    assignedWorkOrders: [];
     pendingWorkOrders: [];
     declinedWorkOrders: [];
     upcomingWorkOrders: [];
@@ -64,6 +65,7 @@ interface DashboardProps {
 
 export default function Dashboard({
     workOrderRequests,
+    assignedWorkOrders,
     pendingWorkOrders,
     declinedWorkOrders,
     upcomingWorkOrders,
@@ -170,8 +172,7 @@ export default function Dashboard({
                                     <div className="flex flex-col gap-4 p-4 w-full">
                                         <div className="flex justify-between items-center">
                                             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                Upcoming Preventive
-                                                Maintenance
+                                                Upcoming Preventive Maintenance
                                             </h1>
                                             <Link
                                                 href={route(
@@ -326,25 +327,48 @@ export default function Dashboard({
                         </>
                     )}
 
-                    {/* Department Head */}
-                    {isDepartmentHead && (
+                    {/* Internal Requesters */}
+                    {(isMaintenancePersonnel || isDepartmentHead) && (
                         <>
-                            {/* My Work Orders */}
+                            {/* Work Orders Statistics */}
                             <div className="flex flex-col md:flex-row justify-between gap-4">
-                                {/* Total Work Order Requests */}
+                                {/* Department Head - Total Work Order Requests */}
+                                {isDepartmentHead && (
                                 <Card className="w-full text-white bg-primary hover:shadow-lg hover:scale-105 transition-all duration-300">
-                                    <CardHeader>
-                                        <CardTitle>
-                                            My Work Order Requests
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-2xl font-bold text-white">
-                                            {workOrderRequests.length}
-                                        </p>
-                                    </CardContent>
+                                    <Link href={route("work-orders.index")}>
+                                        <CardHeader>
+                                            <CardTitle>
+                                                My Work Order Requests
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <p className="text-2xl font-bold text-white">
+                                                {workOrderRequests.length}
+                                            </p>
+                                        </CardContent>
+                                    </Link>
                                 </Card>
+                                )}
 
+                                {/* Maintenance Personnel - Total Assigned Tasks */}
+                                {isMaintenancePersonnel && (
+                                <Card className="w-full text-white bg-primary hover:shadow-lg hover:scale-105 transition-all duration-300">
+                                    <Link href={route("work-orders.assigned-tasks")}>
+                                        <CardHeader>
+                                            <CardTitle>
+                                                My Assigned Tasks
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <p className="text-2xl font-bold text-white">
+                                                {assignedWorkOrders.length}
+                                            </p>
+                                        </CardContent>
+                                    </Link>
+                                </Card>
+                                )}
+
+                                {/* My Pending and Declined Work Orders */}
                                 <div className="flex w-full gap-4">
                                     <Card className="w-full text-white bg-secondary/50 hover:shadow-lg hover:scale-105 hover:bg-secondary transition-all duration-300">
                                         <CardHeader>
@@ -373,12 +397,188 @@ export default function Dashboard({
                                 </div>
                             </div>
 
-                            {/* My Recent Work Orders */}
-                            <div className="flex flex-col md:flex-row justify-between gap-4 text-xs sm:text-sm">
+                            {isMaintenancePersonnel && (
+                            <div className="flex flex-col md:flex-row gap-4">
+                                {/* Maintenance Personnel - Assigned to me */}
+                                <Card className="w-full md:w-[49.2%]">
+                                    <CardHeader className="pb-4">
+                                        <CardTitle className="text-primary text-base sm:text-md flex justify-between items-center">
+                                            Assigned to me
+                                            <Link
+                                                href={route(
+                                                    "work-orders.assigned-tasks"
+                                                )}
+                                                className="text-sm underline text-primary hover:text-primary/80 mr-1"
+                                            >
+                                                View All
+                                            </Link>
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-2 max-h-[18rem] overflow-y-auto">
+                                        {assignedWorkOrders
+                                            .filter((workOrder: any) => 
+                                                workOrder.assigned_to?.id === user.id
+                                            )
+                                            .sort((a: any, b: any) => new Date(b.scheduled_at).getTime() -
+                                                    new Date(a.scheduled_at).getTime())
+                                            .slice(0, 3) // Limiter on how many assigned tasks to show
+                                            .map((workOrder: any) => (
+                                                <Card
+                                                    key={workOrder.id}
+                                                    onClick={() => {setIsViewingWorkOrder(workOrder);}}
+                                                    className="hover:bg-muted hover:shadow-lg transition-all duration-300 cursor-pointer"
+                                                >
+                                                    <CardHeader>
+                                                        <CardTitle className="flex justify-between items-start text-xs">
+                                                            <p className="bg-primary rounded-md px-2 py-1 text-xs text-white">
+                                                                <span className="font-bold">ID:</span>{" "}{workOrder.id}
+                                                            </p>
+                                                            <span className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(workOrder.status)}`}>
+                                                                {workOrder.status}
+                                                            </span>
+                                                        </CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        {/* Info Section */}
+                                                        <div className="space-y-2 pr-8 text-gray-800 text-xs sm:text-sm">
+                                                            {/* Date Requested */}
+                                                            <p>
+                                                                <span className="font-bold text-primary">
+                                                                    Date
+                                                                    Requested:
+                                                                </span>{" "}
+                                                                {new Date(
+                                                                    workOrder.requested_at
+                                                                ).toLocaleDateString()}
+                                                            </p>
+
+                                                            {/* Location */}
+                                                            <p>
+                                                                <span className="font-bold text-primary">
+                                                                    Location:
+                                                                </span>{" "}
+                                                                {workOrder
+                                                                    .location
+                                                                    ?.name ||
+                                                                    "N/A"}
+                                                            </p>
+
+                                                            {/* Description */}
+                                                            <p className="items-start truncate my-2 overflow-y-auto hover:overflow-y-scroll">
+                                                                <span className="font-bold text-primary ">
+                                                                    Description:
+                                                                </span>{" "}
+                                                                {
+                                                                    workOrder.report_description
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                    </CardContent>
+                                </Card>
+
+                                {/* Maintenance Personnel - My Recent Work Orders */}
+                                <Card className="w-full md:w-[49.2%]">
+                                    <CardHeader className="pb-4">
+                                        <CardTitle className="text-primary text-base sm:text-md flex justify-between items-center">
+                                            My Recent Work Orders
+                                            <Link
+                                                href={route(
+                                                    "work-orders.index"
+                                                )}
+                                                className="text-sm underline text-primary hover:text-primary/80 mr-1"
+                                            >
+                                                View All
+                                            </Link>
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-2 max-h-[18rem] overflow-y-auto">
+                                        {workOrderRequests
+                                            .sort(
+                                                (a: any, b: any) =>
+                                                    new Date(
+                                                        b.requested_at
+                                                    ).getTime() -
+                                                    new Date(
+                                                        a.requested_at
+                                                    ).getTime()
+                                            )
+                                            .slice(0, 3) // Limiter on how many of my work orders to show
+                                            .map((workOrder: any) => (
+                                                <Card
+                                                    key={workOrder.id}
+                                                    onClick={() => {setIsViewingWorkOrder(workOrder);}}
+                                                    className="hover:bg-muted hover:shadow-lg transition-all duration-300 cursor-pointer"
+                                                >
+                                                    <CardHeader>
+                                                        <CardTitle className="flex justify-between items-start text-xs">
+                                                            <p className="bg-primary rounded-md px-2 py-1 text-xs text-white">
+                                                                <span className="font-bold">ID:</span>{" "}{workOrder.id}
+                                                            </p>
+                                                            <span className={`font-semibold px-2.5 py-1 border rounded ${getStatusColor(workOrder.status)}`}>
+                                                                {workOrder.status}
+                                                            </span>
+                                                        </CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        {/* Info Section */}
+                                                        <div className="space-y-2 pr-8 text-gray-800 text-xs sm:text-sm">
+                                                            {/* Date Requested */}
+                                                            <p>
+                                                                <span className="font-bold text-primary">
+                                                                    Date
+                                                                    Requested:
+                                                                </span>{" "}
+                                                                {new Date(
+                                                                    workOrder.requested_at
+                                                                ).toLocaleDateString()}
+                                                            </p>
+
+                                                            {/* Location */}
+                                                            <p>
+                                                                <span className="font-bold text-primary">
+                                                                    Location:
+                                                                </span>{" "}
+                                                                {workOrder
+                                                                    .location
+                                                                    ?.name ||
+                                                                    "N/A"}
+                                                            </p>
+
+                                                            {/* Description */}
+                                                            <p className="items-start truncate my-2 overflow-y-auto hover:overflow-y-scroll">
+                                                                <span className="font-bold text-primary ">
+                                                                    Description:
+                                                                </span>{" "}
+                                                                {
+                                                                    workOrder.report_description
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                    </CardContent>
+                                </Card>
+                            </div>
+                            )}
+
+                            {/* Department Head - My Recent Work Orders */}
+                                {isDepartmentHead && (
                                 <Card className="w-full">
                                     <CardHeader>
-                                        <CardTitle className="text-primary text-base sm:text-lg">
+                                        <CardTitle className="text-primary text-base sm:text-md flex justify-between items-center">
                                             My Recent Work Orders
+                                            <Link
+                                                href={route(
+                                                    "work-orders.index"
+                                                )}
+                                                className="text-sm underline text-primary hover:text-primary/80 mr-1"
+                                            >
+                                                View All
+                                            </Link>
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-2 max-h-[25rem] overflow-y-auto">
@@ -396,16 +596,12 @@ export default function Dashboard({
                                             .map((workOrder: any) => (
                                                 <Card
                                                     key={workOrder.id}
-                                                    onClick={() => {
-                                                        setIsViewingWorkOrder(
-                                                            workOrder
-                                                        );
-                                                    }}
-                                                    className="hover:bg-muted hover:shadow-lg transition-all duration-300"
+                                                    onClick={() => {setIsViewingWorkOrder(workOrder);}}
+                                                    className="hover:bg-muted hover:shadow-lg transition-all duration-300 cursor-pointer"
                                                 >
                                                     <CardHeader>
-                                                        <CardTitle className="flex justify-between items-start text-xs sm:text-base">
-                                                            <p className="bg-primary rounded-md px-2 py-1 text-xs sm:text-sm text-white">
+                                                        <CardTitle className="flex justify-between items-start text-xs">
+                                                            <p className="bg-primary rounded-md px-2 py-1 text-xs text-white">
                                                                 <span className="font-bold">
                                                                     ID:
                                                                 </span>{" "}
@@ -448,7 +644,7 @@ export default function Dashboard({
                                                             </p>
 
                                                             {/* Description */}
-                                                            <p className="items-start max-h-[100px] my-2 overflow-y-auto hover:overflow-y-scroll">
+                                                            <p className="items-start truncate my-2 overflow-y-auto hover:overflow-y-scroll">
                                                                 <span className="font-bold text-primary ">
                                                                     Description:
                                                                 </span>{" "}
@@ -462,13 +658,8 @@ export default function Dashboard({
                                             ))}
                                     </CardContent>
                                 </Card>
-                            </div>
+                            )}
                         </>
-                    )}
-
-                    {/* Maintenance Personnel */}
-                    {isMaintenancePersonnel && (
-                        <div>Maintenance Personnel Dashboard here</div>
                     )}
                 </div>
             )}
