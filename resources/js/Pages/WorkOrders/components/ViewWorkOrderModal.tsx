@@ -126,7 +126,7 @@ export default function ViewWorkOrderModal({
                                         <TableHead className="flex flex-[1.5] items-center">
                                             <Label>Requested By:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[3.3] sm:flex-[1] items-center">{workOrder.requested_by.name}</TableCell>
+                                        <TableCell className="flex flex-[3.3] sm:flex-[1.5] items-center">{workOrder.requested_by.name}</TableCell>
                                     </div>
 
                                     {workOrder.assigned_to?.id === user.id ? [
@@ -200,7 +200,7 @@ export default function ViewWorkOrderModal({
                                     <TableHead className={`flex ${isMaintenancePersonnel ? "flex-[1.5]" : "flex-[1]"} items-center`}>
                                         <Label>Date Requested:</Label>
                                     </TableHead>
-                                    <TableCell className="flex flex-[3.3] sm:flex-[1] items-center">{format(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
+                                    <TableCell className={`flex ${isMaintenancePersonnel ? "flex-[3.3] sm:flex-[1.5]" : "flex-[1]"} items-center`}>{format(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
                                 </div>  
 
                                 {/* Work Order Type */}
