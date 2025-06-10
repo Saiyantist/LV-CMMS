@@ -135,6 +135,7 @@ export default function CreateAssetModal({
                                     value={data.name}
                                     onChange={(e) => setData("name", e.target.value)}
                                     required
+                                    placeholder="Enter Asset Name"
                                 />
                             </div>
 
@@ -400,7 +401,7 @@ export default function CreateAssetModal({
                                 </div>
 
                                 {/* Assign to */}
-                                <div className="flex-[1] space-y-2">
+                                {/* <div className="flex-[1] space-y-2">
                                     <Label htmlFor="assigned_to" className="flex items-center">
                                         Assign to <span className="text-red-500 ml-1">*</span>
                                     </Label>
@@ -427,7 +428,7 @@ export default function CreateAssetModal({
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                </div>
+                                </div> */}
                             </div>
                         )}
                     </div>
@@ -435,16 +436,16 @@ export default function CreateAssetModal({
 
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
-                    <div className="flex gap-2 xs:flex-row flex-col">
-                        <Button variant="outline" onClick={onClose}>
-                            Cancel
-                        </Button>
+                    <div className="flex gap-2 xs:flex-row-reverse flex-col">
                         <Button
                             type="submit"
                             onClick={handleSubmit}
                             className="bg-primary hover:bg-primary/90 text-white"
                         >
                             Save Asset
+                        </Button>
+                        <Button variant="outline" onClick={onClose}>
+                            Cancel
                         </Button>
                     </div>
                 </DialogFooter>

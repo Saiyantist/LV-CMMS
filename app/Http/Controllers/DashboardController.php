@@ -24,16 +24,16 @@ class DashboardController extends Controller
 
         $locations = Location::all();
 
-        $workOrderRequests = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'images')
+        $workOrderRequests = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'attachments')
             ->where('requested_by', $user->id)->get();
 
-        $assignedWorkOrders = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'images')->where('assigned_to', $user->id)->get();
+        $assignedWorkOrders = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'attachments')->where('assigned_to', $user->id)->get();
 
-        $pendingWorkOrders = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'images')
+        $pendingWorkOrders = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'attachments')
             ->where('status', 'pending')
             ->where('requested_by', $user->id)->get();
 
-        $declinedWorkOrders = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'images')
+        $declinedWorkOrders = WorkOrder::with('location', 'asset', 'requestedBy', 'assignedTo', 'attachments')
             ->where('status', 'declined')
             ->where('requested_by', $user->id)->get();
 
@@ -64,7 +64,7 @@ class DashboardController extends Controller
                     'id' => $wo->location_id,
                     'name' => $wo->location ? $wo->location->name : null,
                 ],
-                'images' => $wo->images->pluck('url')->toArray(),
+                'attachments' => $wo->attachments->pluck('url')->toArray(),
                 'asset' => $wo->asset ? [
                     'id' => $wo->asset->id,
                     'name' => $wo->asset->name,
@@ -110,7 +110,7 @@ class DashboardController extends Controller
                     'approved_at' => $wo->approved_at ? Carbon::parse($wo->approved_at)->format('m/d/Y') : "",
                     'approved_by' => $wo->approved_by ?: "",
                     'remarks' => $wo->remarks ?: "",
-                    'images' => $wo->images->pluck('url')->toArray(),
+                    'attachments' => $wo->attachments->pluck('url')->toArray(),
                 ];
             });
 
@@ -148,7 +148,7 @@ class DashboardController extends Controller
                     'approved_at' => $wo->approved_at ? Carbon::parse($wo->approved_at)->format('m/d/Y') : "",
                     'approved_by' => $wo->approved_by ?: "",
                     'remarks' => $wo->remarks ?: "",
-                    'images' => $wo->images->pluck('url')->toArray(),
+                    'attachments' => $wo->attachments->pluck('url')->toArray(),
                 ];
             });
         
@@ -186,7 +186,7 @@ class DashboardController extends Controller
                     'approved_at' => $wo->approved_at ? Carbon::parse($wo->approved_at)->format('m/d/Y') : "",
                     'approved_by' => $wo->approved_by ?: "",
                     'remarks' => $wo->remarks ?: "",
-                    'images' => $wo->images->pluck('url')->toArray(),
+                    'attachments' => $wo->attachments->pluck('url')->toArray(),
                 ];
             });
 

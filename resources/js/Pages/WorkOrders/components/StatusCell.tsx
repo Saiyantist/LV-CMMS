@@ -24,13 +24,13 @@ interface StatusCellProps {
 
 // Define status transition rules
 const STATUS_TRANSITIONS: Record<string, string[]> = {
-    "Assigned": ["Pending", "For Budget Request", "Scheduled", "Ongoing", "Completed", "Cancelled"],
+    "Assigned": ["Pending", "For Budget Request", "Scheduled", "Ongoing", "Completed"],
     "Scheduled": ["Pending", "Ongoing"],
-    "Ongoing": ["Assigned", "Overdue", "Completed", "Cancelled"],
-    "Overdue": ["For Budget Request", "Completed", "Cancelled"],
+    "Ongoing": ["Assigned", "Overdue", "Completed"],
+    "Overdue": ["For Budget Request", "Completed"],
     "Completed": ["Ongoing"],
-    "Pending": ["Assigned", "For Budget Request", "Scheduled", "Ongoing", "Completed", "Cancelled"],
-    "For Budget Request": ["Pending", "Assigned", "Ongoing", "Completed", "Cancelled"],
+    "Pending": ["Assigned", "For Budget Request", "Scheduled", "Ongoing", "Completed"],
+    "For Budget Request": ["Pending", "Assigned", "Ongoing", "Completed"],
     "Cancelled": ["Assigned", "For Budget Request"],
     "Declined": ["Assigned", "For Budget Request"],
 };

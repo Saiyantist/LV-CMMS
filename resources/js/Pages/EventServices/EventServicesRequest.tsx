@@ -122,6 +122,7 @@ export default function EventServicesRequest() {
 
     // Step 1: File
     const [file, setFile] = useState<File | null>(null);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
 
     // Step 2: Venue
@@ -168,7 +169,9 @@ export default function EventServicesRequest() {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0]);
+            const file = e.target.files[0];
+            setFile(file);
+            setFilePreview(URL.createObjectURL(file));
         }
     };
 
@@ -185,13 +188,17 @@ export default function EventServicesRequest() {
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
+
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            setFile(e.dataTransfer.files[0]);
+            const file = e.dataTransfer.files[0];
+            setFile(file);
+            setFilePreview(URL.createObjectURL(file));
         }
     };
 
     const removeFile = () => {
         setFile(null);
+        setFilePreview(null);
     };
 
     // Validation and step logic
@@ -281,7 +288,7 @@ export default function EventServicesRequest() {
                 // No conflict, proceed
                 setCurrentStep(4);
             } catch (err) {
-                setError("Let’s sync things up – please refresh the page.");
+                setError("Let's sync things up – please refresh the page.");
             }
             return;
         }
@@ -342,7 +349,9 @@ export default function EventServicesRequest() {
 
         // Build FormData
         const formData = new FormData();
-        if (file) formData.append("proof_of_approval", file);
+        if (file) {
+            formData.append("attachments[]", file);
+        }
 
         // Venue (array of names)
         selectedVenueNames.forEach((venue, i) => {
