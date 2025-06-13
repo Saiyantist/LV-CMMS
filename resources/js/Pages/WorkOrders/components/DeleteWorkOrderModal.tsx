@@ -39,7 +39,7 @@ interface DeleteWorkOrderProps {
         approved_at: string;
         approved_by: string;
         remarks: string;
-        attachments: string[];
+        images: string[];
     };
     locations: Location[];
     user: {
@@ -192,9 +192,9 @@ export default function DeleteWorkOrderModal({
                                     <Label>Attachment:</Label>
                                 </TableHead>
                                 <TableCell className="flex flex-[2] xs:flex-[3] items-center">
-                                    {workOrder.attachments.length > 0 ? (
+                                    {workOrder.images.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                            {workOrder.attachments.map((src, index) => (
+                                            {workOrder.images.map((src, index) => (
                                             <div
                                                 key={index}
                                                 className="aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer"
@@ -255,17 +255,17 @@ export default function DeleteWorkOrderModal({
 
                 {/* Image */}
                 <img
-                    src={workOrder.attachments[activeImageIndex]}
+                    src={workOrder.images[activeImageIndex]}
                     alt={`Preview ${activeImageIndex + 1}`}
                     className="max-h-[90vh] max-w-full object-contain rounded"
                 />
 
                 <div className="absolute bottom-6 text-white text-sm bg-black/40 px-3 py-1 rounded-full">
-                {activeImageIndex + 1} of {workOrder.attachments.length}
+                {activeImageIndex + 1} of {workOrder.images.length}
                 </div>
 
                 {/* Right Arrow */}
-                {activeImageIndex < workOrder.attachments.length - 1 && (
+                {activeImageIndex < workOrder.images.length - 1 && (
                 <button
                     className="absolute right-4 text-white text-4xl"
                     onClick={() => setActiveImageIndex(activeImageIndex + 1)}

@@ -37,11 +37,7 @@ interface ComplianceWorkOrder {
     approved_at: string;
     approved_by: string;
     remarks: string;
-    attachments: {
-        id: number;
-        path: string;
-        file_type: string;
-    }[];
+    images: string[];
     priority: string;
 }
 

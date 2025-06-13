@@ -16,42 +16,28 @@ class UserSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
-    {   
-        // Super Admin
+    {
         User::create([
-            'first_name' => 'Angelo', 'last_name' => 'Delos Santos (SA)',
+            'first_name' => 'Angelo', 'last_name' => 'Delos Santos',
             'gender' => 'male',
             'contact_number' => '09471847021',
-            'email' => 'angelo.delossantos000@gmail.com',
+            'email' => 'superadmin@laverdad.edu.ph',
             'email_verified_at' => now(),
             'password' => Hash::make('secret'),
             'staff_type' => 'non-teaching',
             'department_id' => 1,
             ])->assignRole('super_admin');
 
-        // GASD Coordinator with working Email (for testing purposes)
-        User::create([
-            'first_name' => 'Angelo', 'last_name' => 'Delos Santos (LV)',
-            'gender' => 'male',
-            'contact_number' => '09123456789',
-            'email' => 'jeromedelossantos@student.laverdad.edu.ph',
-            'email_verified_at' => now(),
-            'password' => Hash::make('secret'),
-            'staff_type' => 'non-teaching',
-            'department_id' => 1,
-            ])->assignRole('gasd_coordinator');
-
-        // Communications Officer with working Email (for testing purposes)
         User::create([
             'first_name' => 'Joshua', 'last_name' => 'Allador',
             'gender' => 'male',
             'contact_number' => '09205979015',
-            'email' => 'joshuaallador@student.laverdad.edu.ph',
+            'email' => 'superadmin2@laverdad.edu.ph',
             'email_verified_at' => now(),
             'password' => Hash::make('secret'),
             'staff_type' => 'non-teaching',
             'department_id' => 1,
-        ])->assignRole('communications_officer');
+        ])->assignRole('super_admin');
 
         // // Internal Requester
         // User::create([
@@ -75,8 +61,8 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'staff_type' => 'non-teaching',
             'department_id' => 1,
-            ])->assignRole('department_head');
-            
+        ])->assignRole('department_head');
+
         // Maintenance Personnel
         User::create([
             'first_name' => 'Maintenance', 'last_name' => 'Personnel',
@@ -85,8 +71,7 @@ class UserSeeder extends Seeder
             'email' => 'maintenancepersonnel@laverdad.edu.ph',
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
-            'staff_type' => 'maintenance_personnel',
-            'work_group_id' => '7',
+            'work_group' => '7',
         ])->assignRole('maintenance_personnel');
 
         // External Requester

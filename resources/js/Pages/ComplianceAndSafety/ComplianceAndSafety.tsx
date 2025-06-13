@@ -311,7 +311,7 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
             <Head title="Compliance and Safety" />
 
             {/* Header */}
-            <header className="sticky md:flex top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
+            <header className="sticky top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start -mt-6 pt-6 text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                         Compliance and Safety

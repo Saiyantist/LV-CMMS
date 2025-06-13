@@ -8,10 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Redirect;
-use App\Mail\NewUserApproved;
 
 class UserRoleController extends Controller
 {
@@ -52,10 +50,6 @@ class UserRoleController extends Controller
 
         // Assign new role and remove previous roles
         $user->syncRoles([$request->role]);
-
-        // Mail the user of approval of their account
-        $userData = ['role' => Str::title(str_replace('_', ' ', $user->roles->pluck('name')->first()))];
-        Mail::to($user->email)->send(new NewUserApproved($userData));
 
         return $this->index();
     }

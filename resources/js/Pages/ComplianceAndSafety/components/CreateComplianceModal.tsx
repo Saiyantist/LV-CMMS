@@ -45,7 +45,7 @@ export default function CreateComplianceModal({
     maintenancePersonnel,
     onClose,
 }: CreateComplianceModalProps) {
-    const [previewFiles, setPreviewFiles] = useState<Array<{ url: string; file: File }>>([]);
+    const [previewFiles, setPreviewFiles] = useState<string[]>([]);
     const [showCalendar, setShowCalendar] = useState(false);
     const [typedLocation, setTypedLocation] = useState("");
     const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -131,33 +131,9 @@ export default function CreateComplianceModal({
             const files = Array.from(e.target.files);
             setData("attachments", files);
 
-            const previews = files.map((file) => ({
-                url: URL.createObjectURL(file),
-                file: file
-            }));
+            const previews = files.map((file) => URL.createObjectURL(file));
             setPreviewFiles((prev) => [...prev, ...previews]);
         }
-    };
-
-    const handleRemoveFile = (index: number) => {
-        setPreviewFiles((prev) => {
-            const newPreviews = [...prev];
-            URL.revokeObjectURL(newPreviews[index].url);
-            newPreviews.splice(index, 1);
-            return newPreviews;
-        });
-
-        const newAttachments = [...data.attachments];
-        newAttachments.splice(index, 1);
-        setData("attachments", newAttachments);
-    };
-
-    const formatFileSize = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -187,10 +163,7 @@ export default function CreateComplianceModal({
             const files = Array.from(e.dataTransfer.files);
             setData("attachments", [...data.attachments, ...files]);
 
-            const previews = files.map((file) => ({
-                url: URL.createObjectURL(file),
-                file: file
-            }));
+            const previews = files.map((file) => URL.createObjectURL(file));
             setPreviewFiles((prev) => [...prev, ...previews]);
         }
     };
@@ -201,7 +174,7 @@ export default function CreateComplianceModal({
 
     useEffect(() => {
         return () => {
-            previewFiles.forEach(({ url }) => URL.revokeObjectURL(url));
+            previewFiles.forEach((src) => URL.revokeObjectURL(src));
         };
     }, [previewFiles]);
 
@@ -299,7 +272,7 @@ export default function CreateComplianceModal({
                         
                         <div className="flex flex-col xs:flex-row justify-between gap-4">
                             {/* Target Date */}
-                            <div className="relative flex-[1] space-y-2">
+                            <div className="flex-[1] space-y-2">
                                 <Label htmlFor="scheduled_at" className="flex items-center">
                                     Target Date <span className="text-red-500 ml-1">*</span>
                                 </Label>
@@ -319,7 +292,7 @@ export default function CreateComplianceModal({
                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
                                 {showCalendar && (
-                                    <div className="absolute z-50 !-mt-[20.5rem] bg-white shadow-md border rounded-md">
+                                    <div className="absolute z-50 bg-white shadow-md border mt-2 rounded-md">
                                         <Calendar
                                             mode="single"
                                             selected={data.scheduled_at ? parseISO(data.scheduled_at) : undefined}
@@ -412,10 +385,10 @@ export default function CreateComplianceModal({
                                         <p className={`text-sm mb-1 transition-colors duration-300 ${
                                             isDraggingOver ? "text-primary" : "text-primary"
                                         }`}>
-                                            {isDraggingOver ? "Drop PDF file here" : "Choose a PDF file or drag & drop it here"}
+                                            {isDraggingOver ? "Drop files here" : "Choose a file or drag & drop it here"}
                                         </p>
                                         <p className="text-xs text-secondary/70">
-                                            PDF format only, up to 5MB
+                                            PDF, JPEG, JPG, and PNG formats, up to 5MB
                                         </p>
                                     </div>
                                     <Button
@@ -431,45 +404,28 @@ export default function CreateComplianceModal({
                                             handleBrowseClick();
                                         }}
                                     >
-                                        Browse PDF
+                                        Browse File
                                     </Button>
                                     <input
                                         type="file"
                                         ref={fileInputRef}
                                         onChange={handleFileChange}
                                         className="hidden"
-                                        accept=".pdf"
+                                        accept=".pdf,image/jpeg,image/png"
                                         multiple
                                     />
                                 </div>
 
                                 {/* File Previews */}
                                 {previewFiles.length > 0 && (
-                                    <div className="grid grid-cols-1 gap-3 mt-4 rounded bg-white p-2">
-                                        {previewFiles.map((preview, index) => (
-                                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="w-12 h-12 flex items-center justify-center bg-red-100 rounded">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-gray-900 truncate max-w-xs">
-                                                            {preview.file.name}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500">
-                                                            {formatFileSize(preview.file.size)}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRemoveFile(index)}
-                                                    className="p-1 hover:bg-gray-200 rounded-full transition-colors"
-                                                >
-                                                    <X className="h-5 w-5 text-gray-500" />
-                                                </button>
+                                    <div className="grid grid-cols-3 gap-3 mt-4 rounded bg-white p-2">
+                                        {previewFiles.map((src, index) => (
+                                            <div key={index} className="aspect-square rounded-md overflow-hidden relative">
+                                                <img
+                                                    src={src}
+                                                    alt={`Preview ${index + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                />
                                             </div>
                                         ))}
                                     </div>

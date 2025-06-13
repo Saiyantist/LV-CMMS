@@ -37,7 +37,7 @@ interface WorkOrders {
         id: number;
         name: string;
     };
-    attachments: string[];
+    images: string[];
     asset: {
         id: number;
         name: string;
@@ -149,53 +149,20 @@ const computeNextScheduledDate = (schedule: MaintenanceSchedule | null, lastMain
     
     try {
         const lastDate = new Date(lastMaintainedAt);
-        const { interval_unit, interval_value, month_week, month_weekday, year_month, year_day } = schedule;
+        const { interval_unit, interval_value } = schedule;
         
         let nextDate = new Date(lastDate);
         
         switch (interval_unit) {
             case "weeks":
-                // Add specified number of weeks to last maintained date
                 nextDate.setDate(lastDate.getDate() + ((interval_value || 1) * 7));
                 break;
-                
             case "monthly":
-                if (!month_week || !month_weekday) return "-";
-                
-                // Move to next month
-                nextDate.setMonth(lastDate.getMonth() + 1);
-                nextDate.setDate(1); // Start from first day of month
-                
-                // Find the specified week and weekday
-                const targetWeek = month_week;
-                const targetWeekday = month_weekday.toLowerCase();
-                const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-                const targetWeekdayIndex = weekdays.indexOf(targetWeekday);
-                
-                if (targetWeekdayIndex === -1) return "-";
-                
-                // Find first occurrence of the weekday in the month
-                while (nextDate.getDay() !== targetWeekdayIndex) {
-                    nextDate.setDate(nextDate.getDate() + 1);
-                }
-                
-                // Move to the specified week
-                nextDate.setDate(nextDate.getDate() + ((targetWeek - 1) * 7));
+                nextDate.setMonth(lastDate.getMonth() + (interval_value || 1));
                 break;
-                
             case "yearly":
-                if (!year_month || !year_day) return "-";
-                
-                // Move to next year if current month is past or equal to target month
-                if (lastDate.getMonth() + 1 >= year_month) {
-                    nextDate.setFullYear(lastDate.getFullYear() + 1);
-                }
-                
-                // Set to specified month and day
-                nextDate.setMonth(year_month - 1); // JavaScript months are 0-based
-                nextDate.setDate(year_day);
+                nextDate.setFullYear(lastDate.getFullYear() + (interval_value || 1));
                 break;
-                
             default:
                 return "-";
         }

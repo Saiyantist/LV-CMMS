@@ -37,7 +37,7 @@ export default function ExternalRegistration() {
     };
 
     return (
-        <RegisterLayout width="w-full md:w-3/5 lg:w-2/5 max-h-[80vh]">
+        <RegisterLayout width="w-full md:w-3/5 lg:w-2/5">
             <Head title="Registration for External" />
 
             <div className="p-2">
@@ -56,7 +56,7 @@ export default function ExternalRegistration() {
             </div>
 
             <form onSubmit={submit} className="p-4">
-                <div className="max-h-[45vh] overflow-auto space-y-2 p-1">
+                <div className="max-h-[50vh] overflow-auto space-y-2 p-1">
                     {/* First & Last Name */}
                     <div className="flex flex-col md:flex-row md:space-x-4">
                         <div className="w-full">

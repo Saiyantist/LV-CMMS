@@ -41,7 +41,7 @@ interface WorkOrder {
     approved_at: string;
     approved_by: string;
     remarks: string;
-    attachments: string[];
+    images: string[];
 }
 
 interface ColumnMeta {

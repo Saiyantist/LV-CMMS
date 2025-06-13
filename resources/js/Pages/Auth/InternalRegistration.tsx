@@ -79,7 +79,7 @@ export default function InternalRegistration({
     };
 
     return (
-        <RegisterLayout width="w-full md:w-3/5 lg:w-2/5 max-h-[80vh]">
+        <RegisterLayout width="w-full md:w-3/5 lg:w-2/5">
             <Head title="Registration for Internal" />
 
             <div className="p-2">
@@ -98,7 +98,7 @@ export default function InternalRegistration({
             </div>
 
             <form onSubmit={submit} className="p-4">
-                <div className="max-h-[45vh] overflow-auto space-y-2 p-1">
+                <div className="max-h-[50vh] overflow-auto space-y-2 p-1">
                     {/* Name */}
                     <div className="flex flex-col md:flex-row md:space-x-4">
                         {/* First Name */}
@@ -199,16 +199,7 @@ export default function InternalRegistration({
                                 maxLength={10}
                                 pattern="[0-9]*"
                                 onKeyDown={(e) => {
-                                    if (
-                                        !/[0-9]/.test(e.key) &&
-                                        ![
-                                            "Backspace",
-                                            "Delete",
-                                            "ArrowLeft",
-                                            "ArrowRight",
-                                            "Tab",
-                                        ].includes(e.key)
-                                    ) {
+                                    if (!/[0-9]/.test(e.key)) {
                                         e.preventDefault();
                                     }
                                 }}

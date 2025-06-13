@@ -59,11 +59,6 @@ interface ViewComplianceModalProps {
             last_name: string;
         };
         requested_at: string;
-        attachments: {
-            id: number;
-            path: string;
-            file_type: string;
-        }[];
     };
     locations: {
         id: number;
@@ -90,26 +85,12 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
     const [showCalendar, setShowCalendar] = useState(false);
     const [typedLocation, setTypedLocation] = useState(workOrder.location.name.toString());
     const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
-    const [deletedAttachments, setDeletedAttachments] = useState<number[]>([]);
 
     const handleChange = (field: string, value: any) => {
         setEditableData((prev) => ({
             ...prev,
             [field]: value,
         }));
-    };
-
-    const handleDeleteAttachment = async (attachmentId: number) => {
-        try {
-            await axios.delete(route('attachments.destroy', attachmentId));
-            setDeletedAttachments(prev => [...prev, attachmentId]);
-            setEditableData(prev => ({
-                ...prev,
-                attachments: prev.attachments.filter(att => att.id !== attachmentId)
-            }));
-        } catch (error) {
-            console.error('Error deleting attachment:', error);
-        }
     };
 
     const { data, setData, post, errors } = useForm({
@@ -120,7 +101,6 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
         scheduled_at: editableData.scheduled_at,
         priority: editableData.priority,
         assigned_to: editableData.assigned_to?.id?.toString() || "",
-        deleted_attachments: deletedAttachments
     });
 
     const validateForm = () => {
@@ -384,7 +364,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
 
                                 <div className="flex flex-row justify-between gap-4">
                                     {/* Target Date */}
-                                    <div className="relative flex-[1] space-y-2">
+                                    <div className="flex-[1] space-y-2">
                                         <Label htmlFor="scheduled_at" className="flex items-center">
                                             Target Date <span className="text-red-500 ml-1">*</span>
                                         </Label>
@@ -404,7 +384,7 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>
                                         {showCalendar && (
-                                            <div className="absolute z-50 !-mt-[20.5rem] bg-white shadow-md border rounded-md">
+                                            <div className="absolute z-50 !-mt-[44vh] bg-white shadow-md border rounded-md">
                                                 <Calendar
                                                     mode="single"
                                                     selected={editableData.scheduled_at ? parseISO(editableData.scheduled_at) : undefined}
@@ -481,57 +461,6 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                         </Select>
                                         {localErrors.assigned_to && (
                                             <p className="text-red-500 text-xs">{localErrors.assigned_to}</p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Attachments in Edit Mode */}
-                                <div className="space-y-2">
-                                    <Label>Attachments</Label>
-                                    <div className="grid grid-cols-1 gap-2">
-                                        {editableData.attachments && editableData.attachments.length > 0 ? (
-                                            editableData.attachments.map((attachment) => (
-                                                <div
-                                                    key={attachment.id}
-                                                    className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border"
-                                                >
-                                                    <div className="flex items-center space-x-3">
-                                                        <div className="w-10 h-10 flex items-center justify-center bg-red-100 rounded">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                            </svg>
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="text-sm font-medium text-gray-900 truncate">
-                                                                {attachment.path.split('/').pop()}
-                                                            </p>
-                                                            <p className="text-xs text-gray-500">
-                                                                PDF Document
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <a
-                                                            href={`/storage/${attachment.path}`}
-                                                            download
-                                                            className="p-1 hover:bg-gray-200 rounded-full transition-colors"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                            </svg>
-                                                        </a>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleDeleteAttachment(attachment.id)}
-                                                            className="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                                        >
-                                                            <X className="h-5 w-5 text-red-500" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <span className="text-gray-500 italic">No attachments</span>
                                         )}
                                     </div>
                                 </div>
@@ -657,46 +586,6 @@ const ViewComplianceModal: React.FC<ViewComplianceModalProps> = ({
                                             {editableData.assigned_to
                                                 ? `${editableData.assigned_to.first_name} ${editableData.assigned_to.last_name}`
                                                 : "Unassigned"}
-                                        </TableCell>
-                                    </TableRow>
-
-                                    {/* Attachments */}
-                                    <TableRow className="border-none flex flex-row items-start justify-between w-full">
-                                        <TableHead className="flex flex-[2.2] xs:flex-[1] items-center">
-                                            <Label>Attachments:</Label>
-                                        </TableHead>
-                                        <TableCell className="flex flex-[4.5] flex-col gap-2">
-                                            {editableData.attachments && editableData.attachments.length > 0 ? (
-                                                <div className="grid grid-cols-1 gap-2">
-                                                    {editableData.attachments.map((attachment) => (
-                                                        <a
-                                                            key={attachment.id}
-                                                            href={`/storage/${attachment.path}`}
-                                                            download
-                                                            className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors"
-                                                        >
-                                                            <div className="w-10 h-10 flex items-center justify-center bg-red-100 rounded">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                </svg>
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className="text-sm font-medium text-gray-900 truncate">
-                                                                    {attachment.path.split('/').pop()}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500">
-                                                                    PDF Document
-                                                                </p>
-                                                            </div>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                            </svg>
-                                                        </a>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <span className="text-gray-500 italic">No attachments</span>
-                                            )}
                                         </TableCell>
                                     </TableRow>
 

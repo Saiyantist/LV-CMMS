@@ -17,7 +17,7 @@ class PreventiveMaintenanceController extends Controller
         $user = auth()->user();
         $locations = Location::all();
         $workOrders = WorkOrder::where('work_order_type', 'Preventive Maintenance')
-            ->with(['asset.maintenanceSchedule', 'location', 'assignedTo', 'requestedBy', 'attachments'])
+            ->with(['asset.maintenanceSchedule', 'location', 'assignedTo', 'requestedBy', 'images'])
             ->get();
         $maintenanceSchedules = Asset::whereHas('maintenanceSchedule')->with('location','maintenanceSchedule')->get();
         $formattedWorkOrders = $workOrders->map(function ($wo) {
@@ -47,7 +47,7 @@ class PreventiveMaintenanceController extends Controller
                     'id' => $wo->location_id,
                     'name' => $wo->location ? $wo->location->name : null,
                 ],
-                'attachments' => $wo->attachments->pluck('url')->toArray(),
+                'images' => $wo->images->pluck('url')->toArray(),
                 'asset' => $wo->asset ? [
                     'id' => $wo->asset->id,
                     'name' => $wo->asset->name,

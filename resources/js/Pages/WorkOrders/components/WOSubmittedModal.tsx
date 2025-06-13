@@ -12,7 +12,7 @@ interface Props {
     };
     location: string;
     description: string;
-    attachments: { url: string; name: string }[];
+    images: { url: string; name: string }[];
     onViewWorkOrders: () => void; // Add this property
 }
 
@@ -32,7 +32,7 @@ const WOSubmittedModal: React.FC<Props> = ({
     user,
     location,
     description,
-    attachments,
+    images,
     onViewWorkOrders, // Destructure the new property
 }) => {
     if (!isOpen) return null;
@@ -94,13 +94,13 @@ const WOSubmittedModal: React.FC<Props> = ({
                     <div className="flex items-start mb-4">
                         <strong className="w-36 mr-6">Attachments:</strong>
                         <div className="grid grid-cols-2 gap-2">
-                            {attachments.length > 0 ? (
-                                attachments.map((attachment, index) => (
+                            {images.length > 0 ? (
+                                images.map((img, index) => (
                                     <img
                                         key={index}
-                                        src={attachment.url}
+                                        src={img.url}
                                         alt={
-                                            attachment.name ||
+                                            img.name ||
                                             `Attachment ${index + 1}`
                                         }
                                         className="w-24 h-24 object-cover rounded"

@@ -45,7 +45,7 @@ class ComplianceAndSafetyController extends Controller
             'scheduled_at' => 'required|date',
             'priority' => 'required|string',
             'assigned_to' => 'required|exists:users,id',
-            'attachments.*' => 'nullable|file|mimes:pdf|max:5120' // 5MB max, PDF only
+            'attachments.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120' // 5MB max
         ]);
 
         if ($validator->fails()) {
@@ -67,12 +67,11 @@ class ComplianceAndSafetyController extends Controller
 
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
-                $filename = 'compliance_' . $workOrder->id . '_' . uniqid() . '.pdf';
-                $path = $file->storeAs('compliance_documents', $filename, 'public');
+                $path = $file->store('attachments', 'public');
                 
                 Attachment::create([
                     'path' => $path,
-                    'file_type' => 'application/pdf',
+                    'file_type' => $file->getClientOriginalExtension(),
                     'attachable_id' => $workOrder->id,
                     'attachable_type' => WorkOrder::class
                 ]);

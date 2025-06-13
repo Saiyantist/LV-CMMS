@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/Components/shadcnui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/shadcnui/dialog";
 import { Button } from "@/Components/shadcnui/button";
 import { useState, useRef, useEffect } from "react";
 import { Checkbox } from "@/Components/shadcnui/checkbox";
@@ -95,7 +95,7 @@ export default function DataPrivacyPolicyModal({ isOpen, onClose, onAccept }: Pr
                     </p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="mt-6 space-y-4">
                     <div className="flex items-center space-x-2">
                         <Checkbox 
                             id="privacy-checkbox" 
@@ -109,14 +109,12 @@ export default function DataPrivacyPolicyModal({ isOpen, onClose, onAccept }: Pr
                     </div>
 
                     {hasScrolledToBottom && isChecked && (
-                        <DialogFooter>
-                            <Button 
-                                onClick={handleAccept}
-                                className="w-full bg-secondary hover:bg-primary"
-                                    >
-                                        Accept and Continue
-                            </Button>
-                        </DialogFooter>
+                        <Button 
+                            onClick={handleAccept}
+                            className="w-full bg-secondary hover:bg-primary"
+                        >
+                            Accept and Continue
+                        </Button>
                     )}
                 </div>
             </DialogContent>
