@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Mail\NewUserRegistered;
+use Illuminate\Support\Facades\Mail;
+
 
 class RegisteredUserController extends Controller
 {
@@ -56,6 +59,20 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        // Mail the super admins of the new user registration
+        $user->load(['department', 'workGroup']); // Load the relationships
+        $userData = [
+            'name' => $user->first_name . ' ' . $user->last_name,
+            'email' => $user->email,
+            'staff_type' => $user->staff_type,
+            'department' => $user->department?->name,
+            'work_group' => $user->workGroup?->name,
+        ];
+        $superAdmins = User::role('super_admin')->get();
+        foreach ($superAdmins as $superAdmin) {
+            Mail::to($superAdmin->email)->send(new NewUserRegistered($userData));
+        }
 
         event(new Registered($user));
 

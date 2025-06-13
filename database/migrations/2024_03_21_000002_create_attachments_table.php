@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('path');
             $table->string('file_type');
-            $table->morphs('attachable');
+            $table->nullableMorphs('attachable');
             $table->timestamps();
         });
     }

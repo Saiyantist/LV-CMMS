@@ -16,6 +16,9 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\EventServicesController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PreventiveMaintenanceController;
+use App\Mail\TestWorkOrderAssigned;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\AttachmentController;
 
 /**
  *  Guest Routes
@@ -106,6 +109,9 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
                 Route::put('/{id}', [ComplianceAndSafetyController::class, 'update'])->name('work-orders.compliance-and-safety.update');
                 Route::delete('/{id}', [ComplianceAndSafetyController::class, 'destroy'])->name('work-orders.compliance-and-safety.destroy');
             });
+
+            // Attachment routes
+            Route::delete('/attachments/{id}', [AttachmentController::class, 'destroy'])->name('attachments.destroy');
         });
         
         Route::resource('work-orders', WorkOrderController::class)->except(['create', 'show']); // ALWAYS put this at the end ng mga "/work-orders" routes.
@@ -166,10 +172,19 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
     });
 });
 
-Route::get('/api/event-services/status-counts', [EventServicesController::class, 'statusCounts'])
-    ->middleware(['auth', 'verified'])
-    ->name('api.event-services.status-counts');
+Route::get('/mail-test', function () {
+    $email = 'angelo.delossantos000@gmail.com';
 
+    $data = [
+        'name' => 'John Doe',
+        'description' => 'Replace fire extinguisher at Building A',
+        'due_date' => now()->addDays(3)->format('F j, Y'),
+    ];
+
+    Mail::to($email)->send(new TestWorkOrderAssigned($data));
+
+    return 'Email sent to ' . $email . '!';
+});
     
 
 require __DIR__ . '/auth.php';

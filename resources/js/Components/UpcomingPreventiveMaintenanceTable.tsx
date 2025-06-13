@@ -56,7 +56,7 @@ interface PreventiveMaintenance {
     approved_at: string;
     approved_by: string;
     remarks: string;
-    images: string[];
+    attachments: string[];
 }
 
 interface ColumnMeta {
