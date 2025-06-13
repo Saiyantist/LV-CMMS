@@ -11,69 +11,69 @@ const galleryItems: GalleryItem[] = [
     {
         id: 1,
         title: "Auditorium",
-        subtitle: "Capacities: 300",
+        subtitle: "Capacities: 1000",
         image: "/images/audi.jpg",
     },
     {
         id: 2,
         title: "Auditorium Lobby",
-        subtitle: "Capacities: 500",
+        subtitle: "Capacities: 300",
         image: "/images/lv1.jpg",
     },
     {
         id: 3,
         title: "College Library",
-        subtitle: "Capacities: ",
+        subtitle: "Capacities: 100",
         image: "/images/College_library.jpg",
     },
     {
         id: 4,
         title: "Meeting Room",
-        subtitle: "Capacities: ",
+        subtitle: "Capacities: 50",
         image: "/images/lv2.jpg",
     },
 
        {
         id: 11,
         title: "Elementary & High School Library",
-        subtitle: "Capacities: ",
+        subtitle: "Capacities: 50",
         image: "/images/elem_library.jpg",
     },
     {
         id: 5,
         title: "Computer Laboratory A",
-        subtitle: "Capacities: ",
+        subtitle: "Capacities: 40",
         image: "/images/comlab.jpg",
     },
     {
         id: 6,
         title: "Computer Laboratory B",
-        subtitle: "Capacities: ",
+        subtitle: "Capacities: 40",
         image: "/images/comlab.jpg",
     },
     {
         id: 7,
         title: "EFS Classroom(s)",
-        subtitle: "Capacities: ",
+        subtitle: "Capacities: 40",
         image: "/images/efs_building.jpg",
     },
     {
        id: 8,
         title: "DSR Classroom(s)",
-        subtitle: "Capacities: ",
+        subtitle: "Capacities: 40",
         image: "/images/dsr_building.jpg",
     },
 
     {
         id: 9,
         title: "LVCC Grounds",
-        subtitle: "Capacities: 700 ",
+        subtitle: "Capacities: 500 ",
         image: "/images/lv2.jpg",
     },
     {
         id: 10,
         title: "LVCC Main Lobby",
-        subtitle: "Capacities: ",
+        subtitle: "Capacities: 30",
         image: "/images/main_lobby.jpg",
     },
     
@@ -81,7 +81,7 @@ const galleryItems: GalleryItem[] = [
     {
         id: 12,
         title: "Basketball Court",
-        subtitle: "Capacities: ",
+        subtitle: "Capacities: 100",
         image: "/images/basketball_court.jpg",
     },
 ];

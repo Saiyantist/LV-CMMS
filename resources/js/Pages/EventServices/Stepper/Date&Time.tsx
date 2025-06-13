@@ -158,12 +158,68 @@ export default function DateTimeSelection({
         return startTime && endTime ? `${startTime} - ${endTime}` : "";
     };
 
-    // Notify parent on change
+    // 1. Prop-to-state sync (runs when value changes)
     useEffect(() => {
-        if (onChange) {
+        const composedDateRange = getDateRangeString();
+        const composedTimeRange = getTimeRangeString();
+
+        // Only update if prop is non-empty and different from local state
+        if (value?.dateRange && value.dateRange !== composedDateRange) {
+            const dateMatch = value.dateRange.match(
+                /^([A-Za-z]+) (\d{1,2}) - ([A-Za-z]+) (\d{1,2}), (\d{4})$/
+            );
+            if (dateMatch) {
+                const [, startMonthStr, startDay, endMonthStr, endDay, year] =
+                    dateMatch;
+                const monthsArr = [
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December",
+                ];
+                const sMonth = monthsArr.indexOf(startMonthStr);
+                const eMonth = monthsArr.indexOf(endMonthStr);
+
+                setStartMonth(sMonth);
+                setStartYear(Number(year));
+                setStartDate(Number(startDay));
+                setEndMonth(eMonth);
+                setEndYear(Number(year));
+                setEndDate(Number(endDay));
+            }
+        }
+
+        if (value?.timeRange && value.timeRange !== composedTimeRange) {
+            const timeMatch = value.timeRange.match(/^(.+) - (.+)$/);
+            if (timeMatch) {
+                setStartTime(timeMatch[1]);
+                setEndTime(timeMatch[2]);
+            }
+        }
+        // Only run when value changes!
+        // eslint-disable-next-line
+    }, [value?.dateRange, value?.timeRange]);
+
+    // 2. Notify parent only if value changed (runs when local state changes)
+    useEffect(() => {
+        if (!onChange) return;
+        const newDateRange = startDate && endDate ? getDateRangeString() : "";
+        const newTimeRange = startTime && endTime ? getTimeRangeString() : "";
+        if (
+            value?.dateRange !== newDateRange ||
+            value?.timeRange !== newTimeRange
+        ) {
             onChange({
-                dateRange: startDate && endDate ? getDateRangeString() : "",
-                timeRange: startTime && endTime ? getTimeRangeString() : "",
+                dateRange: newDateRange,
+                timeRange: newTimeRange,
             });
         }
         // eslint-disable-next-line
@@ -229,12 +285,6 @@ export default function DateTimeSelection({
         }
         return false;
     };
-
-    // Add this useEffect to sync with parent
-    useEffect(() => {
-        if (value) {
-        }
-    }, [value?.dateRange, value?.timeRange]);
 
     return (
         <div className="w-full">
@@ -352,16 +402,14 @@ export default function DateTimeSelection({
                     <div className="relative">
                         <button
                             type="button"
-                            className="w-full border rounded-md px-3 py-2 text-left flex items-center justify-between"
+                            className={`w-full border rounded-md px-3 py-2 text-left flex items-center justify-between transition-colors duration-200
+            ${
+                !startDate ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""
+            }`}
                             onClick={() => {
-                                if (!startDate) {
-                                    setEndDatePrompt(
-                                        "Please select a start date before choosing an end date."
-                                    );
-                                } else {
-                                    setShowEndCalendar((v) => !v);
-                                }
+                                if (startDate) setShowEndCalendar((v) => !v);
                             }}
+                            disabled={!startDate}
                         >
                             <span>
                                 {endDate !== null
@@ -370,8 +418,9 @@ export default function DateTimeSelection({
                             </span>
                             <CalendarIcon className="h-5 w-5 ml-2" />
                         </button>
+                        {/* End Date prompt */}
                         {endDatePrompt && !showEndCalendar && (
-                            <div className="text-red-500 text-xs mt-2">
+                            <div className="text-gray-500 text-xs mt-2">
                                 {endDatePrompt}
                             </div>
                         )}
@@ -489,7 +538,9 @@ export default function DateTimeSelection({
                         </label>
 
                         <select
-                            className="w-full border rounded-md px-3 py-2 text-base"
+                            className={`w-full border rounded-md px-3 py-2 text-base transition-colors duration-200
+        ${!startTime ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}
+    `}
                             value={endTime || ""}
                             onChange={(e) => setEndTime(e.target.value)}
                             disabled={!startTime}
@@ -511,9 +562,10 @@ export default function DateTimeSelection({
                                 ))}
                         </select>
 
+                        {/* End Time prompt */}
                         <div className="mt-2 w-full text-left">
                             {!startTime && (
-                                <div className="text-red-500 text-xs mb-2 text-left">
+                                <div className="text-gray-500 text-xs mb-2 text-left">
                                     Please select a Start Time before choosing
                                     an End Time.
                                 </div>
