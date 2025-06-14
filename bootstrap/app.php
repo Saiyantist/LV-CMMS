@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         /**
+         * Trust Proxies
+         */
+        $middleware->trustProxies(at: '*');
+
+        /**
          * Spatie Middleware Aliases
          */
         $middleware->alias([
