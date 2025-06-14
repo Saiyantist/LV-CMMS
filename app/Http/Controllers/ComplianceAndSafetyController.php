@@ -62,7 +62,8 @@ class ComplianceAndSafetyController extends Controller
             'priority' => $request->priority,
             'assigned_to' => $request->assigned_to,
             'status' => 'Assigned',
-            'requested_by' => auth()->user()->id
+            'requested_by' => auth()->user()->id,
+            'requested_at' => now()
         ]);
 
         if ($request->hasFile('attachments')) {
