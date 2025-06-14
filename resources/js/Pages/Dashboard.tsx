@@ -23,7 +23,7 @@ interface DashboardProps {
         requested_at: string;
         requested_by: { id: number; name: string };
         status: string;
-        images: string[];
+        attachments: string[];
     }[];
     assignedWorkOrders: [];
     pendingWorkOrders: [];
@@ -59,7 +59,11 @@ interface DashboardProps {
         approved_at: string;
         approved_by: string;
         remarks: string;
-        images: string[];
+        attachments: {
+            id: number;
+            path: string;
+            file_type: string;
+        }[];
         priority: string;
     }[];
 }

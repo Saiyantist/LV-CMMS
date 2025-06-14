@@ -29,7 +29,7 @@ class WorkOrder extends Model
         'approved_by',
         'completed_at',
         'asset_id',
-        // 'maintenance_schedule_id',
+        'maintenance_schedule_id',
     ];
 
     public function location()
@@ -54,14 +54,9 @@ class WorkOrder extends Model
         );
     }
 
-    // public function maintenanceSchedule()
-    // {
-    //     return $this->belongsTo(PreventiveMaintenance::class, 'maintenance_schedule_id');
-    // }
-
-    public function images()
+    public function maintenanceSchedule()
     {
-        return $this->morphMany(Image::class, 'imageable');
+        return $this->belongsTo(PreventiveMaintenance::class, 'maintenance_schedule_id');
     }
 
     public function requestedBy()
@@ -73,6 +68,11 @@ class WorkOrder extends Model
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
+
+    // public function images()
+    // {
+    //     return $this->morphMany(Image::class, 'imageable');
+    // }
 
     public function attachments()
     {

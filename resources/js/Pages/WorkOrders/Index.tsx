@@ -25,7 +25,7 @@ export default function WorkOrders({
             id: number;
             name: string;
         };
-        images: string;
+        attachments: string[];
         asset: {
             id: number;
             name: string;
