@@ -821,7 +821,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 className="flex justify-center pt-20 py-4"
                             >
                                 <img
-                                    src="/images/Lvlogo.jpg"
+                                    src="/images/lvlogo.jpg"
                                     alt="Logo"
                                     className="h-24 w-24 rounded-full object-cover"
                                 />

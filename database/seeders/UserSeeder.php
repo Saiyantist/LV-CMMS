@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
     {   
         // Super Admin
         User::create([
-            'first_name' => 'Angelo', 'last_name' => 'Delos Santos (SA)',
+            'first_name' => 'Angelo', 'last_name' => 'Super Admin',
             'gender' => 'male',
             'contact_number' => '09471847021',
             'email' => 'angelo.delossantos000@gmail.com',
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
 
         // GASD Coordinator with working Email (for testing purposes)
         User::create([
-            'first_name' => 'Angelo', 'last_name' => 'Delos Santos (LV)',
+            'first_name' => 'GASD Coordinator', 'last_name' => '(Demo)',
             'gender' => 'male',
             'contact_number' => '09123456789',
             'email' => 'jeromedelossantos@student.laverdad.edu.ph',
@@ -43,7 +43,7 @@ class UserSeeder extends Seeder
 
         // Communications Officer with working Email (for testing purposes)
         User::create([
-            'first_name' => 'Joshua', 'last_name' => 'Allador',
+            'first_name' => 'Communications Officer', 'last_name' => '(Demo)',
             'gender' => 'male',
             'contact_number' => '09205979015',
             'email' => 'joshuaallador@student.laverdad.edu.ph',
@@ -100,27 +100,27 @@ class UserSeeder extends Seeder
         ])->assignRole('external_requester');
 
         // Mr. Eric - GASD Coordinator
-        User::create([
-            'first_name' => 'Eric', 'last_name' => 'Bolaño',
-            'gender' => 'male',
-            'contact_number' => '09123456789',
-            'email' => 'eric@laverdad.edu.ph',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'staff_type' => 'non-teaching',
-            'department_id' => 2,
-        ])->assignRole('gasd_coordinator');
+        // User::create([
+        //     'first_name' => 'Eric', 'last_name' => 'Bolaño',
+        //     'gender' => 'male',
+        //     'contact_number' => '09123456789',
+        //     'email' => 'eric@laverdad.edu.ph',
+        //     'email_verified_at' => now(),
+        //     'password' => Hash::make('password'),
+        //     'staff_type' => 'non-teaching',
+        //     'department_id' => 2,
+        // ])->assignRole('gasd_coordinator');
 
         // Ms. Edyssa - Communications Officer
-        User::create([
-            'first_name' => 'Edyssa', 'last_name' => 'Belandres',
-            'gender' => 'female',
-            'contact_number' => '09234567890',
-            'email' => 'edyssa@laverdad.edu.ph',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'staff_type' => 'non-teaching',
-            'department_id' => 3,
-        ])->assignRole('communications_officer');
+        // User::create([
+        //     'first_name' => 'Edyssa', 'last_name' => 'Belandres',
+        //     'gender' => 'female',
+        //     'contact_number' => '09234567890',
+        //     'email' => 'edyssa@laverdad.edu.ph',
+        //     'email_verified_at' => now(),
+        //     'password' => Hash::make('password'),
+        //     'staff_type' => 'non-teaching',
+        //     'department_id' => 3,
+        // ])->assignRole('communications_officer');
     }
 }
