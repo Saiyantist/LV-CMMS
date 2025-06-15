@@ -600,9 +600,9 @@ class WorkOrderController extends Controller
                         'id' => $wo->assignedTo->id,
                         'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
                     ] : null,
-                    'assigned_at' => \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y'),
-                    'scheduled_at' => \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y'),
-                    'completed_at' => \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y'),
+                    'assigned_at' => $wo->assigned_at ? \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y') : null,
+                    'scheduled_at' => $wo->scheduled_at ? \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y') : null,
+                    'completed_at' => $wo->completed_at ? \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y') : null,
                     'remarks' => $wo->remarks,
                     'location' => [
                         'id' => $wo->location_id,

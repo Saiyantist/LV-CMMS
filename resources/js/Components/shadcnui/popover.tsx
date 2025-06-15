@@ -11,9 +11,11 @@ const PopoverAnchor = PopoverPrimitive.Anchor
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
->(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
-  <PopoverPrimitive.Portal>
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
+    noPortal?: boolean
+  }
+>(({ className, align = "center", sideOffset = 4, noPortal, ...props }, ref) => {
+  const Content = (
     <PopoverPrimitive.Content
       ref={ref}
       align={align}
@@ -24,8 +26,10 @@ const PopoverContent = React.forwardRef<
       )}
       {...props}
     />
-  </PopoverPrimitive.Portal>
-))
+  );
+
+  return noPortal ? Content : <PopoverPrimitive.Portal>{Content}</PopoverPrimitive.Portal>;
+});
 PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
 export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor }

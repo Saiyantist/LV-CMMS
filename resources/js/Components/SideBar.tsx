@@ -762,7 +762,25 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                   )}
                               </>,
                           ]
-                        : [
+                        : isMaintenancePersonnel ? [
+                              <>
+                                  <Link
+                                      href={route("work-orders.assigned-tasks")}
+                                      className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
+                                          currentRoute ===
+                                          "work-orders.assigned-tasks"
+                                              ? "bg-white text-primary"
+                                              : "text-white hover:text-opacity-80"
+                                      }`}
+                                  >
+                                      <BriefcaseBusiness
+                                          size={16}
+                                          className="w-6 h-6 xs:w-7 xs:h-7"
+                                      />
+                                      My Tasks
+                                  </Link>
+                              </>,
+                          ] : [
                               <>
                                   <Link
                                       href={route("event-services.my-bookings")}
@@ -832,7 +850,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         {isSuperAdmin ? (
                             <>
                                 {/* Work Orders Dropdown */}
-                                <div>
+                                <div className="border-t pt-4">
                                     <button
                                         type="button"
                                         onClick={() =>
