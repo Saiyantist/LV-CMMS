@@ -57,13 +57,13 @@ class User extends Authenticatable implements MustVerifyEmail
      * Encrypts and decrypts the birth date.
      *
      */
-    protected function birthDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value && Str::startsWith($value, 'eyJpdiI6') ? Crypt::decryptString($value) : $value,
-            set: fn ($value) => $value ? Crypt::encryptString($value) : null
-        );
-    }
+    // protected function birthDate(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn ($value) => $value && Str::startsWith($value, 'eyJpdiI6') ? Crypt::decryptString($value) : $value,
+    //         set: fn ($value) => $value ? Crypt::encryptString($value) : null
+    //     );
+    // }
     /**
      * Work orders requested by this user.
      */

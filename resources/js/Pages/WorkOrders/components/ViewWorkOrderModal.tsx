@@ -137,7 +137,7 @@ export default function ViewWorkOrderModal({
                                             <Label>Status:</Label>
                                         </TableHead>
                                         <TableCell className="flex flex-[3.3] sm:flex-[1] items-center">
-                                            {(workOrder.status === "Completed" || workOrder.status === "For Budget Request") ? [
+                                            {(workOrder.status !== "Assigned" && workOrder.status !== "Ongoing") ? [
                                             <p className={`px-2 !h-7 border rounded flex items-center justify-center gap-2 whitespace-nowrap hover:no-underline ${getStatusColor(workOrder.status)}`}
                                             >
                                                 {workOrder.status}

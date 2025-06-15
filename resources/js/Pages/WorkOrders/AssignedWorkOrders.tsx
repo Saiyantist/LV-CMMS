@@ -81,7 +81,7 @@ export default function AssignedWorkOrders({
     }, []);
 
     // Define columns for the data table
-    const columns: ColumnDef<{ id: number; location?: { name?: string } }>[] = [
+    const columns: ColumnDef<WorkOrder>[] = [
         {
             accessorKey: "id",
             header: "ID",
@@ -103,7 +103,7 @@ export default function AssignedWorkOrders({
         {
             accessorKey: "scheduled_at",
             header: "Target Date",
-            cell: ({ row }) => <div>{row.getValue("scheduled_at")}</div>,
+            cell: ({ row }) => <div>{row.getValue("scheduled_at") || "No date set."}</div>,
             meta: {
                 // headerClassName: "max-w-20",
                 cellClassName: "min-w-[7.5rem]",
@@ -174,7 +174,7 @@ export default function AssignedWorkOrders({
             ),
             sortingFn: statusSorting,
             meta: {
-                // cellClassName: "flex justify-center",
+                cellClassName: "flex justify-center",
                 filterable: true,
             },
         },

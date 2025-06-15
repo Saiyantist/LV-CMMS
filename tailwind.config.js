@@ -57,6 +57,10 @@ export default {
     				DEFAULT: 'hsl(var(--destructive))',
     				foreground: 'hsl(var(--destructive-foreground))'
     			},
+				success: {
+					DEFAULT: '#22c55e',
+					foreground: 'hsl(var(--success-foreground))'
+				},
     			border: 'hsl(var(--border))',
     			input: 'hsl(var(--input))',
     			ring: 'hsl(var(--ring))',

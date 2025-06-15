@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import DateTimeSelection from "./Date&Time";
 import { ArrowRightCircle } from "lucide-react";
+import { galleryItems } from "./Gallery";
 
 interface EventDetailsProps {
     value: {
@@ -14,6 +15,7 @@ interface EventDetailsProps {
     dateTimeValue: { dateRange: string; timeRange: string };
     onDateTimeChange: (val: { dateRange: string; timeRange: string }) => void;
     userType: "internal_requester" | "external_requester";
+    selectedVenueIds: number[]; // <-- Add this line
 }
 
 const eventPlaceholders = [
@@ -45,14 +47,13 @@ const MAX_EVENT_NAME = 100;
 const MAX_DEPARTMENT = 100;
 const MAX_EVENT_PURPOSE = 250;
 const MAX_PARTICIPANTS = 100;
-const MAX_PARTICIPANT_COUNT = 9999;
-
 const EventDetails: React.FC<EventDetailsProps> = ({
     value,
     onChange,
     dateTimeValue,
     onDateTimeChange,
     userType,
+    selectedVenueIds,
 }) => {
     const departmentType =
         userType === "internal_requester" ? "internal" : "external";
@@ -79,6 +80,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({
     const eventNameTimeout = useRef<NodeJS.Timeout | null>(null);
     const departmentTimeout = useRef<NodeJS.Timeout | null>(null);
     const eventPurposeTimeout = useRef<NodeJS.Timeout | null>(null);
+    
     const participantsTimeout = useRef<NodeJS.Timeout | null>(null);
     const participantCountTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -149,6 +151,19 @@ const EventDetails: React.FC<EventDetailsProps> = ({
         setDeptInput(""); // <-- Only clear the input after selection!
         // Do NOT close suggestions here
     };
+
+    // Selected venues based on IDs
+    const selectedVenues = galleryItems.filter((item) =>
+        selectedVenueIds?.includes(item.id)
+    );
+
+    // Extract capacities from subtitle (e.g., "Capacity: 1000")
+    const totalCapacity = selectedVenues.reduce((sum, venue) => {
+        const match = venue.subtitle.match(/(\d+)/);
+        return sum + (match ? parseInt(match[1], 10) : 0);
+    }, 0);
+
+    const dynamicMax = totalCapacity > 0 ? totalCapacity : null;
 
     return (
         <div className="w-full bg-white flex flex-col p-8 rounded">
@@ -570,67 +585,58 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                                     });
                                     setShowParticipantCountLimit(false);
                                 } else if (
+                                    dynamicMax !== null &&
                                     num >= 1 &&
-                                    num <= MAX_PARTICIPANT_COUNT
+                                    num <= dynamicMax
                                 ) {
                                     onChange({
                                         ...value,
                                         participantCount: raw,
                                     });
                                     setShowParticipantCountLimit(false);
-                                } else if (num > MAX_PARTICIPANT_COUNT) {
+                                } else if (
+                                    dynamicMax !== null &&
+                                    num > dynamicMax
+                                ) {
                                     onChange({
                                         ...value,
-                                        participantCount:
-                                            MAX_PARTICIPANT_COUNT.toString(),
+                                        participantCount: dynamicMax.toString(),
                                     });
                                     setShowParticipantCountLimit(true);
                                 }
                             }
                         }}
-                        onKeyDown={(e) => {
-                            if (
-                                value.participantCount.length === 4 &&
-                                Number(value.participantCount) ===
-                                    MAX_PARTICIPANT_COUNT &&
-                                e.key.length === 1 &&
-                                !e.ctrlKey &&
-                                !e.metaKey &&
-                                !e.altKey
-                            ) {
-                                setShowParticipantCountLimit(true);
-                                if (participantCountTimeout.current)
-                                    clearTimeout(
-                                        participantCountTimeout.current
-                                    );
-                                participantCountTimeout.current = setTimeout(
-                                    () => setShowParticipantCountLimit(false),
-                                    3000
-                                );
-                            }
-                        }}
+                        disabled={dynamicMax === null}
                         inputMode="numeric"
                         pattern="[0-9]*"
-                        className="w-full bg-white rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-6 transition-colors duration-200 ease-in-out"
+                        className={`w-full rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-indigo-200 text-base outline-none py-2 px-3 leading-6 transition-colors duration-200 ease-in-out
+                            ${
+                                dynamicMax === null
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : "bg-white text-gray-700"
+                            }`}
                     />
                     {/* Number of Participants Limit Indicator */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-1 gap-1">
+                    <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center mt-1 gap-1">
                         <span className="text-xs text-gray-500">
                             {value.participantCount.length > 0
                                 ? value.participantCount
                                 : 0}
-                            /{MAX_PARTICIPANT_COUNT}
+                            /{dynamicMax ?? "-"}
                         </span>
                         <span
-                            className={`text-xs text-red-500 font-medium w-full sm:w-auto transition-opacity duration-300 ${
-                                showParticipantCountLimit
-                                    ? "opacity-100"
+                            className={`text-xs font-medium w-full sm:w-auto transition-opacity duration-300 ${
+                                dynamicMax === null
+                                    ? "text-gray-500 opacity-100"
+                                    : showParticipantCountLimit
+                                    ? "text-red-500 opacity-100"
                                     : "opacity-0 pointer-events-none select-none"
                             }`}
                             aria-live="polite"
                         >
-                            The number of participants cannot exceed{" "}
-                            {MAX_PARTICIPANT_COUNT}.
+                            {dynamicMax === null
+                                ? "This field is disabled because no venue is selected."
+                                : `The number of participants must not exceed the venue(s) capacity ${dynamicMax}.`}
                         </span>
                     </div>
                 </div>

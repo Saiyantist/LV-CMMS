@@ -1,5 +1,3 @@
-"use client";
-
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Upload, X, FileText, Check } from "lucide-react";
@@ -217,12 +215,14 @@ export default function EventServicesRequest() {
             return;
         }
         if (currentStep === 3) {
+            const venueRequired =
+                selectedGalleryItem && selectedGalleryItem.length > 0;
             if (
                 !eventDetails.eventName ||
                 !eventDetails.department.length ||
                 !eventDetails.eventPurpose ||
                 !eventDetails.participants ||
-                !eventDetails.participantCount ||
+                (venueRequired && !eventDetails.participantCount) ||
                 !dateRange ||
                 !timeRange
             ) {
@@ -481,6 +481,24 @@ export default function EventServicesRequest() {
         setShowConsentModal(false);
     }
 
+    // Warn on page unload if file is uploaded or step is in progress
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            // Only warn if file is uploaded or any step is in progress
+            if (file || currentStep > 1) {
+                const message =
+                    "Are you sure you want to reload or leave this page? Any unsaved progress will be lost, and you may need to re-upload your proof of approval file.";
+                e.preventDefault();
+                e.returnValue = message;
+                return message;
+            }
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [file, currentStep]);
+
     return (
         <AuthenticatedLayout>
             <Head title="Event Services" />
@@ -662,6 +680,7 @@ export default function EventServicesRequest() {
                             setTimeRange(timeRange);
                         }}
                         userType={userType}
+                        selectedVenueIds={selectedGalleryItem || []}
                     />
                 )}
                 {/* Step 4: Requested Services */}
@@ -744,16 +763,8 @@ export default function EventServicesRequest() {
                         {/* Hide Cancel Booking on step 1 */}
                         {currentStep !== 1 && (
                             <button
-                                className="w-full px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md"
-                                onClick={() => {
-                                    if (
-                                        window.confirm(
-                                            "Are you sure you want to cancel and clear all your booking data? This action cannot be undone."
-                                        )
-                                    ) {
-                                        handleCancelBooking();
-                                    }
-                                }}
+                                className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md"
+                                onClick={() => setShowCancelConfirm(true)}
                                 type="button"
                             >
                                 Cancel Booking
@@ -763,33 +774,44 @@ export default function EventServicesRequest() {
                 )}
             </div>
             {showCancelConfirm && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-800">
-                            Cancel Booking?
-                        </h2>
-                        <p className="mb-6 text-gray-600">
-                            Are you sure you want to cancel and clear all your
-                            booking data? This action cannot be undone.
-                        </p>
-                        <div className="flex justify-center gap-4">
-                            <button
-                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-700"
-                                onClick={() => setShowCancelConfirm(false)}
-                            >
-                                No, Go Back
-                            </button>
-                            <button
-                                className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded text-white"
-                                onClick={() => {
-                                    setShowCancelConfirm(false);
-                                    handleCancelBooking();
-                                }}
-                            >
-                                Yes, Cancel Booking
-                            </button>
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm transition-all">
+                    <div className="w-full max-w-sm mx-auto mb-0 md:mb-0 md:mt-0 rounded-t-3xl md:rounded-3xl bg-white shadow-2xl border border-blue-100 p-0 overflow-hidden animate-[slideUp_0.3s_ease]">
+                        <div className="p-6 space-y-4">
+                            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-2" />
+                            <div className="text-lg font-semibold text-gray-900 text-center">
+                                Cancel Booking?
+                            </div>
+                            <div className="text-gray-600 text-center mb-4">
+                                Are you sure you want to cancel and clear all
+                                your booking data? This action cannot be undone.
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    className="w-full py-3 rounded-xl bg-red-500 text-white font-semibold text-base shadow hover:bg-red-600 transition"
+                                    onClick={() => {
+                                        setShowCancelConfirm(false);
+                                        handleCancelBooking();
+                                    }}
+                                >
+                                    Yes, Cancel Booking
+                                </button>
+                                <button
+                                    className="w-full py-3 rounded-xl bg-gray-100 text-gray-800 font-semibold text-base shadow hover:bg-gray-200 transition"
+                                    onClick={() => setShowCancelConfirm(false)}
+                                >
+                                    No, Go Back
+                                </button>
+                            </div>
                         </div>
                     </div>
+                    <style>
+                        {`
+            @keyframes slideUp {
+                from { transform: translateY(100%); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            `}
+                    </style>
                 </div>
             )}
             {conflictModal.open && (
@@ -1001,6 +1023,34 @@ export default function EventServicesRequest() {
                     </style>
                 </div>
             )}
+            {currentStep === 1 &&
+                !file &&
+                localStorage.getItem("lastUploadedFileName") && (
+                    <div className="max-w-2xl mx-auto mb-6">
+                        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md shadow text-yellow-800 text-sm font-medium flex items-center gap-2">
+                            <svg
+                                className="w-5 h-5 text-yellow-400 flex-shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
+                                />
+                            </svg>
+                            <span>
+                                <strong>Notice:</strong> If you reloaded or refreshed
+                                the page during the process, your uploaded file
+                                from Step 1 will be lost for security reasons.
+                                You may need to re-upload your
+                                proof of approval file in order to continue.
+                            </span>
+                        </div>
+                    </div>
+                )}
         </AuthenticatedLayout>
     );
 }

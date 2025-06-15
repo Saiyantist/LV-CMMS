@@ -224,30 +224,32 @@ export default function ExternalRegistration() {
                                 }
                                 required
                             />
-                            {typeof errors.password === "string" &&
-                                errors.password
-                                    .split(". ")
-                                    .map((error, index) =>
-                                        error.trim() ? (
-                                            <div
-                                                key={index}
-                                                className="mt-2 text-xs text-gray-600 dark:text-gray-400"
-                                            >
-                                                <p className="font-medium mb-1">
-                                                    Password Requirements:
-                                                </p>
-                                                <ul>
-                                                    <li>
-                                                        -{" "}
-                                                        <InputError
-                                                            message={error.trim()}
-                                                            className="inline"
-                                                        />
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        ) : null
-                                    )}
+                            {/* Password Requirements */}
+                            {errors.password && (
+                                <div className="mt-2 space-y-1">
+                                    <div className="text-xs  text-gray-700 dark:text-gray-300">
+                                        <p className="font-medium italic mb-1">
+                                            Password Requirements:
+                                        </p>
+                                        <ul className="">
+                                            {typeof errors.password ===
+                                                "string" &&
+                                                errors.password.split(". ").map(
+                                                    (error, index) =>
+                                                        error.trim() && (
+                                                            <li key={index}>
+                                                                -{" "}
+                                                                <InputError
+                                                                    message={error.trim()}
+                                                                    className="inline"
+                                                                />
+                                                            </li>
+                                                        )
+                                                )}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="w-full mt-4 md:mt-0">

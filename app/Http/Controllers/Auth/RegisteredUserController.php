@@ -22,22 +22,33 @@ use Illuminate\Support\Facades\Mail;
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
+     * Display the Access Registration Page.
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register',[
+        return Inertia::render('Auth/Register');
+    }
+
+    /**
+     * Display the External User Registration Page.
+     */
+    public function createExternal(): Response
+    {
+        return Inertia::render('Auth/ExternalRegistration',[
             'departments' => Department::all(),
         ]);
     }
 
+    /**
+     * Display the Internal User Registration Page.
+     */
     public function createInternal(): Response
-{       
-    return Inertia::render('Auth/InternalRegistration', [
-        'departments' => Department::all(),
-        'work_groups' => WorkGroup::all(),
-    ]);
-}
+    {       
+        return Inertia::render('Auth/InternalRegistration', [
+            'departments' => Department::all(),
+            'work_groups' => WorkGroup::all(),
+        ]);
+    }
 
     /**
      * Handle an incoming registration request.
