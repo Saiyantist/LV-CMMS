@@ -38,7 +38,7 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
-        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'attachments']);
+        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'attachments'])->where('work_order_type', 'Work Order');
 
         if ($user->hasPermissionTo('view own work orders') && !$user->hasPermissionTo('manage work orders')) {
             $workOrders->where('requested_by', $user->id);
@@ -52,7 +52,6 @@ class WorkOrderController extends Controller
                 'id' => $wo->id,
                 'report_description' => $wo->report_description,
                 'status' => $wo->status,
-                'work_order_type' => $wo->work_order_type,
                 'label' => $wo->label,
                 'priority' => $wo->priority ?: "",
                 'remarks' => $wo->remarks,

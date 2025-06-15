@@ -15,7 +15,6 @@ export default function WorkOrders({
         id: number;
         report_description: string;
         status: string;
-        work_order_type: string;
         label: string;
         priority: string;
         remarks: string;
@@ -49,33 +48,26 @@ export default function WorkOrders({
     const [editingWorkOrder, setEditingWorkOrder] = useState(null);
     const [showScrollUpButton, setShowScrollUpButton] = useState(false)
 
+    const isWorkOrderManager = user.permissions.includes("manage work orders");
+    const isRequester = user.permissions.includes("request work orders");
+
     const tabs =
-        user.permissions.includes("manage work orders")
-            ? ["Pending", "Accepted", "For Budget Request", "Declined"]
-            : [];
+        isWorkOrderManager ? ["Pending", "Accepted", "Ongoing", "Completed", "Overdue", "Cancelled", "Declined"]
+        : isRequester ? ["Pending", "Assigned", "Ongoing", "Completed", "Overdue", "Cancelled", "Declined"]
+        : [];
 
     /**
      * Filter work orders based on status
      * For Work Order Manager and Super Admin, show all work orders in respective tabs according to status
      */
     const filteredWorkOrders = workOrders.filter((wo) => {
-        if (
-            user.permissions.includes("manage work orders")
-        ) {
-            if (activeTab === "Pending") return wo.status === "Pending";
-            if (activeTab === "Accepted")
-                return ["Assigned", 'Scheduled', "Ongoing", "Completed", "Overdue"].includes(
-                    wo.status
-                );
-            // if (activeTab === "Scheduled")
-            //     return ["Scheduled",].includes(
-            //         wo.status
-            //     );
-            if (activeTab === "For Budget Request")
-                return wo.status === "For Budget Request";
-            if (activeTab === "Declined") return wo.status === "Cancelled" || wo.status === "Declined";
-            return true;
-        }
+        if (activeTab === "Pending") return wo.status === "Pending";
+        if (activeTab === "Accepted") return ["Assigned", 'For Budget Request'].includes(wo.status);
+        if (activeTab === "Ongoing") return ["Ongoing", "Scheduled"].includes(wo.status);
+        if (activeTab === "Completed") return wo.status === "Completed";
+        if (activeTab === "Overdue") return wo.status === "Overdue";
+        if (activeTab === "Cancelled") return wo.status === "Cancelled";
+        if (activeTab === "Declined") return wo.status === "Declined";
         return wo;
     });
 

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Tabs } from "@/Components/shadcnui/tabs";
+import { Tabs, TabsTrigger, TabsList } from "@/Components/shadcnui/tabs";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, usePage } from "@inertiajs/react";
 import { Button } from "@/Components/shadcnui/button";
@@ -18,7 +18,7 @@ import FilterModal from "@/Components/FilterModal";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
 import { format } from "date-fns";
 import { getStatusColor } from "@/utils/getStatusColor";
-import { SelectSeparator } from "@/Components/shadcnui/select";
+import { SelectItem, Select, SelectTrigger, SelectValue, SelectSeparator, SelectContent } from "@/Components/shadcnui/select";
 import { clearLine } from "readline";
 
 // import FullCalendar from "@fullcalendar/react"; // FullCalendar library
@@ -52,19 +52,28 @@ export default function AssignedWorkOrders({
     locations: { id: number; name: string }[];
     workOrders: WorkOrder[];
 }) {
-    const [activeTab, setActiveTab] = useState("list");
+    const [activeTab, setActiveTab] = useState("Assigned");
     const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
     const [mobileSearchQuery, setMobileSearchQuery] = useState("");
     const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
     const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, string>>({});
     const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
     const [showScrollUpButton, setShowScrollUpButton] = useState(false);
-    const [mobileSortConfig, setMobileSortConfig] = useState<{
-        key: string;
-        direction: 'asc' | 'desc';
-    }>({
-        key: 'scheduled_at',
-        direction: 'desc'
+    const [mobileSortConfig, setMobileSortConfig] = useState<{key: string; direction: 'asc' | 'desc';}>({key: 'scheduled_at', direction: 'desc'});
+
+    const tabs = ["Assigned", "Ongoing", "Overdue", "Completed", "Cancelled", "Declined"];
+
+    /**
+     * Filter work orders based on status to show in each tab
+     */
+    const filteredWorkOrders = workOrders.filter((wo) => {
+        if (activeTab === "Assigned") return ["Assigned", "Scheduled", "For Budget Request"].includes(wo.status);
+        if (activeTab === "Ongoing") return wo.status === "Ongoing";
+        if (activeTab === "Overdue") return wo.status === "Overdue";
+        if (activeTab === "Completed") return wo.status === "Completed";
+        if (activeTab === "Cancelled") return wo.status === "Cancelled";
+        if (activeTab === "Declined") return wo.status === "Declined";
+        return wo;
     });
 
     const handleScroll = () => {
@@ -77,8 +86,25 @@ export default function AssignedWorkOrders({
 
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isMobileFilterModalOpen && mobileFilterButtonRef.current && !mobileFilterButtonRef.current.contains(event.target as Node)) {
+                const modalElement = document.querySelector('[data-filter-modal="true"]');
+                if (
+                    modalElement &&
+                    !modalElement.contains(event.target as Node) &&
+                    !mobileFilterButtonRef.current.contains(event.target as Node)
+                ) {
+                    setIsMobileFilterModalOpen(false);
+                }
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isMobileFilterModalOpen]);
 
     // Define columns for the data table
     const columns: ColumnDef<WorkOrder>[] = [
@@ -203,7 +229,7 @@ export default function AssignedWorkOrders({
 
     // Filter and sort work orders based on search query, filters, and sort config
     const filteredMobileWorkOrders = useMemo(() => {
-        let filtered = workOrders.filter((workOrder: WorkOrder) => {
+        let filtered = filteredWorkOrders.filter((workOrder: WorkOrder) => {
             const matchesSearch = mobileSearchQuery === "" || 
                 workOrder.id.toString().includes(mobileSearchQuery) ||
                 workOrder.location?.name?.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
@@ -250,7 +276,7 @@ export default function AssignedWorkOrders({
         });
 
         return filtered;
-    }, [workOrders, mobileSearchQuery, mobileColumnFilters, mobileSortConfig]);
+    }, [filteredWorkOrders, mobileSearchQuery, mobileColumnFilters, mobileSortConfig]);
 
 
     return (
@@ -268,11 +294,78 @@ export default function AssignedWorkOrders({
                 </div>
             </header>
 
+            {/* Tabs - Desktop */}
+            <div className="hidden lg:flex mt-3">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="bg-gray-200 text-black rounded-md mb-6">
+                        {tabs.map((tab) => (
+                            <TabsTrigger key={tab} value={tab} className={`
+                                ${tab === "Completed" ? "data-[state=active]:bg-success/70 hover:bg-success/60 hover:text-white duration-200" : ""}
+                                ${tab === "Overdue" ? "data-[state=active]:bg-red-600/80 hover:bg-red-600/60 hover:text-white duration-200" : ""}
+                                ${tab === "Cancelled" ? "data-[state=active]:bg-red-600/80 hover:bg-red-600/60 hover:text-white duration-200" : ""}
+                                ${tab === "Declined" ? "data-[state=active]:bg-red-600/80 hover:bg-red-600/60 hover:text-white duration-200" : ""}
+                            `}>{tab}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                </Tabs>
+            </div>
+            {/* Tabs - Desktop (Responsive) */}
+            <div className="hidden md:flex md:flex-row lg:hidden items-center gap-1 mb-6">
+                {/* Switch Tabs */}
+                <div className="flex xs:flex-[1.5] sm:flex-[1] justify-start px-2">
+                    <h2 className="text-sm text-primary font-semibold">
+                        Switch Tabs:
+                    </h2>
+                </div>
+                {/* Dropdown */}
+                <div className="flex flex-[5]">
+                    <Select value={activeTab} onValueChange={setActiveTab}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select tab" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {tabs.map((tab) => (
+                                <SelectItem key={tab} value={tab}>
+                                    {tab}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                    </div>
+            
+            {/* Tabs - Mobile */}
+            <div className="md:hidden gap-2 mt-4">
+                <div className="flex flex-row items-center gap-1">
+                    {/* Switch Tabs */}
+                    <div className="flex xs:flex-[1.5] sm:flex-[1] justify-start px-2">
+                        <h2 className="text-sm text-primary font-semibold">
+                            Switch Tabs:
+                        </h2>
+                    </div>
+                    {/* Dropdown */}
+                    <div className="flex flex-[5]">
+                        <Select value={activeTab} onValueChange={setActiveTab}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select tab" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {tabs.map((tab) => (
+                                    <SelectItem key={tab} value={tab}>
+                                        {tab}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </div>
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto rounded-md lg:-mt-[3.3rem]">
+            <div className="hidden md:block overflow-x-auto rounded-md -mt-[0.8rem] xl:-mt-[4.25rem]">
                 <Datatable
                     columns={columns}
-                    data={workOrders}
+                    data={filteredWorkOrders}
                     placeholder="Search ID, Location or Description"
                 />
             </div>
@@ -468,17 +561,72 @@ export default function AssignedWorkOrders({
 
                             {/* Work Order Type */}
                             <p>
-                                <span className="font-bold text-primary">Type:</span>{" "}
-                                <span className="text-secondary font-semibold">{order.work_order_type}</span>
+                                <span className="font-bold text-primary">Work Order Type:</span>{" "}
+                                <span className="text-secondary/50 font-semibold">{order.work_order_type}</span>
                             </p>
 
                             {/* Priority */}
-                            <p>
-                                <span className="font-bold text-primary">Priority:</span>{" "}
-                                <span className={`px-2 py-1 rounded ${getPriorityColor(order.priority)}`}>
-                                    {order.priority}
+                            {(activeTab === "Assigned" || activeTab === "Ongoing" || activeTab === "Overdue") && (
+                            <p className="flex items-center">
+                                <span className="font-bold text-primary mr-1">
+                                    Priority:
+                                </span>
+                                <span className="flex gap-1">
+                                    {["low", "med", "high", "crit"].map(
+                                        (level) => {
+                                            const normalizedPriority =
+                                                order.priority
+                                                    ?.toLowerCase()
+                                                    .trim();
+
+                                            // Mapping for alternate values like "medium" -> "med"
+                                            const priorityAliases: Record<
+                                                string,
+                                                string
+                                            > = {
+                                                low: "low",
+                                                medium: "med",
+                                                med: "med",
+                                                high: "high",
+                                                critical: "crit",
+                                                crit: "crit",
+                                            };
+
+                                            const current =
+                                                priorityAliases[
+                                                    normalizedPriority || ""
+                                                ] || "";
+
+                                            const isActive =
+                                                current === level;
+
+                                            const bgColorMap: Record<
+                                                string,
+                                                string
+                                            > = {
+                                                low: "bg-green-100 text-green-800",
+                                                med: "bg-yellow-100 text-yellow-800",
+                                                high: "bg-orange-100 text-orange-800",
+                                                crit: "bg-red-100 text-red-800",
+                                            };
+
+                                            return (
+                                                <span
+                                                    key={level}
+                                                    className={`px-2 py-1 text-xs font-semibold border ${
+                                                        isActive
+                                                            ? `${bgColorMap[level]} border-transparent`
+                                                            : "bg-gray-100 text-gray-400 border-gray-300"
+                                                    }`}
+                                                >
+                                                    {level}
+                                                </span>
+                                            );
+                                        }
+                                    )}
                                 </span>
                             </p>
+                            )}
                         </div>
                     </div>
                 ))}

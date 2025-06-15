@@ -246,8 +246,25 @@ const PreventiveMaintenance: React.FC = () => {
 
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isMobileFilterModalOpen && mobileFilterButtonRef.current && !mobileFilterButtonRef.current.contains(event.target as Node)) {
+                const modalElement = document.querySelector('[data-filter-modal="true"]');
+                if (
+                    modalElement &&
+                    !modalElement.contains(event.target as Node) &&
+                    !mobileFilterButtonRef.current.contains(event.target as Node)
+                ) {
+                    setIsMobileFilterModalOpen(false);
+                }
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isMobileFilterModalOpen]);
 
     const PMSWorkOrdersColumns: ColumnDef<WorkOrders>[] = [
     {
