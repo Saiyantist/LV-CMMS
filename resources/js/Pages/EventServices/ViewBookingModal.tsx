@@ -14,6 +14,10 @@ import {
     BadgeCheck,
     Building2,
     Badge,
+    Hash,
+    User,
+    FileCheck,
+    Text,
 } from "lucide-react";
 import EditBookingsModal from "./EditBookingsModal";
 
@@ -236,7 +240,7 @@ const ViewBookingModal: React.FC<Props> = ({
                         {/* Proof of Approval at the top */}
                         <div className="space-y-1 mb-4">
                             <div className="text-xs text-blue-700 flex items-center gap-1.5 font-semibold">
-                                <BadgeCheck size={16} />
+                                <FileCheck size={16} />
                                 Proof of Approval
                             </div>
                             {booking.proof_of_approval ? (
@@ -257,7 +261,9 @@ const ViewBookingModal: React.FC<Props> = ({
                                     </button>
                                 </div>
                             ) : (
-                                <span className="text-xs text-gray-400">N/A</span>
+                                <span className="text-xs text-gray-400">
+                                    N/A
+                                </span>
                             )}
                         </div>
 
@@ -265,12 +271,7 @@ const ViewBookingModal: React.FC<Props> = ({
                             <InfoBlock
                                 label="Booking ID"
                                 value={booking.id}
-                                icon={<BadgeCheck size={16} />}
-                            />
-                            <InfoBlock
-                                label="Date Requested"
-                                value={formatDate(booking.date)}
-                                icon={<CalendarDays size={16} />}
+                                icon={<Hash size={16} />}
                             />
                             <InfoBlock
                                 label="Requested By"
@@ -283,7 +284,12 @@ const ViewBookingModal: React.FC<Props> = ({
                                               booking.user.email
                                         : "N/A"
                                 }
-                                icon={<Users size={16} />}
+                                icon={<User size={16} />}
+                            />
+                            <InfoBlock
+                                label="Date Requested"
+                                value={formatDate(booking.date)}
+                                icon={<CalendarDays size={16} />}
                             />
                             <InfoBlock
                                 label="Event Name"
@@ -302,11 +308,6 @@ const ViewBookingModal: React.FC<Props> = ({
                                 value={booking.participants || "N/A"}
                                 icon={<Users size={16} />}
                                 justify
-                            />
-                            <InfoBlock
-                                label="No. of Participants"
-                                value={booking.number_of_participants || "N/A"}
-                                icon={<Users size={16} />}
                             />
                             <InfoBlock
                                 label="Event Date"
@@ -341,12 +342,18 @@ const ViewBookingModal: React.FC<Props> = ({
                                 }
                                 icon={<Clock size={16} />}
                             />
+                            <InfoBlock
+                                label="No. of Participants"
+                                value={booking.number_of_participants || "N/A"}
+                                icon={<Users size={16} />}
+                            />
                         </div>
 
                         <div className="space-y-4">
                             <InfoBlock
                                 label="Description"
                                 value={booking.description || "N/A"}
+                                icon={<FileText size={16} />}
                                 multiline
                                 justify
                             />
@@ -398,7 +405,8 @@ const ViewBookingModal: React.FC<Props> = ({
 
                         {!canEdit && (
                             <div className="text-xs text-red-500 mt-2 text-center">
-                                You can only edit bookings that are still pending.
+                                You can only edit bookings that are still
+                                pending.
                             </div>
                         )}
                     </div>
@@ -440,7 +448,10 @@ const ViewBookingModal: React.FC<Props> = ({
                         </button>
                         {/* Modal Title */}
                         <div className="flex flex-col items-center mb-4">
-                            <BadgeCheck size={22} className="text-blue-500 mb-1" />
+                            <BadgeCheck
+                                size={22}
+                                className="text-blue-500 mb-1"
+                            />
                             <span className="font-semibold text-lg text-blue-800">
                                 Proof of Approval
                             </span>
@@ -476,7 +487,9 @@ const ViewBookingModal: React.FC<Props> = ({
                                     href={`/storage/${booking.proof_of_approval}`}
                                     download={
                                         booking.proof_of_approval_original_name ||
-                                        booking.proof_of_approval.split("/").pop()
+                                        booking.proof_of_approval
+                                            .split("/")
+                                            .pop()
                                     }
                                     target="_blank"
                                     rel="noopener noreferrer"

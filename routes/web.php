@@ -148,7 +148,8 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::post('/event-services', [EventServicesController::class, 'store'])->name('event-services.store');
         Route::delete('/event-services/{id}', [EventServicesController::class, 'destroy'])->name('event-services.destroy');
         Route::put('/event-services/{id}', [EventServicesController::class, 'update'])->name('event-services.update');
-    
+
+        Route::get('/departments/{type}', [DepartmentController::class, 'show']);
         
         Route::post('/event-services/check-conflict', [EventServicesController::class, 'checkConflict']);
    
@@ -157,10 +158,6 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
             return \App\Models\EventService::select('status')->get();
         })->middleware(['auth', 'verified'])->name('api.event-services.statuses');
 
-        // Routes to fetch data in Top Departments,
-        // Frequently Booked venues, and 
-        // Recent Booking Activity, and
-        // for (COMMS Officer's Dashboard)
         Route::get('/api/event-services/bookings', [EventServicesController::class, 'bookingsData']);
     });
 });
