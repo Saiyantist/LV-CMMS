@@ -14,6 +14,7 @@ import EventServicesDashboard from "./EventServices/EventServicesDashboard";
 import { UpcomingWorkOrdersTable } from "@/Components/UpcomingWorkOrdersTable";
 import { UpcomingPreventiveMaintenanceTable } from "@/Components/UpcomingPreventiveMaintenanceTable";
 import { UpcomingCompliancesTable } from "@/Components/UpcomingCompliancesTable";
+import FlashToast from "@/Components/FlashToast";
 
 interface DashboardProps {
     workOrderRequests: {
@@ -92,7 +93,7 @@ export default function Dashboard({
         user.roles?.map((role: { name: string }) => role.name)
     );
 
-    const isDepartmentHead = roleNames.has("department_head");
+    const isSeniorManagement = roleNames.has("senior_management");
     const isMaintenancePersonnel = roleNames.has("maintenance_personnel");
     const isGasdCoordinator = roleNames.has("gasd_coordinator");
     const isCommunicationsOfficer = roleNames.has("communications_officer");
@@ -342,12 +343,12 @@ export default function Dashboard({
                     )}
 
                     {/* Internal Requesters */}
-                    {isDepartmentHead && (
+                    {isSeniorManagement && (
                         <>
                             {/* Work Orders Statistics */}
                             <div className="flex flex-col md:flex-row justify-between gap-4">
-                                {/* Department Head - Total Work Order Requests */}
-                                {isDepartmentHead && (
+                                {/* Senior Management - Total Work Order Requests */}
+                                {isSeniorManagement && (
                                 <Card className="w-full text-white bg-primary hover:shadow-lg hover:scale-105 transition-all duration-300">
                                     <Link href={route("work-orders.index")}>
                                         <CardHeader>
@@ -561,8 +562,8 @@ export default function Dashboard({
                             </div>
                             )}
 
-                            {/* Department Head - My Recent Work Orders */}
-                            {isDepartmentHead && (
+                            {/* Senior Management - My Recent Work Orders */}
+                            {isSeniorManagement && (
                                 <Card className="w-full">
                                     <CardHeader>
                                         <CardTitle className="text-primary text-base sm:text-md flex justify-between items-center">
@@ -822,6 +823,8 @@ export default function Dashboard({
                     )}
                 </div>
             )}
+
+            <FlashToast />
         </AuthenticatedLayout>
     );
 }

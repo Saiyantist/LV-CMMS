@@ -350,7 +350,7 @@ export default function EventServicesRequest() {
         // Build FormData
         const formData = new FormData();
         if (file) {
-            formData.append("attachments[]", file);
+            formData.append("proof_of_approval", file);
         }
 
         // Venue (array of names)
@@ -590,7 +590,7 @@ export default function EventServicesRequest() {
                                     </p>
                                     <p className="text-gray-500 text-sm mb-4">
                                         JPG, PNG or PDF, file size no more than
-                                        10MB
+                                        5MB
                                     </p>
                                     <button>SELECT FILE</button>
                                     <input
@@ -647,7 +647,7 @@ export default function EventServicesRequest() {
                                 </div>
                             )}
 
-                            <div className="text-gray-500 text-sm mt-4">
+                            {/* <div className="text-gray-500 text-sm mt-4">
                                 <p>
                                     Kindly use this naming format:
                                     EventDate_EventName
@@ -655,7 +655,7 @@ export default function EventServicesRequest() {
                                 <p className="text-gray-400">
                                     Example: 112424_EnglishMonth
                                 </p>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 )}
@@ -1023,34 +1023,31 @@ export default function EventServicesRequest() {
                     </style>
                 </div>
             )}
-            {currentStep === 1 &&
-                !file &&
-                localStorage.getItem("lastUploadedFileName") && (
-                    <div className="max-w-2xl mx-auto mb-6">
-                        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md shadow text-yellow-800 text-sm font-medium flex items-center gap-2">
-                            <svg
-                                className="w-5 h-5 text-yellow-400 flex-shrink-0"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
-                                />
-                            </svg>
-                            <span>
-                                <strong>Notice:</strong> If you reloaded or refreshed
-                                the page during the process, your uploaded file
-                                from Step 1 will be lost for security reasons.
-                                You may need to re-upload your
-                                proof of approval file in order to continue.
-                            </span>
-                        </div>
+            {currentStep === 1 && (
+                <div className="max-w-2xl mx-auto mb-1">
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md shadow text-yellow-800 text-sm font-medium flex items-center gap-2">
+                        <svg
+                            className="w-5 h-5 text-yellow-400 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
+                            />
+                        </svg>
+                        <span>
+                            <strong>NOTE!</strong> Refreshing or leaving the
+                            page during the process will remove your uploaded
+                            file due to security reasons and browser's
+                            limitation. You’ll need to upload it again.
+                        </span>
                     </div>
-                )}
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

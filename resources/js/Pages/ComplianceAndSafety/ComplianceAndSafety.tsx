@@ -98,8 +98,25 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
 
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isMobileFilterModalOpen && mobileFilterButtonRef.current && !mobileFilterButtonRef.current.contains(event.target as Node)) {
+                const modalElement = document.querySelector('[data-filter-modal="true"]');
+                if (
+                    modalElement &&
+                    !modalElement.contains(event.target as Node) &&
+                    !mobileFilterButtonRef.current.contains(event.target as Node)
+                ) {
+                    setIsMobileFilterModalOpen(false);
+                }
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isMobileFilterModalOpen]);
 
     const columns: ColumnDef<WorkOrder>[] = [
         {
@@ -181,12 +198,12 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
             accessorKey: "status",
             header: "Status",
             cell: ({ row }) => (
-                <div className={`px-2 py-1 rounded ${getStatusColor(row.getValue("status"))}`}>
+                <div className={`px-2 py-1 rounded border ${getStatusColor(row.getValue("status"))}`}>
                     {row.getValue("status")}
                 </div>
             ),
             meta: {
-                cellClassName: "max-w-[8rem] text-center",
+                cellClassName: "max-w-[9rem] text-center flex justify-self-center items-center",
                 filterable: true,
             },
         },

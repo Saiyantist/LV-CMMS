@@ -36,8 +36,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'work_group_id',
         'email',
         'password',
-        'staff_type',
-        'department_id',
+        'job_position',
+        'status',
     ];
     
 

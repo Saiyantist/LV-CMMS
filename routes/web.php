@@ -113,7 +113,7 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         // ALWAYS ensure this route is at the end of "/work-orders" routes.
         Route::resource('work-orders', WorkOrderController::class)
             ->except(['create', 'show'])
-            ->middleware(['role_or_permission:department_head|manage work orders|view own work orders|update assigned work order status']);
+            ->middleware(['role_or_permission:senior_management|manage work orders|view own work orders|update assigned work order status']);
     
         Route::post('/locations', [LocationController::class, 'store']);
     });
@@ -148,7 +148,8 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::post('/event-services', [EventServicesController::class, 'store'])->name('event-services.store');
         Route::delete('/event-services/{id}', [EventServicesController::class, 'destroy'])->name('event-services.destroy');
         Route::put('/event-services/{id}', [EventServicesController::class, 'update'])->name('event-services.update');
-    
+
+        Route::get('/departments/{type}', [DepartmentController::class, 'show']);
         
         Route::post('/event-services/check-conflict', [EventServicesController::class, 'checkConflict']);
    
@@ -157,11 +158,17 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
             return \App\Models\EventService::select('status')->get();
         })->middleware(['auth', 'verified'])->name('api.event-services.statuses');
 
-        // Routes to fetch data in Top Departments,
-        // Frequently Booked venues, and 
-        // Recent Booking Activity, and
-        // for (COMMS Officer's Dashboard)
         Route::get('/api/event-services/bookings', [EventServicesController::class, 'bookingsData']);
+    });
+
+    // User Role Management Routes
+    Route::prefix('admin/manage-roles')->group(function () {
+        Route::get('/', [UserRoleController::class, 'index'])->name('admin.manage-roles');
+        Route::patch('/{user}/role', [UserRoleController::class, 'updateRole'])->name('admin.update-role');
+        Route::delete('/{user}/role', [UserRoleController::class, 'removeRole'])->name('admin.remove-role');
+        Route::patch('/{user}/approve', [UserRoleController::class, 'approveUser'])->name('admin.approve-user');
+        Route::patch('/{user}/reject', [UserRoleController::class, 'rejectUser'])->name('admin.reject-user');
+        Route::patch('/{user}/remove-access', [UserRoleController::class, 'removeAccess'])->name('admin.remove-access');
     });
 });
 

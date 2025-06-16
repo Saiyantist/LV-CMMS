@@ -43,6 +43,8 @@ export interface Booking {
         fileName: string;
         fileSize: string;
     };
+    proof_of_approval?: string;
+    // proof_of_approval: string;
     department?: string;
     eventPurpose?: string;
     participants?: string;
@@ -300,7 +302,11 @@ export default function MyBookings({
         {
             accessorKey: "name",
             header: "Event Name",
-              cell: ({ row }: { row: import("@tanstack/react-table").Row<Booking> }) => {
+            cell: ({
+                row,
+            }: {
+                row: import("@tanstack/react-table").Row<Booking>;
+            }) => {
                 const name = row.getValue("name") as string;
                 return (
                     <div title={name}>

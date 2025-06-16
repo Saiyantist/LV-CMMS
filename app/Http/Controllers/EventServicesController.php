@@ -94,7 +94,7 @@ public function MyBookings()
     if (
         $user->hasRole('super_admin') ||
         $user->hasRole('communications_officer') ||
-        $user->hasRole('gasd_coordinator') // <-- add this line
+        $user->hasRole('gasd_coordinator')
     ) {
         $myEvents = EventService::with('user')->get();
     } else {
@@ -123,6 +123,7 @@ public function MyBookings()
                     ? $this->filterGasdServices($event->requested_services)
                     : $event->requested_services,
             'proof_of_approval' => $event->proof_of_approval,
+            'proof_of_approval_original_name' => $event->proof_of_approval_original_name, // <-- add this
             'status' => $event->status,
             // Add user info for requester
             'user' => $event->user
@@ -181,7 +182,7 @@ public function MyBookings()
             'event_end_time' => 'required',
             'requested_services' => 'nullable|array',
             'requested_services.*' => 'string|max:255',
-            'proof_of_approval' => 'nullable|file|mimes:jpg,png,pdf|max:10240', // 10MB
+            'proof_of_approval' => 'nullable|file|mimes:jpg,png,pdf|max:1024', // 5MB
         ]);
 
         if ($request->hasFile('proof_of_approval')) {
@@ -279,12 +280,19 @@ public function bookingsData()
 
 public function statusCounts()
 {
+    $allStatuses = ['Pending', 'Approved', 'Rejected', 'Cancelled', 'Completed'];
     $counts = EventService::select('status')
         ->get()
         ->groupBy('status')
         ->map(fn($group) => $group->count());
 
-    return response()->json($counts);
+    // Ensure all statuses are present
+    $result = [];
+    foreach ($allStatuses as $status) {
+        $result[$status] = $counts[$status] ?? 0;
+    }
+
+    return response()->json($result);
 }
 
 public function checkConflict(Request $request)

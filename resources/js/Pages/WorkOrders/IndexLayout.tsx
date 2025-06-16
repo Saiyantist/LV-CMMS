@@ -17,7 +17,7 @@ import FlashToast from "@/Components/FlashToast";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import AssignWorkOrderModal from "./components/AcceptWorkOrderModal";
 import ViewWorkOrderModal from "./components/ViewWorkOrderModal";
-import { BookX, CirclePlus, MoreVertical, Search, SlidersHorizontal, SquarePen, Trash2, ArrowUpDown } from "lucide-react";
+import { SquareX, CirclePlus, MoreVertical, Search, SlidersHorizontal, SquarePen, Trash2, ArrowUpDown } from "lucide-react";
 import DeclineWorkOrderModal from "./components/DeclineWorkOrderModal";
 import CancelWorkOrderModal from "./components/CancelWorkOrderModal";
 import ForBudgetRequestModal from "./components/ForBudgetRequestModal";
@@ -72,7 +72,6 @@ interface Props {
 interface WorkOrders {
     id: number;
     report_description: string;
-    work_order_type: string;
     label: string;
     priority: string;
     remarks: string;
@@ -119,10 +118,8 @@ export default function IndexLayout({
     setEditingWorkOrder,
     scrollToTop,
 }: Props) {
-    const isRequesterOrPersonnel =
-    user.roles[0].name === "internal_requester" ||
-    user.roles[0].name === "department_head" ||
-    user.roles[0].name === "maintenance_personnel";
+    const isRequester = user.roles[0].name === "internal_requester" ||
+                        user.roles[0].name === "senior_management";
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
     const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);
@@ -136,32 +133,8 @@ export default function IndexLayout({
     const [isMobileFilterModalOpen, setIsMobileFilterModalOpen] = useState(false);
     const [mobileColumnFilters, setMobileColumnFilters] = useState<Record<string, any>>({});
     const mobileFilterButtonRef = useRef<HTMLButtonElement>(null);
-    const [mobileSortConfig, setMobileSortConfig] = useState<{
-        key: string;
-        direction: 'asc' | 'desc';
-    }>({
-        key: 'requested_at',
-        direction: 'desc'
-    });
+    const [mobileSortConfig, setMobileSortConfig] = useState<{key: string;direction: 'asc' | 'desc';}>({key: 'requested_at', direction: 'desc'});
     
-    // const toggleDescription = (id: number) => {
-    //     setExpandedDescriptions((prev) =>
-    //         prev.includes(id)
-    //             ? prev.filter((item) => item !== id)
-    //             : [...prev, id]
-    //     );
-    // };
-
-    // const filteredMobileWorkOrders = useMemo(() => {
-    //     return filteredWorkOrders.filter((workOrder) => {
-    //         const searchLower = mobileSearchQuery.toLowerCase();
-    //         return (
-    //             workOrder.report_description?.toLowerCase().includes(searchLower) ||
-    //             workOrder.location?.name?.toLowerCase().includes(searchLower)
-    //         );
-    //     });
-    // }, [filteredWorkOrders, mobileSearchQuery]);
-
     const sortOptions = useMemo(() => {
         const baseOptions = [
             { label: 'ID', value: 'id' },
@@ -287,7 +260,7 @@ export default function IndexLayout({
         }
     };
 
-    const requesterOrPersonnelColumns: ColumnDef<WorkOrders>[] = [
+    const requesterColumns: ColumnDef<WorkOrders>[] = [
         {
             accessorKey: "requested_at",
             header: "Date Requested",
@@ -362,9 +335,9 @@ export default function IndexLayout({
                                 <Button
                                     variant={"outline"}
                                     size={"icon"}
-                                    className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/70 hover:text-white transition-all duration-200"
+                                    className="h-6 text-xs text-white rounded-sm border-destructive/40 hover:bg-destructive/20 hover:text-white transition-all duration-200"
                                     onClick={() => setCancellingWorkOrder(row.original)}
-                                ><BookX />
+                                ><SquareX className="text-destructive"/>
                                 </Button>
                             </>
                         )}
@@ -453,7 +426,7 @@ export default function IndexLayout({
             },
         },
         // Accepted and Declined tabs
-        ...(activeTab !== "Pending" && activeTab !== "For Budget Request"
+        ...(activeTab !== "Pending"
             ? [
                 {
                     accessorKey: "label",
@@ -466,7 +439,7 @@ export default function IndexLayout({
                     }
                 },
                 ...(activeTab === "Accepted" ? [
-                    {
+                {
                     accessorKey: "scheduled_at",
                     header: "Target Date",
                     cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at") || "No date set."}</div>,
@@ -548,7 +521,7 @@ export default function IndexLayout({
                                 )}
                             </div>
 
-                            {/* Large screens - visible from md to lg */}
+                            {/* Medium screens - visible from md to lg */}
                             <div className="hidden md:flex xl:hidden">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -578,8 +551,16 @@ export default function IndexLayout({
               ]
             : []),
         // Pending and For Budget Request tabs
-        ...(activeTab === "Pending" || activeTab === "For Budget Request"
+        ...(activeTab === "Pending"
             ? [
+                {
+                    accessorKey: "scheduled_at",
+                    header: "Target Date",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at") || "No date set."}</div>,
+                    meta: {
+                        cellClassName: "min-w-[7.5rem] max-w-[8rem] text-center",
+                    },
+                },
                 {
                     accessorKey: "requested_by",
                     header: "Requested by",
@@ -593,37 +574,18 @@ export default function IndexLayout({
                         filterable: true,
                     },
                 },
-                ...(activeTab === "For Budget Request" ? [
-                    {
-                        accessorKey: "label",
-                        header: "Label",
-                        cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("label")}</div>,
-                        enableSorting: false,
-                        meta: {
-                            cellClassName: "text-center",
-                            searchable: true,
-                        }
-                    },
-                    // {
-                    //     accessorKey: "priority",
-                    //     header: "Priority",
-                    //     cell: ({ row }: { row: Row<WorkOrders> }) => (
-                    //         <div
-                    //             className={`px-2 py-1 rounded ${getPriorityColor(
-                    //                 row.getValue("priority")
-                    //             )}`}
-                    //         >
-                    //             {row.getValue("priority")}
-                    //         </div>
-                    //     ),
-                    //     sortingFn: prioritySorting,
-                    //     meta: {
-                    //         headerClassName: "max-w-10",
-                    //         cellClassName: "text-center",
-                    //         filterable: true,
-                    //     },
-                    // },
-                ] : []),
+                // ...(activeTab === "For Budget Request" ? [
+                //     {
+                //         accessorKey: "label",
+                //         header: "Label",
+                //         cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("label")}</div>,
+                //         enableSorting: false,
+                //         meta: {
+                //             cellClassName: "text-center",
+                //             searchable: true,
+                //         }
+                //     },
+                // ] : []),
                 {
                     id: "actions",
                     header: "Action",
@@ -650,7 +612,7 @@ export default function IndexLayout({
                                     size={"icon"}
                                     className="h-6 text-xs text-white rounded-sm bg-destructive hover:bg-destructive/75 hover:text-white transition-all duration-200"
                                     onClick={() => setDecliningWorkOrder(row.original)}
-                                ><BookX />
+                                ><SquareX />
                                 </Button>
                             </div>
 
@@ -691,8 +653,8 @@ export default function IndexLayout({
             : [])
     ];
 
-    const columns: ColumnDef<WorkOrders>[] = isRequesterOrPersonnel 
-        ? requesterOrPersonnelColumns 
+    const columns: ColumnDef<WorkOrders>[] = isRequester 
+        ? requesterColumns 
         : isWorkOrderManager 
             ? workOrderManagerColumns 
             : [];
@@ -702,7 +664,7 @@ export default function IndexLayout({
             <Head title="Work Orders" />
 
             {/* Header */}
-            <header className="sticky top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
+            <header className="sticky md:flex top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start -mt-6 pt-6 text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                         Work Orders
@@ -721,57 +683,75 @@ export default function IndexLayout({
             </header>
 
             {/* Tabs - Desktop */}
-            {user.permissions.includes("manage work orders") && (
-                <div className="hidden md:flex">
-                    <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="bg-gray-200 text-black rounded-md mb-6">
-                            <TabsTrigger value="Pending">Pending</TabsTrigger>
-                            <TabsTrigger value="Accepted">Accepted</TabsTrigger>
-                            <TabsTrigger value="For Budget Request">
-                                For Budget Request
-                            </TabsTrigger>
-                            <TabsTrigger value="Declined" className="data-[state=active]:bg-red-600/80 hover:bg-red-600/60 hover:text-white duration-200">Declined</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
+            <div className="hidden lg:flex">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="bg-gray-200 text-black rounded-md mb-6">
+                    {tabs.map((tab) => (
+                        <TabsTrigger key={tab} value={tab} className={`
+                            ${tab === "Completed" ? "data-[state=active]:bg-success/70 hover:bg-success/60 hover:text-white duration-200" : ""}
+                            ${tab === "Overdue" ? "data-[state=active]:bg-red-600/80 hover:bg-red-600/60 hover:text-white duration-200" : ""}
+                            ${tab === "Cancelled" ? "data-[state=active]:bg-red-600/80 hover:bg-red-600/60 hover:text-white duration-200" : ""}
+                            ${tab === "Declined" ? "data-[state=active]:bg-red-600/80 hover:bg-red-600/60 hover:text-white duration-200" : ""}
+                        `}>{tab}
+                        </TabsTrigger>
+                    ))}
+                    </TabsList>
+                </Tabs>
+            </div>
+            {/* Tabs - Desktop (Responsive) */}
+            <div className="hidden md:flex md:flex-row lg:hidden items-center gap-1 mb-6">
+                {/* Switch Tabs */}
+                <div className="flex xs:flex-[1.5] sm:flex-[1] justify-start px-2">
+                    <h2 className="text-sm text-primary font-semibold">
+                        Switch Tabs:
+                    </h2>
                 </div>
-            )}
+                {/* Dropdown */}
+                <div className="flex flex-[5]">
+                    <Select value={activeTab} onValueChange={setActiveTab}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select tab" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {tabs.map((tab) => (
+                                <SelectItem key={tab} value={tab}>
+                                    {tab}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
 
             {/* Tabs - Mobile */}
-            {user.permissions.includes("manage work orders") && (
-                <div className="md:hidden gap-2 mt-4">
-                    <div className="flex flex-row items-center gap-1">
-                        {/* Switch Tabs */}
-                        <div className="flex xs:flex-[1.5] sm:flex-[1] justify-start px-2">
-                            <h2 className="text-sm text-primary font-semibold">
-                                Switch Tabs:
-                            </h2>
-                        </div>
-                        {/* Dropdown */}
-                        <div className="flex flex-[5]">
-                            <Select value={activeTab} onValueChange={setActiveTab}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select tab" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {tabs.map((tab) => (
-                                        <SelectItem key={tab} value={tab}>
-                                            {tab}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+            <div className="md:hidden gap-2 mt-4">
+                <div className="flex flex-row items-center gap-1">
+                    {/* Switch Tabs */}
+                    <div className="flex xs:flex-[1.5] sm:flex-[1] justify-start px-2">
+                        <h2 className="text-sm text-primary font-semibold">
+                            Switch Tabs:
+                        </h2>
+                    </div>
+                    {/* Dropdown */}
+                    <div className="flex flex-[5]">
+                        <Select value={activeTab} onValueChange={setActiveTab}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select tab" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {tabs.map((tab) => (
+                                    <SelectItem key={tab} value={tab}>
+                                        {tab}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
-            )}
+            </div>
 
             {/* Desktop Table View */}
-            <div
-                className={`hidden md:block overflow-x-auto rounded-md lg:-mt-[4.1rem]  ${
-                    !user.permissions.includes("manage work orders")
-                        && "-mt-[3.8rem]"
-                }`}
-            >
+            <div className={`hidden md:block overflow-x-auto rounded-md -mt-[0.8rem] xl:-mt-[4.25rem] `}>
                 <Datatable
                     columns={columns}
                     data={filteredWorkOrders}
@@ -816,11 +796,10 @@ export default function IndexLayout({
                                     <div key={option.value} className="flex items-center justify-between">
                                         <span className="text-sm">{option.label}</span>
                                         <div className="flex gap-1">
+                                            {/* Ascending */}
                                             <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className={`h-6 w-6 p-0 ${
-                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'asc'
+                                                variant="ghost" size="sm"
+                                                className={`h-6 w-6 p-0 ${ mobileSortConfig.key === option.value && mobileSortConfig.direction === 'asc'
                                                         ? 'bg-primary text-white'
                                                         : ''
                                                 }`}
@@ -831,11 +810,10 @@ export default function IndexLayout({
                                             >
                                                 ↑
                                             </Button>
+                                            {/* Descending */}
                                             <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className={`h-6 w-6 p-0 ${
-                                                    mobileSortConfig.key === option.value && mobileSortConfig.direction === 'desc'
+                                                variant="ghost" size="sm"
+                                                className={`h-6 w-6 p-0 ${ mobileSortConfig.key === option.value && mobileSortConfig.direction === 'desc'
                                                         ? 'bg-primary text-white'
                                                         : ''
                                                 }`}
@@ -886,9 +864,6 @@ export default function IndexLayout({
                 />
 
                 {filteredMobileWorkOrders.map((workOrder) => {
-                    const description = workOrder.report_description || "";
-                    const shouldTruncate = description.length > 25;
-
                     return (
                         <div
                             key={workOrder.id}
@@ -934,7 +909,7 @@ export default function IndexLayout({
                                                 sideOffset={4}
                                             >
                                                 {/* Pending Tab Actions */}
-                                                {(activeTab === "Pending" || activeTab === "For Budget Request") && (
+                                                {(activeTab === "Pending") && (
                                                     <>
                                                         <button
                                                             onClick={() => setAcceptingWorkOrder(workOrder)}
@@ -960,7 +935,7 @@ export default function IndexLayout({
                                                 )}
 
                                                 {/* Accepted Tab Actions */}
-                                                {activeTab === "Accepted" && (
+                                                {["Accepted", "Assigned", "Ongoing", "Completed", "Overdue"].includes(activeTab) && (
                                                     <>
                                                         <button
                                                             onClick={() => setEditingWorkOrder(workOrder)}
@@ -972,7 +947,7 @@ export default function IndexLayout({
                                                 )}
 
                                                 {/* Declined Tab Actions */}
-                                                {activeTab === "Declined" && (
+                                                {["Cancelled", "Declined"].includes(activeTab) && (
                                                     <>
                                                         <button
                                                             onClick={() => setEditingWorkOrder(workOrder)}
@@ -1024,6 +999,7 @@ export default function IndexLayout({
 
                             {/* Info Section */}
                             <div className="space-y-1 pr-8 text-gray-800">
+
                                 {/* Date Requested */}
                                 <p>
                                     <span className="font-bold text-primary">
@@ -1033,14 +1009,13 @@ export default function IndexLayout({
                                         workOrder.requested_at
                                     ).toLocaleDateString()}
                                 </p>
+
                                 {/* Description */}
-                                <p>
+                                <p className="items-start truncate my-2 overflow-y-auto hover:overflow-y-scroll">
                                     <span className="font-bold text-primary">
                                         Description:
                                     </span>{" "}
-                                    {shouldTruncate
-                                        ? `${description.slice(0, 25)}...`
-                                        : description}
+                                    {workOrder.report_description}
                                 </p>
 
                                 {/* Location */}
@@ -1050,68 +1025,78 @@ export default function IndexLayout({
                                     </span>{" "}
                                     {workOrder.location?.name || "N/A"}
                                 </p>
+                                
+                                {/* Assigned To and Priority - Hide for Pending tab */}
+                                {activeTab !== "Pending" && (
+                                    <>
+                                        {/* Assigned To */}
+                                        <p>
+                                            <span className="font-bold text-primary">
+                                                Assigned To:
+                                            </span>{" "}
+                                            {workOrder.assigned_to?.name || "N/A"}
+                                        </p>
+                                        {/* Priority */}
+                                        <p className="flex items-center">
+                                            <span className="font-bold text-primary mr-1">
+                                                Priority:
+                                            </span>
+                                            <span className="flex gap-1">
+                                                {["low", "med", "high", "crit"].map(
+                                                    (level) => {
+                                                        const normalizedPriority =
+                                                            workOrder.priority
+                                                                ?.toLowerCase()
+                                                                .trim();
 
-                                {/* Priority - Hide for Pending tab */}
-                                {isWorkOrderManager && activeTab !== "Pending" && (
-                                    <p className="flex items-center">
-                                        <span className="font-bold text-primary mr-1">
-                                            Priority:
-                                        </span>
-                                        <span className="flex gap-1">
-                                            {["low", "med", "high", "crit"].map(
-                                                (level) => {
-                                                    const normalizedPriority =
-                                                        workOrder.priority
-                                                            ?.toLowerCase()
-                                                            .trim();
+                                                        // Mapping for alternate values like "medium" -> "med"
+                                                        const priorityAliases: Record<
+                                                            string,
+                                                            string
+                                                        > = {
+                                                            low: "low",
+                                                            medium: "med",
+                                                            med: "med",
+                                                            high: "high",
+                                                            critical: "crit",
+                                                            crit: "crit",
+                                                        };
 
-                                                    // Mapping for alternate values like "medium" -> "med"
-                                                    const priorityAliases: Record<
-                                                        string,
-                                                        string
-                                                    > = {
-                                                        low: "low",
-                                                        medium: "med",
-                                                        med: "med",
-                                                        high: "high",
-                                                        critical: "crit",
-                                                        crit: "crit",
-                                                    };
+                                                        const current =
+                                                            priorityAliases[
+                                                                normalizedPriority || ""
+                                                            ] || "";
 
-                                                    const current =
-                                                        priorityAliases[
-                                                            normalizedPriority || ""
-                                                        ] || "";
+                                                        const isActive =
+                                                            current === level;
 
-                                                    const isActive =
-                                                        current === level;
+                                                        const bgColorMap: Record<
+                                                            string,
+                                                            string
+                                                        > = {
+                                                            low: "bg-green-100 text-green-800",
+                                                            med: "bg-yellow-100 text-yellow-800",
+                                                            high: "bg-orange-100 text-orange-800",
+                                                            crit: "bg-red-100 text-red-800",
+                                                        };
 
-                                                    const bgColorMap: Record<
-                                                        string,
-                                                        string
-                                                    > = {
-                                                        low: "bg-green-100 text-green-800",
-                                                        med: "bg-yellow-100 text-yellow-800",
-                                                        high: "bg-orange-100 text-orange-800",
-                                                        crit: "bg-red-100 text-red-800",
-                                                    };
-
-                                                    return (
-                                                        <span
-                                                            key={level}
-                                                            className={`px-2 py-1 text-xs font-semibold border ${
-                                                                isActive
-                                                                    ? `${bgColorMap[level]} border-transparent`
-                                                                    : "bg-gray-100 text-gray-400 border-gray-300"
-                                                            }`}
-                                                        >
-                                                            {level}
-                                                        </span>
-                                                    );
-                                                }
-                                            )}
-                                        </span>
-                                    </p>
+                                                        return (
+                                                            <span
+                                                                key={level}
+                                                                className={`px-2 py-1 text-xs font-semibold border ${
+                                                                    isActive
+                                                                        ? `${bgColorMap[level]} border-transparent`
+                                                                        : "bg-gray-100 text-gray-400 border-gray-300"
+                                                                }`}
+                                                            >
+                                                                {level}
+                                                            </span>
+                                                        );
+                                                    }
+                                                )}
+                                            </span>
+                                        </p>
+                                    </>
                                 )}
                             </div>
                         </div>
