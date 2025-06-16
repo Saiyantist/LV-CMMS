@@ -590,7 +590,7 @@ export default function EventServicesRequest() {
                                     </p>
                                     <p className="text-gray-500 text-sm mb-4">
                                         JPG, PNG or PDF, file size no more than
-                                        10MB
+                                        5MB
                                     </p>
                                     <button>SELECT FILE</button>
                                     <input
@@ -647,7 +647,7 @@ export default function EventServicesRequest() {
                                 </div>
                             )}
 
-                            <div className="text-gray-500 text-sm mt-4">
+                            {/* <div className="text-gray-500 text-sm mt-4">
                                 <p>
                                     Kindly use this naming format:
                                     EventDate_EventName
@@ -655,7 +655,7 @@ export default function EventServicesRequest() {
                                 <p className="text-gray-400">
                                     Example: 112424_EnglishMonth
                                 </p>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 )}
@@ -1040,11 +1040,10 @@ export default function EventServicesRequest() {
                             />
                         </svg>
                         <span>
-                            <strong>Notice:</strong> If you reload or leave the
-                            page during the process, your uploaded file in Step
-                            1 will be lost for security reasons. You will need
-                            to re-upload your proof of approval file to continue
-                            your booking request.
+                            <strong>NOTE!</strong> Refreshing or leaving the
+                            page during the process will remove your uploaded
+                            file due to security reasons and browser's
+                            limitation. You’ll need to upload it again.
                         </span>
                     </div>
                 </div>

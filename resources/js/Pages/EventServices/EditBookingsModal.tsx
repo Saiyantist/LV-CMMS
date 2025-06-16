@@ -87,6 +87,7 @@ const EditBookingsModal = ({
 
     const venueDropdownRef = useRef<HTMLDivElement>(null);
     const servicesDropdownRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (booking) {
@@ -125,8 +126,14 @@ const EditBookingsModal = ({
             ) {
                 setServicesDropdownOpen(false);
             }
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node)
+            ) {
+                setShowDeptSuggestions(false);
+            }
         }
-        if (venueDropdownOpen || servicesDropdownOpen) {
+        if (venueDropdownOpen || servicesDropdownOpen || showDeptSuggestions) {
             document.addEventListener("mousedown", handleClickOutside);
         }
         return () => {
@@ -309,6 +316,17 @@ const EditBookingsModal = ({
 
     const dynamicMax = totalCapacity > 0 ? totalCapacity : 9999; // fallback to 9999 if no venue selected
 
+    useEffect(() => {
+        if (booking?.department) {
+            setSelectedDepartments(
+                booking.department.split(",").map((d: string) => d.trim())
+            );
+        } else {
+            setSelectedDepartments([]);
+        }
+        setDeptInput(""); // Optionally reset input as well
+    }, [booking]);
+
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-lg w-full p-0">
@@ -324,161 +342,150 @@ const EditBookingsModal = ({
                 >
                     <div className="max-h-[60vh] overflow-y-auto pr-2">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                            {/* Event Name */}
-                            <div className="flex flex-col">
-                                <label className="mb-1 font-medium text-sm">
-                                    Event Name
-                                </label>
-                                <Input
-                                    name="name"
-                                    value={form.name || ""}
-                                    maxLength={MAX_EVENT_NAME}
-                                    onChange={(e) => {
-                                        let val = e.target.value;
-                                        if (val.length > MAX_EVENT_NAME) {
-                                            val = val.slice(0, MAX_EVENT_NAME);
-                                            setShowEventNameLimit(true);
-                                        } else {
-                                            setShowEventNameLimit(false);
-                                        }
-                                        setForm({ ...form, name: val });
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (
-                                            (form.name?.length || 0) ===
-                                                MAX_EVENT_NAME &&
-                                            e.key.length === 1 &&
-                                            !e.ctrlKey &&
-                                            !e.metaKey &&
-                                            !e.altKey
-                                        ) {
-                                            setShowEventNameLimit(true);
-                                            setTimeout(
-                                                () =>
-                                                    setShowEventNameLimit(
-                                                        false
-                                                    ),
-                                                2000
-                                            );
-                                        }
-                                    }}
-                                    className="text-sm"
-                                    placeholder="Enter event name"
-                                />
-                                <div className="flex justify-between items-center mt-1">
-                                    <span className="text-xs text-gray-500">
-                                        {form.name?.length || 0}/
-                                        {MAX_EVENT_NAME}
-                                    </span>
-                                    <span
-                                        className={`text-xs text-red-500 font-medium transition-opacity duration-300 ${
-                                            showEventNameLimit
-                                                ? "opacity-100"
-                                                : "opacity-0 pointer-events-none select-none"
-                                        }`}
-                                    >
-                                        Max {MAX_EVENT_NAME} characters.
-                                    </span>
-                                </div>
-                                {formErrors.name && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {formErrors.name}
-                                    </span>
-                                )}
-                            </div>
-                            {/* Department */}
-                            <div className="flex flex-col relative ">
-                                <label className="mb-1 font-medium text-sm">
-                                    Department
-                                </label>
-
-                                <button
-                                    type="button"
-                                    className="border rounded-md px-3 py-2 text-sm text-left bg-white"
-                                    onClick={() =>
-                                        setShowDeptSuggestions((v) => !v)
-                                    }
-                                >
-                                    {selectedDepartments.length ? (
-                                        selectedDepartments.join(", ")
-                                    ) : (
-                                        <span className="text-gray-400">
-                                            Select department(s)
+                            <div className="flex flex-col gap-4 w-full">
+                                {/* Event Name */}
+                                <div className="w-full">
+                                    <label className="mb-1 font-medium text-sm">
+                                        Event Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="event_name"
+                                        value={form.event_name || ""}
+                                        onChange={handleFormChange}
+                                        className="border rounded-md px-3 py-2 text-sm w-full"
+                                        placeholder="Enter event name"
+                                        maxLength={MAX_EVENT_NAME}
+                                    />
+                                    {formErrors.event_name && (
+                                        <span className="text-red-500 text-xs mt-1">
+                                            {formErrors.event_name}
                                         </span>
                                     )}
-                                </button>
-                                {showDeptSuggestions && (
-                                    <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto mt-20">
-                                        {deptOptions.map((dept) => (
-                                            <label
-                                                key={dept}
-                                                className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedDepartments.includes(
-                                                        dept
-                                                    )}
-                                                    onChange={() =>
-                                                        handleDeptCheckbox(dept)
-                                                    }
-                                                    className="mr-2"
-                                                />
-                                                {dept}
-                                            </label>
-                                        ))}
-                                        {/* Custom input for new department */}
-                                        <div className="flex items-center px-3 py-2 border-t">
-                                            <Input
+                                </div>
+                                {/* Department */}
+                                <div className="w-full">
+                                    <label className="mb-1 font-medium text-sm">
+                                        Department
+                                    </label>
+                                    <div className="flex flex-col mb-2 relative">
+                                        <div className="relative w-full">
+                                            <input
+                                                type="text"
                                                 value={deptInput}
-                                                onChange={(e) =>
-                                                    setDeptInput(e.target.value)
+                                                onChange={(e) => {
+                                                    setDeptInput(
+                                                        e.target.value
+                                                    );
+                                                    setShowDeptSuggestions(
+                                                        true
+                                                    );
+                                                }}
+                                                onFocus={() =>
+                                                    setShowDeptSuggestions(true)
                                                 }
-                                                className="text-sm flex-1"
-                                                placeholder="Add department"
+                                                className="border rounded-md px-3 py-2 text-sm w-full"
+                                                placeholder="Type or select department"
                                                 onKeyDown={(e) => {
-                                                    if (e.key === "Enter") {
+                                                    if (
+                                                        e.key === "Enter" &&
+                                                        deptInput.trim()
+                                                    ) {
                                                         e.preventDefault();
                                                         handleDeptAdd();
                                                     }
                                                 }}
                                             />
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                className="ml-2"
-                                                onClick={handleDeptAdd}
-                                                disabled={!deptInput.trim()}
-                                            >
-                                                Add
-                                            </Button>
+                                            {deptInput.trim() && (
+                                                <button
+                                                    type="button"
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600"
+                                                    onClick={handleDeptAdd}
+                                                    tabIndex={-1}
+                                                    title="Add department"
+                                                >
+                                                    ↵
+                                                </button>
+                                            )}
+                                            {showDeptSuggestions && (
+                                                <div
+                                                    className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto"
+                                                    ref={dropdownRef}
+                                                >
+                                                    {filteredDeptOptions.map(
+                                                        (dept) => (
+                                                            <label
+                                                                key={dept}
+                                                                className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={selectedDepartments.includes(
+                                                                        dept
+                                                                    )}
+                                                                    onChange={() =>
+                                                                        handleDeptCheckbox(
+                                                                            dept
+                                                                        )
+                                                                    }
+                                                                    className="mr-2"
+                                                                />
+                                                                {dept}
+                                                            </label>
+                                                        )
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {formErrors.department && (
+                                            <span className="text-red-500 text-xs mt-1">
+                                                {formErrors.department}
+                                            </span>
+                                        )}
+
+                                        {/* Chips/tags for selected departments */}
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {selectedDepartments.length ? (
+                                                selectedDepartments.map(
+                                                    (dept) => (
+                                                        <span
+                                                            key={dept}
+                                                            className="bg-secondary text-white px-2 py-1 rounded text-xs flex items-center"
+                                                        >
+                                                            {dept}
+                                                            <button
+                                                                type="button"
+                                                                className="ml-1 text-xs text-white hover:text-red-700"
+                                                                onClick={() =>
+                                                                    setSelectedDepartments(
+                                                                        selectedDepartments.filter(
+                                                                            (
+                                                                                d
+                                                                            ) =>
+                                                                                d !==
+                                                                                dept
+                                                                        )
+                                                                    )
+                                                                }
+                                                                tabIndex={-1}
+                                                                title="Remove"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        </span>
+                                                    )
+                                                )
+                                            ) : (
+                                                <span className="text-gray-400 text-xs">
+                                                    No department selected
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
-                                )}
-                                <div className="flex justify-between items-center mt-1">
-                                    <span className="text-xs text-gray-500">
-                                        {selectedDepartments.join(", ").length}
-                                        /100
-                                    </span>
-                                </div>
-                                {formErrors.department && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {formErrors.department}
-                                    </span>
-                                )}
-                                {/* Display current value */}
-                                <div className="mb-1 text-xs text-blue-700 font-semibold">
-                                    Current:{" "}
-                                    {booking?.department ? (
-                                        booking.department
-                                    ) : (
-                                        <span className="text-gray-400">
-                                            No department selected
-                                        </span>
-                                    )}
                                 </div>
                             </div>
                         </div>
+
                         <div className="flex flex-col mt-5">
                             <label className="mb-1 font-medium text-sm">
                                 Description
@@ -569,7 +576,7 @@ const EditBookingsModal = ({
                                         className={`text-xs text-red-500 font-medium transition-opacity duration-300 ${
                                             showParticipantsLimit
                                                 ? "opacity-100"
-                                                : "opacity-0 pointer-events-none select-none"
+                                                : "opacity-0 pointer-events-none"
                                         }`}
                                     >
                                         Max 100 characters.

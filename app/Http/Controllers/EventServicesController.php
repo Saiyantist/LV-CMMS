@@ -182,7 +182,7 @@ public function MyBookings()
             'event_end_time' => 'required',
             'requested_services' => 'nullable|array',
             'requested_services.*' => 'string|max:255',
-            'proof_of_approval' => 'nullable|file|mimes:jpg,png,pdf|max:10240', // 10MB
+            'proof_of_approval' => 'nullable|file|mimes:jpg,png,pdf|max:1024', // 5MB
         ]);
 
         if ($request->hasFile('proof_of_approval')) {
