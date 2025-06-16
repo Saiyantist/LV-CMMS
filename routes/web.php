@@ -113,7 +113,7 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         // ALWAYS ensure this route is at the end of "/work-orders" routes.
         Route::resource('work-orders', WorkOrderController::class)
             ->except(['create', 'show'])
-            ->middleware(['role_or_permission:department_head|manage work orders|view own work orders|update assigned work order status']);
+            ->middleware(['role_or_permission:senior_management|manage work orders|view own work orders|update assigned work order status']);
     
         Route::post('/locations', [LocationController::class, 'store']);
     });

@@ -324,8 +324,8 @@ class WorkOrderController extends Controller
             return redirect()->route('work-orders.assigned-tasks')->with(['error' => 'Cannot update.']);
         }
 
-        /** Department Head */
-        else if ($user->hasRole('department_head')) {
+        /** Senior Management */
+        else if ($user->hasRole('senior_management')) {
             if (count($request->all()) === 1 && array_key_exists('status', $request->all()) && $request->status === "Cancelled") {
                 $workOrder->update(['status' => $request->status]);
 

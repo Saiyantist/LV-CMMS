@@ -119,7 +119,7 @@ export default function IndexLayout({
     scrollToTop,
 }: Props) {
     const isRequester = user.roles[0].name === "internal_requester" ||
-                        user.roles[0].name === "department_head";
+                        user.roles[0].name === "senior_management";
     const isWorkOrderManager = user.permissions.includes("manage work orders");
 
     const [isViewingWorkOrder, setIsViewingWorkOrder] = useState<any>(null);

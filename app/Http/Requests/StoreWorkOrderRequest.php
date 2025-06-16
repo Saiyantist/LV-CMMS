@@ -14,7 +14,7 @@ class StoreWorkOrderRequest extends FormRequest
     {
         return auth()->user()->hasAnyRole([
             'maintenance_personnel',
-            'department_head',
+            'senior_management',
             'gasd_coordinator',
             'super_admin'
         ]);

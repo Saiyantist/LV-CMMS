@@ -70,7 +70,7 @@ export default function CreateWorkOrderModal({
     const [showCalendar, setShowCalendar] = useState(false);
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
-    const isRequester = user.roles.some((role) => role.name === "department_head");
+    const isRequester = user.roles.some((role) => role.name === "senior_management");
 
     const { data, setData, post, errors } = useForm({
         location_id: "",

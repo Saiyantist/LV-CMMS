@@ -69,18 +69,18 @@ class UserSeeder extends Seeder
         //      'status' => 'approved',
         // ])->assignRole('internal_requester');
 
-        // Department Head
+        // Senior Management
         User::create([
-            'first_name' => 'Department', 'last_name' => 'Head',
+            'first_name' => 'Senior', 'last_name' => 'Management',
             'gender' => 'male',
             'contact_number' => '09205979015',
-            'email' => 'departmenthead@laverdad.edu.ph',
+            'email' => 'seniormanagement@laverdad.edu.ph',
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'staff_type' => 'non-teaching',
             'department_id' => 1,
             'status' => 'approved',
-            ])->assignRole('department_head');
+            ])->assignRole('senior_management');
             
         // Maintenance Personnel
         User::create([
