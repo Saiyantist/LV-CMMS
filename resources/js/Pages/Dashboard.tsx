@@ -14,6 +14,7 @@ import EventServicesDashboard from "./EventServices/EventServicesDashboard";
 import { UpcomingWorkOrdersTable } from "@/Components/UpcomingWorkOrdersTable";
 import { UpcomingPreventiveMaintenanceTable } from "@/Components/UpcomingPreventiveMaintenanceTable";
 import { UpcomingCompliancesTable } from "@/Components/UpcomingCompliancesTable";
+import FlashToast from "@/Components/FlashToast";
 
 interface DashboardProps {
     workOrderRequests: {
@@ -822,6 +823,8 @@ export default function Dashboard({
                     )}
                 </div>
             )}
+
+            <FlashToast />
         </AuthenticatedLayout>
     );
 }

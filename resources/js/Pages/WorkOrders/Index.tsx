@@ -63,6 +63,7 @@ export default function WorkOrders({
     const filteredWorkOrders = workOrders.filter((wo) => {
         if (activeTab === "Pending") return wo.status === "Pending";
         if (activeTab === "Accepted") return ["Assigned", 'For Budget Request'].includes(wo.status);
+        if (activeTab === "Assigned") return ["Assigned", 'For Budget Request'].includes(wo.status);
         if (activeTab === "Ongoing") return ["Ongoing", "Scheduled"].includes(wo.status);
         if (activeTab === "Completed") return wo.status === "Completed";
         if (activeTab === "Overdue") return wo.status === "Overdue";

@@ -55,6 +55,7 @@ class WorkOrderController extends Controller
                 'label' => $wo->label,
                 'priority' => $wo->priority ?: "",
                 'remarks' => $wo->remarks,
+                'work_order_type' => $wo->work_order_type,
                 'requested_by' => [
                     'id' => $wo->requestedBy->id,
                     'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
@@ -122,7 +123,7 @@ class WorkOrderController extends Controller
             'priority' => $isWorkOrderManager ? $request->priority : null,
             'assigned_to' => $isWorkOrderManager ? $request->assigned_to : null,
             'assigned_at' => $isWorkOrderManager ? now() : null,
-            'scheduled_at' => $isWorkOrderManager ? $request->scheduled_at : null,
+            'scheduled_at' => $request->scheduled_at ?? null,
             'asset_id' => $isWorkOrderManager ? $request->asset_id : null,
             'remarks' => $isWorkOrderManager ? $request->remarks : null,
         ]);
@@ -141,6 +142,7 @@ class WorkOrderController extends Controller
                 'requested_at' => $workOrder->requested_at,
                 'report_description' => $workOrder->report_description,
                 'location' => $workOrder->location->name,
+                'scheduled_at' => $workOrder->scheduled_at, 
                 'requested_by' => $workOrder->requestedBy->first_name . ' ' . $workOrder->requestedBy->last_name,
             ];
             Mail::to($this->gasdCoordinator->email)->send(new NewWorkOrder($workOrderData));
@@ -350,6 +352,7 @@ class WorkOrderController extends Controller
                 $workOrder->update([
                     'report_description' => $request->report_description,
                     'location_id' => $request->location_id,
+                    'scheduled_at' => $request->scheduled_at ?? null,
                 ]);
                 return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
             }

@@ -252,7 +252,7 @@ export default function ViewWorkOrderModal({
                             </TableRow>
 
                             {/* Row 3 */}
-                            {isRequester && (
+                            {(isRequester && workOrder.status !== "Pending") && (
                                 <TableRow className="border-none flex flex-col sm:flex-row w-full">
 
                                     {/* Assigned To */}
@@ -260,7 +260,7 @@ export default function ViewWorkOrderModal({
                                         <TableHead className={`flex ${isMaintenancePersonnel ? "flex-[1.5]" : "flex-[1]"} items-center`}>
                                             <Label>Assigned To:</Label>
                                         </TableHead>
-                                        <TableCell className={`flex ${isMaintenancePersonnel ? "flex-[3.3] sm:flex-[1.5]" : "flex-[3.3] sm:flex-[1]"} items-center`}>{workOrder.assigned_to.name}</TableCell>
+                                        <TableCell className={`flex ${isMaintenancePersonnel ? "flex-[3.3] sm:flex-[1.5]" : "flex-[3.3] sm:flex-[1]"} items-center`}>{workOrder.assigned_to?.name}</TableCell>
                                     </div>  
 
                                     {/* Priority */}

@@ -426,7 +426,7 @@ export default function IndexLayout({
             },
         },
         // Accepted and Declined tabs
-        ...(activeTab !== "Pending" && activeTab !== "For Budget Request"
+        ...(activeTab !== "Pending"
             ? [
                 {
                     accessorKey: "label",
@@ -439,7 +439,7 @@ export default function IndexLayout({
                     }
                 },
                 ...(activeTab === "Accepted" ? [
-                    {
+                {
                     accessorKey: "scheduled_at",
                     header: "Target Date",
                     cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at") || "No date set."}</div>,
@@ -521,7 +521,7 @@ export default function IndexLayout({
                                 )}
                             </div>
 
-                            {/* Large screens - visible from md to lg */}
+                            {/* Medium screens - visible from md to lg */}
                             <div className="hidden md:flex xl:hidden">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -551,8 +551,16 @@ export default function IndexLayout({
               ]
             : []),
         // Pending and For Budget Request tabs
-        ...(activeTab === "Pending" || activeTab === "For Budget Request"
+        ...(activeTab === "Pending"
             ? [
+                {
+                    accessorKey: "scheduled_at",
+                    header: "Target Date",
+                    cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("scheduled_at") || "No date set."}</div>,
+                    meta: {
+                        cellClassName: "min-w-[7.5rem] max-w-[8rem] text-center",
+                    },
+                },
                 {
                     accessorKey: "requested_by",
                     header: "Requested by",
@@ -566,18 +574,18 @@ export default function IndexLayout({
                         filterable: true,
                     },
                 },
-                ...(activeTab === "For Budget Request" ? [
-                    {
-                        accessorKey: "label",
-                        header: "Label",
-                        cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("label")}</div>,
-                        enableSorting: false,
-                        meta: {
-                            cellClassName: "text-center",
-                            searchable: true,
-                        }
-                    },
-                ] : []),
+                // ...(activeTab === "For Budget Request" ? [
+                //     {
+                //         accessorKey: "label",
+                //         header: "Label",
+                //         cell: ({ row }: { row: Row<WorkOrders> }) => <div>{row.getValue("label")}</div>,
+                //         enableSorting: false,
+                //         meta: {
+                //             cellClassName: "text-center",
+                //             searchable: true,
+                //         }
+                //     },
+                // ] : []),
                 {
                     id: "actions",
                     header: "Action",
@@ -656,7 +664,7 @@ export default function IndexLayout({
             <Head title="Work Orders" />
 
             {/* Header */}
-            <header className="sticky top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
+            <header className="sticky md:flex top-0 z-40 md:z-0 w-full mx-auto px-0 sm:pb-4 bg-white">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start -mt-6 pt-6 text-center sm:text-left gap-3 sm:gap-4">
                     <h1 className="text-2xl font-semibold sm:mb-0">
                         Work Orders
@@ -901,7 +909,7 @@ export default function IndexLayout({
                                                 sideOffset={4}
                                             >
                                                 {/* Pending Tab Actions */}
-                                                {(activeTab === "Pending" || activeTab === "For Budget Request") && (
+                                                {(activeTab === "Pending") && (
                                                     <>
                                                         <button
                                                             onClick={() => setAcceptingWorkOrder(workOrder)}
@@ -927,7 +935,7 @@ export default function IndexLayout({
                                                 )}
 
                                                 {/* Accepted Tab Actions */}
-                                                {activeTab === "Accepted" && (
+                                                {["Accepted", "Assigned", "Ongoing", "Completed", "Overdue"].includes(activeTab) && (
                                                     <>
                                                         <button
                                                             onClick={() => setEditingWorkOrder(workOrder)}
@@ -939,7 +947,7 @@ export default function IndexLayout({
                                                 )}
 
                                                 {/* Declined Tab Actions */}
-                                                {activeTab === "Declined" && (
+                                                {["Cancelled", "Declined"].includes(activeTab) && (
                                                     <>
                                                         <button
                                                             onClick={() => setEditingWorkOrder(workOrder)}

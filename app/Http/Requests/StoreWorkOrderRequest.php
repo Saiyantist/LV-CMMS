@@ -64,6 +64,7 @@ class StoreWorkOrderRequest extends FormRequest
                 return $rules = [
                     'location_id' => 'required|exists:locations,id',
                     'report_description' => 'required|string|max:1000',
+                    'scheduled_at' => 'nullable|date',
                     'attachments' => 'nullable|array', // Accept multiple images
                     'attachments.*' => 'image|mimes:jpg,jpeg,png,JPG,JPEG,PNG|max:5120',
                 ];
