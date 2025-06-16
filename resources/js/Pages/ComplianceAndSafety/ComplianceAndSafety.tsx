@@ -198,12 +198,12 @@ const ComplianceAndSafety: React.FC<Props> = ({ workOrders, locations, maintenan
             accessorKey: "status",
             header: "Status",
             cell: ({ row }) => (
-                <div className={`px-2 py-1 rounded ${getStatusColor(row.getValue("status"))}`}>
+                <div className={`px-2 py-1 rounded border ${getStatusColor(row.getValue("status"))}`}>
                     {row.getValue("status")}
                 </div>
             ),
             meta: {
-                cellClassName: "max-w-[8rem] text-center",
+                cellClassName: "max-w-[9rem] text-center flex justify-self-center items-center",
                 filterable: true,
             },
         },

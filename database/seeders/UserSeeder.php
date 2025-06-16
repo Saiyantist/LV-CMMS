@@ -27,6 +27,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('secret'),
             'staff_type' => 'non-teaching',
             'department_id' => 1,
+            'status' => 'approved',
             ])->assignRole('super_admin');
 
         // GASD Coordinator with working Email (for testing purposes)
@@ -39,6 +40,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('secret'),
             'staff_type' => 'non-teaching',
             'department_id' => 1,
+            'status' => 'approved',
             ])->assignRole('gasd_coordinator');
 
         // Communications Officer with working Email (for testing purposes)
@@ -51,6 +53,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('secret'),
             'staff_type' => 'non-teaching',
             'department_id' => 1,
+            'status' => 'approved',
         ])->assignRole('communications_officer');
 
         // // Internal Requester
@@ -63,6 +66,7 @@ class UserSeeder extends Seeder
         //     'password' => Hash::make('password'),
         //     'staff_type' => 'teaching',
         //     'department_id' => 9,
+        //      'status' => 'approved',
         // ])->assignRole('internal_requester');
 
         // Department Head
@@ -75,6 +79,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'staff_type' => 'non-teaching',
             'department_id' => 1,
+            'status' => 'approved',
             ])->assignRole('department_head');
             
         // Maintenance Personnel
@@ -87,6 +92,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'staff_type' => 'maintenance_personnel',
             'work_group_id' => '7',
+            'status' => 'approved',
         ])->assignRole('maintenance_personnel');
 
         // External Requester
@@ -97,6 +103,7 @@ class UserSeeder extends Seeder
             'email' => 'externalrequester@laverdad.edu.ph',
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
+            'status' => 'approved',
         ])->assignRole('external_requester');
 
         // Mr. Eric - GASD Coordinator
@@ -109,6 +116,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'staff_type' => 'non-teaching',
             'department_id' => 2,
+             'status' => 'approved',
         ])->assignRole('gasd_coordinator');
 
         // Ms. Edyssa - Communications Officer
@@ -121,6 +129,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'staff_type' => 'non-teaching',
             'department_id' => 3,
+             'status' => 'approved',
         ])->assignRole('communications_officer');
     }
 }

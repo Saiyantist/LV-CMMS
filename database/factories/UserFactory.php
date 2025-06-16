@@ -64,6 +64,7 @@ class UserFactory extends Factory
             'staff_type' => $staffType,
             'department_id' => $departmentId,
             'work_group_id' => $workGroupId,
+            'status' => 'approved',
         ];
     }
 

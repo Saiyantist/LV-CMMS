@@ -35,6 +35,7 @@ export default function FlashToast() {
             position={isMobile ? "top-right" : "bottom-right"} 
             closeButton 
             theme='system'
+            duration={ 7000 }
             toastOptions={{
                 style: {
                     background: '#ffffff',

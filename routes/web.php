@@ -160,6 +160,16 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
 
         Route::get('/api/event-services/bookings', [EventServicesController::class, 'bookingsData']);
     });
+
+    // User Role Management Routes
+    Route::prefix('admin/manage-roles')->group(function () {
+        Route::get('/', [UserRoleController::class, 'index'])->name('admin.manage-roles');
+        Route::patch('/{user}/role', [UserRoleController::class, 'updateRole'])->name('admin.update-role');
+        Route::delete('/{user}/role', [UserRoleController::class, 'removeRole'])->name('admin.remove-role');
+        Route::patch('/{user}/approve', [UserRoleController::class, 'approveUser'])->name('admin.approve-user');
+        Route::patch('/{user}/reject', [UserRoleController::class, 'rejectUser'])->name('admin.reject-user');
+        Route::patch('/{user}/remove-access', [UserRoleController::class, 'removeAccess'])->name('admin.remove-access');
+    });
 });
 
 Route::get('/mail-test', function () {
