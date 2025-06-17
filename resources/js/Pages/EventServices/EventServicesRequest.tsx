@@ -1042,8 +1042,8 @@ export default function EventServicesRequest() {
                         <span>
                             <strong>NOTE!</strong> Refreshing or leaving the
                             page during the process will remove your uploaded
-                            file due to security reasons and browser's
-                            limitation. You’ll need to upload it again.
+                            file due to browser's limitation. You’ll need to
+                            upload it again.
                         </span>
                     </div>
                 </div>

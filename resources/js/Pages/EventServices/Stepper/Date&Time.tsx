@@ -6,13 +6,14 @@ import {
     ChevronRight,
     Calendar as CalendarIcon,
 } from "lucide-react";
+import { galleryItems } from './Gallery';
 
 export default function DateTimeSelection({
     value,
     onChange,
 }: {
-    value?: { dateRange: string; timeRange: string };
-    onChange?: (val: { dateRange: string; timeRange: string }) => void;
+    value?: { dateRange: string; timeRange: string; venues?: number[] };
+    onChange?: (val: { dateRange: string; timeRange: string; venues?: number[] }) => void;
 }) {
     const now = new Date();
 
@@ -29,6 +30,10 @@ export default function DateTimeSelection({
     const [startTime, setStartTime] = useState<string | null>(null);
     const [endTime, setEndTime] = useState<string | null>(null);
     const [endDatePrompt, setEndDatePrompt] = useState<string | null>(null);
+
+    const [selectedVenues, setSelectedVenues] = useState<number[]>([]);
+    const [timeOptions, setTimeOptions] = useState<string[]>([]);
+    const [loadingTimes, setLoadingTimes] = useState(false);
 
     // Generate calendar days for each calendar
     const generateCalendarDays = (
@@ -247,23 +252,67 @@ export default function DateTimeSelection({
     const formatDate = (month: number, day: number, year: number) =>
         `${months[month]} ${day}, ${year}`;
 
-    // Dropdown options for time (12-hour format with AM/PM)
-    const timeOptions: string[] = [];
-    for (let h = 6; h < 12; h++) {
-        for (let m = 0; m < 60; m += 30) {
-            const hour = h.toString().padStart(2, "0");
-            const min = m.toString().padStart(2, "0");
-            timeOptions.push(`${hour}:${min} AM`);
+    // Effect to get selected venues from parent
+    useEffect(() => {
+        if (value?.venues) {
+            setSelectedVenues(value.venues);
         }
-    }
-    for (let h = 12; h < 24; h++) {
-        for (let m = 0; m < 60; m += 30) {
-            const hour = (h > 12 ? h - 12 : h).toString().padStart(2, "0");
-            const min = m.toString().padStart(2, "0");
-            timeOptions.push(`${hour}:${min} PM`);
+    }, [value?.venues]);
+    
+    // Effect to fetch time options - including availability filtering
+    useEffect(() => {
+        // Always fetch basic time options on component mount
+        fetch('/event-services/time-options')
+            .then(res => res.json())
+            .then(data => {
+                setTimeOptions(data.timeSlots);
+            })
+            .catch(err => {
+                console.error("Error fetching time options:", err);
+            });
+    }, []);
+    
+    // Effect to fetch available time slots when venue and date are selected
+    useEffect(() => {
+        if (selectedVenues?.length > 0 && startDate) {
+            setLoadingTimes(true);
+            const dateStr = `${startYear}-${(startMonth + 1).toString().padStart(2, '0')}-${startDate.toString().padStart(2, '0')}`;
+            
+            // Get venue name for the first selected venue
+            const venueName = galleryItems.find(item => item.id === selectedVenues[0])?.title;
+            if (!venueName) {
+                setLoadingTimes(false);
+                return;
+            }
+            
+            fetch(`/event-services/time-options?venue=${encodeURIComponent(venueName)}&date=${dateStr}`)
+                .then(res => res.json())
+                .then(data => {
+                    setTimeOptions(data.timeSlots);
+                    // Reset selected times if they're no longer valid
+                    if (startTime && !data.timeSlots.includes(startTime)) {
+                        setStartTime(null);
+                    }
+                    if (endTime && !data.timeSlots.includes(endTime)) {
+                        setEndTime(null);
+                    }
+                    setLoadingTimes(false);
+                })
+                .catch(err => {
+                    console.error("Error fetching available times:", err);
+                    setLoadingTimes(false);
+                });
         }
-    }
-    timeOptions.push("11:59 PM");
+    }, [selectedVenues, startDate, startMonth, startYear]);
+    
+    // Get available end time options based on start time
+    const getAvailableEndTimeOptions = () => {
+        if (!startTime) return [];
+        
+        return timeOptions.filter(t => 
+            timeOptions.indexOf(t) > timeOptions.indexOf(startTime)
+        );
+    };
 
     // Date select handlers
     const handleDateSelect = (day: number, isStart: boolean) => {
@@ -531,6 +580,16 @@ export default function DateTimeSelection({
                                 </option>
                             ))}
                         </select>
+                        {loadingTimes && (
+                            <div className="mt-2 text-xs text-blue-600">
+                                Loading available times...
+                            </div>
+                        )}
+                        {selectedVenues?.length > 0 && startDate && !loadingTimes && (
+                            <div className="mt-2 text-xs text-blue-600">
+                                Only showing available time slots for the selected venue(s).
+                            </div>
+                        )}
                     </div>
                     <div className="bg-transparent-50 p-4 rounded-md">
                         <label className="block text-left text-lg font-medium mb-2">
@@ -539,8 +598,7 @@ export default function DateTimeSelection({
 
                         <select
                             className={`w-full border rounded-md px-3 py-2 text-base transition-colors duration-200
-        ${!startTime ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}
-    `}
+                            ${!startTime ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}`}
                             value={endTime || ""}
                             onChange={(e) => setEndTime(e.target.value)}
                             disabled={!startTime}
@@ -548,18 +606,11 @@ export default function DateTimeSelection({
                             <option value="" disabled>
                                 Select time
                             </option>
-                            {timeOptions
-                                .filter((t) =>
-                                    !startTime
-                                        ? true
-                                        : timeOptions.indexOf(t) >
-                                          timeOptions.indexOf(startTime)
-                                )
-                                .map((t) => (
-                                    <option key={t} value={t}>
-                                        {t}
-                                    </option>
-                                ))}
+                            {getAvailableEndTimeOptions().map((t) => (
+                                <option key={t} value={t}>
+                                    {t}
+                                </option>
+                            ))}
                         </select>
 
                         {/* End Time prompt */}

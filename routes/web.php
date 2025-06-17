@@ -150,6 +150,12 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
         Route::put('/event-services/{id}', [EventServicesController::class, 'update'])->name('event-services.update');
 
         Route::get('/departments/{type}', [DepartmentController::class, 'show']);
+
+
+        Route::get('/event-services/time-options', [EventServicesController::class, 'getTimeOptions']);
+        
+        Route::get('/event-services/occupied-times', [EventServicesController::class, 'getOccupiedTimes']);
+
         
         Route::post('/event-services/check-conflict', [EventServicesController::class, 'checkConflict']);
    
