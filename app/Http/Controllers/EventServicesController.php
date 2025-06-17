@@ -381,4 +381,80 @@ protected function filterGasdServices($services)
 
     return [];
 }
+
+public function getOccupiedTimes(Request $request)
+{
+    $venue = $request->venue;
+    $date = $request->date;
+
+    $bookings = EventService::whereIn('status', ['Pending', 'Approved', 'On Going'])
+        ->whereJsonContains('venue', $venue)
+        ->where('event_start_date', '<=', $date)
+        ->where('event_end_date', '>=', $date)
+        ->get(['event_start_time', 'event_end_time']);
+
+    $occupied = $bookings->map(function ($b) {
+        return [
+            'start' => $b->event_start_time,
+            'end' => $b->event_end_time,
+        ];
+    });
+
+    return response()->json($occupied);
+}
+
+
+public function getTimeOptions(Request $request)
+{
+    // Standard time slots (30-minute intervals from 6 AM to 11:59 PM)
+    $timeSlots = [];
+    
+    // Generate time slots from 6 AM to 11:59 PM
+    $start = strtotime('06:00');
+    $end = strtotime('23:59');
+    $interval = 30 * 60; // 30 minutes in seconds
+    
+    for ($time = $start; $time <= $end; $time += $interval) {
+        $timeSlots[] = date('h:i A', $time);
+    }
+    
+    // Add 11:59 PM as final option
+    if (end($timeSlots) !== '11:59 PM') {
+        $timeSlots[] = '11:59 PM';
+    }
+    
+    // If venue and date are provided, filter out occupied slots
+    if ($request->has('venue') && $request->has('date')) {
+        $venue = $request->venue;
+        $date = $request->date;
+        
+        // Get bookings for this venue and date
+        $bookings = \App\Models\EventService::whereIn('status', ['Pending', 'Approved', 'On Going'])
+            ->whereJsonContains('venue', $venue)
+            ->where('event_start_date', '<=', $date)
+            ->where('event_end_date', '>=', $date)
+            ->get(['event_start_time', 'event_end_time']);
+        
+        // Filter out occupied times
+        $availableTimeSlots = array_filter($timeSlots, function($timeSlot) use ($bookings) {
+            // Convert 12-hour format to 24-hour for comparison
+            $time24h = date('H:i', strtotime($timeSlot));
+            
+            foreach ($bookings as $booking) {
+                if ($time24h >= $booking->event_start_time && $time24h < $booking->event_end_time) {
+                    return false; // This time is occupied
+                }
+            }
+            
+            return true; // This time is available
+        });
+        
+        $timeSlots = array_values($availableTimeSlots);
+    }
+    
+    return response()->json([
+        'timeSlots' => $timeSlots
+    ]);
+}
+
 }

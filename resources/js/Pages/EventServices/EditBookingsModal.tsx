@@ -341,21 +341,22 @@ const EditBookingsModal = ({
                     autoComplete="off"
                 >
                     <div className="max-h-[60vh] overflow-y-auto pr-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                            <div className="flex flex-col gap-4 w-full">
+                        {/* <div> */}
+                            <div className="flex flex-col gap-4 mt-5 w-full">
                                 {/* Event Name */}
-                                <div className="w-full">
+                                <div className="flex flex-col w-full">
                                     <label className="mb-1 font-medium text-sm">
                                         Event Name
                                     </label>
-                                    <input
+                                    <Input
                                         type="text"
                                         name="event_name"
                                         value={form.event_name || ""}
                                         onChange={handleFormChange}
                                         className="border rounded-md px-3 py-2 text-sm w-full"
-                                        placeholder="Enter event name"
-                                        maxLength={MAX_EVENT_NAME}
+                                        placeholder={
+                                            booking?.name || "Enter event name"
+                                        }
                                     />
                                     {formErrors.event_name && (
                                         <span className="text-red-500 text-xs mt-1">
@@ -364,7 +365,7 @@ const EditBookingsModal = ({
                                     )}
                                 </div>
                                 {/* Department */}
-                                <div className="w-full">
+                                <div className="flex flex-col w-full">
                                     <label className="mb-1 font-medium text-sm">
                                         Department
                                     </label>
@@ -484,7 +485,7 @@ const EditBookingsModal = ({
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        {/* </div> */}
 
                         <div className="flex flex-col mt-5">
                             <label className="mb-1 font-medium text-sm">
