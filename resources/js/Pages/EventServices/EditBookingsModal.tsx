@@ -104,6 +104,7 @@ const EditBookingsModal = ({
             setForm({
                 ...booking,
                 venue: venues,
+                event_name: booking.name, // Add this line to map name to event_name
                 requested_services: requestedServices,
                 status: booking.status,
             });
@@ -196,6 +197,15 @@ const EditBookingsModal = ({
         // Only send changed fields
         const changedFields: any = {};
         Object.keys(form).forEach((key) => {
+            // Special handling for event_name -> name mapping
+            if (key === 'event_name') {
+                const original = booking.name;
+                if (form[key] !== original && form[key] !== undefined) {
+                    changedFields['name'] = form[key]; // Map event_name to name
+                }
+                return;
+            }
+            
             const original =
                 Array.isArray(form[key]) && Array.isArray(booking[key])
                     ? JSON.stringify(booking[key])
