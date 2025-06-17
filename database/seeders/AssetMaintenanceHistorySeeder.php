@@ -13,6 +13,28 @@ class AssetMaintenanceHistorySeeder extends Seeder
     public function run(): void
     {
         $assets = Asset::all();
+        $downtimeReasons = [
+            "Circuit board shorted due to moisture exposure.",
+            "Rust corrosion caused mechanical failure.",
+            "Power outage affected device initialization.",
+            "Rodents chewed on critical wiring.",
+            "Cooling fan seized up from dust build-up.",
+            "Sensor misalignment from equipment shake.",
+            "Routine inspection revealed internal damage.",
+            "Loose internal connectors caused power issues.",
+            "Motor belt slipped off its track.",
+            "Thermal paste degradation led to overheating.",
+            "Battery unit failed and needs replacement.",
+            "Lightbulb lifespan reached end-of-life.",
+            "Display panel cracked during use.",
+            "Blocked air filters caused system shutdown.",
+            "Unexpected voltage spike damaged components.",
+            "Broken switch mechanism inside the control panel.",
+            "Gearbox failed due to lubrication loss.",
+            "Calibration settings lost after reboot.",
+            "Clogged tubing in fluid-handling unit.",
+            "Physical shock from accidental drop.",
+        ];
 
         foreach ($assets as $asset) {
             if ($asset->status === 'End of Useful Life') continue;
@@ -87,7 +109,7 @@ class AssetMaintenanceHistorySeeder extends Seeder
                 AssetMaintenanceHistory::create([
                     'asset_id' => $asset->id,
                     'work_order_id' => $workOrder?->id,
-                    'downtime_reason' => fake()->sentence(),
+                    'downtime_reason' => fake()->randomElement($downtimeReasons),
                     'status' => $status,
                     'failed_at' => $failedAtCarbon,
                     'maintained_at' => $maintainedAt,

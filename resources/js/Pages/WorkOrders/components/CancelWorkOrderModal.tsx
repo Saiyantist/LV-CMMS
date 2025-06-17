@@ -198,7 +198,7 @@ export default function CancelWorkOrderModal({
                 {/* Footer - Buttons */}
                 <DialogFooter className="px-6 py-4 border-t">
                     <Button variant="outline" onClick={onClose}>Back</Button>
-                    <Button variant="destructive" type="submit" onClick={submit}>Cance Work Order</Button>
+                    <Button variant="destructive" type="submit" onClick={submit}>Cancel Work Order</Button>
                 </DialogFooter>
 
             {activeImageIndex !== null && (
