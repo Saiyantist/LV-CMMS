@@ -23,6 +23,8 @@ import {
     SelectValue,
 } from "@/Components/shadcnui/select";
 import SmartDropdown from "@/Components/SmartDropdown";
+import { Input } from "@/Components/shadcnui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/Components/shadcnui/popover";
 
 interface Location {
     id: number;
@@ -68,11 +70,13 @@ export default function CreateWorkOrderModal({
     const [showCalendar, setShowCalendar] = useState(false);
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
+    const isRequester = user.roles.some((role) => role.name === "senior_management");
 
     const { data, setData, post, errors } = useForm({
         location_id: "",
         report_description: "",
         attachments: [] as File[],
+        scheduled_at: "",
         ...(isWorkOrderManager && {
             status: "",
             work_order_type: "Work Order",
@@ -80,11 +84,11 @@ export default function CreateWorkOrderModal({
             priority: "",
             assigned_to: "",
             remarks: "",
-            scheduled_at: "",
             asset_id: "",
         }),
     });
 
+    /** Validate Form */
     const validateForm = () => {
         // fix the location and asset errors
         const newErrors: Record<string, string> = {};
@@ -134,12 +138,12 @@ export default function CreateWorkOrderModal({
         const formData = new FormData();
         formData.append("location_id", locationId);
         formData.append("report_description", data.report_description);
+        if (date) formData.append("scheduled_at", format(date, "yyyy-MM-dd"));
         data.attachments.forEach((file) => formData.append("attachments[]", file));
 
         if (isWorkOrderManager) {
             formData.append("work_order_type", data.work_order_type || "Work Order");
             formData.append("label", data.label || "");
-            if (date) formData.append("scheduled_at", format(date, "yyyy-MM-dd"));
             formData.append("priority", data.priority || "");
             formData.append("status", data.status || "");
             formData.append("assigned_to", data.assigned_to || "");
@@ -284,305 +288,357 @@ export default function CreateWorkOrderModal({
                             )}
                         </div>
 
-                        {isWorkOrderManager && (
-                            <>
-                                <div className="flex flex-row justify-between gap-4 !mt-8">
-                                    {/* Label */}
-                                    <div className="flex-[1] space-y-2">
-                                        <Label
-                                            htmlFor="label"
-                                            className="flex items-center"
-                                        >
-                                            Label{" "}
-                                            <span className="text-red-500 ml-1">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <Select
-                                            value={data.label}
-                                            onValueChange={(value) =>
-                                                setData("label", value)
-                                            }
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select Label" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="No Label">
-                                                    No Label
-                                                </SelectItem>
-                                                <SelectItem value="HVAC">
-                                                    HVAC
-                                                </SelectItem>
-                                                <SelectItem value="Electrical">
-                                                    Electrical
-                                                </SelectItem>
-                                                <SelectItem value="Plumbing">
-                                                    Plumbing
-                                                </SelectItem>
-                                                <SelectItem value="Painting">
-                                                    Painting
-                                                </SelectItem>
-                                                <SelectItem value="Carpentry">
-                                                    Carpentry
-                                                </SelectItem>
-                                                <SelectItem value="Repairing">
-                                                    Repairing
-                                                </SelectItem>
-                                                <SelectItem value="Welding">
-                                                    Welding
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        {localErrors.label && (
-                                            <p className="text-red-500 text-xs">
-                                                {localErrors.label}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {/* Target Date */}
-                                    <div className="flex-[1] space-y-2">
-                                        <Label
-                                            htmlFor="scheduled_at"
-                                            className="flex items-center"
-                                        >
-                                            Target Date{" "}
-                                            <span className="text-red-500 ml-1">
-                                                *
-                                            </span>
-                                        </Label>
+                        {/* Target Date */}
+                        {isRequester && (
+                            <div className="flex-[1] space-y-2">
+                                <Label htmlFor="scheduled_at" className="flex items-center">
+                                    Target Date
+                                </Label>
+                                <Popover open={showCalendar} onOpenChange={setShowCalendar}>
+                                    <PopoverTrigger asChild>
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            onClick={() =>
-                                                setShowCalendar(!showCalendar)
-                                            }
                                             className={cn(
-                                                "w-full flex justify-between items-center",
+                                                "relative w-full flex justify-between items-center",
                                                 "text-left font-normal",
-                                                !data.scheduled_at &&
-                                                    "text-muted-foreground"
+                                                !data.scheduled_at && "text-muted-foreground"
                                             )}
                                         >
                                             {data.scheduled_at
-                                                ? format(
-                                                      parseISO(
-                                                          data.scheduled_at
-                                                      ),
-                                                      "MM/dd/yyyy"
-                                                  )
+                                                ? format(data.scheduled_at, "MM/dd/yyyy")
                                                 : "MM/DD/YYYY"}
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>
-                                        {showCalendar && (
-                                            <div
-                                                className="absolute z-50 bg-white shadow-md border mt-2 -ml-[10rem] md:-ml-[11vw] lg:-ml-[7.5vw] rounded-md"
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
+                                    </PopoverTrigger>
+                                    <PopoverContent 
+                                        className="w-auto p-0" 
+                                        align="end"
+                                        side="bottom"
+                                        noPortal
+                                    >
+                                        <Calendar
+                                            mode="single"
+                                            selected={
+                                                data.scheduled_at && isValid(parseISO(data.scheduled_at))
+                                                    ? parseISO(data.scheduled_at)
+                                                    : undefined
+                                            }
+                                            onSelect={(date) => {
+                                                if (date) {
+                                                    setData("scheduled_at", format(date, "yyyy-MM-dd"))
+                                                    setDate(date)
+                                                    setLocalErrors((prev) => ({ ...prev, scheduled_at: "" }))
+                                                    setShowCalendar(false)
                                                 }
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={
-                                                        data.scheduled_at &&
-                                                        isValid(
-                                                            parseISO(
+                                            }}
+                                            disabled={(date) => date < new Date()}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                        )}
+
+                        {isWorkOrderManager && (
+                        <>
+                            <div className="flex flex-row justify-between gap-4 !mt-8">
+                                {/* Label */}
+                                <div className="flex-[1] space-y-2">
+                                    <Label
+                                        htmlFor="label"
+                                        className="flex items-center"
+                                    >
+                                        Label{" "}
+                                        <span className="text-red-500 ml-1">
+                                            *
+                                        </span>
+                                    </Label>
+                                    <Select
+                                        value={data.label}
+                                        onValueChange={(value) =>
+                                            setData("label", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Label" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="No Label">
+                                                No Label
+                                            </SelectItem>
+                                            <SelectItem value="HVAC">
+                                                HVAC
+                                            </SelectItem>
+                                            <SelectItem value="Electrical">
+                                                Electrical
+                                            </SelectItem>
+                                            <SelectItem value="Plumbing">
+                                                Plumbing
+                                            </SelectItem>
+                                            <SelectItem value="Painting">
+                                                Painting
+                                            </SelectItem>
+                                            <SelectItem value="Carpentry">
+                                                Carpentry
+                                            </SelectItem>
+                                            <SelectItem value="Repairing">
+                                                Repairing
+                                            </SelectItem>
+                                            <SelectItem value="Welding">
+                                                Welding
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {localErrors.label && (
+                                        <p className="text-red-500 text-xs">
+                                            {localErrors.label}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Target Date */}
+                                <div className="flex-[1] space-y-2">
+                                    <Label
+                                        htmlFor="scheduled_at"
+                                        className="flex items-center"
+                                    >
+                                        Target Date{" "}
+                                        <span className="text-red-500 ml-1">
+                                            *
+                                        </span>
+                                    </Label>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() =>
+                                            setShowCalendar(!showCalendar)
+                                        }
+                                        className={cn(
+                                            "w-full flex justify-between items-center",
+                                            "text-left font-normal",
+                                            !data.scheduled_at &&
+                                                "text-muted-foreground"
+                                        )}
+                                    >
+                                        {data.scheduled_at
+                                            ? format(
+                                                    parseISO(
+                                                        data.scheduled_at
+                                                    ),
+                                                    "MM/dd/yyyy"
+                                                )
+                                            : "MM/DD/YYYY"}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                    {showCalendar && (
+                                        <div
+                                            className="absolute z-50 bg-white shadow-md border mt-2 -ml-[10rem] md:-ml-[11vw] lg:-ml-[7.5vw] rounded-md"
+                                            onClick={(e) =>
+                                                e.stopPropagation()
+                                            }
+                                        >
+                                            <Calendar
+                                                mode="single"
+                                                selected={
+                                                    data.scheduled_at &&
+                                                    isValid(
+                                                        parseISO(
+                                                            data.scheduled_at
+                                                        )
+                                                    )
+                                                        ? parseISO(
                                                                 data.scheduled_at
                                                             )
-                                                        )
-                                                            ? parseISO(
-                                                                  data.scheduled_at
-                                                              )
-                                                            : undefined
+                                                        : undefined
+                                                }
+                                                onSelect={(date) => {
+                                                    if (date) {
+                                                        setData(
+                                                            "scheduled_at",
+                                                            format(
+                                                                date,
+                                                                "yyyy-MM-dd"
+                                                            )
+                                                        );
+                                                        setDate(date);
+                                                        setLocalErrors(
+                                                            (prev) => ({
+                                                                ...prev,
+                                                                scheduled_at:
+                                                                    "",
+                                                            })
+                                                        );
+                                                        setShowCalendar(
+                                                            false
+                                                        );
                                                     }
-                                                    onSelect={(date) => {
-                                                        if (date) {
-                                                            setData(
-                                                                "scheduled_at",
-                                                                format(
-                                                                    date,
-                                                                    "yyyy-MM-dd"
-                                                                )
-                                                            );
-                                                            setDate(date);
-                                                            setLocalErrors(
-                                                                (prev) => ({
-                                                                    ...prev,
-                                                                    scheduled_at:
-                                                                        "",
-                                                                })
-                                                            );
-                                                            setShowCalendar(
-                                                                false
-                                                            );
-                                                        }
-                                                    }}
-                                                    disabled={(date) =>
-                                                        date < new Date()
-                                                    } // Disable past dates
-                                                    initialFocus
-                                                />
-                                            </div>
-                                        )}
-                                        {showCalendar && (
-                                            <div
-                                                className="fixed inset-0 z-40"
-                                                onClick={() =>
-                                                    setShowCalendar(false)
-                                                } // Close calendar on outside click
+                                                }}
+                                                disabled={(date) =>
+                                                    date < new Date()
+                                                } // Disable past dates
+                                                initialFocus
                                             />
-                                        )}
-                                        {localErrors.scheduled_at && (
-                                            <p className="text-red-500 text-xs">
-                                                {localErrors.scheduled_at}
-                                            </p>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
+                                    {showCalendar && (
+                                        <div
+                                            className="fixed inset-0 z-40"
+                                            onClick={() =>
+                                                setShowCalendar(false)
+                                            } // Close calendar on outside click
+                                        />
+                                    )}
+                                    {localErrors.scheduled_at && (
+                                        <p className="text-red-500 text-xs">
+                                            {localErrors.scheduled_at}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-row justify-between gap-4 !mt-4">
+                                {/* Priority */}
+                                <div className="flex-[1] space-y-2">
+                                    <Label
+                                        htmlFor="priority"
+                                        className="flex items-center"
+                                    >
+                                        Priority{" "}
+                                        <span className="text-red-500 ml-1">
+                                            *
+                                        </span>
+                                    </Label>
+                                    <Select
+                                        value={data.priority}
+                                        onValueChange={(value) =>
+                                            setData("priority", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Priority" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Low">
+                                                Low
+                                            </SelectItem>
+                                            <SelectItem value="Medium">
+                                                Medium
+                                            </SelectItem>
+                                            <SelectItem value="High">
+                                                High
+                                            </SelectItem>
+                                            <SelectItem value="Critical">
+                                                Critical
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {localErrors.priority && (
+                                        <p className="text-red-500 text-xs">
+                                            {localErrors.priority}
+                                        </p>
+                                    )}
                                 </div>
 
-                                <div className="flex flex-row justify-between gap-4 !mt-4">
-                                    {/* Priority */}
-                                    <div className="flex-[1] space-y-2">
-                                        <Label
-                                            htmlFor="priority"
-                                            className="flex items-center"
-                                        >
-                                            Priority{" "}
-                                            <span className="text-red-500 ml-1">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <Select
-                                            value={data.priority}
-                                            onValueChange={(value) =>
-                                                setData("priority", value)
-                                            }
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select Priority" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Low">
-                                                    Low
-                                                </SelectItem>
-                                                <SelectItem value="Medium">
-                                                    Medium
-                                                </SelectItem>
-                                                <SelectItem value="High">
-                                                    High
-                                                </SelectItem>
-                                                <SelectItem value="Critical">
-                                                    Critical
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        {localErrors.priority && (
-                                            <p className="text-red-500 text-xs">
-                                                {localErrors.priority}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {/* Assigned To */}
-                                    <div className="flex-[2] space-y-2">
-                                        <Label
-                                            htmlFor="assigned_to"
-                                            className="flex items-center"
-                                        >
-                                            Assign to{" "}
-                                            <span className="text-red-500 ml-1">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <Select
-                                            value={data.assigned_to}
-                                            onValueChange={(value) =>
-                                                setData("assigned_to", value)
-                                            }
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select Personnel" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {maintenancePersonnel.map(
-                                                    (person) => (
-                                                        <SelectItem
-                                                            key={person.id}
-                                                            value={person.id.toString()}
-                                                        >
-                                                            {person.first_name}{" "}
-                                                            {person.last_name}
-                                                        </SelectItem>
-                                                    )
-                                                )}
-                                            </SelectContent>
-                                        </Select>
-                                        {localErrors.assigned_to && (
-                                            <p className="text-red-500 text-xs">
-                                                {localErrors.assigned_to}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {/* Status */}
-                                    <div className="flex-[2] space-y-2">
-                                        <Label
-                                            htmlFor="status"
-                                            className="flex items-center"
-                                        >
-                                            Status{" "}
-                                            <span className="text-red-500 ml-1">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <Select
-                                            value={data.status}
-                                            onValueChange={(value) =>
-                                                setData("status", value)
-                                            }
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select Status" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Assigned">
-                                                    Assigned
-                                                </SelectItem>
-                                                <SelectItem value="Ongoing">
-                                                    Ongoing
-                                                </SelectItem>
-                                                <SelectItem value="For Budget Request">
-                                                    For Budget Request
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        {localErrors.status && (
-                                            <p className="text-red-500 text-xs">
-                                                {localErrors.status}
-                                            </p>
-                                        )}
-                                    </div>
+                                {/* Assigned To */}
+                                <div className="flex-[2] space-y-2">
+                                    <Label
+                                        htmlFor="assigned_to"
+                                        className="flex items-center"
+                                    >
+                                        Assign to{" "}
+                                        <span className="text-red-500 ml-1">
+                                            *
+                                        </span>
+                                    </Label>
+                                    <Select
+                                        value={data.assigned_to}
+                                        onValueChange={(value) =>
+                                            setData("assigned_to", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Personnel" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {maintenancePersonnel.map(
+                                                (person) => (
+                                                    <SelectItem
+                                                        key={person.id}
+                                                        value={person.id.toString()}
+                                                    >
+                                                        {person.first_name}{" "}
+                                                        {person.last_name}
+                                                    </SelectItem>
+                                                )
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                    {localErrors.assigned_to && (
+                                        <p className="text-red-500 text-xs">
+                                            {localErrors.assigned_to}
+                                        </p>
+                                    )}
                                 </div>
 
-                                {/* Asset */}
-                                <SmartDropdown
-                                    label="Asset"
-                                    placeholder="Search or select an asset"
-                                    items={assets}
-                                    getLabel={(a) =>
-                                        `${a.name} – ${a.location.name}`
-                                    }
-                                    getValue={(a) => a.id.toString()}
-                                    selectedId={data.asset_id || ""}
-                                    onChange={(id) => setData("asset_id", id)}
-                                    error={localErrors.asset_id}
-                                />
-                            </>
+                                {/* Status */}
+                                <div className="flex-[2] space-y-2">
+                                    <Label
+                                        htmlFor="status"
+                                        className="flex items-center"
+                                    >
+                                        Status{" "}
+                                        <span className="text-red-500 ml-1">
+                                            *
+                                        </span>
+                                    </Label>
+                                    <Select
+                                        value={data.status}
+                                        onValueChange={(value) =>
+                                            setData("status", value)
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select Status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Assigned">
+                                                Assigned
+                                            </SelectItem>
+                                            <SelectItem value="Ongoing">
+                                                Ongoing
+                                            </SelectItem>
+                                            <SelectItem value="For Budget Request">
+                                                For Budget Request
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {localErrors.status && (
+                                        <p className="text-red-500 text-xs">
+                                            {localErrors.status}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Asset */}
+                            <SmartDropdown
+                                label="Asset"
+                                placeholder="Search or select an asset"
+                                items={assets}
+                                getLabel={(a) =>
+                                    `${a.name} – ${a.location.name}`
+                                }
+                                getValue={(a) => a.id.toString()}
+                                selectedId={data.asset_id || ""}
+                                onChange={(id) => setData("asset_id", id)}
+                                error={localErrors.asset_id}
+                            />
+                        </>
                         )}
 
                         {/* Remarks */}
-                        {user.permissions.includes("manage work orders") && (
+                        {isWorkOrderManager && (
                             <div className="space-y-2">
                                 <Label htmlFor="remarks">Remarks</Label>
                                 <Textarea

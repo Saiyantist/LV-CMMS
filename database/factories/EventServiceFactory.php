@@ -60,19 +60,15 @@ class EventServiceFactory extends Factory
             "General Services Department (GSD) - Safety & Security",
             "Data Privacy Office (DPO)",
             "Student Publication Office",
-            "Others:",
         ];
 
         $externalDepartments = [
-            "MCGI music ministry",
-            "MCGI Teatro Kristyano",
+            "MCGI Music Ministry",
+            "MCGI Teatro Kristiano",
             "MCGI Orchestra",
-            "Central Apalit Division",
-            "Central Division Teatro Kristiano",
+            "Teatro Kristiano",
             "MMC Events Committee",
-            "Central Division Volleyball team",
             "Disaster Response and Rescue Team (DRRT)",
-            "Others",
         ];
 
         $services = [
@@ -188,12 +184,27 @@ class EventServiceFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'name' => $this->faker->sentence(3),
+            'name' => $this->faker->randomElement([
+                'Privacy Awareness Seminar',
+                'Morning Show Production',
+                'Communication Week Year 8',
+                'Child Protection Policy Seminar',
+                'Tanghalan ng La Verdarian',
+                'Christian Dance (JHS & SHS)',
+                'Battle of the Bands - CL',
+                'Basic Education Faculty Meeting with APs',
+                'Training and Seminar with UNTV (NAR)',
+                'ICT Week',
+                'Fire Fighting Drill and Orientation',
+                'Dry Run Elementary',
+                'MCGI Chorale Monthly Rehearsal',
+                'Graduation Rehearsals',
+            ]),
             'venue' => $venue ? json_encode($venue) : null,
             'department' => $department,
             'participants' => $participants,
-            'number_of_participants' => $this->faker->numberBetween(1, 9999),
-            'description' => $this->faker->sentence(10),
+            'number_of_participants' => $this->faker->numberBetween(1, 999),
+            'description' => $this->faker->realText(100),
             'requested_services' => json_encode($requestedServices),
             'status' => $status,
             'event_start_date' => $start->format('Y-m-d'),
@@ -201,7 +212,6 @@ class EventServiceFactory extends Factory
             'event_start_time' => $startTime,
             'event_end_time' => $endTime,
             'created_at' => $this->faker->dateTimeBetween('-30 days', 'now'),
-            // ...other fields as needed
         ];
     }
 }

@@ -34,17 +34,9 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/register/external-user-registration', function () {
-    return Inertia::render('Auth/ExternalRegistration'); 
-})->name('access.registration-external-user-registration');
-
-Route::get('/register/internal-user-registration', [RegisteredUserController::class, 'createInternal']
-)->name('access.registration-internal-user-registration');
-
 /**
  * Authenticated Routes
  */
-
 Route::get('/awaiting-approval', function () {
     if (Auth::user()->roles->isnotempty()) {
         return redirect()->route('dashboard');
@@ -53,10 +45,6 @@ Route::get('/awaiting-approval', function () {
 })->middleware('auth', 'verified');
 
 Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 /**
@@ -65,6 +53,14 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
  *      - ROUTING PREVENTION FOR UNAUTHORIZED ACCESS/USERS
  */
 Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     // Super Admins only
     Route::middleware(['role:super_admin'])->group(function () {
@@ -114,7 +110,10 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
             Route::delete('/attachments/{id}', [AttachmentController::class, 'destroy'])->name('attachments.destroy');
         });
         
-        Route::resource('work-orders', WorkOrderController::class)->except(['create', 'show']); // ALWAYS put this at the end ng mga "/work-orders" routes.
+        // ALWAYS ensure this route is at the end of "/work-orders" routes.
+        Route::resource('work-orders', WorkOrderController::class)
+            ->except(['create', 'show'])
+            ->middleware(['role_or_permission:senior_management|manage work orders|view own work orders|update assigned work order status']);
     
         Route::post('/locations', [LocationController::class, 'store']);
     });
@@ -140,35 +139,42 @@ Route::middleware(['auth', 'verified', 'hasRole'])->group(function () {
      */
     Route::middleware([])->group(function () {
         Route::get('/booking-calendar', [EventServicesController::class, 'index'])->name('booking-calendar');
-        
-        // My Bookings Route (use controller method)
         Route::get('/event-services/my-bookings', [EventServicesController::class, 'MyBookings'])->name('event-services.my-bookings');
         
         // Event Services Request Route
         Route::get('/event-services/request', function () {
             return Inertia::render('EventServices/EventServicesRequest');
         })->name('event-services.request');
-    
         Route::post('/event-services', [EventServicesController::class, 'store'])->name('event-services.store');
         Route::delete('/event-services/{id}', [EventServicesController::class, 'destroy'])->name('event-services.destroy');
         Route::put('/event-services/{id}', [EventServicesController::class, 'update'])->name('event-services.update');
+
+        Route::get('/departments/{type}', [DepartmentController::class, 'show']);
+
+
+        Route::get('/event-services/time-options', [EventServicesController::class, 'getTimeOptions']);
+        
+        Route::get('/event-services/occupied-times', [EventServicesController::class, 'getOccupiedTimes']);
+
         
         Route::post('/event-services/check-conflict', [EventServicesController::class, 'checkConflict']);
    
+        // Route to fetch the Booking Statistics (Donut Chart = COMMS Officer's Dashboard)
+        Route::get('/api/event-services/statuses', function () {
+            return \App\Models\EventService::select('status')->get();
+        })->middleware(['auth', 'verified'])->name('api.event-services.statuses');
 
-// Route to fetch the Booking Statistics (Donut Chart = COMMS Officer's Dashboard)
-    Route::get('/api/event-services/statuses', function () {
-    return \App\Models\EventService::select('status')->get();
-})->middleware(['auth', 'verified'])->name('api.event-services.statuses');
+        Route::get('/api/event-services/bookings', [EventServicesController::class, 'bookingsData']);
+    });
 
-
-
-// Routes to fetch data in Top Departments,
-// Frequently Booked venues, and 
-// Recent Booking Activity, and
-// for (COMMS Officer's Dashboard)
-    Route::get('/api/event-services/bookings', [EventServicesController::class, 'bookingsData'])
-    ->middleware(['auth', 'verified']);
+    // User Role Management Routes
+    Route::prefix('admin/manage-roles')->group(function () {
+        Route::get('/', [UserRoleController::class, 'index'])->name('admin.manage-roles');
+        Route::patch('/{user}/role', [UserRoleController::class, 'updateRole'])->name('admin.update-role');
+        Route::delete('/{user}/role', [UserRoleController::class, 'removeRole'])->name('admin.remove-role');
+        Route::patch('/{user}/approve', [UserRoleController::class, 'approveUser'])->name('admin.approve-user');
+        Route::patch('/{user}/reject', [UserRoleController::class, 'rejectUser'])->name('admin.reject-user');
+        Route::patch('/{user}/remove-access', [UserRoleController::class, 'removeAccess'])->name('admin.remove-access');
     });
 });
 

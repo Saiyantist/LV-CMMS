@@ -8,21 +8,7 @@ import {
 import { Button } from "@/Components/shadcnui/button";
 import { Input } from "@/Components/shadcnui/input";
 import { router, usePage } from "@inertiajs/react";
-
-// Venue options (fixed)
-const venueOptions = [
-    "Auditorium",
-    "Auditorium Lobby",
-    "Basketball Court",
-    "College Library",
-    "Meeting Room",
-    "Computer Laboratory A",
-    "Computer Laboratory B",
-    "EFS Classroom(s) Room #:",
-    "LVCC Grounds",
-    "LVCC  Main Lobby",
-    "Elementary & High School Library",
-];
+import { galleryItems } from "./Stepper/Gallery";
 
 // Service groups
 const serviceGroups = [
@@ -62,31 +48,6 @@ const serviceGroups = [
     },
 ];
 
-// Helper for time options
-function generateTimeOptions(start = "06:00", end = "23:59") {
-    const options = [];
-    let [h, m] = start.split(":").map(Number);
-    const [endH, endM] = end.split(":").map(Number);
-    while (h < endH || (h === endH && m <= endM)) {
-        const time = `${h.toString().padStart(2, "0")}:${m
-            .toString()
-            .padStart(2, "0")}`;
-        options.push(time);
-        m += 30;
-        if (m >= 60) {
-            m = 0;
-            h++;
-        }
-    }
-    return options;
-}
-function formatAMPM(time: string) {
-    const [h, m] = time.split(":").map(Number);
-    const ampm = h >= 12 ? "PM" : "AM";
-    const hour = h % 12 === 0 ? 12 : h % 12;
-    return `${hour}:${m.toString().padStart(2, "0")} ${ampm}`;
-}
-
 // Date validation
 const today = new Date();
 const minStartDate = new Date(today);
@@ -113,7 +74,9 @@ const EditBookingsModal = ({
     const user = props.auth?.user || {};
     const userRoles = user.roles?.map((r: any) => r.name) || [];
 
-    const [form, setForm] = useState<any>({});
+    const [form, setForm] = useState<any>({
+        department: booking?.department || "",
+    });
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [venueDropdownOpen, setVenueDropdownOpen] = useState(false);
     const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
@@ -124,6 +87,7 @@ const EditBookingsModal = ({
 
     const venueDropdownRef = useRef<HTMLDivElement>(null);
     const servicesDropdownRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (booking) {
@@ -140,6 +104,7 @@ const EditBookingsModal = ({
             setForm({
                 ...booking,
                 venue: venues,
+                event_name: booking.name, // Add this line to map name to event_name
                 requested_services: requestedServices,
                 status: booking.status,
             });
@@ -161,12 +126,15 @@ const EditBookingsModal = ({
                 !servicesDropdownRef.current.contains(event.target as Node)
             ) {
                 setServicesDropdownOpen(false);
-
-                // Department field state
-                // (removed duplicate declaration)
+            }
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node)
+            ) {
+                setShowDeptSuggestions(false);
             }
         }
-        if (venueDropdownOpen || servicesDropdownOpen) {
+        if (venueDropdownOpen || servicesDropdownOpen || showDeptSuggestions) {
             document.addEventListener("mousedown", handleClickOutside);
         }
         return () => {
@@ -229,6 +197,15 @@ const EditBookingsModal = ({
         // Only send changed fields
         const changedFields: any = {};
         Object.keys(form).forEach((key) => {
+            // Special handling for event_name -> name mapping
+            if (key === 'event_name') {
+                const original = booking.name;
+                if (form[key] !== original && form[key] !== undefined) {
+                    changedFields['name'] = form[key]; // Map event_name to name
+                }
+                return;
+            }
+            
             const original =
                 Array.isArray(form[key]) && Array.isArray(booking[key])
                     ? JSON.stringify(booking[key])
@@ -258,104 +235,41 @@ const EditBookingsModal = ({
 
     if (!booking) return null;
 
-    // Helper to render proof preview
-    // const renderProofPreview = () => {
-    //     const file = form.proof_of_approval;
-    //     const existing = booking.proof_of_approval;
-    //     if (previewFile && file) {
-    //         if (file.type && file.type.startsWith("image/")) {
-    //             return (
-    //                 <img
-    //                     src={previewFile}
-    //                     alt="Proof Preview"
-    //                     className="mt-2 max-h-40 rounded border"
-    //                 />
-    //             );
-    //         } else if (file.type === "application/pdf") {
-    //             return (
-    //                 <iframe
-    //                     src={previewFile}
-    //                     title="PDF Preview"
-    //                     className="mt-2 w-full h-40 border rounded"
-    //                 />
-    //             );
-    //         }
-    //     } else if (existing) {
-    //         const ext = existing.split(".").pop().toLowerCase();
-    //         if (["jpg", "jpeg", "png"].includes(ext)) {
-    //             return (
-    //                 <img
-    //                     src={`/storage/${existing}`}
-    //                     alt="Proof"
-    //                     className="mt-2 max-h-40 rounded border"
-    //                 />
-    //             );
-    //         } else if (ext === "pdf") {
-    //             return (
-    //                 <iframe
-    //                     src={`/storage/${existing}`}
-    //                     title="PDF Proof"
-    //                     className="mt-2 w-full h-40 border rounded"
-    //                 />
-    //             );
-    //         }
-    //     }
-    //     return null;
-    // };
-
     // Only super_admin and communications_officer can edit status
-    const canEditStatus =
-        userRoles.includes("super_admin") ||
-        userRoles.includes("communications_officer");
+    // const canEditStatus =
+    //     userRoles.includes("super_admin") ||
+    //     userRoles.includes("communications_officer");
 
-    // Department suggestions (simulate fetch or use static for demo)
-    const internalDepartments = [
-        "MIS",
-        "Registrar",
-        "Accounting",
-        "Library",
-        "Guidance",
-        "HR",
-        "Communications",
-        "General Services",
-    ];
-    const externalDepartments = [
-        "External Partner",
-        "Alumni",
-        "Guest",
-        "Other",
-    ];
     const departmentType = userRoles.includes("internal_requester")
         ? "internal"
         : "external";
-    const departmentSuggestions =
-        departmentType === "internal"
-            ? internalDepartments
-            : externalDepartments;
-
-    const startTimes = generateTimeOptions();
-    const endTimes = form.event_start_time
-        ? generateTimeOptions(form.event_start_time, "23:59").filter(
-              (t) => t > form.event_start_time
-          )
-        : generateTimeOptions();
 
     // Number of Participants validation
     const handleParticipantsChange = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         let val = e.target.value.replace(/\D/g, "");
-        if (val.length > 4) val = val.slice(0, 4);
-        setForm({ ...form, number_of_participants: val });
-        setShowParticipantsLimit(val.length === 4);
+        if (val === "") {
+            setForm({ ...form, number_of_participants: "" });
+            setShowParticipantsLimit(false);
+            return;
+        }
+        let num = Number(val);
+        if (num > dynamicMax) {
+            setForm({ ...form, number_of_participants: dynamicMax.toString() });
+            setShowParticipantsLimit(true);
+        } else {
+            setForm({ ...form, number_of_participants: val });
+            setShowParticipantsLimit(false);
+        }
     };
 
     // State for department selection
     const [deptInput, setDeptInput] = useState("");
     const [showDeptSuggestions, setShowDeptSuggestions] = useState(false);
     const [selectedDepartments, setSelectedDepartments] = useState<string[]>(
-        form.department
-            ? form.department.split(",").map((d: string) => d.trim())
+        booking?.department
+            ? booking.department.split(",").map((d: string) => d.trim())
             : []
     );
 
@@ -400,6 +314,29 @@ const EditBookingsModal = ({
         opt.toLowerCase().includes(deptInput.toLowerCase())
     );
 
+    // Calculate total capacity from selected venues
+    const selectedVenues = galleryItems.filter((item) =>
+        form.venue?.includes(item.title)
+    );
+
+    const totalCapacity = selectedVenues.reduce((sum, venue) => {
+        const match = venue.subtitle.match(/(\d+)/);
+        return sum + (match ? parseInt(match[1], 10) : 0);
+    }, 0);
+
+    const dynamicMax = totalCapacity > 0 ? totalCapacity : 9999; // fallback to 9999 if no venue selected
+
+    useEffect(() => {
+        if (booking?.department) {
+            setSelectedDepartments(
+                booking.department.split(",").map((d: string) => d.trim())
+            );
+        } else {
+            setSelectedDepartments([]);
+        }
+        setDeptInput(""); // Optionally reset input as well
+    }, [booking]);
+
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-lg w-full p-0">
@@ -414,219 +351,152 @@ const EditBookingsModal = ({
                     autoComplete="off"
                 >
                     <div className="max-h-[60vh] overflow-y-auto pr-2">
-                        {/* Proof of Approval at the top (not sticky) */}
-                        {/* <div className="flex flex-col">
-                            <label className="mb-1 font-medium text-sm">
-                                Proof of Approval (JPG, PNG, PDF, max 10MB)
-                            </label>
-                            <Input
-                                type="file"
-                                name="proof_of_approval"
-                                accept=".jpg,.jpeg,.png,.pdf"
-                                onChange={handleFormChange}
-                                className="text-sm"
-                            />
-                            {renderProofPreview()}
-                            {formErrors.proof_of_approval && (
-                                <span className="text-red-500 text-xs mt-1">
-                                    {formErrors.proof_of_approval}
-                                </span>
-                            )}
-                        </div> */}
-                        {/* Requested Venue Dropdown */}
-                        {/* <div
-                            className="flex flex-col relative w-full mt-5"
-                            ref={venueDropdownRef}
-                        >
-                            <label className="mb-1 font-medium text-sm">
-                                Requested Venue
-                            </label>
-                            <button
-                                type="button"
-                                className="border rounded-md px-3 py-2 text-sm text-left bg-white"
-                                onClick={() => setVenueDropdownOpen((v) => !v)}
-                            >
-                                {form.venue && form.venue.length ? (
-                                    form.venue.join(", ")
-                                ) : (
-                                    <span className="text-gray-400">
-                                        Select venue(s)
-                                    </span>
-                                )}
-                            </button>
-                            {venueDropdownOpen && (
-                                <div className="absolute z-10 mt-20 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
-                                    {venueOptions.map((venue) => (
-                                        <label
-                                            key={venue}
-                                            className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={form.venue?.includes(
-                                                    venue
-                                                )}
-                                                onChange={() =>
-                                                    handleVenueCheckbox(venue)
-                                                }
-                                                className="mr-2"
-                                            />
-                                            {venue}
-                                        </label>
-                                    ))}
-                                </div>
-                            )}
-                            {formErrors.venue && (
-                                <span className="text-red-500 text-xs mt-1">
-                                    {formErrors.venue}
-                                </span>
-                            )}
-                        </div> */}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                            {/* Event Name */}
-                            <div className="flex flex-col">
-                                <label className="mb-1 font-medium text-sm">
-                                    Event Name
-                                </label>
-                                <Input
-                                    name="name"
-                                    value={form.name || ""}
-                                    maxLength={MAX_EVENT_NAME}
-                                    onChange={(e) => {
-                                        let val = e.target.value;
-                                        if (val.length > MAX_EVENT_NAME) {
-                                            val = val.slice(0, MAX_EVENT_NAME);
-                                            setShowEventNameLimit(true);
-                                        } else {
-                                            setShowEventNameLimit(false);
+                        {/* <div> */}
+                            <div className="flex flex-col gap-4 mt-5 w-full">
+                                {/* Event Name */}
+                                <div className="flex flex-col w-full">
+                                    <label className="mb-1 font-medium text-sm">
+                                        Event Name
+                                    </label>
+                                    <Input
+                                        type="text"
+                                        name="event_name"
+                                        value={form.event_name || ""}
+                                        onChange={handleFormChange}
+                                        className="border rounded-md px-3 py-2 text-sm w-full"
+                                        placeholder={
+                                            booking?.name || "Enter event name"
                                         }
-                                        setForm({ ...form, name: val });
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (
-                                            (form.name?.length || 0) ===
-                                                MAX_EVENT_NAME &&
-                                            e.key.length === 1 &&
-                                            !e.ctrlKey &&
-                                            !e.metaKey &&
-                                            !e.altKey
-                                        ) {
-                                            setShowEventNameLimit(true);
-                                            setTimeout(
-                                                () =>
-                                                    setShowEventNameLimit(
-                                                        false
-                                                    ),
-                                                2000
-                                            );
-                                        }
-                                    }}
-                                    className="text-sm"
-                                    placeholder="Enter event name"
-                                />
-                                <div className="flex justify-between items-center mt-1">
-                                    <span className="text-xs text-gray-500">
-                                        {form.name?.length || 0}/
-                                        {MAX_EVENT_NAME}
-                                    </span>
-                                    <span
-                                        className={`text-xs text-red-500 font-medium transition-opacity duration-300 ${
-                                            showEventNameLimit
-                                                ? "opacity-100"
-                                                : "opacity-0 pointer-events-none select-none"
-                                        }`}
-                                    >
-                                        Max {MAX_EVENT_NAME} characters.
-                                    </span>
-                                </div>
-                                {formErrors.name && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {formErrors.name}
-                                    </span>
-                                )}
-                            </div>
-                            {/* Department */}
-                            <div className="flex flex-col relative ">
-                                <label className="mb-1 font-medium text-sm">
-                                    Department
-                                </label>
-                                <button
-                                    type="button"
-                                    className="border rounded-md px-3 py-2 text-sm text-left bg-white"
-                                    onClick={() =>
-                                        setShowDeptSuggestions((v) => !v)
-                                    }
-                                >
-                                    {selectedDepartments.length ? (
-                                        selectedDepartments.join(", ")
-                                    ) : (
-                                        <span className="text-gray-400">
-                                            Select department(s)
+                                    />
+                                    {formErrors.event_name && (
+                                        <span className="text-red-500 text-xs mt-1">
+                                            {formErrors.event_name}
                                         </span>
                                     )}
-                                </button>
-                                {showDeptSuggestions && (
-                                    <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto mt-20">
-                                        {deptOptions.map((dept) => (
-                                            <label
-                                                key={dept}
-                                                className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedDepartments.includes(
-                                                        dept
-                                                    )}
-                                                    onChange={() =>
-                                                        handleDeptCheckbox(dept)
-                                                    }
-                                                    className="mr-2"
-                                                />
-                                                {dept}
-                                            </label>
-                                        ))}
-                                        {/* Custom input for new department */}
-                                        <div className="flex items-center px-3 py-2 border-t">
-                                            <Input
+                                </div>
+                                {/* Department */}
+                                <div className="flex flex-col w-full">
+                                    <label className="mb-1 font-medium text-sm">
+                                        Department
+                                    </label>
+                                    <div className="flex flex-col mb-2 relative">
+                                        <div className="relative w-full">
+                                            <input
+                                                type="text"
                                                 value={deptInput}
-                                                onChange={(e) =>
-                                                    setDeptInput(e.target.value)
+                                                onChange={(e) => {
+                                                    setDeptInput(
+                                                        e.target.value
+                                                    );
+                                                    setShowDeptSuggestions(
+                                                        true
+                                                    );
+                                                }}
+                                                onFocus={() =>
+                                                    setShowDeptSuggestions(true)
                                                 }
-                                                className="text-sm flex-1"
-                                                placeholder="Add department"
+                                                className="border rounded-md px-3 py-2 text-sm w-full"
+                                                placeholder="Type or select department"
                                                 onKeyDown={(e) => {
-                                                    if (e.key === "Enter") {
+                                                    if (
+                                                        e.key === "Enter" &&
+                                                        deptInput.trim()
+                                                    ) {
                                                         e.preventDefault();
                                                         handleDeptAdd();
                                                     }
                                                 }}
                                             />
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                className="ml-2"
-                                                onClick={handleDeptAdd}
-                                                disabled={!deptInput.trim()}
-                                            >
-                                                Add
-                                            </Button>
+                                            {deptInput.trim() && (
+                                                <button
+                                                    type="button"
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600"
+                                                    onClick={handleDeptAdd}
+                                                    tabIndex={-1}
+                                                    title="Add department"
+                                                >
+                                                    ↵
+                                                </button>
+                                            )}
+                                            {showDeptSuggestions && (
+                                                <div
+                                                    className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto"
+                                                    ref={dropdownRef}
+                                                >
+                                                    {filteredDeptOptions.map(
+                                                        (dept) => (
+                                                            <label
+                                                                key={dept}
+                                                                className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={selectedDepartments.includes(
+                                                                        dept
+                                                                    )}
+                                                                    onChange={() =>
+                                                                        handleDeptCheckbox(
+                                                                            dept
+                                                                        )
+                                                                    }
+                                                                    className="mr-2"
+                                                                />
+                                                                {dept}
+                                                            </label>
+                                                        )
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {formErrors.department && (
+                                            <span className="text-red-500 text-xs mt-1">
+                                                {formErrors.department}
+                                            </span>
+                                        )}
+
+                                        {/* Chips/tags for selected departments */}
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {selectedDepartments.length ? (
+                                                selectedDepartments.map(
+                                                    (dept) => (
+                                                        <span
+                                                            key={dept}
+                                                            className="bg-secondary text-white px-2 py-1 rounded text-xs flex items-center"
+                                                        >
+                                                            {dept}
+                                                            <button
+                                                                type="button"
+                                                                className="ml-1 text-xs text-white hover:text-red-700"
+                                                                onClick={() =>
+                                                                    setSelectedDepartments(
+                                                                        selectedDepartments.filter(
+                                                                            (
+                                                                                d
+                                                                            ) =>
+                                                                                d !==
+                                                                                dept
+                                                                        )
+                                                                    )
+                                                                }
+                                                                tabIndex={-1}
+                                                                title="Remove"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        </span>
+                                                    )
+                                                )
+                                            ) : (
+                                                <span className="text-gray-400 text-xs">
+                                                    No department selected
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
-                                )}
-                                <div className="flex justify-between items-center mt-1">
-                                    <span className="text-xs text-gray-500">
-                                        {selectedDepartments.join(", ").length}
-                                        /100
-                                    </span>
                                 </div>
-                                {formErrors.department && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {formErrors.department}
-                                    </span>
-                                )}
                             </div>
-                        </div>
+                        {/* </div> */}
+
                         <div className="flex flex-col mt-5">
                             <label className="mb-1 font-medium text-sm">
                                 Description
@@ -713,15 +583,15 @@ const EditBookingsModal = ({
                                     <span className="text-xs text-gray-500">
                                         {form.participants?.length || 0}/100
                                     </span>
-                                    <span
+                                    {/* <span
                                         className={`text-xs text-red-500 font-medium transition-opacity duration-300 ${
                                             showParticipantsLimit
                                                 ? "opacity-100"
-                                                : "opacity-0 pointer-events-none select-none"
+                                                : "opacity-0 pointer-events-none"
                                         }`}
                                     >
                                         Max 100 characters.
-                                    </span>
+                                    </span> */}
                                 </div>
                                 {formErrors.participants && (
                                     <span className="text-red-500 text-xs mt-1">
@@ -732,24 +602,25 @@ const EditBookingsModal = ({
                             {/* Number of Participants */}
                             <div className="flex flex-col">
                                 <label className="mb-1 font-medium text-sm">
-                                    Number of Participants
+                                    No. of Participants
                                 </label>
                                 <Input
                                     type="number"
                                     name="number_of_participants"
                                     min={1}
-                                    max={9999}
+                                    max={dynamicMax}
                                     value={form.number_of_participants || ""}
                                     onChange={handleParticipantsChange}
                                     className="text-sm"
-                                    placeholder="1-9999"
+                                    placeholder={`1-${dynamicMax}`}
+                                    disabled={dynamicMax === 0}
                                 />
                                 <div className="flex justify-between items-center mt-1">
-                                    <span className="text-xs text-gray-500">
+                                    {/* <span className="text-xs text-gray-500">
                                         {form.number_of_participants?.length ||
                                             0}
-                                        /4
-                                    </span>
+                                        /{dynamicMax}
+                                    </span> */}
                                     <span
                                         className={`text-xs text-red-500 font-medium transition-opacity duration-300 ${
                                             showParticipantsLimit
@@ -757,7 +628,9 @@ const EditBookingsModal = ({
                                                 : "opacity-0 pointer-events-none select-none"
                                         }`}
                                     >
-                                        Up to 4 digits (max: 9999)
+                                        {dynamicMax === 0
+                                            ? "Select at least one venue to enable"
+                                            : `The number of participants must not exceed the venue(s) capacity (${dynamicMax}).`}
                                     </span>
                                 </div>
                                 {formErrors.number_of_participants && (
@@ -768,101 +641,6 @@ const EditBookingsModal = ({
                             </div>
                         </div>
 
-                        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                            <div className="flex flex-col">
-                                <label className="mb-1 font-medium text-sm">
-                                    Event Start Date
-                                </label>
-                                <Input
-                                    type="date"
-                                    name="event_start_date"
-                                    value={form.event_start_date || ""}
-                                    min={minStartDateStr}
-                                    onChange={handleFormChange}
-                                    className="text-sm"
-                                />
-                                <span className="text-xs text-gray-500 mt-1">
-                                    Please note: You may only select a start
-                                    date that is at least 3 days from today.
-                                    Earlier dates are unavailable for booking.
-                                </span>
-                                {formErrors.event_start_date && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {formErrors.event_start_date}
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex flex-col">
-                                <label className="mb-1 font-medium text-sm">
-                                    Event End Date
-                                </label>
-                                <Input
-                                    type="date"
-                                    name="event_end_date"
-                                    value={form.event_end_date || ""}
-                                    min={
-                                        form.event_start_date || minStartDateStr
-                                    }
-                                    onChange={handleFormChange}
-                                    className="text-sm"
-                                />
-                                {formErrors.event_end_date && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {formErrors.event_end_date}
-                                    </span>
-                                )}
-                            </div>
-                        </div> */}
-
-                        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                            <div className="flex flex-col">
-                                <label className="mb-1 font-medium text-sm">
-                                    Event Start Time
-                                </label>
-                                <select
-                                    name="event_start_time"
-                                    value={form.event_start_time || ""}
-                                    onChange={handleFormChange}
-                                    className="border rounded-md px-3 py-2 text-sm"
-                                >
-                                    <option value="">Select start time</option>
-                                    {startTimes.map((t) => (
-                                        <option key={t} value={t}>
-                                            {formatAMPM(t)}
-                                        </option>
-                                    ))}
-                                </select>
-                                {formErrors.event_start_time && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {formErrors.event_start_time}
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex flex-col">
-                                <label className="mb-1 font-medium text-sm">
-                                    Event End Time
-                                </label>
-                                <select
-                                    name="event_end_time"
-                                    value={form.event_end_time || ""}
-                                    onChange={handleFormChange}
-                                    className="border rounded-md px-3 py-2 text-sm"
-                                >
-                                    <option value="">Select end time</option>
-                                    {endTimes.map((t) => (
-                                        <option key={t} value={t}>
-                                            {formatAMPM(t)}
-                                        </option>
-                                    ))}
-                                </select>
-                                {formErrors.event_end_time && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {formErrors.event_end_time}
-                                    </span>
-                                )}
-                            </div>
-                        </div> */}
-                        
                         {/* Requested Services Dropdown */}
                         <div
                             className="flex flex-col relative w-full mt-5"
@@ -924,9 +702,8 @@ const EditBookingsModal = ({
                                 </span>
                             )}
                         </div>
-                        {/* Status field for super_admin and comms officer */}
-        
                     </div>
+
                     <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
                         <Button
                             type="button"

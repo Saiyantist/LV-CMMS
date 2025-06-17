@@ -60,7 +60,7 @@ export default function ViewWorkOrderModal({
     onClose,
 }: ViewWorkOrderProps) {
     const isMaintenancePersonnel = user.roles.some(role => role.name === 'maintenance_personnel');
-    const isDepartmentHead = user.roles.some(role => role.name === 'department_head');
+    const isRequester = user.permissions.includes("view own work orders");
     const isWorkOrderManager = user.permissions.includes("manage work orders");
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
     const getAssetDetails = (workOrder: any) => {
@@ -117,7 +117,6 @@ export default function ViewWorkOrderModal({
                         <TableBody className="flex flex-col">
 
                             {/* Row 1 */}
-
                             {(isMaintenancePersonnel || isWorkOrderManager) && (
                                 <TableRow className="border-none flex flex-col sm:flex-row w-full">
 
@@ -137,7 +136,7 @@ export default function ViewWorkOrderModal({
                                             <Label>Status:</Label>
                                         </TableHead>
                                         <TableCell className="flex flex-[3.3] sm:flex-[1] items-center">
-                                            {(workOrder.status === "Completed" || workOrder.status === "For Budget Request") ? [
+                                            {(workOrder.status !== "Assigned" && workOrder.status !== "Ongoing") ? [
                                             <p className={`px-2 !h-7 border rounded flex items-center justify-center gap-2 whitespace-nowrap hover:no-underline ${getStatusColor(workOrder.status)}`}
                                             >
                                                 {workOrder.status}
@@ -200,7 +199,7 @@ export default function ViewWorkOrderModal({
                                     <TableHead className={`flex ${isMaintenancePersonnel ? "flex-[1.5]" : "flex-[1]"} items-center`}>
                                         <Label>Date Requested:</Label>
                                     </TableHead>
-                                    <TableCell className={`flex ${isMaintenancePersonnel ? "flex-[3.3] sm:flex-[1.5]" : "flex-[1]"} items-center`}>{format(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
+                                    <TableCell className={`flex ${isMaintenancePersonnel ? "flex-[3.3] sm:flex-[1.5]" : "flex-[3.3] sm:flex-[1]"} items-center`}>{format(workOrder.requested_at, "MM/dd/yyyy")}</TableCell>
                                 </div>  
 
                                 {/* Work Order Type */}
@@ -209,8 +208,8 @@ export default function ViewWorkOrderModal({
                                     <TableHead className="flex flex-[1.5] items-center">
                                         <Label>Work Order Type:</Label>
                                     </TableHead>
-                                    <TableCell className="flex flex-[3.3] sm:flex-[1] items-center">
-                                        <span className="text-secondary font-semibold">
+                                    <TableCell className="flex flex-[3.3] sm:flex-[2] items-center">
+                                        <span className="text-secondary font-semibold xs:font-medium text-xs xs:text-sm">
                                             {workOrder.work_order_type}
                                         </span>
                                     </TableCell>
@@ -236,12 +235,12 @@ export default function ViewWorkOrderModal({
                                 )}
 
                                 {/* Status */}
-                                {isDepartmentHead && (   
+                                {isRequester && (   
                                     <div className="flex-[1] flex">
                                         <TableHead className="flex flex-[1] items-center">
                                             <Label>Status:</Label>
                                         </TableHead>
-                                        <TableCell className="flex flex-[3] items-center">
+                                        <TableCell className="flex flex-[3.3] items-center">
                                             <span
                                                 className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(workOrder.status)}`}
                                             >
@@ -251,6 +250,37 @@ export default function ViewWorkOrderModal({
                                     </div>
                                 )}
                             </TableRow>
+
+                            {/* Row 3 */}
+                            {(isRequester && workOrder.status !== "Pending") && (
+                                <TableRow className="border-none flex flex-col sm:flex-row w-full">
+
+                                    {/* Assigned To */}
+                                    <div className="flex-[1] flex">
+                                        <TableHead className={`flex ${isMaintenancePersonnel ? "flex-[1.5]" : "flex-[1]"} items-center`}>
+                                            <Label>Assigned To:</Label>
+                                        </TableHead>
+                                        <TableCell className={`flex ${isMaintenancePersonnel ? "flex-[3.3] sm:flex-[1.5]" : "flex-[3.3] sm:flex-[1]"} items-center`}>{workOrder.assigned_to?.name}</TableCell>
+                                    </div>  
+
+                                    {/* Priority */}
+                                    <div className="flex-[1] flex">
+                                        <TableHead className="flex flex-[1] items-center">
+                                            <Label>Priority:</Label>
+                                        </TableHead>
+                                        <TableCell className="flex flex-[3.3] items-start">
+                                            <div
+                                                className={`px-2 py-1 rounded bg-muted ${getPriorityColor(
+                                                    workOrder.priority
+                                                )}`}
+                                            >
+                                                {workOrder.priority || "No Priority"}
+                                            </div>
+                                        </TableCell>
+                                    </div>
+
+                                </TableRow>
+                            )}
                             
                         </TableBody>
                     </Table>

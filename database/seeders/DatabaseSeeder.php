@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call(EventServiceSeeder::class);
         User::factory(50)->create();
         
-        WorkOrder::factory(100)->create();
+        WorkOrder::factory(300)->create();
         $this->call(AssetMaintenanceHistorySeeder::class);
     }
 }

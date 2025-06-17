@@ -60,7 +60,7 @@ export default function AuthenticatedLayout({
                 )}
 
                 {/* Main Content */}
-                <main className="flex-1 p-6">
+                <main className="flex-1 p-6 mt-3 sm:mt-0">
                     {children}
                 </main>
             </div>

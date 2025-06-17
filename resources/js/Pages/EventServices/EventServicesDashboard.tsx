@@ -144,22 +144,17 @@ export default function EventServicesDashboard({
         }
     }, [initialBookings]);
 
-    const [statusCounts, setStatusCounts] = useState<Record<string, number>>(
-        {}
-    );
-
-    useEffect(() => {
-        axios
-            .get("/api/event-services/status-counts")
-            .then((res) => setStatusCounts(res.data))
-            .catch(() => setStatusCounts({}));
-    }, []);
+    // Compute status counts from bookings
+    const statusCounts = allStatuses.reduce((acc, status) => {
+        acc[status] = bookings.filter((b) => b.status === status).length;
+        return acc;
+    }, {} as Record<string, number>);
 
     // Stats for cards
     const statsData = [
         {
             title: "Total Bookings",
-            value: Object.values(statusCounts).reduce((a, b) => a + b, 0),
+            value: bookings.length,
         },
         {
             title: "Pending Requests",

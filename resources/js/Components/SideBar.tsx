@@ -96,7 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     ]
                   : []),
 
-              ...(isWorkOrderRequester && !isWorkOrderManager
+              ...((isWorkOrderRequester && !isWorkOrderManager)
                   ? [
                         {
                             routeName: "work-orders.index",
@@ -112,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     ]
                   : []),
 
-              ...(isEventServiceRequester || isWorkOrderRequester
+              ...(((isEventServiceRequester || isWorkOrderRequester) && !isEventServicesManager) 
                   ? [
                         {
                             routeName: "booking-calendar",
@@ -173,7 +173,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     };
 
     const workOrderAdminItems = [
-        hasRoute("assets.index") && {
+        hasRoute("work-orders.index") && {
             routeName: "work-orders.index",
             href: route("work-orders.index") || "",
             text: "Work Order Requests",
@@ -218,28 +218,28 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             ),
         },
 
-        {
-            routeName: "event-services.my-bookings",
-            href: route("event-services.my-bookings") || "",
-            text: user.roles.some((r) => r.name === "communications_officer")
-                ? "Requests Management"
-                : user.roles.some((r) => r.name === "gasd_coordinator")
-                ? "Event Services"
-                : "My Bookings",
-            icon: user.roles.some(
-                (r) => r.name === "communications_officer"
-            ) ? (
-                <CalendarCog
-                    size={16}
-                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
-                />
-            ) : (
-                <Book
-                    size={16}
-                    className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
-                />
-            ),
-        },
+        // {
+        //     routeName: "event-services.my-bookings",
+        //     href: route("event-services.my-bookings") || "",
+        //     text: user.roles.some((r) => r.name === "communications_officer")
+        //         ? "Requests Management"
+        //         : user.roles.some((r) => r.name === "gasd_coordinator")
+        //         ? "Event Services"
+        //         : "My Bookings",
+        //     icon: user.roles.some(
+        //         (r) => r.name === "communications_officer"
+        //     ) ? (
+        //         <CalendarCog
+        //             size={16}
+        //             className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+        //         />
+        //     ) : (
+        //         <Book
+        //             size={16}
+        //             className="mr-2 w-6 h-6 xs:w-7 xs:h-7 md:w-4 md:h-4"
+        //         />
+        //     ),
+        // },
     ].filter(Boolean);
 
     // Insert the following routes if there are pages na.
@@ -762,7 +762,25 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                   )}
                               </>,
                           ]
-                        : [
+                        : isMaintenancePersonnel ? [
+                              <>
+                                  <Link
+                                      href={route("work-orders.assigned-tasks")}
+                                      className={`flex flex-col items-center text-xs sm:text-sm text-center px-4 xs:px-8 py-1 rounded-md transition ${
+                                          currentRoute ===
+                                          "work-orders.assigned-tasks"
+                                              ? "bg-white text-primary"
+                                              : "text-white hover:text-opacity-80"
+                                      }`}
+                                  >
+                                      <BriefcaseBusiness
+                                          size={16}
+                                          className="w-6 h-6 xs:w-7 xs:h-7"
+                                      />
+                                      My Tasks
+                                  </Link>
+                              </>,
+                          ] : [
                               <>
                                   <Link
                                       href={route("event-services.my-bookings")}
@@ -821,7 +839,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                                 className="flex justify-center pt-20 py-4"
                             >
                                 <img
-                                    src="/images/Lvlogo.jpg"
+                                    src="/images/lvlogo.jpg"
                                     alt="Logo"
                                     className="h-24 w-24 rounded-full object-cover"
                                 />
@@ -832,7 +850,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                         {isSuperAdmin ? (
                             <>
                                 {/* Work Orders Dropdown */}
-                                <div>
+                                <div className="border-t pt-4">
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -904,14 +922,14 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             </>
                         ) : (
                             <>
-                                <div className="space-y-1 border-t pt-4 list-none">
-                                    {menuItems.map(renderMenuItem)}
-                                </div>
                                 {adminItems.length > 0 && (
                                     <div className="border-t pt-4 mt-4 space-y-1 list-none">
                                         {adminItems.map(renderMenuItem)}
                                     </div>
                                 )}
+                                <div className="space-y-1 border-t pt-4 list-none">
+                                    {menuItems.map(renderMenuItem)}
+                                </div>
                             </>
                         )}
                     </div>
