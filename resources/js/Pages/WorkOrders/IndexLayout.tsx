@@ -504,11 +504,21 @@ export default function IndexLayout({
                         <div className="flex gap-2 justify-center">
                             {/* Large screens - visible above md breakpoint */}
                             <div className="hidden xl:flex gap-2">
+                                {row.getValue('status') === "For Budget Request" && (
+                                    <Button
+                                        className="bg-secondary h-6 text-xs text-white rounded-sm !border-none hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                        onClick={() => setAcceptingWorkOrder(row.original)}
+                                    >
+                                        Accept
+                                    </Button>
+                                )}
+                                {/* Edit */}
                                 <Button
-                                    className="bg-secondary h-6 text-xs rounded-sm hover:bg-secondary/80 hover:text-white transition-all duration-200"
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="h-6 text-xs text-white bg-secondary/70 border-input rounded-sm hover:bg-secondary hover:text-white"
                                     onClick={() => setEditingWorkOrder(row.original)}
-                                >
-                                    Edit
+                                ><SquarePen />
                                 </Button>
                                 {activeTab === "Declined" && (
                                     <Button
@@ -530,6 +540,11 @@ export default function IndexLayout({
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
+                                        {row.getValue('status') === "For Budget Request" && (
+                                            <DropdownMenuItem onClick={() => setAcceptingWorkOrder(row.original)}>
+                                                Accept
+                                            </DropdownMenuItem>
+                                        )}
                                         <DropdownMenuItem onClick={() => setEditingWorkOrder(row.original)}>
                                             Edit
                                         </DropdownMenuItem>
