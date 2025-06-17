@@ -34,9 +34,9 @@ class WorkOrderFactory extends Factory
             "Cracks have formed along the wall near the window.",
             "The tiles on the corridor are uneven and loose.",
             "Bathroom faucet is leaking even when shut off tightly.",
-            "The electric kettle used in the pantry isn’t heating.",
+            "The electric kettle used in the pantry isn't heating.",
             "Some desks in the lab are unstable or wobbly.",
-            "Windows won’t lock securely.",
+            "Windows won't lock securely.",
             "Wi-Fi signal is very weak in this room.",
             "The sound system in the auditorium is producing static.",
             "Projector in this classroom doesn't turn on.",
@@ -46,7 +46,7 @@ class WorkOrderFactory extends Factory
             "Main entrance automatic doors are delayed in response.",
             "Mold spotted on ceiling tiles in the library.",
             "Air vent covers are missing or dislodged.",
-            "Hand dryer in restroom isn’t operating.",
+            "Hand dryer in restroom isn't operating.",
             "Several fluorescent bulbs have gone dim.",
             "Sink drainage is clogged and water pools up.",
             "The filing cabinet drawers get stuck when pulled.",
@@ -104,8 +104,8 @@ class WorkOrderFactory extends Factory
             $data['completed_at'] = fake()->dateTimeBetween('+4 days', '+3 month')->format('Y-m-d H:i:s');
         }
 
-        // Add approved_at and approved_by on a chance basis
-        if (fake()->boolean(30)) { // 30% chance of being approved
+        // Add approved_at and approved_by on a chance basis, but not for Pending Work Orders
+        if (fake()->boolean(30) && !($status === 'Pending' && $workOrderType === 'Work Order')) { // 30% chance of being approved
             $data['approved_at'] = fake()->dateTimeBetween('-1 month', 'now')->format('Y-m-d H:i:s');
             $data['approved_by'] = fake()->randomElement(['Dr. Sharene', 'Bro. Noli']);
         }
