@@ -144,26 +144,33 @@ const formatMaintenanceSchedule = (schedule: MaintenanceSchedule | null): string
     return 'No schedule';
 };
 
+/**
+ * Compute for the next scheduled date based on the maintenance schedule and last maintained date.
+ * @param schedule 
+ * @param lastMaintainedAt 
+ * @returns 
+ */
 const computeNextScheduledDate = (schedule: MaintenanceSchedule | null, lastMaintainedAt: string | null): string => {
-    if (!schedule || !lastMaintainedAt) return "-";
+    if (!schedule) return "-";
     
     try {
-        const lastDate = new Date(lastMaintainedAt);
+        // Use last_run_at if available, otherwise use last_maintained_at
+        const baseDate = schedule.last_run_at ? new Date(schedule.last_run_at) : new Date(lastMaintainedAt || '');
         const { interval_unit, interval_value, month_week, month_weekday, year_month, year_day } = schedule;
         
-        let nextDate = new Date(lastDate);
+        let nextDate = new Date(baseDate);
         
         switch (interval_unit) {
             case "weeks":
-                // Add specified number of weeks to last maintained date
-                nextDate.setDate(lastDate.getDate() + ((interval_value || 1) * 7));
+                // Add specified number of weeks to last run date
+                nextDate.setDate(baseDate.getDate() + ((interval_value || 1) * 7));
                 break;
                 
             case "monthly":
                 if (!month_week || !month_weekday) return "-";
                 
                 // Move to next month
-                nextDate.setMonth(lastDate.getMonth() + 1);
+                nextDate.setMonth(baseDate.getMonth() + 1);
                 nextDate.setDate(1); // Start from first day of month
                 
                 // Find the specified week and weekday
@@ -187,8 +194,8 @@ const computeNextScheduledDate = (schedule: MaintenanceSchedule | null, lastMain
                 if (!year_month || !year_day) return "-";
                 
                 // Move to next year if current month is past or equal to target month
-                if (lastDate.getMonth() + 1 >= year_month) {
-                    nextDate.setFullYear(lastDate.getFullYear() + 1);
+                if (baseDate.getMonth() + 1 >= year_month) {
+                    nextDate.setFullYear(baseDate.getFullYear() + 1);
                 }
                 
                 // Set to specified month and day
