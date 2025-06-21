@@ -43,13 +43,13 @@ const galleryItems: GalleryItem[] = [
         id: 5,
         title: "Computer Laboratory A",
         subtitle: "Capacities: 40",
-        image: "/images/comlab.jpg",
+        image: "/images/Comlab.jpg",
     },
     {
         id: 6,
         title: "Computer Laboratory B",
         subtitle: "Capacities: 40",
-        image: "/images/comlab.jpg",
+        image: "/images/Comlab.jpg",
     },
     {
         id: 7,
@@ -82,7 +82,7 @@ const galleryItems: GalleryItem[] = [
         id: 12,
         title: "Basketball Court",
         subtitle: "Capacities: 100",
-        image: "/images/basketball_court.jpg",
+        image: "/images/Basketball_court.jpg",
     },
 ];
 
