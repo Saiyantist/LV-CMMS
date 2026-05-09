@@ -190,6 +190,62 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Get recent assigned tasks
+        $recentAssignedTasks = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'attachments'])
+            ->where('status', '=', 'Assigned')
+            ->where('assigned_to', $user->id)
+            ->orderBy('scheduled_at', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function ($wo) {
+                return [
+                    'id' => $wo->id,
+                    'report_description' => $wo->report_description,
+                    'status' => $wo->status,
+                    'work_order_type' => $wo->work_order_type,
+                    'label' => $wo->label,
+                    'priority' => $wo->priority ?: "",
+                    'remarks' => $wo->remarks,
+                    'requested_by' => [
+                        'id' => $wo->requestedBy->id,
+                        'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
+                    ],
+                    'requested_at' => \Carbon\Carbon::parse($wo->requested_at)->format('m/d/Y'),
+                    'assigned_to' => $wo->assignedTo ? [
+                        'id' => $wo->assignedTo->id,
+                        'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
+                    ] : null,
+                    'assigned_at' => $wo->assigned_at ? \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y') : null,
+                    'scheduled_at' => $wo->scheduled_at ? \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y') : null,
+                    'completed_at' => $wo->completed_at ? \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y') : null,
+                    'approved_at' => $wo->approved_at ? \Carbon\Carbon::parse($wo->approved_at)->format('m/d/Y') : null,
+                    'approved_by' => $wo->approved_by,
+                    'location' => [
+                        'id' => $wo->location_id,
+                        'name' => $wo->location ? $wo->location->name : null,
+                    ],
+                    'attachments' => $wo->attachments->pluck('url')->toArray(),
+                    'asset' => $wo->asset ? [
+                        'id' => $wo->asset->id,
+                        'name' => $wo->asset->name,
+                        'specification_details' => $wo->asset->specification_details,
+                        'status' => $wo->asset->status,
+                        'location_id' => $wo->asset->location_id,
+                    ] : null,
+                ];
+            })
+            ;
+
+
+        // Get ongoing & completedtasks
+        $ongoingTasks = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'attachments'])
+            ->where('status', 'Ongoing')
+            ->where('assigned_to', $user->id)->get();
+
+        $completedTasks = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'attachments'])
+            ->where('status', 'Completed')
+            ->where('assigned_to', $user->id)->get();
+        
         return Inertia::render('Dashboard', [
             'workOrderRequests' => $formattedWorkOrders,
             'assignedWorkOrders' => $assignedWorkOrders,
@@ -208,6 +264,9 @@ class DashboardController extends Controller
             ],
             'locations' => $locations,
             'maintenancePersonnel' => User::role('maintenance_personnel')->with('roles')->get(),
+            'recentAssignedTasks' => $recentAssignedTasks,
+            'ongoingTasks' => $ongoingTasks,
+            'completedTasks' => $completedTasks,
         ]);
     }
 }

@@ -49,7 +49,7 @@ class RolePermissionSeeder extends Seeder
         $roles = [
             'internal_requester' => ['request event services', 'view own event services', 'cancel own event services'], 
             'external_requester' => ['request event services', 'view own event services', 'cancel own event services'],
-            'department_head' => [
+            'senior_management' => [
                 'request work orders', 'view own work orders', 'cancel own work orders', 'edit own work orders',
                 'request event services', 'view own event services', 'cancel own event services',
             ],
@@ -57,7 +57,6 @@ class RolePermissionSeeder extends Seeder
                 'manage work orders', 'request work orders',
             ], 
             'maintenance_personnel' => [
-                'request work orders', 'view own work orders', 'cancel own work orders' , 'edit own work orders',
                 'view work orders assigned to them', 'update assigned work order status'
             ],
             'communications_officer' => [

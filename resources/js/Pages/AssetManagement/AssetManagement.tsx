@@ -95,28 +95,25 @@ const AssetManagement: React.FC = () => {
 
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isMobileFilterModalOpen && mobileFilterButtonRef.current && !mobileFilterButtonRef.current.contains(event.target as Node)) {
+                const modalElement = document.querySelector('[data-filter-modal="true"]');
+                if (
+                    modalElement &&
+                    !modalElement.contains(event.target as Node) &&
+                    !mobileFilterButtonRef.current.contains(event.target as Node)
+                ) {
+                    setIsMobileFilterModalOpen(false);
+                }
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
 
-    // useEffect(() => {
-    //     const handleClickOutside = (event: MouseEvent) => {
-    //         if (isMobileFilterModalOpen && mobileFilterButtonRef.current && !mobileFilterButtonRef.current.contains(event.target as Node)) {
-    //             const modalElement = document.querySelector('[data-filter-modal="true"]');
-    //             if (
-    //                 modalElement &&
-    //                 !modalElement.contains(event.target as Node) &&
-    //                 !mobileFilterButtonRef.current.contains(event.target as Node)
-    //             ) {
-    //                 setIsMobileFilterModalOpen(false);
-    //             }
-    //         }
-    //     };
-    
-    //     document.addEventListener("mousedown", handleClickOutside);
-    //     return () => {
-    //         document.removeEventListener("mousedown", handleClickOutside);
-    //     };
-    // }, [isMobileFilterModalOpen]);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isMobileFilterModalOpen]);
 
     const handleCheckboxChange = (assetId: number) => {
         setSelectedAssets((prev) =>
@@ -534,11 +531,9 @@ const AssetManagement: React.FC = () => {
                             </p>
 
                             {/* Specification */}
-                            <p>
+                            <p className="items-start truncate my-2 overflow-y-auto hover:overflow-y-scroll">
                                 <span className="font-bold text-primary">Specification:</span>{" "}
-                                    {asset.specification_details.length > 50 
-                                        ? `${asset.specification_details.slice(0, 50)}...`
-                                        : asset.specification_details}
+                                {asset.specification_details}
                             </p>
 
                             {/* Location */}

@@ -40,23 +40,22 @@ export function StatusCell({ value, user, row }: StatusCellProps) {
         router.put(`/work-orders/${rowId}`, { status });
     };
 
+    const isMaintenancePersonnel = user.roles[0].name === "maintenance_personnel";
+
     // Get available status transitions based on current status
     const getAvailableStatuses = (currentStatus: string): string[] => {
-        // If user is maintenance personnel, restrict to basic statuses
-        if (user.roles[0].name === "maintenance_personnel") {
-            return ["Ongoing", "Completed"];
-        }
+        // If user is maintenance personnel, restrict changing status to fixed workflow
+        if (isMaintenancePersonnel) return ["Ongoing", "Completed"];
         
         // Return available transitions for current status
         return STATUS_TRANSITIONS[currentStatus] || [];
     };
     const availableStatuses = getAvailableStatuses(value);
     const canEditStatus = user.permissions.includes("manage work orders") || 
-                         (user.roles[0].name === "maintenance_personnel" && 
-                          window.route().current("work-orders.assigned-tasks"));
+                         (isMaintenancePersonnel && window.route().current("work-orders.assigned-tasks"));
 
     // If maintenance personnel and status is completed, show static status
-    if (user.roles[0].name === "maintenance_personnel" && value === "Completed") {
+    if (isMaintenancePersonnel && (value !== "Assigned" && value !== "Ongoing")) {
         return (
             <span
                 className={`px-2 py-1 h-6 border rounded inline-flex items-center ${getStatusColor(value)}`}

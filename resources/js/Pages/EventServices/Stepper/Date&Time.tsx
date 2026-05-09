@@ -6,13 +6,14 @@ import {
     ChevronRight,
     Calendar as CalendarIcon,
 } from "lucide-react";
+import { galleryItems } from './Gallery';
 
 export default function DateTimeSelection({
     value,
     onChange,
 }: {
-    value?: { dateRange: string; timeRange: string };
-    onChange?: (val: { dateRange: string; timeRange: string }) => void;
+    value?: { dateRange: string; timeRange: string; venues?: number[] };
+    onChange?: (val: { dateRange: string; timeRange: string; venues?: number[] }) => void;
 }) {
     const now = new Date();
 
@@ -29,6 +30,10 @@ export default function DateTimeSelection({
     const [startTime, setStartTime] = useState<string | null>(null);
     const [endTime, setEndTime] = useState<string | null>(null);
     const [endDatePrompt, setEndDatePrompt] = useState<string | null>(null);
+
+    const [selectedVenues, setSelectedVenues] = useState<number[]>([]);
+    const [timeOptions, setTimeOptions] = useState<string[]>([]);
+    const [loadingTimes, setLoadingTimes] = useState(false);
 
     // Generate calendar days for each calendar
     const generateCalendarDays = (
@@ -158,12 +163,68 @@ export default function DateTimeSelection({
         return startTime && endTime ? `${startTime} - ${endTime}` : "";
     };
 
-    // Notify parent on change
+    // 1. Prop-to-state sync (runs when value changes)
     useEffect(() => {
-        if (onChange) {
+        const composedDateRange = getDateRangeString();
+        const composedTimeRange = getTimeRangeString();
+
+        // Only update if prop is non-empty and different from local state
+        if (value?.dateRange && value.dateRange !== composedDateRange) {
+            const dateMatch = value.dateRange.match(
+                /^([A-Za-z]+) (\d{1,2}) - ([A-Za-z]+) (\d{1,2}), (\d{4})$/
+            );
+            if (dateMatch) {
+                const [, startMonthStr, startDay, endMonthStr, endDay, year] =
+                    dateMatch;
+                const monthsArr = [
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December",
+                ];
+                const sMonth = monthsArr.indexOf(startMonthStr);
+                const eMonth = monthsArr.indexOf(endMonthStr);
+
+                setStartMonth(sMonth);
+                setStartYear(Number(year));
+                setStartDate(Number(startDay));
+                setEndMonth(eMonth);
+                setEndYear(Number(year));
+                setEndDate(Number(endDay));
+            }
+        }
+
+        if (value?.timeRange && value.timeRange !== composedTimeRange) {
+            const timeMatch = value.timeRange.match(/^(.+) - (.+)$/);
+            if (timeMatch) {
+                setStartTime(timeMatch[1]);
+                setEndTime(timeMatch[2]);
+            }
+        }
+        // Only run when value changes!
+        // eslint-disable-next-line
+    }, [value?.dateRange, value?.timeRange]);
+
+    // 2. Notify parent only if value changed (runs when local state changes)
+    useEffect(() => {
+        if (!onChange) return;
+        const newDateRange = startDate && endDate ? getDateRangeString() : "";
+        const newTimeRange = startTime && endTime ? getTimeRangeString() : "";
+        if (
+            value?.dateRange !== newDateRange ||
+            value?.timeRange !== newTimeRange
+        ) {
             onChange({
-                dateRange: startDate && endDate ? getDateRangeString() : "",
-                timeRange: startTime && endTime ? getTimeRangeString() : "",
+                dateRange: newDateRange,
+                timeRange: newTimeRange,
             });
         }
         // eslint-disable-next-line
@@ -191,23 +252,67 @@ export default function DateTimeSelection({
     const formatDate = (month: number, day: number, year: number) =>
         `${months[month]} ${day}, ${year}`;
 
-    // Dropdown options for time (12-hour format with AM/PM)
-    const timeOptions: string[] = [];
-    for (let h = 6; h < 12; h++) {
-        for (let m = 0; m < 60; m += 30) {
-            const hour = h.toString().padStart(2, "0");
-            const min = m.toString().padStart(2, "0");
-            timeOptions.push(`${hour}:${min} AM`);
+    // Effect to get selected venues from parent
+    useEffect(() => {
+        if (value?.venues) {
+            setSelectedVenues(value.venues);
         }
-    }
-    for (let h = 12; h < 24; h++) {
-        for (let m = 0; m < 60; m += 30) {
-            const hour = (h > 12 ? h - 12 : h).toString().padStart(2, "0");
-            const min = m.toString().padStart(2, "0");
-            timeOptions.push(`${hour}:${min} PM`);
+    }, [value?.venues]);
+    
+    // Effect to fetch time options - including availability filtering
+    useEffect(() => {
+        // Always fetch basic time options on component mount
+        fetch('/event-services/time-options')
+            .then(res => res.json())
+            .then(data => {
+                setTimeOptions(data.timeSlots);
+            })
+            .catch(err => {
+                console.error("Error fetching time options:", err);
+            });
+    }, []);
+    
+    // Effect to fetch available time slots when venue and date are selected
+    useEffect(() => {
+        if (selectedVenues?.length > 0 && startDate) {
+            setLoadingTimes(true);
+            const dateStr = `${startYear}-${(startMonth + 1).toString().padStart(2, '0')}-${startDate.toString().padStart(2, '0')}`;
+            
+            // Get venue name for the first selected venue
+            const venueName = galleryItems.find(item => item.id === selectedVenues[0])?.title;
+            if (!venueName) {
+                setLoadingTimes(false);
+                return;
+            }
+            
+            fetch(`/event-services/time-options?venue=${encodeURIComponent(venueName)}&date=${dateStr}`)
+                .then(res => res.json())
+                .then(data => {
+                    setTimeOptions(data.timeSlots);
+                    // Reset selected times if they're no longer valid
+                    if (startTime && !data.timeSlots.includes(startTime)) {
+                        setStartTime(null);
+                    }
+                    if (endTime && !data.timeSlots.includes(endTime)) {
+                        setEndTime(null);
+                    }
+                    setLoadingTimes(false);
+                })
+                .catch(err => {
+                    console.error("Error fetching available times:", err);
+                    setLoadingTimes(false);
+                });
         }
-    }
-    timeOptions.push("11:59 PM");
+    }, [selectedVenues, startDate, startMonth, startYear]);
+    
+    // Get available end time options based on start time
+    const getAvailableEndTimeOptions = () => {
+        if (!startTime) return [];
+        
+        return timeOptions.filter(t => 
+            timeOptions.indexOf(t) > timeOptions.indexOf(startTime)
+        );
+    };
 
     // Date select handlers
     const handleDateSelect = (day: number, isStart: boolean) => {
@@ -229,12 +334,6 @@ export default function DateTimeSelection({
         }
         return false;
     };
-
-    // Add this useEffect to sync with parent
-    useEffect(() => {
-        if (value) {
-        }
-    }, [value?.dateRange, value?.timeRange]);
 
     return (
         <div className="w-full">
@@ -352,16 +451,14 @@ export default function DateTimeSelection({
                     <div className="relative">
                         <button
                             type="button"
-                            className="w-full border rounded-md px-3 py-2 text-left flex items-center justify-between"
+                            className={`w-full border rounded-md px-3 py-2 text-left flex items-center justify-between transition-colors duration-200
+            ${
+                !startDate ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""
+            }`}
                             onClick={() => {
-                                if (!startDate) {
-                                    setEndDatePrompt(
-                                        "Please select a start date before choosing an end date."
-                                    );
-                                } else {
-                                    setShowEndCalendar((v) => !v);
-                                }
+                                if (startDate) setShowEndCalendar((v) => !v);
                             }}
+                            disabled={!startDate}
                         >
                             <span>
                                 {endDate !== null
@@ -370,8 +467,9 @@ export default function DateTimeSelection({
                             </span>
                             <CalendarIcon className="h-5 w-5 ml-2" />
                         </button>
+                        {/* End Date prompt */}
                         {endDatePrompt && !showEndCalendar && (
-                            <div className="text-red-500 text-xs mt-2">
+                            <div className="text-gray-500 text-xs mt-2">
                                 {endDatePrompt}
                             </div>
                         )}
@@ -482,6 +580,16 @@ export default function DateTimeSelection({
                                 </option>
                             ))}
                         </select>
+                        {loadingTimes && (
+                            <div className="mt-2 text-xs text-blue-600">
+                                Loading available times...
+                            </div>
+                        )}
+                        {selectedVenues?.length > 0 && startDate && !loadingTimes && (
+                            <div className="mt-2 text-xs text-blue-600">
+                                Only showing available time slots for the selected venue(s).
+                            </div>
+                        )}
                     </div>
                     <div className="bg-transparent-50 p-4 rounded-md">
                         <label className="block text-left text-lg font-medium mb-2">
@@ -489,7 +597,8 @@ export default function DateTimeSelection({
                         </label>
 
                         <select
-                            className="w-full border rounded-md px-3 py-2 text-base"
+                            className={`w-full border rounded-md px-3 py-2 text-base transition-colors duration-200
+                            ${!startTime ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}`}
                             value={endTime || ""}
                             onChange={(e) => setEndTime(e.target.value)}
                             disabled={!startTime}
@@ -497,23 +606,17 @@ export default function DateTimeSelection({
                             <option value="" disabled>
                                 Select time
                             </option>
-                            {timeOptions
-                                .filter((t) =>
-                                    !startTime
-                                        ? true
-                                        : timeOptions.indexOf(t) >
-                                          timeOptions.indexOf(startTime)
-                                )
-                                .map((t) => (
-                                    <option key={t} value={t}>
-                                        {t}
-                                    </option>
-                                ))}
+                            {getAvailableEndTimeOptions().map((t) => (
+                                <option key={t} value={t}>
+                                    {t}
+                                </option>
+                            ))}
                         </select>
 
+                        {/* End Time prompt */}
                         <div className="mt-2 w-full text-left">
                             {!startTime && (
-                                <div className="text-red-500 text-xs mb-2 text-left">
+                                <div className="text-gray-500 text-xs mb-2 text-left">
                                     Please select a Start Time before choosing
                                     an End Time.
                                 </div>

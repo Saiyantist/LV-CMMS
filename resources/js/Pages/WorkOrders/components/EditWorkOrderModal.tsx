@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Head, router, useForm } from "@inertiajs/react";
 import axios from "axios";
-import { format, parseISO, isValid } from "date-fns"; // make sure this is imported
+import { format, parseISO, isValid } from "date-fns";
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/Components/shadcnui/dialog";
 import { Button } from "@/Components/shadcnui/button";
-import { CalendarIcon, ChevronLeft, ChevronLeftSquare, ChevronRight, ChevronRightSquare, X } from "lucide-react";
+import { CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -16,9 +16,9 @@ import {
 import { Label } from "@/Components/shadcnui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/shadcnui/select";
 import { Calendar } from "@/Components/shadcnui/calendar";
-import { Input } from "@/Components/shadcnui/input";
 import { Textarea } from "@/Components/shadcnui/textarea";
 import SmartDropdown from "@/Components/SmartDropdown";
+import { Popover, PopoverContent, PopoverTrigger } from "@/Components/shadcnui/popover";
 
 
 interface Location {
@@ -86,7 +86,7 @@ export default function EditWorkOrderModal({
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const isWorkOrderManager = user.permissions.includes("manage work orders");
-    const isDepartmentHeadOrMaintenancePersonnel = user.roles.some(role => role.name === "department_head" || role.name === "maintenance_personnel");
+    const isSeniorManagementOrMaintenancePersonnel = user.roles.some(role => role.name === "senior_management" || role.name === "maintenance_personnel");
 
     const { data, setData, errors, processing } = useForm({
         location_id: "",
@@ -133,6 +133,7 @@ export default function EditWorkOrderModal({
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        
         if (!validateForm()) return
 
         let locationId;
@@ -160,6 +161,7 @@ export default function EditWorkOrderModal({
         formData.append("_method", "PUT");
         formData.append("location_id", String(locationId));
         formData.append("report_description", data.report_description);
+        formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
 
         data.attachments.forEach((image) => formData.append("attachments[]", image));
         deletedImages.forEach((image) =>
@@ -169,7 +171,6 @@ export default function EditWorkOrderModal({
         if (isWorkOrderManager) {
             formData.append("work_order_type", data.work_order_type || "");
             formData.append("label", data.label || "");
-            formData.append("scheduled_at", date ? format(date, "yyyy-MM-dd") : data.scheduled_at ? format(data.scheduled_at, "yyyy-MM-dd") : "")
             formData.append("assigned_to", data.assigned_to?.id?.toString() || "")
             formData.append("priority", data.priority || "");
             formData.append("status", data.status || "");
@@ -345,7 +346,7 @@ export default function EditWorkOrderModal({
                     )}
 
                     {/* Show editable fields to IR or MP */}
-                    { isDepartmentHeadOrMaintenancePersonnel && (
+                    { isSeniorManagementOrMaintenancePersonnel && (
                         <form onSubmit={submit}>
                             <div className="py-1 flex flex-col space-y-4">
 
@@ -395,6 +396,55 @@ export default function EditWorkOrderModal({
                                         {localErrors.report_description}
                                     </p>
                                 )}
+                            </div>
+
+                            <div className="flex-[1] space-y-2">
+                                <Label htmlFor="scheduled_at" className="flex items-center">
+                                    Target Date
+                                </Label>
+                                <Popover open={showCalendar} onOpenChange={setShowCalendar}>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className={cn(
+                                                "relative w-full flex justify-between items-center",
+                                                "text-left font-normal",
+                                                !data.scheduled_at && "text-muted-foreground"
+                                            )}
+                                        >
+                                            {data.scheduled_at
+                                                ? format(data.scheduled_at, "MM/dd/yyyy")
+                                                : "MM/DD/YYYY"}
+                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent 
+                                        className="w-auto p-0" 
+                                        align="end"
+                                        side="bottom"
+                                        noPortal
+                                    >
+                                        <Calendar
+                                            mode="single"
+                                            selected={
+                                                data.scheduled_at && isValid(parseISO(data.scheduled_at))
+                                                    ? parseISO(data.scheduled_at)
+                                                    : undefined
+                                            }
+                                            onSelect={(date) => {
+                                                if (date) {
+                                                    setData("scheduled_at", format(date, "yyyy-MM-dd"))
+                                                    setDate(date)
+                                                    setLocalErrors((prev) => ({ ...prev, scheduled_at: "" }))
+                                                    setShowCalendar(false)
+                                                }
+                                            }}
+                                            disabled={(date) => date < new Date()}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
                             </div>
 
                             { workOrder.attachments?.length > 0 && (
@@ -463,52 +513,49 @@ export default function EditWorkOrderModal({
                                         <Label htmlFor="scheduled_at" className="flex items-center">
                                         Target Date <span className="text-red-500 ml-1">*</span>
                                         </Label>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setShowCalendar(!showCalendar)}
-                                            className={cn(
-                                                "w-full flex justify-between items-center",
-                                                "text-left font-normal !text-xs sm:!text-sm",
-                                                !data.scheduled_at && "text-muted-foreground"
-                                            )}
-                                        >
-                                            {data.scheduled_at
-                                                ? format(data.scheduled_at, "MM/dd/yyyy")
-                                                : "MM/DD/YYYY"}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                        {showCalendar && (
-                                            <div
-                                                className="absolute z-50 bg-white shadow-md border !-mt-[44vh] -ml-[6.5rem] rounded-md"
-                                                onClick={(e) => e.stopPropagation()}
+                                        <Popover open={showCalendar} onOpenChange={setShowCalendar}>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "relative w-full flex justify-between items-center",
+                                                        "text-left font-normal",
+                                                        !data.scheduled_at && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    {data.scheduled_at
+                                                        ? format(data.scheduled_at, "MM/dd/yyyy")
+                                                        : "MM/DD/YYYY"}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent 
+                                                className="w-auto p-0" 
+                                                align="start"
+                                                side="top"
+                                                noPortal
                                             >
                                                 <Calendar
                                                     mode="single"
                                                     selected={
-                                                    data.scheduled_at && isValid(parseISO(data.scheduled_at))
-                                                        ? parseISO(data.scheduled_at)
-                                                        : undefined
+                                                        data.scheduled_at && isValid(parseISO(data.scheduled_at))
+                                                            ? parseISO(data.scheduled_at)
+                                                            : undefined
                                                     }
                                                     onSelect={(date) => {
-                                                    if (date) {
-                                                        setData("scheduled_at", format(date, "yyyy-MM-dd"))
-                                                        setDate(date)
-                                                        setLocalErrors((prev) => ({ ...prev, scheduled_at: "" }))
-                                                        setShowCalendar(false)
-                                                    }
+                                                        if (date) {
+                                                            setData("scheduled_at", format(date, "yyyy-MM-dd"))
+                                                            setDate(date)
+                                                            setLocalErrors((prev) => ({ ...prev, scheduled_at: "" }))
+                                                            setShowCalendar(false)
+                                                        }
                                                     }}
-                                                    disabled={(date) => date < new Date()} // Disable past dates
+                                                    disabled={(date) => date < new Date()}
                                                     initialFocus
                                                 />
-                                            </div>
-                                        )}
-                                        {showCalendar && (
-                                            <div
-                                                className="fixed inset-0 z-40"
-                                                onClick={() => setShowCalendar(false)} // Close calendar on outside click
-                                            />
-                                        )}
+                                            </PopoverContent>
+                                        </Popover>
                                         {localErrors.scheduled_at && (
                                             <p className="text-red-500 text-xs">{localErrors.scheduled_at}</p>
                                         )}

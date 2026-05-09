@@ -43,6 +43,8 @@ export interface Booking {
         fileName: string;
         fileSize: string;
     };
+    proof_of_approval?: string;
+    // proof_of_approval: string;
     department?: string;
     eventPurpose?: string;
     participants?: string;
@@ -277,7 +279,7 @@ export default function MyBookings({
         {
             accessorKey: "venue",
             header: "Requested Venue",
-            cell: ({ row }) => {
+            cell: ({ row }: { row: any }) => {
                 let venues = Array.isArray(row.original.venue)
                     ? row.original.venue.join(", ")
                     : row.getValue("venue");
@@ -300,7 +302,11 @@ export default function MyBookings({
         {
             accessorKey: "name",
             header: "Event Name",
-            cell: ({ row }) => {
+            cell: ({
+                row,
+            }: {
+                row: import("@tanstack/react-table").Row<Booking>;
+            }) => {
                 const name = row.getValue("name") as string;
                 return (
                     <div title={name}>
@@ -346,6 +352,7 @@ export default function MyBookings({
                 );
             },
         },
+
         {
             accessorKey: "requestedServices",
             header: isGasdCoordinator
@@ -368,9 +375,9 @@ export default function MyBookings({
                         services = [];
                     }
                 }
-                let serviceList = "";
+                let serviceList: string[] = [];
                 if (Array.isArray(services)) {
-                    serviceList = services.join(", ");
+                    serviceList = services;
                 } else if (services && typeof services === "object") {
                     serviceList = Object.entries(services)
                         .filter(([_, value]) => value)
@@ -378,15 +385,28 @@ export default function MyBookings({
                             key
                                 .replace(/([A-Z])/g, " $1")
                                 .replace(/^./, (str) => str.toUpperCase())
-                        )
-                        .join(", ");
+                        );
                 }
-                if (!serviceList) serviceList = "N/A";
+                if (!serviceList.length) serviceList = ["N/A"];
+
+                // GASD Coordinator: show each service on a new line, left-aligned
+                if (isGasdCoordinator) {
+                    return (
+                        <div className="text-center">
+                            {serviceList.map((s, i) => (
+                                <div key={i}>{s}</div>
+                            ))}
+                        </div>
+                    );
+                }
+
+                // Default: original logic with ellipsis
+                const joined = serviceList.join(", ");
                 return (
-                    <div title={serviceList}>
-                        {serviceList.length > 25
-                            ? serviceList.slice(0, 25) + "..."
-                            : serviceList}
+                    <div title={joined}>
+                        {joined.length > 25
+                            ? joined.slice(0, 25) + "..."
+                            : joined}
                     </div>
                 );
             },

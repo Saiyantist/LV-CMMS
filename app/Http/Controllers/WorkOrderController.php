@@ -38,7 +38,7 @@ class WorkOrderController extends Controller
     {
         $user = auth()->user();
 
-        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'attachments']);
+        $workOrders = WorkOrder::with(['location', 'asset', 'requestedBy', 'assignedTo', 'attachments'])->where('work_order_type', 'Work Order');
 
         if ($user->hasPermissionTo('view own work orders') && !$user->hasPermissionTo('manage work orders')) {
             $workOrders->where('requested_by', $user->id);
@@ -52,10 +52,10 @@ class WorkOrderController extends Controller
                 'id' => $wo->id,
                 'report_description' => $wo->report_description,
                 'status' => $wo->status,
-                'work_order_type' => $wo->work_order_type,
                 'label' => $wo->label,
                 'priority' => $wo->priority ?: "",
                 'remarks' => $wo->remarks,
+                'work_order_type' => $wo->work_order_type,
                 'requested_by' => [
                     'id' => $wo->requestedBy->id,
                     'name' => $wo->requestedBy->first_name . ' ' . $wo->requestedBy->last_name,
@@ -123,7 +123,7 @@ class WorkOrderController extends Controller
             'priority' => $isWorkOrderManager ? $request->priority : null,
             'assigned_to' => $isWorkOrderManager ? $request->assigned_to : null,
             'assigned_at' => $isWorkOrderManager ? now() : null,
-            'scheduled_at' => $isWorkOrderManager ? $request->scheduled_at : null,
+            'scheduled_at' => $request->scheduled_at ?? null,
             'asset_id' => $isWorkOrderManager ? $request->asset_id : null,
             'remarks' => $isWorkOrderManager ? $request->remarks : null,
         ]);
@@ -142,6 +142,7 @@ class WorkOrderController extends Controller
                 'requested_at' => $workOrder->requested_at,
                 'report_description' => $workOrder->report_description,
                 'location' => $workOrder->location->name,
+                'scheduled_at' => $workOrder->scheduled_at, 
                 'requested_by' => $workOrder->requestedBy->first_name . ' ' . $workOrder->requestedBy->last_name,
             ];
             Mail::to($this->gasdCoordinator->email)->send(new NewWorkOrder($workOrderData));
@@ -323,8 +324,8 @@ class WorkOrderController extends Controller
             return redirect()->route('work-orders.assigned-tasks')->with(['error' => 'Cannot update.']);
         }
 
-        /** Department Head */
-        else if ($user->hasRole('department_head')) {
+        /** Senior Management */
+        else if ($user->hasRole('senior_management')) {
             if (count($request->all()) === 1 && array_key_exists('status', $request->all()) && $request->status === "Cancelled") {
                 $workOrder->update(['status' => $request->status]);
 
@@ -351,6 +352,7 @@ class WorkOrderController extends Controller
                 $workOrder->update([
                     'report_description' => $request->report_description,
                     'location_id' => $request->location_id,
+                    'scheduled_at' => $request->scheduled_at ?? null,
                 ]);
                 return redirect()->route('work-orders.index')->with('success', 'Work Order updated successfully.');
             }
@@ -600,9 +602,9 @@ class WorkOrderController extends Controller
                         'id' => $wo->assignedTo->id,
                         'name' => $wo->assignedTo->first_name . ' ' . $wo->assignedTo->last_name,
                     ] : null,
-                    'assigned_at' => \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y'),
-                    'scheduled_at' => \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y'),
-                    'completed_at' => \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y'),
+                    'assigned_at' => $wo->assigned_at ? \Carbon\Carbon::parse($wo->assigned_at)->format('m/d/Y') : null,
+                    'scheduled_at' => $wo->scheduled_at ? \Carbon\Carbon::parse($wo->scheduled_at)->format('m/d/Y') : null,
+                    'completed_at' => $wo->completed_at ? \Carbon\Carbon::parse($wo->completed_at)->format('m/d/Y') : null,
                     'remarks' => $wo->remarks,
                     'location' => [
                         'id' => $wo->location_id,

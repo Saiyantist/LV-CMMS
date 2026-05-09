@@ -72,11 +72,11 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
   const isWorkOrderManager = user?.permissions.some((permission: string) =>["manage work orders"].includes(permission));
   const isMaintenancePersonnel = user?.roles.some((role) => role.name === "maintenance_personnel");
 
-  const canSeeCriticalOrOverdue = (row: TData) => {
+  const canSeeCritical = (row: TData) => {
     if (isWorkOrderManager) {
-      return ((row.original.priority === "Critical" || row.original.status === "Overdue") && row.original.status !== "Completed")
+      return ((row.original.priority === "Critical") && row.original.status !== "Completed")
     } else if (isMaintenancePersonnel && row.original.assigned_to?.id === user.id) {
-      return ((row.original.priority === "Critical" || row.original.status === "Overdue") && row.original.status !== "Completed")
+      return ((row.original.priority === "Critical") && row.original.status !== "Completed")
     }
     return false
   }
@@ -269,7 +269,7 @@ export function Datatable<TData extends { priority?: string; status?: string; [k
                   key={row.id} 
                   data-state={row.getIsSelected() && "selected"} 
                   className={`h-6 hover:font-medium ${
-                    (canSeeCriticalOrOverdue(row as any)) 
+                    (canSeeCritical(row as any)) 
                       ? "bg-red-50 hover:bg-red-100" 
                       : ""
                   }`}

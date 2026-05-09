@@ -8,7 +8,7 @@ export default function NavBar() {
         <>
             {/* NavBar */}
             <header className="fixed top-0 left-0 w-full py-3 z-50 bg-white shadow">
-                <div className="px-10 mx-auto w-full flex items-center justify-between">
+                <div className="px-4 xs:px-10 mx-auto w-full flex items-center justify-between">
                     {/* Logo */}
                     <div className="flex items-center space-x-2">
                         <img

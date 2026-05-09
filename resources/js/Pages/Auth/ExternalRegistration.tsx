@@ -114,6 +114,8 @@ export default function ExternalRegistration() {
 
                     {/* Gender & Contact Number */}
                     <div className="flex flex-col md:flex-row md:space-x-4">
+
+                        {/* Gender */}
                         <div className="w-full">
                             <div className="flex items-center">
                                 <InputLabel htmlFor="gender" value="Gender" />
@@ -139,42 +141,48 @@ export default function ExternalRegistration() {
                             />
                         </div>
 
+                        {/* Contact Number */}
                         <div className="w-full mt-4 md:mt-0">
-                            <div className="flex items-center">
+                            <div className="flex">
                                 <InputLabel
                                     htmlFor="contact_number"
                                     value="Contact Number"
                                 />
                                 <span className="text-red-500 ml-1">*</span>
                             </div>
-                            <TextInput
-                                id="contact_number"
-                                type="tel"
-                                name="contact_number"
-                                value={data.contact_number}
-                                className="mt-1 block w-full"
-                                placeholder="9XXXXXXXXX"
-                                maxLength={10}
-                                pattern="[0-9]*"
-                                onKeyDown={(e) => {
-                                    if (
-                                        !/[0-9]/.test(e.key) &&
-                                        ![
-                                            "Backspace",
-                                            "Delete",
-                                            "ArrowLeft",
-                                            "ArrowRight",
-                                            "Tab",
-                                        ].includes(e.key)
-                                    ) {
-                                        e.preventDefault();
+                            <div className="flex mt-1">
+                                <div className="flex items-center px-3 dark:bg-gray-800 border border-r-0 border-gray-300 dark:border-gray-700 rounded-l-md">
+                                    <span className="text-gray-700 dark:text-gray-300">+63</span>
+                                </div>
+                                <TextInput
+                                    id="contact_number"
+                                    type="tel"
+                                    name="contact_number"
+                                    value={data.contact_number}
+                                    className="block w-full rounded-l-none"
+                                    placeholder="9XXXXXXXXX"
+                                    maxLength={10}
+                                    pattern="[0-9]*"
+                                    onKeyDown={(e) => {
+                                        if (
+                                            !/[0-9]/.test(e.key) &&
+                                            ![
+                                                "Backspace",
+                                                "Delete",
+                                                "ArrowLeft",
+                                                "ArrowRight",
+                                                "Tab",
+                                            ].includes(e.key)
+                                        ) {
+                                            e.preventDefault();
+                                        }
+                                    }}
+                                    onChange={(e) =>
+                                        setData("contact_number", e.target.value)
                                     }
-                                }}
-                                onChange={(e) =>
-                                    setData("contact_number", e.target.value)
-                                }
-                                required
-                            />
+                                    required
+                                />
+                            </div>
                             <InputError
                                 message={errors.contact_number}
                                 className="mt-2"
@@ -224,30 +232,32 @@ export default function ExternalRegistration() {
                                 }
                                 required
                             />
-                            {typeof errors.password === "string" &&
-                                errors.password
-                                    .split(". ")
-                                    .map((error, index) =>
-                                        error.trim() ? (
-                                            <div
-                                                key={index}
-                                                className="mt-2 text-xs text-gray-600 dark:text-gray-400"
-                                            >
-                                                <p className="font-medium mb-1">
-                                                    Password Requirements:
-                                                </p>
-                                                <ul>
-                                                    <li>
-                                                        -{" "}
-                                                        <InputError
-                                                            message={error.trim()}
-                                                            className="inline"
-                                                        />
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        ) : null
-                                    )}
+                            {/* Password Requirements */}
+                            {errors.password && (
+                                <div className="mt-2 space-y-1">
+                                    <div className="text-xs  text-gray-700 dark:text-gray-300">
+                                        <p className="font-medium italic mb-1">
+                                            Password Requirements:
+                                        </p>
+                                        <ul className="">
+                                            {typeof errors.password ===
+                                                "string" &&
+                                                errors.password.split(". ").map(
+                                                    (error, index) =>
+                                                        error.trim() && (
+                                                            <li key={index}>
+                                                                -{" "}
+                                                                <InputError
+                                                                    message={error.trim()}
+                                                                    className="inline"
+                                                                />
+                                                            </li>
+                                                        )
+                                                )}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="w-full mt-4 md:mt-0">

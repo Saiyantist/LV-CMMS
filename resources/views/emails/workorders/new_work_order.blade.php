@@ -7,6 +7,7 @@ A new work order request has been submitted.
 **Requested At:** {{ $workOrder['requested_at'] }}  
 **Location:** {{ $workOrder['location'] }}  
 **Report Description:** {{ $workOrder['report_description'] }}  
+**Target Date:** {{ $workOrder['scheduled_at'] }}  
 
 <x-mail::button :url="url('/work-orders')">
 Go to Work Orders

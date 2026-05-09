@@ -37,7 +37,7 @@ class UpdatedWorkOrder extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.workOrders.updated_work_order',
+            markdown: 'emails.workorders.updated_work_order',
             with: ['workOrder' => $this->workOrder],
         );
     }

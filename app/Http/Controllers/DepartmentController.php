@@ -60,13 +60,10 @@ class DepartmentController extends Controller
         ];
 
         $external = [
-            "MCGI music ministry",
-            "MCGI Teatro Kristyano",
+            "MCGI Music Ministry",
+            "MCGI Teatro Kristiano",
             "MCGI Orchestra",
-            "Central Apalit Division",
-            "Central Division Teatro Kristiano",
             "MMC Events Committee",
-            "Central Division Volleyball team",
             "Disaster Response and Rescue Team (DRRT)",
             "Others",
         ];
