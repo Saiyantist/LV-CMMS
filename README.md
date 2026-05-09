@@ -1,66 +1,161 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CMMS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**LV CMMS** is a responsive web-based computerized maintenance management system designed for ***La Verdad Christian College - Apalit, Pampanga***. ✨
 
-## About Laravel
+It provides a centralized platform for coordinating maintenance operations, tracking institutional assets, monitoring safety-related activities, and managing facility and equipment booking requests.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+It is built with a **Laravel** backend and a **React** frontend served through Vite.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+This served as part of the partial fulfillment for the **Bachelor's Degree in Information Systems**.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Salient Features
 
-## Learning Laravel
+### Centralized work order management
+Create, monitor, update, and manage maintenance requests in one place, giving authorized users a clearer view of pending, ongoing, and completed work.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Asset management with preventive maintenance
+Keep track of institutional assets, view maintenance history, and receive automated preventive maintenance notifications to help reduce unexpected equipment issues.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Compliance and safety monitoring
+Support organized monitoring and management of compliance and safety-related records, helping the institution maintain better oversight of important operational requirements.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Event services and facility booking
+Manage facility reservations, equipment booking, and related service requests through a structured workflow for better scheduling and accountability.
 
-## Laravel Sponsors
+### Mobile Responsive Experience
+Access the system across desktop, tablet, and mobile screen sizes, making it practical for both office-based users and personnel working around campus.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Technology Stack 🧰
 
-### Premium Partners
+- Laravel 11
+- PHP 8.2+
+- MySQL
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Prerequisites
 
-## Contributing
+Before installing the system, make sure you have the following installed:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- PHP 8.2 or higher
+- Composer
+- Node.js and npm
+- MySQL
+- Git
 
-## Code of Conduct
+## Installation and Setup ⚙️
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. Clone the repository.
 
-## Security Vulnerabilities
+   ```bash
+   git clone <repository-url>
+   cd LV-CMMS
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+2. Install PHP dependencies.
 
-## License
+   ```bash
+   composer install
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+3. Install JavaScript dependencies.
+
+   ```bash
+   npm install
+   ```
+
+4. Configure the environment file.
+
+   Copy `.env.example` to `.env` if an example file is available:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   If you do not have the environment variables, request the `.env` file or the correct environment configuration from the repository owners.
+
+5. Update the database settings in `.env`.
+
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=<database_name>
+   DB_USERNAME=<database_user>
+   DB_PASSWORD=<database_password>
+   ```
+
+6. Configure the mailer if you want to test emails.
+
+   For local development, a free email testing service such as [Mailtrap](https://mailtrap.io/) is recommended. Create a free account, open your email testing inbox, then copy the SMTP credentials into your `.env` file.
+
+   ```env
+   MAIL_MAILER=smtp
+   MAIL_HOST=<smtp_host>
+   MAIL_PORT=<smtp_port>
+   MAIL_USERNAME=<smtp_username>
+   MAIL_PASSWORD=<smtp_password>
+   MAIL_ENCRYPTION=<tls_or_ssl>
+   MAIL_FROM_ADDRESS="noreply@example.com"
+   MAIL_FROM_NAME="${APP_NAME}"
+   ```
+
+   Use the values provided by your selected development mail service. Do not use personal or production SMTP credentials for local testing unless instructed by the repository owners.
+
+7. Generate the application key.
+
+   ```bash
+   php artisan key:generate
+   ```
+
+8. Run database migrations and seeders.
+
+   ```bash
+   php artisan migrate --seed
+   ```
+
+## Running the System 🚀
+
+Start the Laravel backend:
+
+```bash
+php artisan serve
+```
+
+In another terminal, start the Vite development server:
+
+```bash
+npm run dev
+```
+
+Then open the Laravel application URL shown in the terminal:
+
+```text
+http://127.0.0.1:8000
+```
+
+You can also run the combined development command if your local environment supports it:
+
+```bash
+composer run dev
+```
+
+## Support and Opportunities 🫱🏼‍🫲🏽🤍
+
+For issues encountered while installing, running, or using the system, please reach out to the developers for assistance.
+
+The developers are also open to discussions about possible improvements, collaborations, deployment support, customization, or other project opportunities.
+
+Developer contact details:
+
+### Saiyantist 🚀🪖
+
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:angelo.delossantos000@gmail.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/saiyantist/)
+
+### Morrow4 🦾🧰
+
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:jshallador19@gmail.com)
